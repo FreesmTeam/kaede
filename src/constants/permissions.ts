@@ -7,6 +7,10 @@ export const IgnoredExtensionPermissions: Record<string, Partial<{
   [Key in PermissionType]: boolean;
 }>> = {};
 export const Permissions = {
+  "UI": {
+    "Basic": "ui-basic",
+    "Style": "ui-style",
+  },
   "Events": {
     "All": "all-events",
   },

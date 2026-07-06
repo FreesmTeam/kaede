@@ -7,14 +7,19 @@ export async function runInUnrestricted(id: string, code: string): Promise<void>
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${id}' extension code`);
 
-  const compiled = new AsyncFunction(code);
+  const compiled = new AsyncFunction("scopedThis", code);
 
   log.debug(
     __PRE_BUNDLED_FILENAME__,
     `Executing the '${id}' extension code in the unrestricted environment`,
   );
   try {
-    await compiled();
+    await compiled({
+      "huuh": false,
+      "fn"  : () => {
+        console.log("Hi from " + id);
+      },
+    });
   } catch (error: unknown) {
     return log.error(
       __PRE_BUNDLED_FILENAME__,

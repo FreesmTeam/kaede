@@ -1,9 +1,11 @@
-use std::process;
-use sysinfo::{System, Pid};
+use std::sync::Mutex;
+use sysinfo::System;
+
+static SYS_CPU: Mutex<Option<System>> = Mutex::new(None);
 
 #[tauri::command]
 pub fn get_system_memory() -> (u64, u64) {
-    let mut sys = System::new_all();
+    let mut sys = System::new();
 
     sys.refresh_memory();
 
@@ -14,20 +16,18 @@ pub fn get_system_memory() -> (u64, u64) {
 }
 
 #[tauri::command]
-pub fn get_process_memory() -> (u64, u64) {
-    let mut sys = System::new_all();
+pub fn get_cpu_usage() -> f32 {
+    let mut guard = SYS_CPU.lock().unwrap();
 
-    sys.refresh_memory();
+    let lazy_sys = guard.get_or_insert_with(|| {
+        let mut refreshed_sys = System::new();
 
-    // Get the current application process idg
-    let pid = process::id();
+        refreshed_sys.refresh_cpu_usage();
+        std::thread::sleep(sysinfo::MINIMUM_CPU_UPDATE_INTERVAL);
 
-    if let Some(process) = sys.process(Pid::from_u32(pid)) {
-        let process_memory = process.memory();
-        let process_virtual_memory = process.virtual_memory();
+        refreshed_sys
+    });
 
-        return (process_memory, process_virtual_memory);
-    } else {
-        return (0, 0);
-    }
+    lazy_sys.refresh_cpu_usage();
+    lazy_sys.global_cpu_usage()
 }

@@ -32,22 +32,21 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
-            // Checking whether the application is in a portable mode or not
-            // by reading the window label to find a 'Portable' string
-            // is beyond fucking insanity.
+            // Just so you know:
             //
-            // These chained calls took only '225.60µs' on my laptop though,
-            // not as slow as I initially thought.
-            let window_title = app
-                .get_webview_window("main")
-                .expect("no main window found - tauri setup")
-                .title()
-                .unwrap()
-                .to_string();
+            // Initially, checking whether the application is in a portable mode or not
+            // was made by reading the window label to find a 'Portable' string
+            //
+            // Those chained calls took only '225.60µs' on my laptop though,
+            // not as slow as I thought at first.
+            //
+            // Nevertheless, I was enlightened by Prism Launcher
+            // which uses 'portable.txt' to make the launcher portable
+            let portable = launcher::is_portable();
 
             let mut path;
 
-            if window_title.contains("Portable") {
+            if portable {
                 // Resolves to the launcher executable file directory
                 path = std::env::current_exe().unwrap().parent().unwrap().to_path_buf();
             } else {
@@ -98,10 +97,6 @@ pub fn run() {
 
             app.handle().plugin(
                 logging_builder
-                    // Do not log log messages from 'reqwest::connect'
-                    .filter(|metadata| metadata.target() != "reqwest::connect")
-                    // Do not log 'trace' level messages
-                    .level(log::LevelFilter::Debug)
                     // Make a new output target that will save logs in a log file
                     .target(tauri_plugin_log::Target::new(
                         tauri_plugin_log::TargetKind::Folder {
@@ -134,12 +129,11 @@ pub fn run() {
         })
         // Register custom Tauri commands
         .invoke_handler(tauri::generate_handler![
-            launcher::get_launched_state,
-            launcher::get_executable_directory,
+            launcher::get_initial_state,
             launcher::get_missing_files,
             launcher::verify_file_paths,
             system::get_system_memory,
-            system::get_process_memory,
+            system::get_cpu_usage,
             zip::unzip_file,
         ])
         .run(tauri::generate_context!())

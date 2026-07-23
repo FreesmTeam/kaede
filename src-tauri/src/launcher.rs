@@ -3,12 +3,118 @@ use std::fs;
 use std::path::{Path};
 use std::fs::{File};
 use std::io::{self, BufReader, Read};
+use std::sync::atomic::{AtomicI32, Ordering};
 use sha1::{Sha1, Digest};
 use rayon::prelude::*;
-use serde::{Deserialize};
+use serde::{Deserialize, Serialize};
+use tauri::Manager;
 
-// Keep track of launcher UI reloads
-static mut LAUNCHES_COUNT: i32 = -1;
+static LAUNCHES_COUNT: AtomicI32 = AtomicI32::new(0);
+
+// Extract the locale value from a raw config without parsing the JSON
+// by finding "locale" and grabbing the next quoted value
+fn extract_locale(config: &str) -> &str {
+    if let Some(key_start) = config.find(r#""locale""#) {
+        let after_key = &config[key_start + 8..];
+
+        // Skip until the opening quote of the value
+        if let Some(quote_pos) = after_key.find('"') {
+            let value_str = &after_key[quote_pos + 1..];
+
+            // Read until the closing quote
+            if let Some(end) = value_str.find('"') {
+                return &value_str[..end];
+            }
+        }
+    }
+    "en"
+}
+
+pub fn is_portable() -> bool {
+    if let Ok(exe_path) = std::env::current_exe() {
+        if let Some(exe_dir) = exe_path.parent() {
+            return exe_dir.join("portable.txt").exists();
+        }
+    }
+    false
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InitialStateBasic {
+    pub launcher_version: String,
+    pub base_directory: String,
+    pub launch_count: i32,
+    pub separator: String,
+    pub portable: bool,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InitialStateRawFiles {
+    pub config: String,
+    pub accounts: String,
+    pub instances: String,
+    pub translations: String,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct InitialState {
+    pub basic: InitialStateBasic,
+    pub raw_files: InitialStateRawFiles,
+}
+
+#[tauri::command]
+pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, String> {
+    let portable = is_portable();
+    let launcher_version = app.package_info().version.to_string();
+    let launch_count = LAUNCHES_COUNT.fetch_add(1, Ordering::SeqCst);
+    let separator = std::path::MAIN_SEPARATOR.to_string();
+
+    let base_directory = if portable {
+        std::env::current_exe()
+            .map_err(|e| e.to_string())?
+            .parent()
+            .ok_or_else(|| "Failed to get executable directory".to_string())?
+            .to_path_buf()
+    } else {
+        app.path().app_data_dir().map_err(|e| e.to_string())?
+    };
+
+    let (config, accounts, instances) = tokio::join!(
+        tokio::fs::read_to_string(base_directory.join("config.json")),
+        tokio::fs::read_to_string(base_directory.join("accounts.json")),
+        tokio::fs::read_to_string(base_directory.join("instances.json")),
+    );
+
+    let config = config.unwrap_or_default();
+    let accounts = accounts.unwrap_or_default();
+    let instances = instances.unwrap_or_default();
+
+    let locale = extract_locale(&config);
+    let translations = tokio::fs::read_to_string(
+        base_directory.join("translations").join(&format!("{}.json", locale)),
+    )
+    .await
+    .unwrap_or_default();
+
+    Ok(InitialState {
+        basic: InitialStateBasic {
+            launcher_version,
+            base_directory: base_directory.to_string_lossy().to_string(),
+            launch_count,
+            separator,
+            portable,
+        },
+        raw_files: InitialStateRawFiles {
+            config,
+            accounts,
+            instances,
+            translations,
+        },
+    })
+}
 
 // If the 'latest.log' file exists and is not empty,
 // then rename that file to 'kaede-{number}.log',
@@ -75,31 +181,6 @@ pub fn prepare_log_file(logs_dir: &Path, app_name: &str) -> std::io::Result<()> 
     fs::rename(&latest_log_path, &new_log_path)?;
 
     Ok(())
-}
-
-// 'get_launched_state' will be called on every JS initialization code
-#[tauri::command]
-pub fn get_launched_state() -> i32 {
-    // unsafe is not safe (what)
-    unsafe {
-        LAUNCHES_COUNT = LAUNCHES_COUNT + 1;
-
-        return LAUNCHES_COUNT;
-    }
-}
-
-#[tauri::command]
-pub fn get_executable_directory() -> Result<String, String> {
-    match std::env::current_exe() {
-        Ok(path) => {
-            if let Some(parent) = path.parent() {
-                Ok(parent.to_string_lossy().to_string())
-            } else {
-                Err("Failed to get the parent directory".to_string())
-            }
-        }
-        Err(error) => Err(format!("Error getting the executable path: {}", error)),
-    }
 }
 
 #[tauri::command]

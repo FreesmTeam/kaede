@@ -1,33 +1,67 @@
-use tokio;
 use std::fs;
-use std::path::{Path};
-use std::fs::{File};
-use std::io::{self, BufReader, Read};
+use std::fs::File;
+use std::io::{self, Read};
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI32, Ordering};
-use sha1::{Sha1, Digest};
+
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
+use sha1::{Digest, Sha1};
 use tauri::Manager;
 
 static LAUNCHES_COUNT: AtomicI32 = AtomicI32::new(0);
 
-// Extract the locale value from a raw config without parsing the JSON
-// by finding "locale" and grabbing the next quoted value
-fn extract_locale(config: &str) -> &str {
-    if let Some(key_start) = config.find(r#""locale""#) {
-        let after_key = &config[key_start + 8..];
+#[derive(Serialize)]
+#[serde(tag = "status", rename_all = "camelCase")]
+pub enum ParsedFile {
+    // For a well-formed JSON
+    Loaded { data: Value },
+    // The file is empty or does not exist.
+    // It will be rewritten with default contents
+    Missing,
+    // The file exists and is not empty, but has invalid JSON.
+    // It will be backed up and a new file with default contents will be created
+    Corrupt { raw: String, error: String },
+}
 
-        // Skip until the opening quote of the value
-        if let Some(quote_pos) = after_key.find('"') {
-            let value_str = &after_key[quote_pos + 1..];
+async fn load_json_file(path: PathBuf) -> Result<ParsedFile, String> {
+    let content = match tokio::fs::read_to_string(&path).await {
+        Ok(content) => content,
+        Err(e) if e.kind() == io::ErrorKind::NotFound => return Ok(ParsedFile::Missing),
+        Err(e) => return Err(format!("Failed to read {}: {}", path.display(), e)),
+    };
 
-            // Read until the closing quote
-            if let Some(end) = value_str.find('"') {
-                return &value_str[..end];
-            }
-        }
+    // Treat empty files as missing (so that they will be rewritten without any corrupt file backups)
+    if content.trim().is_empty() {
+        return Ok(ParsedFile::Missing);
     }
-    "en"
+
+    match serde_json::from_str::<Value>(&content) {
+        Ok(data) => Ok(ParsedFile::Loaded { data }),
+        Err(e) => Ok(ParsedFile::Corrupt {
+            raw: content,
+            error: e.to_string(),
+        }),
+    }
+}
+
+fn extract_locale(config: &ParsedFile) -> String {
+    let ParsedFile::Loaded { data } = config else {
+        return "en".to_string();
+    };
+
+    data.get("locale")
+        .and_then(Value::as_str)
+        .filter(|locale| {
+            !locale.is_empty()
+                && locale
+                    .chars()
+                    // I do not want to see '../accounts'
+                    .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+        })
+        .unwrap_or("en")
+        .to_string()
 }
 
 pub fn is_portable() -> bool {
@@ -51,18 +85,18 @@ pub struct InitialStateBasic {
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct InitialStateRawFiles {
-    pub config: String,
-    pub accounts: String,
-    pub instances: String,
-    pub translations: String,
+pub struct InitialStateParsedFiles {
+    pub config: ParsedFile,
+    pub accounts: ParsedFile,
+    pub instances: ParsedFile,
+    pub translations: ParsedFile,
 }
 
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InitialState {
     pub basic: InitialStateBasic,
-    pub raw_files: InitialStateRawFiles,
+    pub parsed: InitialStateParsedFiles,
 }
 
 #[tauri::command]
@@ -83,21 +117,20 @@ pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, St
     };
 
     let (config, accounts, instances) = tokio::join!(
-        tokio::fs::read_to_string(base_directory.join("config.json")),
-        tokio::fs::read_to_string(base_directory.join("accounts.json")),
-        tokio::fs::read_to_string(base_directory.join("instances.json")),
+        load_json_file(base_directory.join("config.json")),
+        load_json_file(base_directory.join("accounts.json")),
+        load_json_file(base_directory.join("instances.json")),
     );
 
-    let config = config.unwrap_or_default();
-    let accounts = accounts.unwrap_or_default();
-    let instances = instances.unwrap_or_default();
+    let config = config?;
+    let accounts = accounts?;
+    let instances = instances?;
 
     let locale = extract_locale(&config);
-    let translations = tokio::fs::read_to_string(
-        base_directory.join("translations").join(&format!("{}.json", locale)),
+    let translations = load_json_file(
+        base_directory.join("translations").join(format!("{}.json", locale)),
     )
-    .await
-    .unwrap_or_default();
+    .await?;
 
     Ok(InitialState {
         basic: InitialStateBasic {
@@ -107,7 +140,7 @@ pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, St
             separator,
             portable,
         },
-        raw_files: InitialStateRawFiles {
+        parsed: InitialStateParsedFiles {
             config,
             accounts,
             instances,
@@ -118,7 +151,7 @@ pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, St
 
 // If the 'latest.log' file exists and is not empty,
 // then rename that file to 'kaede-{number}.log',
-// where the 'number' property is the next biggest and unique log file number.
+// where 'number' is one greater than the biggest existing log file number.
 //
 // Else abort the log file preparation.
 pub fn prepare_log_file(logs_dir: &Path, app_name: &str) -> std::io::Result<()> {
@@ -135,39 +168,30 @@ pub fn prepare_log_file(logs_dir: &Path, app_name: &str) -> std::io::Result<()> 
         return Ok(());
     }
 
-    // Get the file name prefix using current application name
+    // Rotated log files are named '{app_name}-{number}.log'
     let prefix = format!("{}-", app_name);
-    let prefix_length = prefix.len();
-    // The '.log' extension consists of 4 characters
-    let log_extension_length = 4;
 
     // We will keep track of the biggest log file number to make a unique file name
-    let mut max_number = 0;
+    let mut max_number: usize = 0;
 
     for entry in fs::read_dir(logs_dir)? {
         let entry = entry?;
-        let path = entry.path();
+        let file_name = entry.file_name();
 
-        let filename = match path.file_name().and_then(|f| f.to_str()) {
-            Some(name) => name,
-            None => continue,
+        // Skip files whose names are not valid UTF-8
+        let Some(filename) = file_name.to_str() else {
+            continue;
         };
-        // Count the file name length without its extension
-        let clean_filename_length = filename.len() - log_extension_length;
 
-        // Prefix length should be smaller than the cleaned file name length
-        if prefix_length >= clean_filename_length {
-          continue;
+        // Count only '{prefix}{number}.log' files
+        let number = filename
+            .strip_prefix(&prefix)
+            .and_then(|rest| rest.strip_suffix(".log"))
+            .and_then(|digits| digits.parse::<usize>().ok());
+
+        if let Some(number) = number {
+            max_number = max_number.max(number);
         }
-
-        let extracted_number = &filename[prefix_length..clean_filename_length];
-        // Parse the extracted number
-        let parsed_number = match extracted_number.parse::<usize>() {
-            Ok(n) => n,
-            Err(_) => continue,
-        };
-
-        max_number = max_number.max(parsed_number);
     }
 
     // Get the absolute path of the renamed log file
@@ -238,14 +262,13 @@ pub async fn verify_file_paths(artifacts: Vec<Artifact>) -> Result<Vec<String>, 
 }
 
 fn verify_file_hash(path: &Path, expected_hash: &str) -> io::Result<bool> {
-    let file = File::open(path)?;
+    let mut file = File::open(path)?;
 
-    let mut reader = BufReader::new(file);
     let mut hasher = Sha1::new();
-    let mut buffer = [0; 8192];
+    let mut buffer = [0u8; 64 * 1024];
 
     loop {
-        let bytes_read = reader.read(&mut buffer)?;
+        let bytes_read = file.read(&mut buffer)?;
 
         if bytes_read == 0 {
             break;
@@ -254,8 +277,7 @@ fn verify_file_hash(path: &Path, expected_hash: &str) -> io::Result<bool> {
         hasher.update(&buffer[..bytes_read]);
     }
 
-    let result = hasher.finalize();
-    let actual_hash = format!("{:x}", result);
+    let actual_hash = format!("{:x}", hasher.finalize());
 
     Ok(actual_hash == expected_hash)
 }

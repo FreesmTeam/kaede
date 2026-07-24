@@ -211,7 +211,7 @@ pub fn prepare_log_file(logs_dir: &Path, app_name: &str) -> std::io::Result<()> 
 pub async fn get_missing_files(paths: Vec<String>) -> Result<Vec<String>, String> {
     tokio::task::spawn_blocking(move || {
         paths
-            .into_iter()
+            .into_par_iter()
             .filter(|path| !Path::new(path).exists())
             .collect()
     })

@@ -3,7 +3,7 @@ use sysinfo::System;
 
 static SYS_CPU: Mutex<Option<System>> = Mutex::new(None);
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_system_memory() -> (u64, u64) {
     let mut sys = System::new();
 
@@ -15,7 +15,7 @@ pub fn get_system_memory() -> (u64, u64) {
     return (used_memory, total_memory);
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_cpu_usage() -> f32 {
     let mut guard = SYS_CPU.lock().unwrap();
 

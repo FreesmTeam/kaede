@@ -1,5 +1,4 @@
 use tauri::Manager;
-use chrono::{DateTime, Utc};
 use log::error;
 
 mod finalization;
@@ -107,9 +106,10 @@ pub fn run() {
                     ))
                     // Make a custom logs format
                     .format(|out, message, record| {
-                        let now_utc: DateTime<Utc> = Utc::now();
+                        let now = time::OffsetDateTime::now_utc();
                         // Default tauri logging format does not include milliseconds
-                        let formatted_time = now_utc.format("%H:%M:%S%.3f").to_string();
+                        let formatted_time = format!("{:02}:{:02}:{:02}.{:03}",
+                            now.hour(), now.minute(), now.second(), now.millisecond());
 
                         out.finish(format_args!(
                             "{} | {} | {} | {}",

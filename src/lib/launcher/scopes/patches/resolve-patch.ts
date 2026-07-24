@@ -21,7 +21,7 @@ import { APIEndpoints, LaunchStatus } from "@/constants/launcher.ts";
 import { CustomPatches } from "@/constants/meta.ts";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import Fetching from "@/lib/launcher/scopes/fetching";
 import Patches from "@/lib/launcher/scopes/patches/index.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -62,49 +62,55 @@ export async function resolvePatch({
   log.debug(descriptiveLogPrefix, "Reading the cached patch metadata");
   statuses.current = LaunchStatus.PatchMetadata.Reading;
   try {
-    parsedPatch = await General.handleJsonFile({
+    const refetch = async (): Promise<unknown> => {
+      const url: string = metadata.uid === CustomPatches.OptiFine
+        ? (
+          APIEndpoints.KaedeCache.Base +
+          APIEndpoints.KaedeCache.Paths.OptiFine.Base +
+          fileName
+        )
+        : APIEndpoints.Meta.Base + metadata.uid + "/" + fileName;
+
+      log.warn(
+        descriptiveLogPrefix,
+        "No cache; fetching the patch metadata",
+      );
+      statuses.current = LaunchStatus.PatchMetadata.Fetching;
+      const fetched: { "data": unknown } | LaunchStatusType = await Fetching.fetchMetadata({
+        "url"   : url,
+        "label" : "patch metadata",
+        "scope" : "PatchMetadata",
+        "prefix": descriptiveLogPrefix,
+      });
+
+      // Just return the patch metadata
+      if (typeof fetched === "object") {
+        return fetched.data;
+      }
+
+      log.error(
+        descriptiveLogPrefix,
+        `Could not fetch the patch metadata. Status: ${fetched}`,
+      );
+      statuses.current = fetched;
+
+      /*
+       * The 'General#handleJsonFile' function writes the returned value
+       * into the file specified earlier, but in case of an error we do not
+       * want to write anything. Moreover, we want to stop the launch process execution
+       * since we cannot handle a MultiMC patch without its metadata
+       */
+      throw new Error(`An error occurred while fetching the patch metadata (${metadata.uid})`);
+    };
+
+    parsedPatch = await FileManager.handleJsonFile({
       "baseDirectory"  : directories.base,
       "path"           : [FileStructure.Folders.Cache.Path, metadata.uid, fileName],
       "label"          : `/cache/${metadata.uid}/${fileName}`,
-      "getDefaultValue": async () => {
-        const url: string = metadata.uid === CustomPatches.OptiFine
-          ? (
-            APIEndpoints.KaedeCache.Base +
-            APIEndpoints.KaedeCache.Paths.OptiFine.Base +
-            fileName
-          )
-          : APIEndpoints.Meta.Base + metadata.uid + "/" + fileName;
-
-        log.warn(
-          descriptiveLogPrefix,
-          "No cache; fetching the patch metadata",
-        );
-        statuses.current = LaunchStatus.PatchMetadata.Fetching;
-        const fetched: { "data": unknown } | LaunchStatusType = await Fetching.fetchMetadata({
-          "url"   : url,
-          "label" : "patch metadata",
-          "scope" : "PatchMetadata",
-          "prefix": descriptiveLogPrefix,
-        });
-
-        // Just return the patch metadata
-        if (typeof fetched === "object") {
-          return fetched.data;
-        }
-
-        log.error(
-          descriptiveLogPrefix,
-          `Could not fetch the patch metadata. Status: ${fetched}`,
-        );
-        statuses.current = fetched;
-
-        /*
-         * The 'General#handleJsonFile' function writes the returned value
-         * into the file specified earlier, but in case of an error we do not
-         * want to write anything. Moreover, we want to stop the launch process execution
-         * since we cannot handle a MultiMC patch without its metadata
-         */
-        throw new Error(`An error occurred while fetching the patch metadata (${metadata.uid})`);
+      "getDefaultValue": refetch,
+      "invalidation"   : {
+        "days"       : 7,
+        "getNewValue": refetch,
       },
     });
   } catch (error: unknown) {

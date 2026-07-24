@@ -16,4 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export default {} as const;
+import { handleJsonFile } from "@/lib/file-manager/handle-json-file.ts";
+
+export default {
+  handleJsonFile,
+} as const;

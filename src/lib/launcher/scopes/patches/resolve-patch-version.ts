@@ -19,7 +19,7 @@
 import FileStructure from "@/constants/file-structure.ts";
 import { APIEndpoints, LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import Fetching from "@/lib/launcher/scopes/fetching";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { LaunchStatusType } from "@/types/launcher/launch/launch-status.type.ts";
@@ -58,41 +58,47 @@ export async function resolvePatchVersion({
   log.debug(logPrefix, "Reading the cached index manifest");
   statuses.current = LaunchStatus.PatchIndex.Reading;
   try {
-    parsedPatchIndex = await General.handleJsonFile({
+    const refetch = async (): Promise<unknown> => {
+      log.warn(
+        logPrefix,
+        "No cache; fetching the index manifest",
+      );
+      statuses.current = LaunchStatus.PatchIndex.Fetching;
+      const fetched: { "data": unknown } | LaunchStatusType = await Fetching.fetchMetadata({
+        "url"   : APIEndpoints.Meta.Base + metadata.uid,
+        "label" : "index manifest",
+        "scope" : "PatchIndex",
+        "prefix": metadata.uid,
+      });
+
+      // Just return the patch index manifest
+      if (typeof fetched === "object") {
+        return fetched.data;
+      }
+
+      log.error(
+        logPrefix,
+        `Could not fetch the index manifest. Status: ${fetched}`,
+      );
+      statuses.current = fetched;
+
+      /*
+       * The 'General#handleJsonFile' function writes the returned value
+       * into the file specified earlier, but in case of an error we do not
+       * want to write anything. Moreover, we want to stop the launch process execution
+       * since we cannot handle a MultiMC patch without the version
+       */
+      throw new Error(`An error occurred while fetching the index manifest (${metadata.uid})`);
+    };
+
+    parsedPatchIndex = await FileManager.handleJsonFile({
       "baseDirectory"  : directories.base,
       "path"           : [FileStructure.Folders.Cache.Path, fileName],
       "label"          : `/cache/${fileName}`,
-      "getDefaultValue": async () => {
-        log.warn(
-          logPrefix,
-          "No cache; fetching the index manifest",
-        );
-        statuses.current = LaunchStatus.PatchIndex.Fetching;
-        const fetched: { "data": unknown } | LaunchStatusType = await Fetching.fetchMetadata({
-          "url"   : APIEndpoints.Meta.Base + metadata.uid,
-          "label" : "index manifest",
-          "scope" : "PatchIndex",
-          "prefix": metadata.uid,
-        });
-
-        // Just return the patch index manifest
-        if (typeof fetched === "object") {
-          return fetched.data;
-        }
-
-        log.error(
-          logPrefix,
-          `Could not fetch the index manifest. Status: ${fetched}`,
-        );
-        statuses.current = fetched;
-
-        /*
-         * The 'General#handleJsonFile' function writes the returned value
-         * into the file specified earlier, but in case of an error we do not
-         * want to write anything. Moreover, we want to stop the launch process execution
-         * since we cannot handle a MultiMC patch without the version
-         */
-        throw new Error(`An error occurred while fetching the index manifest (${metadata.uid})`);
+      "getDefaultValue": refetch,
+      "invalidation"   : {
+        "days"       : 7,
+        "getNewValue": refetch,
       },
     });
   } catch (error: unknown) {

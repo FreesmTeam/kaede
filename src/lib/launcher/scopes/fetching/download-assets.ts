@@ -19,6 +19,7 @@
 import FileStructure from "@/constants/file-structure.ts";
 import { APIEndpoints, GeneralSettings, LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
+import FileManager from "@/lib/file-manager";
 import General from "@/lib/general";
 import { fetchMetadata } from "@/lib/launcher/scopes/fetching/fetch-metadata.ts";
 import { shallowlyValidateMeta } from "@/lib/launcher/scopes/validators/shallowly-validate-meta.ts";
@@ -62,7 +63,36 @@ export async function downloadAssets({
   log.debug(logPrefix, "Reading the cached assets metadata");
   statuses.current = LaunchStatus.AssetIndex.Reading;
   try {
-    parsedIndex = await General.handleJsonFile({
+    const refetch = async (): Promise<unknown> => {
+      log.warn(logPrefix, "No cache; fetching the assets metadata");
+      statuses.current = LaunchStatus.AssetIndex.Fetching;
+      const fetched: { "data": unknown } | LaunchStatusType = await fetchMetadata({
+        "url"   : assetIndex.url,
+        "label" : "assets index",
+        "scope" : "AssetIndex",
+        "prefix": metaFilename,
+      });
+
+      // Just return the assets index
+      if (typeof fetched === "object") {
+        return fetched.data;
+      }
+
+      log.error(
+        logPrefix,
+        `Could not fetch the asset index. Status: ${fetched}`,
+      );
+      statuses.current = fetched;
+
+      /*
+       * The 'General#handleJsonFile' function writes the returned value
+       * into the file specified earlier, but in case of an error we do not
+       * want to write anything
+       */
+      throw new Error(`An error occurred while fetching the asset index (${metaFilename})`);
+    };
+
+    parsedIndex = await FileManager.handleJsonFile({
       "baseDirectory": directories.base,
       "path"         : [
         FileStructure.Folders.Assets.Path,
@@ -70,33 +100,10 @@ export async function downloadAssets({
         metaFilename,
       ],
       "label"          : `/assets/indexes/${metaFilename}`,
-      "getDefaultValue": async () => {
-        log.warn(logPrefix, "No cache; fetching the assets metadata");
-        statuses.current = LaunchStatus.AssetIndex.Fetching;
-        const fetched: { "data": unknown } | LaunchStatusType = await fetchMetadata({
-          "url"   : assetIndex.url,
-          "label" : "assets index",
-          "scope" : "AssetIndex",
-          "prefix": metaFilename,
-        });
-
-        // Just return the assets index
-        if (typeof fetched === "object") {
-          return fetched.data;
-        }
-
-        log.error(
-          logPrefix,
-          `Could not fetch the asset index. Status: ${fetched}`,
-        );
-        statuses.current = fetched;
-
-        /*
-         * The 'General#handleJsonFile' function writes the returned value
-         * into the file specified earlier, but in case of an error we do not
-         * want to write anything
-         */
-        throw new Error(`An error occurred while fetching the asset index (${metaFilename})`);
+      "getDefaultValue": refetch,
+      "invalidation"   : {
+        "days"       : 7,
+        "getNewValue": refetch,
       },
     });
   } catch (error: unknown) {

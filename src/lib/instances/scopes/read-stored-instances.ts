@@ -2,18 +2,26 @@ import FileStructure from "@/constants/file-structure.ts";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import Schemas from "@/lib/schemas";
+import type { ParsedFile } from "@/types/application/initial-state.type.ts";
 import type {
   InstanceStatesType,
   InstanceStateType,
 } from "@/types/application/instance-states.type.ts";
 
-export async function readStoredInstances(baseDirectory: string): Promise<InstanceStatesType> {
-  const parsedMetadata: unknown = await General.handleJsonFile({
-    baseDirectory,
-    "path"           : [FileStructure.Files.Metadata],
-    "label"          : FileStructure.Files.Metadata,
-    "getDefaultValue": async (): Promise<object> => ({}),
-  });
+export async function readStoredInstances(properties?: Partial<{
+  "baseDirectory": string;
+  "parsedFile"   : ParsedFile;
+}>): Promise<InstanceStatesType> {
+  const baseDirectory = properties?.baseDirectory ?? General.getCachedBaseDirectory();
+  const parsedFile: ParsedFile | undefined = properties?.parsedFile;
+  const parsedMetadata: unknown = parsedFile?.status === "loaded"
+    ? parsedFile.data
+    : await General.handleJsonFile({
+      baseDirectory,
+      "path"           : [FileStructure.Files.Metadata],
+      "label"          : FileStructure.Files.Metadata,
+      "getDefaultValue": async (): Promise<object> => ({}),
+    });
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Validating the instances metadata");
 

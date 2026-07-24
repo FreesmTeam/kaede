@@ -1,17 +1,18 @@
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
+import type { ParsedFile } from "@/types/application/initial-state.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
-export async function getSafeConfigFile(baseDirectory?: string): Promise<ConfigType> {
+export async function getSafeConfigFile(properties?: Partial<{
+  "baseDirectory": string;
+  "parsedFile"   : ParsedFile;
+}>): Promise<ConfigType> {
   try {
     log.debug(__PRE_BUNDLED_FILENAME__, "Getting a config file");
 
     // Await here to catch errors
-    return await Configs.get(
-      baseDirectory ?? General.getCachedBaseDirectory(),
-    );
+    return await Configs.get(properties);
   } catch (error: unknown) {
     log.error(
       __PRE_BUNDLED_FILENAME__,

@@ -4,9 +4,15 @@ import { regenerateConfigFile } from "@/lib/configs/scopes/regenerate-config-fil
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
 import Schemas from "@/lib/schemas";
+import type { ParsedFile } from "@/types/application/initial-state.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
-export async function getConfigFile(baseDirectory: string): Promise<ConfigType> {
+export async function getConfigFile(properties?: Partial<{
+  "baseDirectory": string;
+  "parsedFile"   : ParsedFile;
+}>): Promise<ConfigType> {
+  const baseDirectory: string = properties?.baseDirectory ?? General.getCachedBaseDirectory();
+  const parsedFile: ParsedFile | undefined = properties?.parsedFile;
   const configFileDirectory = General.cachedJoin(baseDirectory, FileStructure.Files.Config);
 
   const hooksResult: "continue" | ConfigType | undefined =
@@ -20,12 +26,21 @@ export async function getConfigFile(baseDirectory: string): Promise<ConfigType> 
     return hooksResult;
   }
 
-  const parsedConfig: unknown = await General.handleJsonFile({
-    baseDirectory,
-    "path"           : [FileStructure.Files.Config],
-    "label"          : FileStructure.Files.Config,
-    "getDefaultValue": getDefaultConfig,
-  });
+  if (parsedFile?.status === "corrupt") {
+    return regenerateConfigFile({
+      baseDirectory,
+      configFileDirectory,
+    });
+  }
+
+  const parsedConfig: unknown = parsedFile?.status === "loaded"
+    ? parsedFile.data
+    : await General.handleJsonFile({
+      baseDirectory,
+      "path"           : [FileStructure.Files.Config],
+      "label"          : FileStructure.Files.Config,
+      "getDefaultValue": getDefaultConfig,
+    });
 
   const configId: string =
     [

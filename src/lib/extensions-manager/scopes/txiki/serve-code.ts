@@ -17,14 +17,10 @@
  */
 
 import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
-import { Command } from "tauri-plugin-shellx-api";
 
 import FileStructure from "@/constants/file-structure.ts";
 import Errors from "@/lib/errors";
-import { getFreePort } from "@/lib/extensions-manager/scopes/txiki/get-free-port.ts";
-import {
-  handleServerProcess,
-} from "@/lib/extensions-manager/scopes/txiki/handle-server-process.ts";
+import { serveFile } from "@/lib/extensions-manager/scopes/txiki/serve-file.ts";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 
@@ -53,13 +49,5 @@ export async function serveCode(name: string, code: string): Promise<void> {
     }
   }
 
-  const port: number = getFreePort();
-  const command: Command<string> = Command.sidecar("txiki-server", [
-    "serve",
-    "--port",
-    port.toString(),
-    filePath,
-  ]);
-
-  return handleServerProcess(command, name, port);
+  return serveFile(name, filePath);
 }

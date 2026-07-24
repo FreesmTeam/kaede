@@ -16,21 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Command } from "tauri-plugin-shellx-api";
-
+import Errors from "@/lib/errors";
 import { getFreePort } from "@/lib/extensions-manager/scopes/txiki/get-free-port.ts";
-import {
-  handleServerProcess,
-} from "@/lib/extensions-manager/scopes/txiki/handle-server-process.ts";
+import { log } from "@/lib/logging/scopes/log.ts";
+import Processes from "@/lib/processes";
 
 export async function serveFile(name: string, filePath: string): Promise<void> {
   const port: number = getFreePort();
-  const command: Command<string> = Command.sidecar("txiki-server", [
-    "serve",
-    "--port",
-    port.toString(),
-    filePath,
-  ]);
 
-  return handleServerProcess(command, name, port);
+  try {
+    await Processes.spawnServer({
+      name,
+      port,
+      "program": { "type": "sidecar", "value": "txiki-server" },
+      "args"   : ["serve", "--port", port.toString(), filePath],
+    });
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Failed to spawn a txiki server:",
+      Errors.prettify(error),
+    );
+  }
 }

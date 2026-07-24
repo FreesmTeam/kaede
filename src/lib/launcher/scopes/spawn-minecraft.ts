@@ -16,12 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Child, Command } from "tauri-plugin-shellx-api";
-
 import { LaunchStatus } from "@/constants/launcher.ts";
 import ExtensionsManager from "@/lib/extensions-manager";
 import { log } from "@/lib/logging/scopes/log.ts";
-import type { LaunchResponseType } from "@/types/launcher/launch/launch-response.type.ts";
+import Processes from "@/lib/processes";
+import type {
+  LaunchResponseType,
+  MinecraftMetaType,
+  MinecraftProcessType,
+} from "@/types/launcher/launch/launch-response.type.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
@@ -57,43 +60,54 @@ export async function spawnMinecraft({
 
   log.debug(
     logPrefix,
-    `Creating a launch command with the '${directories.instance}' working directory`,
+    `Spawning a Minecraft process with the '${directories.instance}' working directory`,
   );
-  const launchTask: Command<string> = Command.create(command.java, command.arguments, {
-    "cwd": directories.instance,
-  });
 
-  log.debug(logPrefix, "Spawning a process");
-  const process: Child = await launchTask.spawn();
+  let process: MinecraftProcessType;
 
-  log.debug(logPrefix, "Adding listeners to the process");
-  launchTask.stdout.on("data", onInput);
-  launchTask.stderr.on("data", onInput);
-  launchTask.on("close", payload => {
-    onClose(instanceId);
-    log.warn(logPrefix, log.templates.json.contents(
-      "Successfully closed. Payload",
-      payload,
-    ));
-    ExtensionsManager.catchAsyncVoidHooks({
-      "scope" : "onMinecraftKill",
-      "toPass": process.pid,
-      "timing": "after",
+  try {
+    process = await Processes.spawnProcess<MinecraftMetaType>({
+      "program": { "type": "path", "value": command.java },
+      "args"   : command.arguments,
+      "cwd"    : directories.instance,
+      "kind"   : "minecraft",
+      "meta"   : { instanceId },
+    }, {
+      "onOutput": onInput,
+      "onExit"  : payload => {
+        onClose(instanceId);
+        log.warn(logPrefix, log.templates.json.contents(
+          "Successfully closed. Payload",
+          payload,
+        ));
+        void ExtensionsManager.catchAsyncVoidHooks({
+          "scope" : "onMinecraftKill",
+          "toPass": payload.pid,
+          "timing": "after",
+        });
+      },
+      "onError": payload => {
+        statuses.current = LaunchStatus.Errors.UnhandledError;
+        log.error(logPrefix, log.templates.json.contents(
+          "Something went wrong. Payload",
+          payload,
+        ));
+        void ExtensionsManager.catchAsyncVoidHooks({
+          "scope" : "onMinecraftKill",
+          "toPass": payload.pid,
+          "timing": "after",
+        });
+      },
     });
-  });
-  launchTask.on("error", payload => {
+  } catch (error: unknown) {
     statuses.current = LaunchStatus.Errors.UnhandledError;
-
     log.error(logPrefix, log.templates.json.contents(
-      "Something went wrong. Payload",
-      payload,
+      "Failed to spawn. Payload",
+      error,
     ));
-    ExtensionsManager.catchAsyncVoidHooks({
-      "scope" : "onMinecraftKill",
-      "toPass": process.pid,
-      "timing": "after",
-    });
-  });
+
+    return { "success": false, "process": undefined };
+  }
 
   await ExtensionsManager.catchAsyncVoidHooks({
     "scope" : "onMinecraftLaunch",
@@ -101,10 +115,7 @@ export async function spawnMinecraft({
     "timing": "after",
   });
 
-  log.info(
-    logPrefix,
-    `Successfully launched with the ${process.pid} PID`,
-  );
+  log.info(logPrefix, `Successfully launched with the ${process.pid} PID`);
   statuses.current = LaunchStatus.General.Success;
 
   return { "success": true, process };

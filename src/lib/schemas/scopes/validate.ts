@@ -30,7 +30,5 @@ export function validate<T>({
     return false;
   }
 
-  log.info(__PRE_BUNDLED_FILENAME__, `The provided ${label} (${entryInfo}) is valid`);
-
   return value as T;
 }

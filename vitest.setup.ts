@@ -35,18 +35,24 @@ vi.stubGlobal("window", {
     "syncConfig"          : async (): Promise<void> => {},
     "joinDelimiter"       : "",
     "launcherVersion"     : "",
-    "initialPortable"     : false,
-    "initialBaseDirectory": "",
+    "portable"            : false,
+    "baseDirectory"       : "",
+    "launchCount"         : 0,
     "initialConfig"       : {},
     "temporaryAccounts"   : [] as Array<AccountType>,
     "initialTranslations" : {} as TranslationsType,
     "initialInstances"    : {} as InstanceStatesType,
+    "serverProcesses"     : [],
     "logsInBrowser"       : [],
   },
   "__KAEDE__": {
     "variables": {
       "rippleColor"     : "",
       "sparklesColorRGB": "255 255 255",
+      "logs"            : {
+        "targetCollapse"       : false,
+        "collapsedTargetLength": 0,
+      },
     },
     "hooks": {
       "onConfigFileGet"              : { "before": [], "after": [] },

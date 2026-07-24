@@ -206,7 +206,7 @@ test.for(tests)(
 
     // For some reason, these 'expect' tests throw an error on test fail
     expect(
-      JSON.stringify(await getConfigFile("")),
+      JSON.stringify(await getConfigFile()),
     ).toBe(
       JSON.stringify(output),
     );

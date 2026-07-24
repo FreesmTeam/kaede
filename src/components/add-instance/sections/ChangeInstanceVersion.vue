@@ -25,7 +25,6 @@ import ChangeInstanceVersionDropdown
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { Patches } from "@/constants/meta.ts";
-import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
@@ -52,15 +51,6 @@ const currentVersionSearch = computed(
 const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
 
 function toggleTypeFilter(): void {
   currentFilter.value = currentFilter.value === "release"
@@ -94,12 +84,11 @@ onClickOutside(target, () => handleDropdown(false));
     ref="target"
     id="__add-instance-page__instance-version"
     class="relative flex flex-nowrap gap-2 rounded-md p-2"
-    :style="cardStyles"
   >
     <div
       v-if="currentInstance?.patchVersions?.[Patches.Minecraft]"
       id="__add-instance-page__instance-version-selected-badge"
-      class="grid h-full place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
+      class="grid place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
       :data-tooltip="`Selected version of '${Patches.Minecraft}'`"
     >
       {{ currentInstance.patchVersions[Patches.Minecraft] }}
@@ -128,7 +117,7 @@ onClickOutside(target, () => handleDropdown(false));
     <button
       v-if="currentPatch === Patches.Minecraft"
       id="__add-instance-page__instance-version-selected-filter"
-      class="relative grid h-full min-w-20 place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
+      class="relative grid min-w-20 place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
       @click="toggleTypeFilter"
     >
       {{ currentFilter }}

@@ -58,7 +58,11 @@ function toggleOtherOptions(): void {
 </script>
 
 <template>
-  <div id="__add-instance-page__instance-wrapper" class="h-fit w-full flex flex-col gap-2">
+  <div
+    id="__add-instance-page__instance-wrapper"
+    class="h-fit w-full flex flex-col gap-2 rounded-md p-2"
+    :style="cardStyles"
+  >
     <div
       id="__add-instance-page__instance-main-group"
       class="flex flex-nowrap gap-2"
@@ -77,7 +81,6 @@ function toggleOtherOptions(): void {
     <div
       id="__add-instance-page__other-group-expander"
       class="relative flex flex-nowrap justify-between rounded-md p-2"
-      :style="cardStyles"
     >
       <p
         id="__add-instance-page__other-group-expander-label"

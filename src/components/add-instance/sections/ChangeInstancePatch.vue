@@ -22,7 +22,6 @@ import { computed } from "vue";
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { InstallablePatches, Patches } from "@/constants/meta.ts";
-import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { globalStates } from "@/states/global.ts";
 import type {
@@ -38,15 +37,6 @@ const currentVersionSearch = computed(
 const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
 
 function handlePatch(uid: ExtendedPatchUIDType): void {
   GlobalStateHelpers.Pages.addToState("add-instance", {
@@ -64,7 +54,6 @@ function handlePatch(uid: ExtendedPatchUIDType): void {
   <div
     id="__add-instance-page__instance-patch"
     class="flex flex-wrap gap-2 rounded-md p-2"
-    :style="cardStyles"
   >
     <button
       v-for="patch in InstallablePatches"

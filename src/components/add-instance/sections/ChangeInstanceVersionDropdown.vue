@@ -191,7 +191,9 @@ function selectVersion(event: MouseEvent): void {
     !currentInstance.value ||
     !currentPatch.value ||
     // Sometimes it may happen...
-    extractedVersion === "Loading..."
+    extractedVersion === "Loading..." ||
+    // This can happen as well if the user click "No Matches"
+    extractedVersion === noMatches.version
   ) {
     return;
   }

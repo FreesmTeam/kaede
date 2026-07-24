@@ -38,15 +38,6 @@ const currentInstance = computed(
     Instances.extractSavedFromPages(globalStates)
   ),
 );
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
 
 async function handleIconPick(): Promise<void> {
   if (!currentInstance.value) {
@@ -101,7 +92,6 @@ async function handleIconPick(): Promise<void> {
     id="__add-instance-page__instance-icon-wrapper"
     class="shrink-0 rounded-md p-2"
     data-tooltip="Instance icon"
-    :style="cardStyles"
   >
     <Image
       id="__add-instance-page__instance-icon-image"

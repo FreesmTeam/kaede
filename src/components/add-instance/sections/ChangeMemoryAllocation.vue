@@ -20,7 +20,6 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
-import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
@@ -55,15 +54,6 @@ const currentMemoryAllocation = computed((): {
 
   return results;
 });
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
 
 function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   if (!currentInstance.value) {
@@ -98,7 +88,6 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   <div
     id="__add-instance-page__instance-other-memory-title"
     class="relative rounded-md p-2"
-    :style="cardStyles"
   >
     <p
       id="__add-instance-page__instance-other-memory-title-label"
@@ -110,7 +99,6 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   <div
     id="__add-instance-page__instance-other-min-memory"
     class="relative rounded-md p-2"
-    :style="cardStyles"
   >
     <div
       id="__add-instance-page__instance-other-min-memory-unit"
@@ -134,7 +122,6 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   <div
     id="__add-instance-page__instance-other-max-memory"
     class="relative rounded-md p-2"
-    :style="cardStyles"
   >
     <div
       id="__add-instance-page__instance-other-max-memory-unit"

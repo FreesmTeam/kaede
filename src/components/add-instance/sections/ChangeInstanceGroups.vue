@@ -20,7 +20,6 @@
 import { computed } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import General from "@/lib/general/index.js";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances/index.js";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -30,15 +29,6 @@ import type { GlobalStatesType } from "@/types/application/global-states.type.js
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
-  ),
-);
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
   ),
 );
 
@@ -72,7 +62,6 @@ function handleGroup(group: string): void {
     v-if="currentInstance?.groups"
     id="__add-instance-page__instance-groups"
     class="flex flex-nowrap gap-2 overflow-x-auto rounded-md p-2"
-    :style="cardStyles"
   >
     <template v-if="['Group 1', 'Group 2', 'Hiii'].length > 0">
       <button

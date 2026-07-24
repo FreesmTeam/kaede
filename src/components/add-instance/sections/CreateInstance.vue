@@ -21,7 +21,6 @@ import { computed } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { Patches, PrettyPatchLabels } from "@/constants/meta.ts";
-import General from "@/lib/general";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type {
@@ -42,22 +41,12 @@ const currentVersionSearch = computed(
 const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
 </script>
 
 <template>
   <div
     id="__add-instance-page__create-instance-wrapper"
-    class="mb-2 w-fit flex flex-nowrap gap-2 rounded-md p-2"
-    :style="cardStyles"
+    class="w-fit flex flex-nowrap gap-2 rounded-md p-2"
   >
     <button
       id="__add-instance-page__create-instance-button"

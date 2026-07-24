@@ -20,7 +20,6 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
-import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -32,15 +31,6 @@ import type {
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
-  ),
-);
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
   ),
 );
 
@@ -65,7 +55,6 @@ function handleNameChange(input: string): void {
   <div
     id="__add-instance-page__instance-name"
     class="rounded-md p-2"
-    :style="cardStyles"
   >
     <CustomInput
       icon="i-lucide-grid-2x2"

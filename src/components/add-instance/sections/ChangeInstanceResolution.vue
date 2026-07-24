@@ -33,15 +33,6 @@ const currentInstance = computed(
     Instances.extractSavedFromPages(globalStates)
   ),
 );
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
 const aspectRatio = computed((): string => {
   if (!currentInstance.value) {
     return "0:0";
@@ -104,7 +95,6 @@ function handleHeightChange(value: string): void {
     <div
       id="__add-instance-page__instance-resolution-inner"
       class="rounded-md p-2"
-      :style="cardStyles"
     >
       <div
         id="__add-instance-page__instance-resolution-display"
@@ -138,7 +128,6 @@ function handleHeightChange(value: string): void {
       <div
         id="__add-instance-page__instance-other-width"
         class="relative flex-1 rounded-md p-2"
-        :style="cardStyles"
       >
         <div
           id="__add-instance-page__instance-other-width-unit"
@@ -162,7 +151,6 @@ function handleHeightChange(value: string): void {
       <div
         id="__add-instance-page__instance-other-height"
         class="relative flex-1 rounded-md p-2"
-        :style="cardStyles"
       >
         <div
           id="__add-instance-page__instance-other-height-unit"

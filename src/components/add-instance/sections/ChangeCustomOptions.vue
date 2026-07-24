@@ -21,7 +21,6 @@ import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import { Patches } from "@/constants/meta.ts";
-import General from "@/lib/general";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
@@ -45,15 +44,6 @@ const customSettings = computed(
     globalStates?.pages?.states?.["add-instance"]?.customSettings
   ),
 );
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
 </script>
 
 <template>
@@ -61,7 +51,6 @@ const cardStyles = computed(
     <div
       id="__add-instance-page__instance-other-custom-title"
       class="relative rounded-md p-2"
-      :style="cardStyles"
     >
       <p
         id="__add-instance-page__instance-other-custom-title-label"
@@ -75,7 +64,6 @@ const cardStyles = computed(
       :id="`__add-instance-page__instance-other-custom-option-${index}`"
       :key="index"
       class="relative rounded-md p-2"
-      :style="cardStyles"
     >
       <p
         v-if="option?.label"

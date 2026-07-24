@@ -2,6 +2,7 @@ use tauri::Manager;
 use chrono::{DateTime, Utc};
 use log::error;
 
+mod finalization;
 mod launcher;
 mod system;
 mod zip;
@@ -129,6 +130,8 @@ pub fn run() {
         })
         // Register custom Tauri commands
         .invoke_handler(tauri::generate_handler![
+            finalization::finalize_initialization,
+            finalization::get_java_major,
             launcher::get_initial_state,
             launcher::get_missing_files,
             launcher::verify_file_paths,

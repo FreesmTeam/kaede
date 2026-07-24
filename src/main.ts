@@ -145,7 +145,7 @@ AppInstance.mount(ApplicationRootID);
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Initializing launcher");
 await General
-  .initializeLauncher({ config, baseDirectory, startTime })
+  .finalizeInitialization({ config, baseDirectory, startTime })
   .catch((error: unknown) => {
     log.error(__PRE_BUNDLED_FILENAME__, "Failed to initialize launcher:", Errors.prettify(error));
   });

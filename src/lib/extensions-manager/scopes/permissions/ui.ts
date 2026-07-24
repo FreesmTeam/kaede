@@ -20,7 +20,6 @@ import { createSafeDocument, type SafeDocument } from "ark-of-atrahasis";
 
 import { GrantedScopes } from "@/constants/permissions.ts";
 import { handleCssTheme } from "@/lib/extensions-manager/scopes/handle-css-theme.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
 
 export function handleBasicUIPermission({
   id,
@@ -28,26 +27,18 @@ export function handleBasicUIPermission({
   "id": string;
 }): void {
   GrantedScopes[id].handleUIMount = (elementId: string): void => {
-    const element: HTMLElement | null = document.getElementById(elementId);
+    const gui: SafeDocument = createSafeDocument(elementId);
 
-    if (!element) {
-      return log.error(
-        __PRE_BUNDLED_FILENAME__,
-        "Error while getting a root container for the extension",
-      );
-    }
-
-    const gui: SafeDocument = createSafeDocument(element);
-
-    GrantedScopes[id].gui = { ...gui };
-
-    // These will be granted with other permissions
-    delete GrantedScopes[id].gui.createAnchor;
-    delete GrantedScopes[id].gui.createCanvas;
-    delete GrantedScopes[id].gui.createImage;
-    delete GrantedScopes[id].gui.createVideo;
-    delete GrantedScopes[id].gui.createAudio;
-    delete GrantedScopes[id].gui.createSource;
+    GrantedScopes[id].gui = {
+      ...gui,
+      // These will be granted with other permissions
+      "createAnchor": undefined,
+      "createCanvas": undefined,
+      "createImage" : undefined,
+      "createVideo" : undefined,
+      "createAudio" : undefined,
+      "createSource": undefined,
+    };
   };
 }
 

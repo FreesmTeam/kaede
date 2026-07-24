@@ -3,9 +3,10 @@ import { computed } from "vue";
 
 import PageWrapper from "@/components/general/layout/PageWrapper.vue";
 import Tabs from "@/components/general/layout/Tabs.vue";
+import ExtensionsSettings from "@/components/settings/tabs/ExtensionsSettings.vue";
 import GeneralSettings from "@/components/settings/tabs/GeneralSettings.vue";
+import PluginPlayground from "@/components/settings/tabs/PluginPlayground.vue";
 import { SettingsSections } from "@/constants/application.ts";
-import { LazyPluginPlayground } from "@/constants/ui/pages.ts";
 import { globalStates } from "@/states/global.ts";
 
 const stateKey = "settings" as const;
@@ -26,7 +27,8 @@ const selected = computed((): string => (
         :state-key="stateKey"
       />
       <GeneralSettings v-if="selected === 'general'" />
-      <LazyPluginPlayground v-else-if="selected === 'plugin-playground'" />
+      <ExtensionsSettings v-else-if="selected === 'extensions'" />
+      <PluginPlayground v-else-if="selected === 'plugin-playground'" />
     </div>
   </PageWrapper>
 </template>

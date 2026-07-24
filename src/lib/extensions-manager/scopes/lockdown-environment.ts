@@ -2,7 +2,7 @@ import "ses";
 
 export function lockdownEnvironment(): void {
   /*
-   * Can throw an error, which is a desirable behaviour
+   * Can throw an error, which is a desirable behavior
    * since we do NOT want to execute sandboxed plugins without environment lockdown
    */
   lockdown({
@@ -13,7 +13,7 @@ export function lockdownEnvironment(): void {
      *
      * 'noEval' completely disables 'eval' and the 'Function' constructor.
      *
-     * 'unsafeEval' appears not to change the behaviour of 'eval' and the 'Function' constructor.
+     * 'unsafeEval' appears not to change the behavior of 'eval' and the 'Function' constructor.
      */
     "evalTaming": "unsafeEval",
   });

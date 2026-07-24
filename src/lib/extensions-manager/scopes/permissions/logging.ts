@@ -6,6 +6,11 @@ export function handleLoggingPermission(id: string): void {
     method: "debug" | "info" | "warn" | "error",
     ...input: Array<string>
   ): void => {
+    if (method === "error") console.error(...input);
+    if (method === "info") console.info(...input);
+    if (method === "warn") console.warn(...input);
+    if (method === "debug") console.debug(...input);
+
     return log[method](`${id}`, ...input);
   };
 

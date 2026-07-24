@@ -20,33 +20,38 @@ export function runInSandbox({
     return await ExtensionsManager.requestPermissions(permissions, id);
   };
 
-  const compartment = new Compartment({
-    "globals": {
-      "requestPermissions": wrappedPermissionsRequest,
+  try {
+    const compartment = new Compartment({
+      "globals": {
+        "requestPermissions": wrappedPermissionsRequest,
+
+        /*
+         * Provide a reference to the plugin-scoped 'GrantedScopes' object to make it
+         * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handlePermission'
+         */
+        "GrantedScopes": GrantedScopes[id],
+
+        /*
+         * Provide a reference to the plugin-scoped 'EventListeners' object to make it
+         * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handleEvent'
+         */
+        "EventListeners": EventListeners[id],
+      },
 
       /*
-       * Provide a reference to the plugin-scoped 'GrantedScopes' object to make it
-       * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handlePermission'
+       * Code execution does not work without this property,
+       * and the documentation does not explain what '__options__' exactly do
        */
-      "GrantedScopes": GrantedScopes[id],
-
-      /*
-       * Provide a reference to the plugin-scoped 'EventListeners' object to make it
-       * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handleEvent'
-       */
-      "EventListeners": EventListeners[id],
-    },
+      "__options__": true,
+    });
 
     /*
-     * Code execution does not work without this property,
-     * and the documentation does not explain what '__options__' exactly do
+     * Compartments run using the same JavaScript interpreter as the WebView uses itself,
+     * so the performance of sandboxed plugins vs. unrestricted should equal
      */
-    "__options__": true,
-  });
-
-  /*
-   * Compartments run using the same JavaScript interpreter as the WebView uses itself,
-   * so the performance of sandboxed plugins vs. unrestricted should equal
-   */
-  compartment.evaluate(code);
+    compartment.evaluate(code);
+  } catch (error: unknown) {
+    // eslint-disable-next-line
+    console.error("Compartment error:", error);
+  }
 }

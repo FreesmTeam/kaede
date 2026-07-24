@@ -22,7 +22,8 @@ const { page } = defineProps<{
   <LazyProfile v-else-if="page === 'profile'" />
   <!-- This block of elements is shown only when custom pages are selected -->
   <PageWrapper v-else>
-    <!-- Extensions should mount their pages to this element -->
-    <div id="__custom-page__wrapper"></div>
+    <div id="__custom-page__wrapper">
+      <component :is="page" />
+    </div>
   </PageWrapper>
 </template>

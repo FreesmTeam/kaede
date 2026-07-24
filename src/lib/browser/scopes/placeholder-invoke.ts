@@ -93,9 +93,6 @@ export async function placeholderInvoke(
     case "get_executable_directory": {
       return "indexed_db";
     }
-    case "get_launched_state": {
-      return 1;
-    }
     case "verify_file_paths": {
       const artifacts: Array<{
         "shortHashPath": string;

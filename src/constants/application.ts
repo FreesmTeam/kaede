@@ -140,9 +140,19 @@ export const SettingsSections: Array<TabSectionType> = [
     "icon": "i-lucide-sliders-horizontal",
   },
   {
-    "id"  : "languages",
-    "name": "Languages",
-    "icon": "i-lucide-languages",
+    "id"  : "user-interface",
+    "name": "User Interface",
+    "icon": "i-lucide-paintbrush-vertical",
+  },
+  {
+    "id"  : "minecraft",
+    "name": "Minecraft",
+    "icon": "i-lucide-box",
+  },
+  {
+    "id"  : "java",
+    "name": "Java",
+    "icon": "i-lucide-coffee",
   },
   {
     "id"  : "extensions",

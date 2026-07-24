@@ -38,8 +38,9 @@ export const GlobalInternals: KaedeInternalsType = {
   "temporaryAccounts"   : [] as Array<AccountType>,
   "initialTranslations" : {} as TranslationsType,
   "initialInstances"    : {} as InstanceStatesType,
-  "initialPortable"     : false,
-  "initialBaseDirectory": "",
+  "portable"            : false,
+  "baseDirectory"       : "",
+  "launchCount"         : 0,
   "logsInBrowser"       : [],
   "serverProcesses"     : [],
 };

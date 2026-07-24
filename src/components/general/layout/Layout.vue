@@ -4,10 +4,8 @@ import { ref } from "vue";
 
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import PageError from "@/components/general/errors/PageError.vue";
-import ContextMenu from "@/components/general/layout/ContextMenu.vue";
-import LaunchProgress from "@/components/general/layout/LaunchProgress.vue";
-import Sidebar from "@/components/general/layout/Sidebar.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
+import { C } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
 
@@ -79,14 +77,14 @@ useEventListener(window, "pointerdown", (event: PointerEvent) => {
       @contextmenu="showContextMenu"
       class="relative h-vh w-full flex flex-nowrap gap-0 overflow-hidden text-white"
     >
-      <LaunchProgress />
-      <ContextMenu
+      <C.LaunchProgress />
+      <C.ContextMenu
         v-if="toShowContextMenu"
         :opened="contextMenu.opened"
         :x="contextMenu.x"
         :y="contextMenu.y"
       />
-      <Sidebar v-if="toShowSidebar" />
+      <C.Sidebar v-if="toShowSidebar" />
       <!-- Pages error boundary -->
       <ErrorBoundary :reset-key="page">
         <template #default>

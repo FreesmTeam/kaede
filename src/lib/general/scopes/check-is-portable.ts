@@ -1,16 +1,8 @@
-import { BaseDirectory, exists } from "@tauri-apps/plugin-fs";
+import { invoke } from "@tauri-apps/api/core";
 
 export async function checkIsPortable(): Promise<boolean> {
   try {
-    await exists("i_need_to_prepare_for_my_final_terms.txt", {
-      "baseDir": BaseDirectory.Desktop,
-    });
-
-    /*
-     * If user is using a non-portable version of the launcher,
-     * then the 'exists' function should throw an error before this statement
-     */
-    return true;
+    return await invoke("is_portable");
   } catch {
     return false;
   }

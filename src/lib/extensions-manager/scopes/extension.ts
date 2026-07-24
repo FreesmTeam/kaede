@@ -16,23 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { defineAsyncComponent } from "vue";
+export class Extension {
+  readonly kind: string;
 
-/**
- * Lazy-loaded components
- */
-export const LazyHome = defineAsyncComponent(
-  () => import("@/components/home/Home.vue"),
-);
-export const LazyLibrary = defineAsyncComponent(
-  () => import("@/components/library/Library.vue"),
-);
-export const LazySettings = defineAsyncComponent(
-  () => import("@/components/settings/Settings.vue"),
-);
-export const LazyAddInstance = defineAsyncComponent(
-  () => import("@/components/add-instance/AddInstance.vue"),
-);
-export const LazyProfile = defineAsyncComponent(
-  () => import("@/components/profile/Profile.vue"),
-);
+  constructor(kind: "d") {
+    this.kind = kind;
+  }
+}

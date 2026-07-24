@@ -31,7 +31,7 @@
       "assetProtocol": {
         "enable": true,
         "scope": {
-          "allow": ["$APPDATA", "$APPDATA/**/*"]
+          "allow": ["**/*"]
         }
       }
     }
@@ -41,9 +41,6 @@
     "targets": "all",
     "externalBin": [
       "binaries/txiki-server"
-    ],
-    "resources": [
-      "jarfiles/launcher.jar"
     ],
     "icon": [
       "icons/32x32.png",

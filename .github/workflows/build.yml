@@ -11,7 +11,6 @@ on:
       - beta
       - rc
       - release
-      - extensions
     tags:
       - "*"
   workflow_dispatch:
@@ -32,42 +31,42 @@ jobs:
             identifier: "macos-arm"
             platform: "macos-latest" # For Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
-            type: "non-portable"
+            # type: "non-portable"
           - name: "macOS x86_64"
             identifier: "macos-x86"
             platform: "macos-latest" # For Intel based macs.
             args: "--target x86_64-apple-darwin"
-            type: "non-portable"
+            # type: "non-portable"
           - name: "Linux"
             identifier: "linux"
             platform: "ubuntu-22.04"
             args: ""
-            type: "non-portable"
+            # type: "non-portable"
           - name: "Windows"
             identifier: "windows"
             platform: "windows-latest"
             args: ""
-            type: "non-portable"
-          - name: "macOS ARM (Portable)"
-            identifier: "macos-arm"
-            platform: "macos-latest" # For Arm based macs (M1 and above).
-            args: "--target aarch64-apple-darwin"
-            type: "portable"
-          - name: "macOS x86_64 (Portable)"
-            identifier: "macos-x86"
-            platform: "macos-latest" # For Intel based macs.
-            args: "--target x86_64-apple-darwin"
-            type: "portable"
-          - name: "Linux (Portable)"
-            identifier: "linux"
-            platform: "ubuntu-22.04"
-            args: ""
-            type: "portable"
-          - name: "Windows (Portable)"
-            identifier: "windows"
-            platform: "windows-latest"
-            args: ""
-            type: "portable"
+            # type: "non-portable"
+          # - name: "macOS ARM (Portable)"
+          #   identifier: "macos-arm"
+          #   platform: "macos-latest" # For Arm based macs (M1 and above).
+          #   args: "--target aarch64-apple-darwin"
+          #   type: "portable"
+          # - name: "macOS x86_64 (Portable)"
+          #   identifier: "macos-x86"
+          #   platform: "macos-latest" # For Intel based macs.
+          #   args: "--target x86_64-apple-darwin"
+          #   type: "portable"
+          # - name: "Linux (Portable)"
+          #   identifier: "linux"
+          #   platform: "ubuntu-22.04"
+          #   args: ""
+          #   type: "portable"
+          # - name: "Windows (Portable)"
+          #   identifier: "windows"
+          #   platform: "windows-latest"
+          #   args: ""
+          #   type: "portable"
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -107,39 +106,39 @@ jobs:
           $TAG_NAME = $env:GITHUB_REF -replace 'refs/tags/', ''
           echo "APP_VERSION=$TAG_NAME" >> $env:GITHUB_ENV
 
-      - name: Remove File System restrictions (Portable-only, tauri.conf.json)
-        if: matrix.type == 'portable'
-        uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
-        with:
-          file: "./src-tauri/tauri.conf.json"
-          fields: "{
-            \"app.security.assetProtocol.scope.allow\": [\"**/*\"]
-          }"
+      # - name: Remove File System restrictions (Portable-only, tauri.conf.json)
+      #   if: matrix.type == 'portable'
+      #   uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
+      #   with:
+      #     file: "./src-tauri/tauri.conf.json"
+      #     fields: "{
+      #       \"app.security.assetProtocol.scope.allow\": [\"**/*\"]
+      #     }"
 
-      - name: Remove File System restrictions (Portable-only, plugin-fs)
-        if: matrix.type == 'portable'
-        uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
-        with:
-          file: "./src-tauri/capabilities/plugin-fs.json"
-          fields: "{
-            \"permissions[0].allow\": [{\"path\":\"**/*\"}]
-          }"
+      # - name: Remove File System restrictions (Portable-only, plugin-fs)
+      #   if: matrix.type == 'portable'
+      #   uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
+      #   with:
+      #     file: "./src-tauri/capabilities/plugin-fs.json"
+      #     fields: "{
+      #       \"permissions[0].allow\": [{\"path\":\"**/*\"}]
+      #     }"
 
-      - name: Remove File System restrictions (Portable-only, plugin-opener)
-        if: matrix.type == 'portable'
-        uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
-        with:
-          file: "./src-tauri/capabilities/plugin-opener.json"
-          fields: "{
-            \"permissions[0].allow\": [{\"path\":\"**/*\"}]
-          }"
+      # - name: Remove File System restrictions (Portable-only, plugin-opener)
+      #   if: matrix.type == 'portable'
+      #   uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
+      #   with:
+      #     file: "./src-tauri/capabilities/plugin-opener.json"
+      #     fields: "{
+      #       \"permissions[0].allow\": [{\"path\":\"**/*\"}]
+      #     }"
 
-      - name: Mark window title as Portable (Portable-only)
-        if: matrix.type == 'portable'
-        uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
-        with:
-          file: "./src-tauri/tauri.conf.json"
-          fields: "{\"app.windows[0].title\": \"Kaede Portable\"}"
+      # - name: Mark window title as Portable (Portable-only)
+      #   if: matrix.type == 'portable'
+      #   uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
+      #   with:
+      #     file: "./src-tauri/tauri.conf.json"
+      #     fields: "{\"app.windows[0].title\": \"Kaede Portable\"}"
 
       - name: Bump tauri.conf.json version
         uses: restackio/update-json-file-action@6f50afee9a03a456a30cd574123db793319f7544
@@ -193,34 +192,34 @@ jobs:
           args: ${{ matrix.args }}
 
       - name: Bundle txiki-server (Windows, non-setup)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows' && matrix.type == 'portable'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows'
         run: |
           New-Item -ItemType Directory -Force -Path portable-build
           Copy-Item "./src-tauri/target/release/${{ steps.json_properties.outputs.productName }}.exe" -Destination "portable-build/"
           Copy-Item "./src-tauri/binaries/txiki-server-x86_64-pc-windows-msvc.exe" -Destination "portable-build/txiki-server.exe"
 
       - name: Upload binary (Windows, non-setup)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows' && matrix.type == 'portable'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-windows-non-setup-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-windows-non-setup-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "portable-build/"
 
       - name: Upload binary (Windows, NSIS)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows' && matrix.type != 'portable'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-windows-nsis-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-windows-nsis-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/release/bundle/nsis/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64-setup.exe"
 
       - name: Upload binary (Windows, MSI)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows' && matrix.type != 'portable'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-windows-msi-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-windows-msi-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/release/bundle/msi/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64_en-US.msi"
 
       # txiki-server is not being bundled with this step, see the appropriate step above
@@ -237,7 +236,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-linux-deb-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-linux-deb-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/release/bundle/deb/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_amd64.deb"
 
       - name: Upload binary (Linux, RPM)
@@ -245,7 +244,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-linux-rpm-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-linux-rpm-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/release/bundle/rpm/${{ steps.json_properties.outputs.productName }}-${{steps.json_properties.outputs.version}}-1.x86_64.rpm"
 
       - name: Upload binary (Linux, AppImage)
@@ -253,7 +252,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-linux-app-image-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-linux-app-image-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/release/bundle/appimage/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_amd64.AppImage"
 
       - name: Upload binary (macOS, x86_64, DMG)
@@ -261,7 +260,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-dmg-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-dmg-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64.dmg"
 
       - name: Upload binary (macOS, x86_64, tarball)
@@ -269,7 +268,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-tarball-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"
 
       - name: Upload binary (macOS, ARM, DMG)
@@ -277,7 +276,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-dmg-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-dmg-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_aarch64.dmg"
 
       - name: Upload binary (macOS, ARM, tarball)
@@ -285,5 +284,5 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-tarball-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"

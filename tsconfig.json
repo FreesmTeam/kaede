@@ -3,5 +3,16 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    /*
+     * 'tsc' resolves '@/...' through the referenced configs, but 'bun test'
+     * only reads the nearest 'tsconfig.json' and does not follow references,
+     * so the paths are duplicated here for the Bun runtime
+     */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  }
 }

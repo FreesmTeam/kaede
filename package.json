@@ -9,7 +9,7 @@
     "dev:frontend": "vite",
     "build:frontend": "vue-tsc -b && vite build",
     "preview:frontend": "vite preview",
-    "test": "vitest run ./src",
+    "test": "bun test --preload ./bun.setup.ts src",
     "lint": "eslint .",
     "typecheck": "vue-tsc -b",
     "generate:types": "dts-bundle-generator ./src/declarations.ts -o ./types/kaede-lib.d.ts --project tsconfig.app.json --inline-declare-global"
@@ -46,6 +46,7 @@
     "@iconify-json/lucide": "^1.2.70",
     "@stylistic/eslint-plugin": "^5.2.3",
     "@tauri-apps/cli": "^2.8.3",
+    "@types/bun": "^1.3.14",
     "@types/node": "^24.3.0",
     "@types/unzipper": "^0.10.11",
     "@unocss/eslint-config": "^66.4.2",
@@ -65,7 +66,6 @@
     "unocss": "^66.4.2",
     "vite": "^7.0.4",
     "vite-plugin-eslint2": "^5.0.4",
-    "vitest": "^3.2.4",
     "vue-tsc": "^2.2.12"
   }
 }

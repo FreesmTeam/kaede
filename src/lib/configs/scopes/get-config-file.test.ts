@@ -1,4 +1,4 @@
-import { beforeEach, expect, test, vi } from "vitest";
+import { expect, mock, test } from "bun:test";
 
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
@@ -54,16 +54,34 @@ const defaultConfig: ConfigType = {
   },
 };
 
-vi.mock("@/lib/configs/scopes/get-default-config.ts", async () => {
-  return {
-    "getDefaultConfig": async (): Promise<ConfigType> => defaultConfig,
-  };
-});
-vi.mock("@/lib/configs/scopes/initialize-config-file.ts", async () => {
-  return {
-    "initializeConfigFile": async (): Promise<void> => {},
-  };
-});
+// 'handleJsonFile' returns the actually stored config; reassigned by every test case
+let currentFetchedConfig: unknown;
+
+/*
+ * Unlike 'vi.mock', 'mock.module' is not hoisted, so it only has to be registered
+ * before the dynamic import of the module under test. The factory closures read
+ * 'currentFetchedConfig' at call time, which replaces the old 'vi.doMock' dance.
+ *
+ * Note: 'bun test' runs all test files in a single process with a shared module
+ * registry, so these mocks leak into test files that run later. Tests that import
+ * concrete scope files instead of the '@/lib/...' barrels stay unaffected.
+ */
+mock.module("@/lib/extensions-manager", () => ({
+  "default": {
+    "catchAsyncResponseHooks": async (): Promise<string> => "continue",
+  },
+}));
+mock.module("@/lib/general", () => ({
+  "default": {
+    "handleJsonFile"        : async (): Promise<unknown> => currentFetchedConfig,
+    "cachedJoin"            : (): string => "",
+    "getCachedBaseDirectory": (): string => "",
+  },
+}));
+mock.module("@/lib/configs/scopes/regenerate-config-file.ts", () => ({
+  // 'regenerateConfigFile' returns a default config
+  "regenerateConfigFile": async (): Promise<unknown> => defaultConfig,
+}));
 
 const tests: Array<{
   "arguments": {
@@ -167,42 +185,12 @@ const tests: Array<{
   },
 ];
 
-let index = -1;
+test.each(tests)(
+  "Get Config File: %o", async ({ "arguments": testArguments, output }) => {
+    currentFetchedConfig = testArguments.fetchedConfig;
 
-beforeEach(() => {
-  vi.doMock("@/lib/extensions-manager", async () => {
-    return {
-      "default": {
-        "catchAsyncResponseHooks": async (): Promise<string> => "continue",
-      },
-    };
-  });
-  vi.doMock("@/lib/general", async () => {
-    return {
-      "default": {
-        // 'handleJsonFile' returns actually stored config
-        "handleJsonFile": async (): Promise<unknown> => tests[index].arguments.fetchedConfig,
-        "cachedJoin"    : (): string => "",
-      },
-    };
-  });
-  vi.doMock("@/lib/configs/scopes/regenerate-config-file.ts", async () => {
-    return {
-      // 'regenerateConfigFile' returns a default config
-      "regenerateConfigFile": async (): Promise<unknown> => defaultConfig,
-    };
-  });
-});
-
-test.for(tests)(
-  "Get Config File: %o", async ({ output }) => {
-    /*
-     * Original import (top-level) will not be mocked, because 'vi.doMock' is evaluated
-     * after all imports and 'vi.mock' can't be called dynamically
-     */
+    // Imported dynamically so that the 'mock.module' calls above are registered first
     const { getConfigFile } = await import("./get-config-file.ts");
-
-    index++;
 
     // For some reason, these 'expect' tests throw an error on test fail
     expect(

@@ -19,7 +19,8 @@
     },
 
     /* Fixes TS2307: Cannot find module '@/resources/ATLauncherIcon.svg' or its corresponding type declarations. */
-    "types": ["vite/client"]
+    /* 'bun' provides the 'bun:test' module types for '*.test.ts' files */
+    "types": ["vite/client", "bun"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

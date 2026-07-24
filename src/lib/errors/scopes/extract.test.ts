@@ -1,6 +1,6 @@
-import { expect, test } from "vitest";
+import { expect, test } from "bun:test";
 
-import type { DeepRequired } from "@/types/utils/deep-required.type.ts";
+import type { NativeErrorType } from "@/types/errors/error-handling.type.ts";
 
 import { extract } from "./extract";
 
@@ -9,7 +9,7 @@ const defaultError = {
   "message": "unknown",
   "stack"  : "Unknown Error: unknown",
 };
-const testData: Array<[unknown, DeepRequired<Error>]> = [
+const testData: Array<[unknown, NativeErrorType]> = [
   [
     { "days": 8 },
     defaultError,

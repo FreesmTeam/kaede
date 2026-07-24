@@ -20,9 +20,8 @@ import path from "node:path";
 
 import vue from "@vitejs/plugin-vue";
 import unocss from "unocss/vite";
+import { defineConfig } from "vite";
 import eslint from "vite-plugin-eslint2";
-// 'vitest/config' extends 'vite' config
-import { defineConfig } from "vitest/config";
 
 import kaedeExtraConfiguration from "./kaede-extra.json";
 
@@ -78,10 +77,6 @@ export default defineConfig({
     "alias": {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  // Tests-related code
-  "test": {
-    "setupFiles": "vitest.setup.ts",
   },
   "plugins": [
     // Replace all '__PRE_BUNDLED_FILENAME__,' variables at build time

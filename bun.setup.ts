@@ -16,16 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { vi } from "vitest";
+import { mock } from "bun:test";
 
 import type { KaedeInternalsType, KaedeNamespaceType } from "./src/declarations";
 import type { GlobalStatesType } from "./src/types/application/global-states.type";
 import type { InstanceStatesType } from "./src/types/application/instance-states.type";
 import type { AccountType } from "./src/types/configs/account.type";
+import type { ConfigType } from "./src/types/configs/config.type";
 import type { TranslationsType } from "./src/types/translations/translations.type";
 
+(globalThis as unknown as Record<string, unknown>).__PRE_BUNDLED_FILENAME__ = "bun-test:0";
+
 // Overwrite the 'window' object for tests only
-vi.stubGlobal("window", {
+const testWindow = {
   "__KAEDE_INTERNALS__": {
     "getGlobalStates"     : (): GlobalStatesType => ({} as GlobalStatesType),
     "changeGlobalStates"  : (): void => {},
@@ -38,7 +41,7 @@ vi.stubGlobal("window", {
     "portable"            : false,
     "baseDirectory"       : "",
     "launchCount"         : 0,
-    "initialConfig"       : {},
+    "initialConfig"       : {} as ConfigType,
     "temporaryAccounts"   : [] as Array<AccountType>,
     "initialTranslations" : {} as TranslationsType,
     "initialInstances"    : {} as InstanceStatesType,
@@ -46,14 +49,6 @@ vi.stubGlobal("window", {
     "logsInBrowser"       : [],
   },
   "__KAEDE__": {
-    "variables": {
-      "rippleColor"     : "",
-      "sparklesColorRGB": "255 255 255",
-      "logs"            : {
-        "targetCollapse"       : false,
-        "collapsedTargetLength": 0,
-      },
-    },
     "hooks": {
       "onConfigFileGet"              : { "before": [], "after": [] },
       "onDefaultConfigGet"           : { "before": [] },
@@ -92,27 +87,22 @@ vi.stubGlobal("window", {
   "__KAEDE_INTERNALS__": KaedeInternalsType;
 
   /*
-   * Kaede itself uses only the "variables", and "hooks" properties.
+   * Kaede itself uses only the "hooks" property.
    * The remaining fields provide access to the Kaede utilities for plugin developers.
    */
   "__KAEDE__": Pick<
     KaedeNamespaceType,
-    "variables" | "hooks"
+    "hooks"
   >;
-});
+};
+
+(globalThis as unknown as { "window": unknown }).window = testWindow;
+
+const logMock = await import("./src/__mocks__/log.cjs");
+const windowMock = await import("./src/__mocks__/api/window.cjs");
 
 // Mock the logging utilities
-vi.mock("@/lib/logging/scopes/log.ts", async () => {
-  return await vi.importActual("@/__mocks__/log.cjs");
-});
+mock.module("@/lib/logging/scopes/log.ts", () => logMock);
 
 // Mock Tauri APIs
-vi.mock("@tauri-apps/api/window", async () => {
-  const mockedWindow: typeof window.__TAURI__.window = {
-    "getCurrentWindow": () => ({
-      "theme": async () => "dark",
-    }),
-  } as typeof window.__TAURI__.window;
-
-  return mockedWindow;
-});
+mock.module("@tauri-apps/api/window", () => windowMock);

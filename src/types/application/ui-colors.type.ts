@@ -16,21 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { computed } from "vue";
-
-import General from "@/lib/general";
-import { globalStates } from "@/states/global.ts";
-
-export function useConfigColors() {
-  const styles = computed(
-    (): ReturnType<typeof General.getSidebarInnerStyles> => (
-      General.getSidebarInnerStyles(
-        globalStates?.layout?.sidebar?.background,
-        globalStates?.layout?.sidebar?.color,
-        globalStates?.layout?.sidebar?.blur,
-      )
-    ),
-  );
-
-  return { styles };
-}
+export type UiColorsType = {
+  "textMain"       : string;
+  "textSecondary"  : string;
+  "widgetMain"     : string;
+  "widgetSecondary": string;
+  "widgetBlur"     : string;
+  "backgroundImage": string;
+  "backgroundColor": string;
+  "backgroundBlur" : string;
+  "rippleColor"    : string;
+  "sparklesColor"  : string;
+};

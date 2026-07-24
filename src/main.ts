@@ -29,7 +29,7 @@ import { VueQueryPlugin } from "@tanstack/vue-query";
 import { createApp } from "vue";
 
 import App from "@/App.vue";
-import { ApplicationRootID, DefaultLocale } from "@/constants/application";
+import { ApplicationRootID } from "@/constants/application";
 import { getASCIIArt } from "@/constants/ascii-art.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Browser from "@/lib/browser";
@@ -60,31 +60,22 @@ if (Browser.detectIsBrowser()) {
   Browser.handleLogsFlush();
 }
 
-const [launchCount, portable]: [number, boolean, void, void] = await Promise.all([
-  // Get application UI reloads count
-  Globals.getLaunchCount(),
-  General.checkIsPortable(),
+const { basic, parsed } = await General.getInitialState();
+const baseDirectory = basic.baseDirectory;
 
-  /*
-   * Even the simplest invokes from Tauri API are expensive (around 5 ms on my laptop).
-   * To optimize 'join' calls, find out the delimiter and cache it
-   */
-  Globals.cachePathJoin(),
-  Globals.cacheLauncherVersion(),
-]);
+// Caching
+GlobalInternals.baseDirectory = baseDirectory;
+GlobalInternals.portable = basic.portable;
+GlobalInternals.joinDelimiter = basic.separator;
+GlobalInternals.launcherVersion = basic.launcherVersion;
+GlobalInternals.launchCount = basic.launchCount;
 
 // Show a pretty ASCII art with the launcher name :3
 log.info(
   __PRE_BUNDLED_FILENAME__,
-  getASCIIArt(portable, launchCount),
+  getASCIIArt(basic.portable, basic.launchCount),
 );
 
-const baseDirectory: string = await General.getBaseDirectory(portable);
-
-log.debug(
-  __PRE_BUNDLED_FILENAME__,
-  "Resolving configs, accounts, default translations, and instances",
-);
 const [
   config,
   accounts,
@@ -96,20 +87,16 @@ const [
   TranslationsType,
   InstanceStatesType,
 ] = await Promise.all([
-  Configs.getSafe(baseDirectory),
-  Configs.getAccounts(baseDirectory),
-  Configs.getTranslations(baseDirectory, DefaultLocale, true),
-  Instances.readStored(baseDirectory),
+  Configs.getSafe({ baseDirectory, "parsedFile": parsed.config }),
+  Configs.getAccounts({ baseDirectory, "parsedFile": parsed.accounts }),
+  Configs.getTranslations({ baseDirectory, "parsedFile": parsed.translations }),
+  Instances.readStored({ baseDirectory, "parsedFile": parsed.instances }),
 ]);
-
-log.debug(__PRE_BUNDLED_FILENAME__, "Caching internals");
 
 // Define launcher's initial values at globals to make them accessible from anywhere
 GlobalInternals.initialConfig = config;
 GlobalInternals.initialTranslations = translations;
 GlobalInternals.initialInstances = instances;
-GlobalInternals.initialPortable = portable;
-GlobalInternals.initialBaseDirectory = baseDirectory;
 
 /*
  * Exposing account details to the global object
@@ -143,6 +130,9 @@ log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Creating a Vue instance");
 const AppInstance = createApp(App);
+
+// @ts-expect-error For testing purposes
+window.__KAEDE__.appInstance = AppInstance;
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Initializing Vue Query plugin");
 AppInstance.use(VueQueryPlugin);

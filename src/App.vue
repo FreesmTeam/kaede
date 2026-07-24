@@ -19,22 +19,22 @@
 <script setup lang="ts">
 import { useEventListener } from "@vueuse/core";
 import { computed, provide, watchEffect } from "vue";
+import * as Vue from "vue";
 
+import DevelopmentMode from "@/components/general/development-mode/DevelopmentMode.vue";
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import ExtensionsError from "@/components/general/errors/ExtensionsError.vue";
 import GlobalError from "@/components/general/errors/GlobalError.vue";
 import CssThemeLoader from "@/components/general/extensions/CssThemeLoader.vue";
+import ExtensionLoader from "@/components/general/extensions/ExtensionLoader.vue";
 import CustomLayout from "@/components/general/layout/CustomLayout.vue";
 import Layout from "@/components/general/layout/Layout.vue";
 import Router from "@/components/general/layout/Router.vue";
 import ConfigSyncer from "@/components/general/misc/ConfigSyncer.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
+import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
-import {
-  LazyDevelopmentMode,
-  LazyExtensionLoader,
-  LazyLogViewer,
-} from "@/constants/ui/pages.ts";
+import { registerComponent } from "@/extendable/component-registry.ts";
 import Configs from "@/lib/configs";
 import DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import General from "@/lib/general";
@@ -45,6 +45,13 @@ import type {
   TranslationsStateType,
   TranslationsType,
 } from "@/types/translations/translations.type.ts";
+
+// @ts-expect-error For testing purposes
+window.__KAEDE__.vue = Vue;
+// @ts-expect-error For testing purposes
+window.__KAEDE__.registerComponent = (name: string, component: Vue.Component): void => {
+  registerComponent(name, component);
+};
 
 /**
  * Contains a computed translation state to pass down with the 'inject'.
@@ -105,10 +112,10 @@ watchEffect(() => {
         />
 
         <Transition name="pop">
-          <LazyLogViewer v-if="globalStates.logs.show" />
+          <LogViewer v-if="globalStates.logs.show" />
         </Transition>
 
-        <LazyDevelopmentMode
+        <DevelopmentMode
           v-if="globalStates.development"
           :development="globalStates.development"
         />
@@ -128,7 +135,7 @@ watchEffect(() => {
   <ErrorBoundary>
     <template #default>
       <CssThemeLoader />
-      <LazyExtensionLoader v-if="globalStates.extensions.enabled" />
+      <ExtensionLoader v-if="globalStates.extensions.enabled" />
     </template>
 
     <template #error="{ currentError }">

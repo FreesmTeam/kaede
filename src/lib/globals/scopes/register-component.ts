@@ -16,14 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type FinalizedType = {
-  "createdDirectories": Array<string>;
-  "javaMajor"         : number | null;
+import type { Component } from "vue";
 
-  /*
-   * "release-file" (JVM was not spawned)
-   * "spawn" (JVM was spawned)
-   * "unresolved" (returns None)
-   */
-  "javaMajorSource": "release-file" | "spawn" | "unresolved";
-};
+import { __registerComponent } from "@/extendable/component-registry.ts";
+
+export function registerComponent(name: string, component: Component): void {
+  __registerComponent(name, component);
+}

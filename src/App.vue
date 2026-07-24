@@ -19,7 +19,6 @@
 <script setup lang="ts">
 import { useEventListener } from "@vueuse/core";
 import { computed, provide, watchEffect } from "vue";
-import * as Vue from "vue";
 
 import DevelopmentMode from "@/components/general/development-mode/DevelopmentMode.vue";
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
@@ -34,7 +33,6 @@ import ConfigSyncer from "@/components/general/misc/ConfigSyncer.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
-import { registerComponent } from "@/extendable/component-registry.ts";
 import Configs from "@/lib/configs";
 import DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import General from "@/lib/general";
@@ -45,13 +43,6 @@ import type {
   TranslationsStateType,
   TranslationsType,
 } from "@/types/translations/translations.type.ts";
-
-// @ts-expect-error For testing purposes
-window.__KAEDE__.vue = Vue;
-// @ts-expect-error For testing purposes
-window.__KAEDE__.registerComponent = (name: string, component: Vue.Component): void => {
-  registerComponent(name, component);
-};
 
 /**
  * Contains a computed translation state to pass down with the 'inject'.
@@ -82,7 +73,7 @@ watchEffect(() => {
   const locale: string = globalStates.layout.locale;
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Overriding default translations to '${locale}'`);
-  Configs.getTranslations(baseDirectory, locale).then(translations => {
+  Configs.getTranslations({ baseDirectory, "selected": locale }).then(translations => {
     GlobalStateHelpers.change("translations", translations);
     log.info(__PRE_BUNDLED_FILENAME__, `Successfully set translations to '${locale}'`);
   });

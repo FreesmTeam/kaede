@@ -28,6 +28,7 @@ import type * as TauriOpener from "@tauri-apps/plugin-opener";
 import type * as TauriOs from "@tauri-apps/plugin-os";
 import type * as TauriProcess from "@tauri-apps/plugin-process";
 import type * as TauriUpload from "@tauri-apps/plugin-upload";
+import type { App } from "vue";
 
 import type _Application from "@/constants/application.ts";
 import type _ASCIIArt from "@/constants/ascii-art.ts";
@@ -145,16 +146,19 @@ declare global {
       "initialTranslations" : TranslationsType;
       // Instances metadata state before launcher initialization
       "initialInstances"    : InstanceStatesType;
-      // Portable state before launcher initialization
-      "initialPortable"     : boolean;
-      // Base directory state before launcher initialization
-      "initialBaseDirectory": string;
+      // Portable state
+      "portable"            : boolean;
+      // Base directory
+      "baseDirectory"       : string;
+      // This counter starts as 0 and increases by 1 each time the UI is reloaded via window#reload
+      "launchCount"         : number;
       // A temporary storage for the 'At a Glance' widget
       "atAGlance"          ?: AtAGlanceType;
       // A timestamp for the application code initialization
       "startTime"          ?: number;
       // A Java major version (for example, 8, 11, or 17)
       "javaMajor"          ?: number;
+      "appInstance"        ?: App<Element>;
 
       /* Needed for browser environments (non-application) */
       "logsInBrowser"       : Array<string>;
@@ -178,6 +182,14 @@ declare global {
      * Extensions can extend this namespace
      */
     "__KAEDE__": {
+
+      /**
+       * Exposed packages.
+       *
+       * Used for externalizing plugin dependencies.
+       * Contains only Vue 3 as of now.
+       */
+      "packages": Record<string, unknown>;
 
       /**
        * Global constants.

@@ -131,8 +131,8 @@ log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
 log.debug(__PRE_BUNDLED_FILENAME__, "Creating a Vue instance");
 const AppInstance = createApp(App);
 
-// @ts-expect-error For testing purposes
-window.__KAEDE__.appInstance = AppInstance;
+// Expose the app instance so that plugins can register components, etc.
+GlobalInternals.appInstance = AppInstance;
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Initializing Vue Query plugin");
 AppInstance.use(VueQueryPlugin);

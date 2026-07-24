@@ -30,16 +30,16 @@ import { createApp } from "vue";
 
 import App from "@/App.vue";
 import { ApplicationRootID } from "@/constants/application";
-import { getASCIIArt } from "@/constants/ascii-art.ts";
+import ASCIIArt from "@/constants/ascii-art.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Browser from "@/lib/browser";
 import Configs from "@/lib/configs";
-import DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
 import Globals from "@/lib/globals";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/scopes/log.ts";
+import Watchers from "@/lib/watchers";
 import { declareGlobalStates } from "@/states/global.ts";
 import { declareInstanceStates } from "@/states/instance.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
@@ -73,7 +73,7 @@ GlobalInternals.launchCount = basic.launchCount;
 // Show a pretty ASCII art with the launcher name :3
 log.info(
   __PRE_BUNDLED_FILENAME__,
-  getASCIIArt(basic.portable, basic.launchCount),
+  ASCIIArt.getASCIIArt(basic.portable, basic.launchCount),
 );
 
 const [
@@ -112,12 +112,12 @@ GlobalInternals.temporaryAccounts = accounts;
 declareGlobalStates();
 declareInstanceStates();
 
-if (config.development?.enableDebugMode) {
-  // Enabling debug mode means that debug-level messages will be logged
-  DevelopmentModeHelpers.enableDebugMode(
-    config.development,
-  );
-}
+/*
+ * They handle the necessary watching actions.
+ * For example, if 'enableDebugMode' is true, they allow debug messages to be logged
+ */
+Watchers.watchDevelopmentStates();
+Watchers.watchLayoutStates();
 
 log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
   "Config contents",

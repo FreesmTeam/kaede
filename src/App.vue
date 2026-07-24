@@ -17,8 +17,7 @@
   -->
 
 <script setup lang="ts">
-import { useEventListener } from "@vueuse/core";
-import { computed, provide, watchEffect } from "vue";
+import { computed, provide } from "vue";
 
 import DevelopmentMode from "@/components/general/development-mode/DevelopmentMode.vue";
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
@@ -33,11 +32,6 @@ import ConfigSyncer from "@/components/general/misc/ConfigSyncer.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
-import Configs from "@/lib/configs";
-import DevelopmentModeHelpers from "@/lib/development-mode-helpers";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
-import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type {
   TranslationsStateType,
@@ -54,30 +48,6 @@ const translations = computed((): TranslationsType => globalStates.translations)
  * for all component children.
  */
 provide<TranslationsStateType>(TranslationsContextKey, translations);
-
-/**
- * Handles 'F5', 'Ctrl+R', and 'Command+R' key binds that reload the launcher.
- */
-useEventListener("keydown", (event: KeyboardEvent) => (
-  DevelopmentModeHelpers.handleNativeReloadKeyBinds(
-    event,
-    globalStates.development?.enableNativeReloadKeyBinds,
-  )
-));
-
-/**
- * Updates translations on locale change.
- */
-watchEffect(() => {
-  const baseDirectory: string = General.getCachedBaseDirectory();
-  const locale: string = globalStates.layout.locale;
-
-  log.debug(__PRE_BUNDLED_FILENAME__, `Overriding default translations to '${locale}'`);
-  Configs.getTranslations({ baseDirectory, "selected": locale }).then(translations => {
-    GlobalStateHelpers.change("translations", translations);
-    log.info(__PRE_BUNDLED_FILENAME__, `Successfully set translations to '${locale}'`);
-  });
-});
 </script>
 
 <template>

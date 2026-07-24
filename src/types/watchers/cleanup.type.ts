@@ -16,23 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { defineAsyncComponent } from "vue";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
-/**
- * Lazy-loaded components
- */
-export const LazyHome = defineAsyncComponent(
-  () => import("@/components/home/Home.vue"),
-);
-export const LazyLibrary = defineAsyncComponent(
-  () => import("@/components/library/Library.vue"),
-);
-export const LazySettings = defineAsyncComponent(
-  () => import("@/components/settings/Settings.vue"),
-);
-export const LazyAddInstance = defineAsyncComponent(
-  () => import("@/components/add-instance/AddInstance.vue"),
-);
-export const LazyProfile = defineAsyncComponent(
-  () => import("@/components/profile/Profile.vue"),
-);
+export type CleanupType<T extends GlobalStatesType[keyof GlobalStatesType]> = Partial<
+  Record<keyof T, () => void>
+>;

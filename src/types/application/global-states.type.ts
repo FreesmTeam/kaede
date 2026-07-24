@@ -106,7 +106,10 @@ export type GlobalStatesContextMenuItemsType = Array<{
   "image"?: string;
 }>;
 export type GlobalStatesDevelopmentType = {
+  "loadErudaDevTools"         : boolean;
   "showFPS"                   : boolean;
+  "showCPUUsage"              : boolean;
+  "showMemoryUsage"           : boolean;
   "enableDebugMode"           : boolean;
   "enableNativeContextMenu"   : boolean;
   "enableNativeReloadKeyBinds": boolean;
@@ -136,19 +139,13 @@ export type GlobalStatesExtensionsType = {
 };
 
 export type GlobalStatesType = {
-
-  /*
-   * Specified in config (only JSON values)
-   *
-   * JSON doesn't have 'undefined' value, so we use 'null' instead of it
-   */
-  "development": GlobalStatesDevelopmentType | null;
-  "extensions" : GlobalStatesExtensionsType;
-  "layout"     : GlobalStatesLayoutType;
-  "logs"       : GlobalStatesLogsType;
-  "misc"       : GlobalStatesMiscType;
-  "minecraft"  : GlobalStatesMinecraftType;
-
+  // Specified in config (only JSON values)
+  "development"     : GlobalStatesDevelopmentType;
+  "extensions"      : GlobalStatesExtensionsType;
+  "layout"          : GlobalStatesLayoutType;
+  "logs"            : GlobalStatesLogsType;
+  "misc"            : GlobalStatesMiscType;
+  "minecraft"       : GlobalStatesMinecraftType;
   // Not specified in config (non-JSON values)
   "translations"    : TranslationsType;
   "sidebarItems"    : GlobalStatesSidebarItemsType;

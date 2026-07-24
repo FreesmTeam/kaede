@@ -98,7 +98,9 @@ const testWindow = {
 
 (globalThis as unknown as { "window": unknown }).window = testWindow;
 
+// @ts-expect-error top-level await works
 const logMock = await import("./src/__mocks__/log.cjs");
+// @ts-expect-error top-level await works
 const windowMock = await import("./src/__mocks__/api/window.cjs");
 
 // Mock the logging utilities

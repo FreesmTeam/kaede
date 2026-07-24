@@ -3,7 +3,6 @@ import { nextTick } from "vue";
 import { cachedJoin } from "@/lib/general/scopes/cached-join.ts";
 import { capitalize } from "@/lib/general/scopes/capitalize.ts";
 import { checkDaysDifference } from "@/lib/general/scopes/check-days-difference.ts";
-import { checkIsPortable } from "@/lib/general/scopes/check-is-portable.ts";
 import { concurrentlyDownload } from "@/lib/general/scopes/concurrently-download.ts";
 import { finalizeInitialization } from "@/lib/general/scopes/finalize-initialization.ts";
 import { gcd } from "@/lib/general/scopes/gcd.ts";
@@ -33,7 +32,6 @@ export default {
   cachedJoin,
   capitalize,
   checkDaysDifference,
-  checkIsPortable,
   concurrentlyDownload,
   finalizeInitialization,
   gcd,

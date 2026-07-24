@@ -1,11 +1,10 @@
 import { appDataDir } from "@tauri-apps/api/path";
 
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import General from "@/lib/general";
 
-export async function getBaseDirectory(portable?: boolean): Promise<string> {
-  const safePortable = portable ?? await General.checkIsPortable();
-
-  return safePortable
-    ? await General.getExecutableDirectory()
-    : await appDataDir();
+export function getBaseDirectory(portable?: boolean): Promise<string> {
+  return (portable ?? GlobalInternals.portable)
+    ? General.getExecutableDirectory()
+    : appDataDir();
 }

@@ -16,11 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import { watchDevelopmentStates, watchLayoutStates } from "@/lib/watchers/watch-states.ts";
+import type {
+  ProcessHandleType,
+  ServerMetaType,
+  ServerProcessType,
+} from "@/types/application/server-process.type.ts";
 
-export default {
-  watchProcesses,
-  watchDevelopmentStates,
-  watchLayoutStates,
-} as const;
+export function hydrate(handle: ProcessHandleType<ServerMetaType>): ServerProcessType {
+  return {
+    "name" : handle.meta.name,
+    "port" : handle.meta.port,
+    "value": { "pid": handle.pid, "kill": handle.kill, "write": handle.write },
+  };
+}

@@ -4,6 +4,7 @@ use log::error;
 mod extensions;
 mod finalization;
 mod launcher;
+mod processes;
 mod system;
 mod zip;
 
@@ -133,6 +134,7 @@ pub fn run() {
 
             Ok(())
         })
+        .manage(processes::ProcessRegistry::default())
         // Register custom Tauri commands
         .invoke_handler(tauri::generate_handler![
             extensions::read_extensions,
@@ -141,6 +143,10 @@ pub fn run() {
             launcher::get_initial_state,
             launcher::get_missing_files,
             launcher::verify_file_paths,
+            processes::list_processes,
+            processes::spawn_process,
+            processes::kill_process,
+            processes::write_process,
             system::get_system_memory,
             system::get_cpu_usage,
             zip::unzip_file,

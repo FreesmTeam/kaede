@@ -16,11 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import { watchDevelopmentStates, watchLayoutStates } from "@/lib/watchers/watch-states.ts";
+import { rehydrateProcesses } from "@/lib/processes/core.ts";
+import { hydrate } from "@/lib/processes/hydrate.ts";
+import { spawnProcess } from "@/lib/processes/spawn-process.ts";
+import { spawnServer } from "@/lib/processes/spawn-server.ts";
 
 export default {
-  watchProcesses,
-  watchDevelopmentStates,
-  watchLayoutStates,
+  rehydrateProcesses,
+  hydrate,
+  spawnProcess,
+  spawnServer,
 } as const;

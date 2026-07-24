@@ -42,6 +42,7 @@ import { log } from "@/lib/logging/scopes/log.ts";
 import Watchers from "@/lib/watchers";
 import { declareGlobalStates } from "@/states/global.ts";
 import { declareInstanceStates } from "@/states/instance.ts";
+import { declareServerProcesses } from "@/states/servers.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
@@ -111,6 +112,17 @@ GlobalInternals.temporaryAccounts = accounts;
  */
 declareGlobalStates();
 declareInstanceStates();
+declareServerProcesses()
+  .then(() => {
+    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated server processes state");
+  })
+  .catch((error: unknown) => {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Failed to hydrate server processes state:",
+      Errors.prettify(error),
+    );
+  });
 
 /*
  * They handle the necessary watching actions.
@@ -118,6 +130,18 @@ declareInstanceStates();
  */
 Watchers.watchDevelopmentStates();
 Watchers.watchLayoutStates();
+Watchers.watchProcesses()
+  .then(() => declareServerProcesses())
+  .then(() => {
+    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated and wired server processes state");
+  })
+  .catch((error: unknown) => {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Failed to attach a listener to server processes:",
+      Errors.prettify(error),
+    );
+  });
 
 log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
   "Config contents",

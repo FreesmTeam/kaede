@@ -1,6 +1,6 @@
-import type { Child } from "tauri-plugin-shellx-api";
+import type { ServerProcessType } from "@/types/application/server-process.type.ts";
 
 export type LaunchResponseType = {
   "success": boolean;
-  "process": Child | undefined;
+  "process": ServerProcessType | undefined;
 };

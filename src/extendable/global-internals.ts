@@ -42,5 +42,4 @@ export const GlobalInternals: KaedeInternalsType = {
   "baseDirectory"       : "",
   "launchCount"         : 0,
   "logsInBrowser"       : [],
-  "serverProcesses"     : [],
 };

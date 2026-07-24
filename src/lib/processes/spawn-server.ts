@@ -16,36 +16,37 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { shallowRef } from "vue";
-
-import { rehydrateProcesses } from "@/lib/processes/core.ts";
+import { log } from "@/lib/logging/scopes/log.ts";
 import { hydrate } from "@/lib/processes/hydrate.ts";
+import { spawnProcess } from "@/lib/processes/spawn-process.ts";
+import { serverProcesses } from "@/states/servers.ts";
 import type {
-  ProcessHandleType,
+  ProgramSpecType,
   ServerMetaType,
   ServerProcessType,
 } from "@/types/application/server-process.type.ts";
 
-export const serverProcesses = shallowRef<Array<ServerProcessType>>([]);
-
-export async function declareServerProcesses(): Promise<void> {
-  const servers: Array<ServerProcessType> = [];
-
-  await rehydrateProcesses(handle => {
-    if (handle.kind !== "extension-server") {
-      return;
-    }
-
-    const meta = handle.meta as ServerMetaType;
-
-    servers.push(hydrate(handle as ProcessHandleType<ServerMetaType>));
-
-    return {
-      "onExit": (): void => {
-        serverProcesses.value = serverProcesses.value.filter(item => item.name !== meta.name);
-      },
-    };
+export async function spawnServer({ name, program, args, port }: {
+  "name"   : string;
+  "program": ProgramSpecType;
+  "args"   : Array<string>;
+  "port"   : number;
+}): Promise<ServerProcessType> {
+  const handle = await spawnProcess<ServerMetaType>({
+    program, args,
+    "kind": "extension-server",
+    "meta": { name, port },
+  }, {
+    "onOutput": (line, stream) => (stream === "stdout" ? log.debug : log.error)(
+      __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", line,
+    ),
+    "onExit": () => {
+      serverProcesses.value = serverProcesses.value.filter(item => item.name !== name);
+    },
   });
+  const process = hydrate(handle);
 
-  serverProcesses.value = servers;
+  serverProcesses.value = [...serverProcesses.value, process];
+
+  return process;
 }

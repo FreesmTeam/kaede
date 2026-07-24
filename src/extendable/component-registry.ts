@@ -18,6 +18,8 @@
 
 import { type Component, shallowReactive } from "vue";
 
+import AddInstance from "@/components/add-instance/AddInstance.vue";
+import CleanInstance from "@/components/add-instance/tabs/CleanInstance.vue";
 import ContextMenu from "@/components/general/layout/ContextMenu.vue";
 import GlobalBackground from "@/components/general/layout/GlobalBackground.vue";
 import LaunchProgress from "@/components/general/layout/LaunchProgress.vue";
@@ -33,7 +35,14 @@ interface ComponentRegistryType {
   "PagesSelector"   : Component;
 }
 
+// Extensions can use this registry to replace existing components with their own ones
 export const C: ComponentRegistryType = shallowReactive({
+
+  /**
+   * Add Instance
+   */
+  AddInstance,
+  CleanInstance,
   "Sidebar"         : Sidebar,
   "ContextMenu"     : ContextMenu,
   "LaunchProgress"  : LaunchProgress,

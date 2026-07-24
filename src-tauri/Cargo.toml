@@ -50,8 +50,10 @@ tauri-plugin-shellx = "2.0.16"
 tauri-plugin-single-instance = "2"
 
 [profile.release]
-codegen-units = 1  # compile each crate as one unit instead of 16 parallel chunks:
-                   # slower build, but the optimizer sees more at once → smaller/faster code
-lto = true         # link-time optimization ACROSS crates (tauri, tokio, zip, you):
-                   # dead code elimination + cross-crate inlining, biggest size win, slowest link
-strip = true       # remove debug symbols from the binary — often cuts several MB
+# compile each crate as one unit instead of 16 parallel chunks
+# slower build but more optimizations might be applied
+codegen-units = 1
+# link-time optimization across crates
+lto = true
+# remove debug symbols from the binary
+strip = true

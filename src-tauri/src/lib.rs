@@ -1,6 +1,7 @@
 use tauri::Manager;
 use log::error;
 
+mod extensions;
 mod finalization;
 mod launcher;
 mod system;
@@ -134,6 +135,7 @@ pub fn run() {
         })
         // Register custom Tauri commands
         .invoke_handler(tauri::generate_handler![
+            extensions::read_extensions,
             finalization::finalize_initialization,
             finalization::get_java_major,
             launcher::get_initial_state,

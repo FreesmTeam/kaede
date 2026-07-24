@@ -17,5 +17,5 @@
  */
 
 export function detectIsBrowser(): boolean {
-  return window.__TAURI__ === undefined;
+  return import.meta.env.TAURI_ENV_PLATFORM === undefined;
 }

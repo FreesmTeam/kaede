@@ -10,20 +10,16 @@ import {
 } from "@/constants/application.ts";
 import { GeneralSettings, LaunchStatus } from "@/constants/launcher.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import { type BrokerProcess, Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/scopes/log.ts";
-import { rehydrateProcesses } from "@/lib/processes/core.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
-import type {
-  LaunchResponseType,
-  MinecraftMetaType,
-  MinecraftProcessType,
-} from "@/types/launcher/launch/launch-response.type.ts";
+import type { LaunchResponseType } from "@/types/launcher/launch/launch-response.type.ts";
 import type {
   LauncherStatusesType,
   WrappedInstanceLauncherStatusesType,
@@ -34,7 +30,7 @@ const accounts = ref<Array<AccountType>>(GlobalInternals.temporaryAccounts);
 const launches = reactive<Record<string, LauncherStatusesType>>({});
 const logs = shallowReactive<Record<string, Array<string>>>({});
 
-const childProcesses: Record<string, MinecraftProcessType> = {};
+const childProcesses: Record<string, BrokerProcess> = {};
 
 // Do not expose accounts data to globals since extensions will easily access it
 GlobalInternals.temporaryAccounts = [];
@@ -98,10 +94,11 @@ async function launchInstance(instanceId?: string): Promise<void> {
     "launching": 1,
     "current"  : undefined,
     "downloads": {
-      "current": markRaw(new Map<string, [number, number]>),
-      "success": 0,
-      "failed" : 0,
-      "total"  : 0,
+      "current"    : markRaw(new Map<string, [number, number]>),
+      "success"    : 0,
+      "failed"     : 0,
+      "total"      : 0,
+      "cancellable": false,
     },
   };
 
@@ -156,7 +153,7 @@ async function launchInstance(instanceId?: string): Promise<void> {
 }
 
 async function closeInstance(instanceId: string): Promise<void> {
-  const process: MinecraftProcessType | undefined = childProcesses[instanceId];
+  const process: BrokerProcess | undefined = childProcesses[instanceId];
 
   if (!process) {
     log.error(
@@ -179,7 +176,7 @@ async function closeInstance(instanceId: string): Promise<void> {
   }
 
   try {
-    await process.kill();
+    await Host.processes.kill(process.handle);
   } catch (error: unknown) {
     log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -188,69 +185,6 @@ async function closeInstance(instanceId: string): Promise<void> {
     );
   }
 }
-
-async function rehydrateLaunchedInstances(): Promise<void> {
-  try {
-    const handles = await rehydrateProcesses(handle => {
-      if (handle.kind !== "minecraft") {
-        return;
-      }
-
-      const { instanceId } = handle.meta as MinecraftMetaType;
-
-      launches[instanceId] = {
-        "launching": 2,
-        "current"  : LaunchStatus.General.Success,
-        "downloads": {
-          "current": markRaw(new Map<string, [number, number]>),
-          "success": 0,
-          "failed" : 0,
-          "total"  : 0,
-        },
-      };
-
-      return {
-        "onOutput": createLogSink(instanceId),
-        "onExit"  : (payload): void => {
-          onClose(instanceId);
-          ExtensionsManager.catchAsyncVoidHooks({
-            "scope" : "onMinecraftKill",
-            "toPass": payload.pid,
-            "timing": "after",
-          });
-        },
-      };
-    });
-
-    let count: number = 0;
-
-    for (const handle of handles) {
-      if (handle.kind !== "minecraft") {
-        continue;
-      }
-
-      const _handle = handle as MinecraftProcessType;
-
-      childProcesses[_handle.meta.instanceId] = _handle;
-      count += 1;
-    }
-
-    if (count > 0) {
-      log.info(
-        __PRE_BUNDLED_FILENAME__,
-        `Rehydrated ${count} still-running instance(s) after a reload`,
-      );
-    }
-  } catch (error: unknown) {
-    log.error(
-      __PRE_BUNDLED_FILENAME__,
-      "Failed to rehydrate launched instances:",
-      Errors.prettify(error),
-    );
-  }
-}
-
-rehydrateLaunchedInstances();
 
 /*
  * AFAIK, even unrestricted extensions should not be able to access this context

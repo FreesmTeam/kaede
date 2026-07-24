@@ -29,3 +29,15 @@ export type InitialStateType = {
     "translations": ParsedFile;
   };
 };
+
+export type InitializationFinalizationInput = Readonly<{
+  "baseDirectory": string;
+  "folders"      : ReadonlyArray<string>;
+  "javaBinary"   : string;
+}>;
+
+export type InitializationFinalizationReport = Readonly<{
+  "createdDirectories": ReadonlyArray<string>;
+  "javaMajor"         : number | null;
+  "javaMajorSource"   : "release-file" | "spawn" | "unresolved";
+}>;

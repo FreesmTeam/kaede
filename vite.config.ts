@@ -20,8 +20,8 @@ import path from "node:path";
 
 import vue from "@vitejs/plugin-vue";
 import unocss from "unocss/vite";
-import { defineConfig } from "vite";
 import eslint from "vite-plugin-eslint2";
+import { defineConfig } from "vitest/config";
 
 import kaedeExtraConfiguration from "./kaede-extra.json";
 
@@ -64,41 +64,54 @@ function handleSourceFileNames(): {
   };
 }
 
-export default defineConfig({
-  // Use '/kaede' base path for GitHub Pages
-  "base"       : kaedeExtraConfiguration.useKaedeBase ? "/kaede" : undefined,
-  // Better support for Tauri CLI output
-  "clearScreen": false,
-  // Enable environment variables
-  "envPrefix"  : ["VITE_", "TAURI_"],
-  "server"     : {
-    // Tauri requires a consistent port
-    "strictPort": true,
-  },
+export default defineConfig(({ mode }) => {
+  const useBrowserAdapter = kaedeExtraConfiguration.useKaedeBase || mode === "test";
+  const browserAdapterRoot = path.resolve(
+    __dirname,
+    useBrowserAdapter ? "./src/lib/__browser" : "./src/lib/browser",
+  );
 
-  /*
-   * Experiments with bundle size
-   * "build": {
-   *   "rollupOptions": {
-   *     "external": ["typebox/compile", "typebox"],
-   *   },
-   * },
-   */
-
-  // Handle '@/...' imports
-  "resolve": {
-    "alias": {
-      "@": path.resolve(__dirname, "./src"),
+  return {
+    // Use '/kaede' base path for GitHub Pages
+    "base"       : kaedeExtraConfiguration.useKaedeBase ? "/kaede" : undefined,
+    // Better support for Tauri CLI output
+    "clearScreen": false,
+    // Enable environment variables
+    "envPrefix"  : ["VITE_", "TAURI_"],
+    "server"     : {
+      // Tauri requires a consistent port
+      "strictPort": true,
     },
-  },
-  "plugins": [
-    // Replace all '__PRE_BUNDLED_FILENAME__,' variables at build time
-    handleSourceFileNames(),
-    // Handle a Vue framework
-    vue(),
-    // Handle a UnoCSS package
-    unocss(),
-    // Handle an ESLint package
-    eslint(),
-  ],
+    // Handle '@/...' imports
+    "resolve": {
+      "alias": {
+        // Select a whole adapter root without mutating the source tree.
+        "@/lib/browser": browserAdapterRoot,
+        "@"            : path.resolve(__dirname, "./src"),
+
+        /*
+         * Remove this source alias after Ark 1.0 is published to npm.
+         * The exact pre-release Git commit is pinned in package.json, but Git
+         * dependencies do not run Ark's prepack build under Bun.
+         */
+        "ark-of-atrahasis": path.resolve(
+          __dirname,
+          "./node_modules/ark-of-atrahasis/src/index.ts",
+        ),
+      },
+    },
+    "test": {
+      "setupFiles": ["./vitest.setup.ts"],
+    },
+    "plugins": [
+      // Replace all '__PRE_BUNDLED_FILENAME__,' variables at build time
+      handleSourceFileNames(),
+      // Handle a Vue framework
+      vue(),
+      // Handle a UnoCSS package
+      unocss(),
+      // Handle an ESLint package
+      eslint(),
+    ],
+  };
 });

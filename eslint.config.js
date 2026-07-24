@@ -22,13 +22,14 @@ import { includeIgnoreFile } from "@eslint/compat";
 import stylistic from "@stylistic/eslint-plugin";
 import unocss from "@unocss/eslint-config/flat";
 import { defineConfigWithVueTs, vueTsConfigs } from "@vue/eslint-config-typescript";
-import vueRequireID from "@vue-require-id/eslint-plugin";
 import { globalIgnores } from "eslint/config";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tsDoc from "eslint-plugin-tsdoc";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
+
+import vueRequireID from "./eslint-rules/vue-require-id.js";
 
 // Get an absolute path of the '.gitignore' file
 const gitIgnorePath = fileURLToPath(
@@ -171,8 +172,7 @@ export default defineConfigWithVueTs(
       }],
 
       /* TypeScript */
-      "@typescript-eslint/explicit-function-return-type": ["warn"],
-      "@typescript-eslint/no-unused-vars"               : ["warn"],
+      "@typescript-eslint/no-unused-vars": ["warn"],
 
       /* Vue */
       "vue/attribute-hyphenation": ["warn", "always", {
@@ -313,5 +313,9 @@ export default defineConfigWithVueTs(
       "@stylistic/wrap-regex"              : ["warn"],
       "@stylistic/yield-star-spacing"      : ["warn", { "before": false, "after": true }],
     },
+  },
+  {
+    "files": ["**/*.{cts,mts,ts,tsx,vue}"],
+    "rules": { "@typescript-eslint/explicit-function-return-type": ["warn"] },
   },
 );

@@ -1,11 +1,11 @@
-import { arch, platform, version } from "@tauri-apps/plugin-os";
-
 import { ApplicationName } from "@/constants/application.ts";
+import { Host } from "@/lib/capability-broker";
 
 const date = (new Date).toISOString();
 
 export function getASCIIArt(portable: boolean, launchCount: number): string {
-  const launchStatus: string = window.__TAURI__ === undefined ? (
+  const snapshot = Host.runtime.getCachedSnapshot();
+  const launchStatus: string = snapshot.kind === "browser-preview" ? (
     "browser"
   ) : (
     launchCount === 0
@@ -18,9 +18,9 @@ export function getASCIIArt(portable: boolean, launchCount: number): string {
     "\n    __                  __   " +
     "  me@" + ApplicationName.toLowerCase() +
     "\n   / /______ ____  ____/ /__ " +
-    "  os     " + platform() + " " + version() +
+    "  os     " + snapshot.os.platform + " " + snapshot.os.version +
     "\n  / //_/ __ `/ _ \\/ __  / _ \\" +
-    "  arch   " + arch() +
+    "  arch   " + snapshot.os.arch +
     "\n / ,< / /_/ /  __/ /_/ /  __/" +
     "  mode   " + (portable ? "portable" : "non-portable") +
     "\n/_/|_|\\__,_/\\___/\\__,_/\\___/ " +

@@ -1,6 +1,5 @@
-import { version } from "@tauri-apps/plugin-os";
-
 import { JVMArguments } from "@/constants/launcher.ts";
+import { Host } from "@/lib/capability-broker";
 import ExtensionsManager from "@/lib/extensions-manager";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
@@ -42,8 +41,9 @@ export async function getJvmArguments({
   switch (platform) {
     case "windows": {
       log.debug(logPrefix, "Adding Windows-only JVM arguments");
+      const snapshot = await Host.runtime.getSnapshot();
 
-      if (version().slice(0, 2) === "10") {
+      if (snapshot.os.version.slice(0, 2) === "10") {
         log.debug(logPrefix, "Adding Windows 10 specific JVM arguments");
         jvmArguments.push(
           JVMArguments.WindowsNonIterable.DosName,

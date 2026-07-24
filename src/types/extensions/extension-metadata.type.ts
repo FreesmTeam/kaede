@@ -1,4 +1,4 @@
-import type { PermissionType } from "@/types/extensions/permission.type.ts";
+import type { PermissionRequest } from "@/types/extensions/permission.type.ts";
 
 export type ExtensionMetadataType = {
   // Should be unique
@@ -14,6 +14,6 @@ export type ExtensionMetadataType = {
   "categories": Array<string>;
 } & Partial<{
   "description": string;
-  "permissions": Array<PermissionType>;
+  "permissions": Array<PermissionRequest>;
   "enabled"    : boolean;
 }>;

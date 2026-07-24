@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { exists, mkdir } from "@tauri-apps/plugin-fs";
-
+import { Host } from "@/lib/capability-broker";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
   PreLaunchInformationType,
@@ -33,15 +32,13 @@ export async function ensureMinecraftDirectory(
     logPrefix,
     `Checking if the minecraft directory exists (${directory})`,
   );
-  const directoryExists: boolean = await exists(directory);
+  const directoryExists: boolean = await Host.files.exists(directory);
 
   if (!directoryExists) {
     log.warn(
       logPrefix,
       `The minecraft directory does not exist; creating it (${directory})`,
     );
-    await mkdir(directory, {
-      "recursive": true,
-    });
+    await Host.files.ensureDirectories([directory], { "recursive": true });
   }
 }

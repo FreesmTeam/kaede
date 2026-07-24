@@ -31,9 +31,6 @@ const idRoot = "__settings-page__extensions";
 const enabled = computed((): boolean => (
   globalStates?.extensions?.enabled === true
 ));
-const allowUntrusted = computed((): boolean => (
-  globalStates?.extensions?.allowUnrestrictedUntrusted === true
-));
 const showAfterInitialization = computed((): boolean => (
   globalStates?.misc?.showAfterExtensionsInitialization === true
 ));
@@ -66,9 +63,6 @@ function overrideMisc(
 function handleEnabledToggle(value: boolean): void {
   overrideExtensions({ "enabled": value });
 }
-function handleAllowUntrustedToggle(value: boolean): void {
-  overrideExtensions({ "allowUnrestrictedUntrusted": value });
-}
 function handleShowAfterInitializationToggle(value: boolean): void {
   overrideMisc({ "showAfterExtensionsInitialization": value });
 }
@@ -91,17 +85,6 @@ function handleAutoConfigSyncToggle(value: boolean): void {
         :id="`${idRoot}-enabled-toggle`"
         :model-value="enabled"
         :on-toggle="handleEnabledToggle"
-      />
-    </SettingsRow>
-    <SettingsRow
-      :id-root="`${idRoot}-allow-untrusted`"
-      title="Allow unrestricted untrusted extensions"
-      subtitle="Run untrusted extensions outside of the sandbox. Only enable this if you trust them"
-    >
-      <SettingsToggle
-        :id="`${idRoot}-allow-untrusted-toggle`"
-        :model-value="allowUntrusted"
-        :on-toggle="handleAllowUntrustedToggle"
       />
     </SettingsRow>
     <SettingsRow

@@ -193,7 +193,7 @@ export async function downloadAssets({
     "label"      : "assets",
   });
 
-  if (report.cancelled) {
+  if (report.cancelled || report.failed > 0) {
     return false;
   }
 

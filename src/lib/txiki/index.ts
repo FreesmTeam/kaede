@@ -18,19 +18,43 @@
 
 import serialize from "serialize-javascript";
 
+import type { BrokerServerProcess } from "@/lib/capability-broker";
 import { serveCode } from "@/lib/txiki/serve-code.ts";
-import { TxikiSocket } from "@/lib/txiki/socket.ts";
-import type { ServerProcessType } from "@/types/application/server-process.type.ts";
 
 type LightResponse<T> = Promise<T> | T;
-type GetCallback = (request: { "params": Record<string, unknown> }) => LightResponse<unknown>;
+type GetCallback = (request: {
+  "params": Record<string, string>;
+}) => LightResponse<unknown>;
 type PostCallback = (request: {
   "body"  : unknown;
-  "params": Record<string, unknown>;
+  "params": Record<string, string>;
 }) => LightResponse<unknown>;
 
+const identifierPattern = /^[$_\p{ID_Start}][$\u200C\u200D_\p{ID_Continue}]*$/u;
+const reservedGlobalNames = new Set(`
+  arguments await break case catch class const continue
+  debugger default delete do else enum eval export extends
+  false finally for function if implements import in instanceof interface
+  let new null package private protected public return static super switch
+  this throw true try typeof var void while with yield
+  routes readBody toResponse
+`.trim().split(/\s+/u));
+let nextServerId = 0;
+
+function assertValidGlobalName(name: string): void {
+  if (!identifierPattern.test(name) || reservedGlobalNames.has(name)) {
+    throw new TypeError(`Invalid Txiki global identifier: ${JSON.stringify(name)}`);
+  }
+}
+
+function createServerName(): string {
+  nextServerId += 1;
+
+  return `txiki-${nextServerId}`;
+}
+
 export default class Txiki {
-  private paths: {
+  private readonly paths: {
     "GET" : Map<string, string>;
     "POST": Map<string, string>;
   } = {
@@ -38,7 +62,7 @@ export default class Txiki {
     "POST": new Map,
   };
 
-  private globals: Map<string, string> = new Map;
+  private readonly globals = new Map<string, string>;
 
   private serializeRoutes(map: Map<string, string>): string {
     if (map.size === 0) {
@@ -48,16 +72,56 @@ export default class Txiki {
     const entries: Array<string> = [];
 
     for (const [path, callback] of map) {
-      entries.push(`${JSON.stringify(path)}: ${callback}`);
+      entries.push(`${JSON.stringify(path)}:${callback}`);
     }
 
-    return `{\n${entries.join(",\n")}\n}`;
+    return `{${entries.join(",")}}`;
   }
 
   private transformDefinedGlobals(): string {
     return [...this.globals.entries()]
-      .map(([name, value]) => `const ${name} = ${value};`)
+      .map(([name, value]) => `const ${name}=${value};`)
       .join("");
+  }
+
+  private createServerCode(): string {
+    const globals = this.transformDefinedGlobals();
+    const getRoutes = this.serializeRoutes(this.paths.GET);
+    const postRoutes = this.serializeRoutes(this.paths.POST);
+
+    return [
+      globals,
+      `const routes={GET:${getRoutes},POST:${postRoutes}};`,
+      "export default{async fetch(request){",
+      "const url=new URL(request.url);",
+      "const method=request.method;",
+      "const methodRoutes=routes[method];",
+      "if(!methodRoutes)return new Response(\"Method Not Allowed\",{status:405});",
+      "const callback=methodRoutes[url.pathname];",
+      "if(!callback)return new Response(\"Not Found\",{status:404});",
+      "const params={};",
+      "url.searchParams.forEach((value,key)=>{params[key]=value});",
+      "try{",
+      "const input=method===\"POST\"",
+      "?{body:await readBody(request),params}",
+      ":{params};",
+      "return toResponse(await callback(input));",
+      "}catch(error){",
+      "console.error(\"Handler error:\",error);",
+      "return new Response(\"Internal Server Error\",{status:500});",
+      "}}};",
+      "async function readBody(request){",
+      "const type=request.headers.get(\"content-type\")||\"\";",
+      "return type.includes(\"application/json\")?await request.json():await request.text();",
+      "}",
+      "function toResponse(value){",
+      "if(value instanceof Response)return value;",
+      "if(typeof value===\"string\")return new Response(value,",
+      "{headers:{\"Content-Type\":\"text/plain; charset=utf-8\"}});",
+      "return new Response(JSON.stringify(value),",
+      "{headers:{\"Content-Type\":\"application/json\"}});",
+      "}",
+    ].join("");
   }
 
   public get(path: string, callback: GetCallback): Txiki {
@@ -73,23 +137,20 @@ export default class Txiki {
   }
 
   public defineGlobal(name: string, value: unknown): Txiki {
+    assertValidGlobalName(name);
     this.globals.set(name, serialize(value, { "unsafe": true, "ignoreFunction": false }));
 
     return this;
   }
 
-  public async listen(port: number): Promise<ServerProcessType | undefined> {
-    const name: string = `txiki-${port}`;
-    const generatedGlobals: string = this.transformDefinedGlobals();
-    const getRoutes: string = this.serializeRoutes(this.paths.GET);
-    const postRoutes: string = this.serializeRoutes(this.paths.POST);
-    // eslint-disable-next-line vue/max-len
-    const code: string = `${generatedGlobals}const routes={GET:${getRoutes},POST:${postRoutes}};const wsClients=new Set;function broadcast(t,n){const e=JSON.stringify({type:t,payload:n,ts:Date.now()});for(const t of wsClients)try{t.sendText(e)}catch{wsClients.delete(t)}}function trace(...t){broadcast("log",t.map(t=>"object"==typeof t?JSON.stringify(t):String(t)).join(" "))}export default{async fetch(e,{server:o}){const t=new URL(e.url),r=e.method,s=routes[r];if("/__ws"===t.pathname&&"websocket"===e.headers.get("upgrade"))return void o.upgrade(e);if(!s)return new Response("Method Not Allowed",{status:405});const a=s[t.pathname];if(!a)return new Response("Not Found",{status:404});try{const s={};let n;if(t.searchParams.forEach((e,t)=>{s[t]=e}),"POST"===r){const t=(e.headers.get("content-type")||"").includes("application/json")?await e.json():await e.text();n=await a({body:t,params:s})}else n=await a({params:s});return toResponse(n)}catch(e){return console.error("Handler error:",e),new Response("Internal Server Error",{status:500})}},websocket:{open(e){wsClients.add(e),broadcast("meta",{event:"client-connected",clients:wsClients.size})},message(e,t){try{"ping"===JSON.parse(t).type&&e.sendText(JSON.stringify({type:"pong",ts:Date.now()}))}catch{}},close(e){wsClients.delete(e),broadcast("meta",{event:"client-disconnected",clients:wsClients.size})}}};function toResponse(e){let res = e instanceof Response?e:"string"==typeof e?new Response(e,{headers:{"Content-Type":"text/plain; charset=utf-8"}}):new Response(JSON.stringify(e),{headers:{"Content-Type":"application/json"}});res.headers.set("Access-Control-Allow-Origin", "*");return res}`.trim();
+  public async listen(requestedPort?: number): Promise<BrokerServerProcess | undefined> {
+    if (requestedPort !== undefined) {
+      throw new RangeError([
+        "Txiki ports are assigned atomically by the host broker;",
+        "renderer-selected ports are unsupported",
+      ].join(" "));
+    }
 
-    return await serveCode(name, code, port);
-  }
-
-  public static Socket(port: number, path: string | undefined): TxikiSocket {
-    return new TxikiSocket(port, path);
+    return await serveCode(createServerName(), this.createServerCode());
   }
 }

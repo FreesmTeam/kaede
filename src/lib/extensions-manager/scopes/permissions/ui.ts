@@ -16,38 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { createSafeDocument, type SafeDocument } from "ark-of-atrahasis";
+import type {
+  SafeFormControlPolicy,
+  SafeStylePolicy,
+  SafeStyleProperty,
+} from "ark-of-atrahasis";
 
-import { GrantedScopes } from "@/constants/permissions.ts";
-import { handleCssTheme } from "@/lib/extensions-manager/scopes/handle-css-theme.ts";
-
-export function handleBasicUIPermission({
-  id,
-}: {
-  "id": string;
-}): void {
-  GrantedScopes[id].handleUIMount = (elementId: string): void => {
-    const gui: SafeDocument = createSafeDocument(elementId);
-
-    GrantedScopes[id].gui = {
-      ...gui,
-      // These will be granted with other permissions
-      "createAnchor": undefined,
-      "createCanvas": undefined,
-      "createImage" : undefined,
-      "createVideo" : undefined,
-      "createAudio" : undefined,
-      "createSource": undefined,
-    };
-  };
+/** Build the fixed ui/basic policy from Ark's complete reviewed property catalog. */
+export function createBasicUIStylePolicy(
+  safeStyleProperties: ReadonlyArray<SafeStyleProperty>,
+): SafeStylePolicy {
+  return Object.freeze({
+    "allowedProperties": Object.freeze([...safeStyleProperties]),
+  });
 }
 
-export function handleUIStyle({
-  id,
-}: {
-  "id": string;
-}): void {
-  GrantedScopes[id].handleCssTheme = (css: string): void => {
-    handleCssTheme(css);
-  };
-}
+/** This acknowledgement is supplied only for a confirmed static forms grant. */
+export const NON_CREDENTIAL_FORM_CONTROL_POLICY = Object.freeze({
+  "allowNonCredentialFormElements": true,
+}) satisfies SafeFormControlPolicy;

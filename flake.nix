@@ -28,6 +28,7 @@
           openssl_3
           cairo
           gdk-pixbuf
+          libayatana-appindicator
         ];
 
         nativeDependencies = with pkgs; [
@@ -44,7 +45,7 @@
           llvmPackages.clang
         ];
       in {
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           nativeBuildInputs = nativeDependencies;
           buildInputs = webDependencies;
 

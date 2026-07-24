@@ -16,10 +16,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { Component } from "vue";
-
 import { __registerComponent } from "@/extendable/component-registry.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 
-export function registerComponent(name: string, component: Component): void {
+export function registerComponent(
+  name: string,
+  component: import("vue").Component,
+): void {
+  const app = GlobalInternals.appInstance;
+
+  if (app === undefined) {
+    throw new Error("Cannot register component before the Vue app is created");
+  }
+
+  app.component(name, component);
   __registerComponent(name, component);
 }

@@ -35,11 +35,11 @@ onMounted(async () => {
 <template>
   <PageWrapper>
     {{ accounts }}
-    <div>
+    <div id="profile__skin-status">
       {{ status }}
     </div>
-    <div class="flex">
-      <canvas ref="canvas" width="300" height="400" />
+    <div id="profile__skin-preview" class="flex">
+      <canvas id="profile__skin-canvas" ref="canvas" width="300" height="400" />
     </div>
   </PageWrapper>
 </template>

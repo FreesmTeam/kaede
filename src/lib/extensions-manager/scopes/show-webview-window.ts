@@ -1,5 +1,4 @@
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
-
+import { DirectHost } from "@/lib/capability-broker";
 import { log } from "@/lib/logging/scopes/log.ts";
 
 export async function showWebviewWindow(show: boolean | undefined): Promise<void> {
@@ -9,7 +8,7 @@ export async function showWebviewWindow(show: boolean | undefined): Promise<void
       "User has enabled 'show-after-extensions-initialization';",
       "Showing the webview now",
     );
-    await getCurrentWebviewWindow().show();
+    await DirectHost.showMainWebview();
 
     log.info(
       __PRE_BUNDLED_FILENAME__,

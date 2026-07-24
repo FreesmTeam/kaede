@@ -16,15 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type DownloadSnapshotType = {
-  "current": Record<string, [number, number]>;
-  "success": number;
-  "failed" : number;
-};
-
-export type DownloadReportType = {
-  "success"  : number;
-  "failed"   : number;
-  "failures" : Array<{ "url": string; "path": string; "error": string }>;
-  "cancelled": boolean;
-};
+export type {
+  DownloadBatchSnapshot as DownloadSnapshotType,
+  DownloadReport as DownloadReportType,
+} from "@/lib/capability-broker";

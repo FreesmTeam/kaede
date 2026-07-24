@@ -134,8 +134,7 @@ export type GlobalStatesMinecraftType = {
   }>;
 };
 export type GlobalStatesExtensionsType = {
-  "enabled"                   : boolean;
-  "allowUnrestrictedUntrusted": boolean;
+  "enabled": boolean;
 };
 
 export type GlobalStatesType = {

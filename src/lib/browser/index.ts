@@ -16,12 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export default {
-  "detectIsBrowser"       : (): boolean => false,
-  "handleLogsFlush"       : (): void => {},
-  "handleTauriEnvironment": async (): Promise<void> => {},
-  "readStoragePath"       : async (path: string): Promise<string> => path,
-  "writeToStoragePath"    : async (path: string, value: string): Promise<void> => {
+type BrowserAdapter = typeof import("@/lib/__browser").default;
+
+const Browser = {
+  "detectIsBrowser": (): boolean => false,
+  "handleLogsFlush": (): void => {},
+  "readStoragePath": async (path: string): Promise<string> => {
+    void path;
+
+    return "";
+  },
+  "writeToStoragePath": async (
+    path: string,
+    value: string | Uint8Array,
+  ): Promise<void> => {
     void ({ path, value });
   },
-} as const;
+} as const satisfies BrowserAdapter;
+
+export default Browser;

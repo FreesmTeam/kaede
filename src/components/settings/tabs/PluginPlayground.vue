@@ -41,13 +41,12 @@ import { cursorPosition } from "prism-code-editor/cursor";
 import { indentGuides } from "prism-code-editor/guides";
 import { computed, onMounted } from "vue";
 
-import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import { AsyncFunction } from "@/constants/application.ts";
+import { Host, type ProcessHandle } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
-import { codeOutput, codeToEvaluate } from "@/states/plugin-playground.ts";
+import { codeToEvaluate } from "@/states/plugin-playground.ts";
 import { serverProcesses } from "@/states/servers.ts";
 
 const cardStyles = computed(
@@ -60,20 +59,15 @@ const cardStyles = computed(
   ),
 );
 
-async function handleCode(): Promise<void> {
+async function stopServer(handle: ProcessHandle): Promise<void> {
   try {
-    const userPlugin = new AsyncFunction(codeToEvaluate.value);
-
-    codeOutput.value = await userPlugin();
+    await Host.processes.kill(handle);
   } catch (error: unknown) {
-    const prettyError: string = Errors.prettify(error);
-
     log.error(
       __PRE_BUNDLED_FILENAME__,
-      "Failed to execute the code in playground:",
-      prettyError,
+      "Failed to stop the plugin-playground server:",
+      Errors.prettify(error),
     );
-    codeOutput.value = prettyError;
   }
 }
 
@@ -123,7 +117,7 @@ onMounted(() => {
       id="__settings-page__plugin-playground-description"
       class="shrink-0 text-neutral-300"
     >
-      A place where you can experiment with your Kaede plugins. Your code and output will be lost as soon as you reload the UI or close the launcher.
+      A scratchpad for drafting sandbox plugin code. Your code will be lost as soon as you reload the UI or close the launcher.
     </div>
     <div
       id="__settings-page__plugin-playground-active-zone"
@@ -137,24 +131,21 @@ onMounted(() => {
         id="__settings-page__plugin-playground-servers"
         class="w-full flex shrink-0 flex-col select-text gap-2 lg:w-80 sm:w-48"
       >
-        <button
-          id="__settings-page__plugin-playground-execute"
-          @click="handleCode"
-          class="relative w-full flex rounded-md bg-[#0d1117] p-2 text-neutral-300"
-        >
-          Execute the code
-          <MaterialRipple />
-        </button>
         <div
-          id="__settings-page__plugin-playground-code-output"
+          id="__settings-page__plugin-playground-execution-disabled"
           class="rounded-md bg-[#0d1117] p-2 text-neutral-300"
         >
-          Output:
           <div
-            id="__settings-page__plugin-playground-code-output-area"
-            class="mt-1 min-h-6 whitespace-pre-wrap break-all rounded-md bg-[#171b22] p-1 text-xs text-white font-mono"
+            id="__settings-page__plugin-playground-execution-disabled-title"
+            class="text-white font-medium"
           >
-            {{ codeOutput }}
+            Execution disabled
+          </div>
+          <div
+            id="__settings-page__plugin-playground-execution-disabled-description"
+            class="mt-1 text-xs"
+          >
+            Install the code as a sandbox extension to run it with an artifact-bound identity and explicit permission grants.
           </div>
         </div>
         <div
@@ -169,31 +160,29 @@ onMounted(() => {
         </div>
         <div
           v-for="server in serverProcesses"
-          :key="server.name"
-          :id="`__settings-page__plugin-playground-server-wrapper-${server.name}`"
+          :key="server.value.handle"
+          :id="`__settings-page__plugin-playground-server-wrapper-${server.value.handle}`"
           class="flex flex-nowrap justify-between rounded-md bg-[#0d1117] p-1"
         >
           <div
-            :id="`__settings-page__plugin-playground-server-info-${server.name}`"
+            :id="`__settings-page__plugin-playground-server-info-${server.value.handle}`"
             class="shrink-0 px-1"
           >
             {{ server.name }}
             <span
-              :id="`__settings-page__plugin-playground-server-port-${server.name}`"
+              :id="`__settings-page__plugin-playground-server-port-${server.value.handle}`"
               class="shrink-0 text-neutral-400"
             >
             Port: {{ server.port }}
           </span>
           </div>
           <button
-            :id="`__settings-page__plugin-playground-server-kill-button-${server.name}`"
-            @click="() => {
-              server.value.kill();
-            }"
+            :id="`__settings-page__plugin-playground-server-kill-button-${server.value.handle}`"
+            @click="() => stopServer(server.value.handle)"
             class="flex hover:text-neutral-400"
           >
             <span
-              :id="`__settings-page__plugin-playground-server-kill-icon-${server.name}`"
+              :id="`__settings-page__plugin-playground-server-kill-icon-${server.value.handle}`"
               class="i-lucide-x size-5 shrink-0"
             ></span>
           </button>

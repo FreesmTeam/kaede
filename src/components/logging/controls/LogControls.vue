@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { useEventListener } from "@vueuse/core";
 import { computed, ref, shallowRef, watchEffect } from "vue";
 
@@ -7,6 +6,7 @@ import CustomButton from "@/components/general/base/CustomButton.vue";
 import LogFilterer from "@/components/logging/controls/LogFilterer.vue";
 import LogSearcher from "@/components/logging/controls/LogSearcher.vue";
 import FileStructure from "@/constants/file-structure.ts";
+import { Host } from "@/lib/capability-broker";
 import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Logging from "@/lib/logging";
@@ -78,7 +78,7 @@ async function viewInExplorer(): Promise<void> {
     FileStructure.Folders.Logs.Files.LatestLog,
   );
 
-  await revealItemInDir(latestLogAbsolutePath);
+  await Host.opener.revealItem(latestLogAbsolutePath);
 }
 
 const explorerControl: LogButtonType = {

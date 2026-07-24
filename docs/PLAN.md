@@ -1,10 +1,21 @@
+# Plan
+
+> [!NOTE]
+> The dated implementation notes below are retained as project history. The
+> current extension security and developer contract is documented in
+> [`EXTENSIONS.md`](./EXTENSIONS.md); examples that use `window.__TAURI__`, a
+> raw Tauri plugin, or unrestricted community code are not current APIs.
+
 - a development option to enable native context menu alongside the default one
 - `${plugin-id}/${key}` for custom global states from plugins are quite cool (`GlobalStateHelpers.change("shitPlugin/cache", { ... });`)
 
 // temporary
 - [ ] Plugin system
     - [x] Custom CSS themes
-    - [x] Permission-system (need to add more permissions, though)
+    - [x] Artifact-bound static and dynamic permission system
+    - [x] Typed Rust capability broker for privileged host operations
+    - [x] Ark `SafeDocument` for sandboxed DOM access
+    - [x] Per-artifact SES compartment, session revocation, and resource cleanup
     - [ ] Dependencies handling (?)
     - [x] Application hooks
     - [x] Sandboxed environment using Secure ECMAScript
@@ -73,8 +84,6 @@ tbd (https://mc-launcher.tayou.org/)
 # UI/UX Design
 
 Whatever my mind thinks is good
-
-# Plan
 
 ## Routing
 
@@ -158,6 +167,15 @@ That repository must include only moderated extensions. Moderation process shoul
 Those extensions should be loaded once at application launch. Programming language must be a JavaScript. Any framework is ok, as long as it is capable running in a browser. Extensions will be able to communicate with the launcher
 
 ### More
+
+**Current implementation details (24.07.2026)**
+
+Trusted artifacts from the exact `trusted-extensions` repository execute as
+cooperative TCB code before SES lockdown. Community artifacts execute in
+separate compartments and receive only artifact-bound typed capabilities. Raw
+Tauri APIs and `window.__KAEDE__` are removed before community code runs. See
+[`EXTENSIONS.md`](./EXTENSIONS.md) for the live permission IDs, scope formats,
+DOM contract, and lifecycle.
 
 **Previous implementation details**
 
@@ -308,7 +326,10 @@ A server management utility to handle Minecraft servers
 
 ### Implementation
 
-It could be implemented as an extension. Downloading server jar should be possible using `window.__TAURI__.upload`, launching it should be possible using `window.__TAURI__.shell`
+It could be implemented as an extension. Downloading a server jar requires an
+exact `network/http` scope plus internal/external storage authority. Starting a
+fixed server executable uses `system/process/spawn`; arbitrary scripts require
+the separate critical `system/shell` permission.
 
 ### Thoughts
 

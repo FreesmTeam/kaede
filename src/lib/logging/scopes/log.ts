@@ -1,5 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
-
+import { Host } from "@/lib/capability-broker";
 import { capitalize } from "@/lib/general/scopes/capitalize.ts";
 import type { LogMethodType } from "@/types/logging/log-method.type.ts";
 
@@ -15,8 +14,15 @@ function invokeLog(
    * We do not care about promises here
    * Yeah, that can possibly lead to racing conditions...
    */
-  invoke("plugin:log|log", {
-    level,
+  const brokerLevel = ({
+    "2": "debug",
+    "3": "info",
+    "4": "warn",
+    "5": "error",
+  } as const)[level as 2 | 3 | 4 | 5];
+
+  Host.logs.write({
+    "level": brokerLevel,
     message,
     location,
   });

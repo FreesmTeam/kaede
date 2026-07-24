@@ -1,13 +1,14 @@
-use tauri::Manager;
 use log::error;
+use tauri::{webview::PageLoadEvent, Manager};
 
 mod downloads;
 mod extensions;
 mod finalization;
 mod hashes;
+#[cfg(test)]
+mod ipc_acl_smoke;
 mod launcher;
-mod processes;
-mod system;
+mod plugin_broker;
 mod zip;
 
 // Launcher name
@@ -17,7 +18,6 @@ const APP_NAME: &str = "kaede";
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .plugin(tauri_plugin_upload::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             // If user tries to open the launcher when it is already opened,
             // then focus the already opened window.
@@ -26,42 +26,21 @@ pub fn run() {
                 .expect("no main window found - tauri single instance plugin")
                 .set_focus();
         }))
-        .plugin(tauri_plugin_shellx::init(true))
-        .plugin(tauri_plugin_process::init())
-        .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_http::init())
+        .plugin(tauri_plugin_shellx::init(false))
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_oauth::init())
-        .plugin(tauri_plugin_fs::init())
-        .plugin(tauri_plugin_clipboard_manager::init())
-        .setup(|app| {
-            // Just so you know:
-            //
-            // Initially, checking whether the application is in a portable mode or not
-            // was made by reading the window label to find a 'Portable' string
-            //
-            // Those chained calls took only '225.60µs' on my laptop though,
-            // not as slow as I thought at first.
-            //
-            // Nevertheless, I was enlightened by Prism Launcher
-            // which uses 'portable.txt' to make the launcher portable
-            let portable = launcher::is_portable();
-
-            let mut path;
-
-            if portable {
-                // Resolves to the launcher executable file directory
-                path = std::env::current_exe().unwrap().parent().unwrap().to_path_buf();
-            } else {
-                // Resolves to '${dataDir}/${bundleIdentifier}'
-                path = app.path().app_data_dir()?;
+        .on_page_load(|webview, payload| {
+            if payload.event() == PageLoadEvent::Started {
+                plugin_broker::reset_for_page_load(webview);
             }
-
-            path.push("logs");
+        })
+        .setup(|app| {
+            let runtime_paths =
+                launcher::select_runtime_paths(app.handle()).map_err(std::io::Error::other)?;
+            let path = runtime_paths.base_directory.join("logs");
+            app.manage(plugin_broker::BrokerState::new_for_runtime(runtime_paths)?);
 
             // Creates the 'logs' directory if it doesn't exist
-            let _ = std::fs::create_dir_all(&path)?;
+            std::fs::create_dir_all(&path)?;
 
             // Prepare the log file.
             //
@@ -86,7 +65,7 @@ pub fn run() {
             // requiring the JavaScript code to copy the contents from the log file into another
             // instead of just renaming that file. Of course, copying takes more time.
             if let Err(error) = launcher::prepare_log_file(&path, APP_NAME) {
-                error!("Failed to prepare the log file: {}", error);
+                error!("Failed to prepare the log file: {error}");
             }
 
             // Handle logging targets differently based on build mode
@@ -101,23 +80,28 @@ pub fn run() {
 
             app.handle().plugin(
                 logging_builder
-                    // Do not log log messages from 'reqwest::connect'
+                    // Do not log connection setup noise from the HTTP client.
                     .filter(|metadata| metadata.target() != "reqwest::connect")
-                    // Do not log 'trace' level messages
+                    // Do not persist trace-level dependency logs.
                     .level(log::LevelFilter::Debug)
                     // Make a new output target that will save logs in a log file
                     .target(tauri_plugin_log::Target::new(
                         tauri_plugin_log::TargetKind::Folder {
-                            path: path,
-                            file_name: Some(format!("latest")),
+                            path,
+                            file_name: Some("latest".to_owned()),
                         },
                     ))
                     // Make a custom logs format
                     .format(|out, message, record| {
                         let now = time::OffsetDateTime::now_utc();
                         // Default tauri logging format does not include milliseconds
-                        let formatted_time = format!("{:02}:{:02}:{:02}.{:03}",
-                            now.hour(), now.minute(), now.second(), now.millisecond());
+                        let formatted_time = format!(
+                            "{:02}:{:02}:{:02}.{:03}",
+                            now.hour(),
+                            now.minute(),
+                            now.second(),
+                            now.millisecond()
+                        );
 
                         out.finish(format_args!(
                             "{} | {} | {} | {}",
@@ -136,28 +120,10 @@ pub fn run() {
 
             Ok(())
         })
-        .manage(processes::ProcessRegistry::default())
-        .manage(downloads::CancelFlags::default())
         // Register custom Tauri commands
         .invoke_handler(tauri::generate_handler![
-            downloads::concurrently_download,
-            downloads::cancel_downloads,
-            extensions::read_extensions,
-            finalization::finalize_initialization,
-            finalization::get_java_major,
-            hashes::hash_md5,
-            hashes::hash_sha256,
-            launcher::get_initial_state,
-            launcher::get_missing_files,
-            launcher::verify_file_paths,
-            processes::list_processes,
-            processes::spawn_process,
-            processes::kill_process,
-            processes::write_process,
-            processes::run_process,
-            system::get_system_memory,
-            system::get_cpu_usage,
-            zip::unzip_file,
+            plugin_broker::commands::bootstrap_capability_broker,
+            plugin_broker::commands::capability_call,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

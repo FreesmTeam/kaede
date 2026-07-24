@@ -1,5 +1,4 @@
-import { writeTextFile } from "@tauri-apps/plugin-fs";
-
+import { Host } from "@/lib/capability-broker";
 import { getDefaultConfig } from "@/lib/configs/scopes/get-default-config.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 
@@ -8,7 +7,7 @@ export async function initializeConfigFile(configFilePath: string): Promise<void
   const defaultConfig = await getDefaultConfig();
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Writing the default config file");
-  await writeTextFile(configFilePath, JSON.stringify(
+  await Host.files.writeText(configFilePath, JSON.stringify(
     defaultConfig,
     // Save formatting
     null,

@@ -16,14 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
-
+import { Host } from "@/lib/capability-broker";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { InitialStateType } from "@/types/application/initial-state.type.ts";
 
 export async function getInitialState(): Promise<InitialStateType> {
   try {
-    return await invoke("get_initial_state");
+    return await Host.runtime.getInitialState();
   } catch (error: unknown) {
     log.error(
       __PRE_BUNDLED_FILENAME__,

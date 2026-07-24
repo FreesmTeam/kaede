@@ -1,6 +1,5 @@
-import { writeTextFile } from "@tauri-apps/plugin-fs";
-
 import FileStructure from "@/constants/file-structure.ts";
+import { Host } from "@/lib/capability-broker";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
@@ -13,7 +12,7 @@ export async function saveInstanceStatesToFile(instances: InstanceStatesType): P
     FileStructure.Files.Metadata,
   );
 
-  await writeTextFile(metadataPath, JSON.stringify(
+  await Host.files.writeText(metadataPath, JSON.stringify(
     instances,
     null,
     2,

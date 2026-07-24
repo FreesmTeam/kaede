@@ -1,9 +1,8 @@
 /* eslint-disable max-lines */
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
-
 import FileStructure from "@/constants/file-structure.ts";
 import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
@@ -213,7 +212,7 @@ export const ContextMenuItems = [
       const baseDirectory: string = General.getCachedBaseDirectory();
 
       GlobalObject.libs.ContextMenu.close();
-      revealItemInDir(
+      Host.opener.revealItem(
         General.cachedJoin(
           baseDirectory,
           FileStructure.Files.Config,
@@ -225,7 +224,7 @@ export const ContextMenuItems = [
           Errors.prettify(error),
         );
 
-        revealItemInDir(
+        Host.opener.revealItem(
           General.cachedJoin(baseDirectory),
         ).catch((error: unknown) => {
           log.error(
@@ -248,7 +247,7 @@ export const ContextMenuItems = [
 
       if (!currentInstanceId) {
         log.warn("No instance selected; revealing the root directory in explorer");
-        revealItemInDir(
+        Host.opener.revealItem(
           General.cachedJoin(
             baseDirectory,
             FileStructure.Folders.Instances.Path,
@@ -269,7 +268,7 @@ export const ContextMenuItems = [
         "instanceId"   : currentInstanceId,
       });
 
-      revealItemInDir(
+      Host.opener.revealItem(
         General.cachedJoin(minecraftDirectory),
       ).catch((error: unknown) => {
         log.error(

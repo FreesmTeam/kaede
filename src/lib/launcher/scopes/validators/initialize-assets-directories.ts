@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { exists, mkdir } from "@tauri-apps/plugin-fs";
-
+import { Host } from "@/lib/capability-broker";
 import Validators from "@/lib/launcher/scopes/validators/index.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
@@ -33,9 +32,9 @@ export async function initializeAssetsDirectories(
     logPrefix,
     "Checking if '/assets/indexes/' and '/assets/objects/' exist",
   );
-  const [indexesExists, objectsExists]: [boolean, boolean] = await Promise.all([
-    exists(directories.assetIndexes),
-    exists(directories.assetObjects),
+  const [indexesExists, objectsExists] = await Host.files.existsMany([
+    directories.assetIndexes,
+    directories.assetObjects,
   ]);
 
   if (!indexesExists && !objectsExists) {
@@ -43,10 +42,7 @@ export async function initializeAssetsDirectories(
       logPrefix,
       "Initializing the '/assets/indexes/' and '/assets/objects/' directories",
     );
-    await Promise.all([
-      mkdir(directories.assetIndexes),
-      mkdir(directories.assetObjects),
-    ]);
+    await Host.files.ensureDirectories([directories.assetIndexes, directories.assetObjects]);
 
     return Validators.initializeShortHashDirectories(necessaries);
   }
@@ -56,14 +52,14 @@ export async function initializeAssetsDirectories(
       logPrefix,
       "Initializing the '/assets/indexes/' directory",
     );
-    await mkdir(directories.assetIndexes);
+    await Host.files.ensureDirectories([directories.assetIndexes]);
 
     return Validators.initializeShortHashDirectories(necessaries);
   }
 
   if (!objectsExists) {
     log.debug(logPrefix, "Initializing the '/assets/objects/' directory");
-    await mkdir(directories.assetObjects);
+    await Host.files.ensureDirectories([directories.assetObjects]);
 
     return Validators.initializeShortHashDirectories(necessaries);
   }

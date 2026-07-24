@@ -1,11 +1,9 @@
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker";
 
 export async function getSha1Mismatches({
   paths,
 }: {
   "paths": Array<{ "path": string; "hash": string }>;
 }): Promise<Array<string>> {
-  return invoke("verify_file_paths", {
-    "artifacts": paths,
-  });
+  return [...await Host.files.verifySha1(paths)];
 }

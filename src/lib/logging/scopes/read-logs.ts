@@ -16,10 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { readTextFile } from "@tauri-apps/plugin-fs";
-import type { ShallowReactive } from "vue";
-
 import FileStructure from "@/constants/file-structure.ts";
+import { Host } from "@/lib/capability-broker";
 import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -30,7 +28,7 @@ export async function readLogs({
   instanceLogs,
 }: {
   "globalStates": GlobalStatesType | undefined;
-  "instanceLogs": ShallowReactive<Record<string, string[]>> | undefined;
+  "instanceLogs": import("vue").ShallowReactive<Record<string, string[]>> | undefined;
 }): Promise<{
   "size"               : string;
   "logs"               : Array<string>;
@@ -45,7 +43,7 @@ export async function readLogs({
   );
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Reading 'latest.log' file");
-  const existingLauncherLogs: string = await readTextFile(latestLogAbsolutePath);
+  const existingLauncherLogs: string = await Host.files.readText(latestLogAbsolutePath);
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Reading the '${currentMode}' instance logs`);
   const currentInstanceLogs: Array<string> = instanceLogs?.[currentMode] ?? [];

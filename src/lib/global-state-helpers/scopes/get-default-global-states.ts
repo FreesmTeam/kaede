@@ -73,8 +73,7 @@ export function getDefaultGlobalStates(): GlobalStatesType {
       "enableNativeReloadKeyBinds": false,
     },
     "extensions": {
-      "enabled"                   : true,
-      "allowUnrestrictedUntrusted": true,
+      "enabled": true,
     },
     "misc": {
       "showAfterExtensionsInitialization": false,

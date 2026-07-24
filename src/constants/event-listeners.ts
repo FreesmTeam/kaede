@@ -1,4 +1,4 @@
-import type { EventListenersType } from "@/types/extensions/event-listeners.type.ts";
+import { EventBroker } from "@/lib/extensions-manager/scopes/event-broker.ts";
 
 export const AllEventListeners = {
   "all-clicks"  : true,
@@ -8,11 +8,11 @@ export const AllEventListeners = {
   "routing"     : true,
   "instance"    : true,
 } as const;
-export const EventListeners: Record<string, Record<EventListenersType, unknown>> = {};
-export const EventSubscribers: Set<string> = new Set;
+
+/** Host-owned broker. Subscriber records remain private to EventBroker. */
+export const ExtensionEvents = new EventBroker;
 
 export default {
   AllEventListeners,
-  EventListeners,
-  EventSubscribers,
+  ExtensionEvents,
 } as const;

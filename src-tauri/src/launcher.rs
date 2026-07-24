@@ -1,8 +1,6 @@
-use std::fs;
-use std::fs::File;
+use std::fs::{self, File};
 use std::io::{self, Read};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicI32, Ordering};
 
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -10,9 +8,7 @@ use serde_json::Value;
 use sha1::{Digest, Sha1};
 use tauri::Manager;
 
-static LAUNCHES_COUNT: AtomicI32 = AtomicI32::new(0);
-
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(tag = "status", rename_all = "camelCase")]
 pub enum ParsedFile {
     // For a well-formed JSON
@@ -64,16 +60,60 @@ fn extract_locale(config: &ParsedFile) -> String {
         .to_string()
 }
 
-pub fn is_portable() -> bool {
-    if let Ok(exe_path) = std::env::current_exe() {
-        if let Some(exe_dir) = exe_path.parent() {
-            return exe_dir.join("portable.txt").exists();
-        }
-    }
-    false
+#[derive(Clone, Debug)]
+pub struct RuntimePaths {
+    pub portable: bool,
+    pub base_directory: PathBuf,
+    pub executable_directory: PathBuf,
+    pub app_data_directory: PathBuf,
 }
 
-#[derive(Serialize)]
+impl RuntimePaths {
+    pub fn capability_decisions_path(&self) -> PathBuf {
+        self.base_directory.join("capability-decisions.json")
+    }
+}
+
+pub fn select_runtime_paths<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+) -> Result<RuntimePaths, String> {
+    let executable_directory = executable_directory().map_err(|error| error.to_string())?;
+    let app_data_directory = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| error.to_string())?;
+    select_runtime_paths_from(executable_directory, app_data_directory)
+        .map_err(|error| error.to_string())
+}
+
+pub(crate) fn select_runtime_paths_from(
+    executable_directory: PathBuf,
+    app_data_directory: PathBuf,
+) -> io::Result<RuntimePaths> {
+    let executable_directory = fs::canonicalize(executable_directory)?;
+    let portable = executable_directory.join("portable.txt").exists();
+    let selected_directory = if portable {
+        executable_directory.clone()
+    } else {
+        app_data_directory.clone()
+    };
+    fs::create_dir_all(&selected_directory)?;
+    let base_directory = fs::canonicalize(selected_directory)?;
+    let app_data_directory = if portable {
+        app_data_directory
+    } else {
+        base_directory.clone()
+    };
+
+    Ok(RuntimePaths {
+        portable,
+        base_directory,
+        executable_directory,
+        app_data_directory,
+    })
+}
+
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InitialStateBasic {
     pub launcher_version: String,
@@ -83,7 +123,7 @@ pub struct InitialStateBasic {
     pub portable: bool,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InitialStateParsedFiles {
     pub config: ParsedFile,
@@ -92,29 +132,21 @@ pub struct InitialStateParsedFiles {
     pub translations: ParsedFile,
 }
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct InitialState {
     pub basic: InitialStateBasic,
     pub parsed: InitialStateParsedFiles,
 }
 
-#[tauri::command]
-pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, String> {
-    let portable = is_portable();
+pub async fn get_initial_state<R: tauri::Runtime>(
+    app: &tauri::AppHandle<R>,
+    launch_count: i32,
+    runtime_paths: &RuntimePaths,
+) -> Result<InitialState, String> {
     let launcher_version = app.package_info().version.to_string();
-    let launch_count = LAUNCHES_COUNT.fetch_add(1, Ordering::SeqCst);
     let separator = std::path::MAIN_SEPARATOR.to_string();
-
-    let base_directory = if portable {
-        std::env::current_exe()
-            .map_err(|e| e.to_string())?
-            .parent()
-            .ok_or_else(|| "Failed to get executable directory".to_string())?
-            .to_path_buf()
-    } else {
-        app.path().app_data_dir().map_err(|e| e.to_string())?
-    };
+    let base_directory = &runtime_paths.base_directory;
 
     let (config, accounts, instances) = tokio::join!(
         load_json_file(base_directory.join("config.json")),
@@ -128,7 +160,9 @@ pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, St
 
     let locale = extract_locale(&config);
     let translations = load_json_file(
-        base_directory.join("translations").join(format!("{}.json", locale)),
+        base_directory
+            .join("translations")
+            .join(format!("{locale}.json")),
     )
     .await?;
 
@@ -138,7 +172,7 @@ pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, St
             base_directory: base_directory.to_string_lossy().to_string(),
             launch_count,
             separator,
-            portable,
+            portable: runtime_paths.portable,
         },
         parsed: InitialStateParsedFiles {
             config,
@@ -169,7 +203,7 @@ pub fn prepare_log_file(logs_dir: &Path, app_name: &str) -> std::io::Result<()> 
     }
 
     // Rotated log files are named '{app_name}-{number}.log'
-    let prefix = format!("{}-", app_name);
+    let prefix = format!("{app_name}-");
 
     // We will keep track of the biggest log file number to make a unique file name
     let mut max_number: usize = 0;
@@ -195,11 +229,7 @@ pub fn prepare_log_file(logs_dir: &Path, app_name: &str) -> std::io::Result<()> 
     }
 
     // Get the absolute path of the renamed log file
-    let new_log_path = logs_dir.join(format!(
-        "{}-{}.log",
-        app_name,
-        max_number + 1,
-    ));
+    let new_log_path = logs_dir.join(format!("{}-{}.log", app_name, max_number + 1,));
 
     // 'latest.log' becomes 'kaede-{number}.log'
     fs::rename(&latest_log_path, &new_log_path)?;
@@ -207,58 +237,46 @@ pub fn prepare_log_file(logs_dir: &Path, app_name: &str) -> std::io::Result<()> 
     Ok(())
 }
 
-#[tauri::command]
-pub async fn get_missing_files(paths: Vec<String>) -> Result<Vec<String>, String> {
-    tokio::task::spawn_blocking(move || {
-        paths
-            .into_par_iter()
-            .filter(|path| !Path::new(path).exists())
-            .collect()
-    })
-    .await
-    .map_err(|e| e.to_string())
+pub fn executable_directory() -> io::Result<PathBuf> {
+    std::env::current_exe()?
+        .parent()
+        .map(Path::to_path_buf)
+        .ok_or_else(|| io::Error::other("executable path has no parent directory"))
 }
 
-#[derive(Deserialize)]
+pub fn missing_files(paths: Vec<PathBuf>) -> Vec<PathBuf> {
+    paths
+        .into_par_iter()
+        .filter(|path| !path.exists())
+        .collect()
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Artifact {
-    path: String,
-    hash: String,
+    pub path: PathBuf,
+    pub hash: String,
 }
 
-#[tauri::command]
-pub async fn verify_file_paths(artifacts: Vec<Artifact>) -> Result<Vec<String>, String> {
-    tokio::task::spawn_blocking(move || {
-        let mismatched_paths: Vec<String> = artifacts
-            .par_iter()
-            .filter_map(|artifact| {
-                let path = Path::new(&artifact.path);
+pub fn verify_file_paths(artifacts: Vec<Artifact>) -> Vec<PathBuf> {
+    artifacts
+        .par_iter()
+        .filter_map(|artifact| {
+            if !artifact.path.exists() {
+                return Some(artifact.path.clone());
+            }
 
-                if !path.exists() {
-                    return Some(artifact.path.clone());
-                }
+            // Artifacts that did not specify SHA1 hashes have been assigned to 'ignore'.
+            if artifact.hash == "ignore" {
+                return None;
+            }
 
-                // Artifacts that did not specify SHA1 hashes have been assigned to 'ignore'
-                if artifact.hash == "ignore" {
-                    return None;
-                }
-
-                match verify_file_hash(path, &artifact.hash) {
-                    Ok(is_valid) => {
-                        if !is_valid {
-                            Some(artifact.path.clone())
-                        } else {
-                            None
-                        }
-                    }
-                    Err(_) => Some(artifact.path.clone()),
-                }
-            })
-            .collect();
-
-        Ok(mismatched_paths)
-    })
-    .await
-    .map_err(|e| e.to_string())?
+            match verify_file_hash(&artifact.path, &artifact.hash) {
+                Ok(true) => None,
+                Ok(false) | Err(_) => Some(artifact.path.clone()),
+            }
+        })
+        .collect()
 }
 
 fn verify_file_hash(path: &Path, expected_hash: &str) -> io::Result<bool> {

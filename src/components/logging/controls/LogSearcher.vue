@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { message } from "@tauri-apps/plugin-dialog";
-
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { ApplicationName } from "@/constants/application.ts";
+import { Host } from "@/lib/capability-broker";
+import Errors from "@/lib/errors";
+import { log } from "@/lib/logging/scopes/log.ts";
 import type { LogControlsType } from "@/types/logging/log-controls.type.ts";
 
 const {
@@ -93,14 +94,18 @@ function handleTextSelection(event: KeyboardEvent): void {
     return;
   }
 
-  message(
-    "Sorry, but you can't select text in the virtualized log viewer. " +
-    "Either disable it or open the log file in a text editor.",
-    {
-      "title": ApplicationName,
-      "kind" : "warning",
-    },
-  );
+  void Host.dialogs.message({
+    "message": "Sorry, but you can't select text in the virtualized log viewer. " +
+      "Either disable it or open the log file in a text editor.",
+    "title": ApplicationName,
+    "kind" : "warning",
+  }).catch((error: unknown) => {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Failed to show the virtualized-log selection warning:",
+      Errors.prettify(error),
+    );
+  });
 }
 </script>
 

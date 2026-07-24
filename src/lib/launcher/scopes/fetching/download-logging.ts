@@ -1,6 +1,5 @@
-import { exists, mkdir } from "@tauri-apps/plugin-fs";
-
 import { LaunchStatus } from "@/constants/launcher.ts";
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
@@ -53,14 +52,11 @@ export async function downloadLogging({
   ]: [
     boolean,
     boolean,
-  ] = await Promise.all([
-    exists(directories.logging),
-    exists(path),
-  ]);
+  ] = [...await Host.files.existsMany([directories.logging, path])] as [boolean, boolean];
 
   if (!directoryExists) {
     log.warn(logPrefix, "The logging config directory does not exist");
-    await mkdir(directories.logging);
+    await Host.files.ensureDirectories([directories.logging]);
   }
 
   if (!fileExists) {
@@ -75,7 +71,7 @@ export async function downloadLogging({
         "label"      : "logging",
       });
 
-      if (report.cancelled) {
+      if (report.cancelled || report.failed > 0) {
         return false;
       }
     } catch (error: unknown) {
@@ -84,7 +80,8 @@ export async function downloadLogging({
         "Could not download the logging config file:",
         Errors.prettify(error),
       );
-      statuses.downloads.failed++;
+
+      return false;
     }
   }
 

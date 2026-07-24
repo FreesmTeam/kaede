@@ -16,26 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { type BrokerServerProcess, Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
-import Processes from "@/lib/processes";
-import { getFreePort } from "@/lib/txiki/get-free-port.ts";
-import type { ServerProcessType } from "@/types/application/server-process.type.ts";
+import {
+  handleServerProcess,
+} from "@/lib/txiki/handle-server-process.ts";
 
 export async function serveFile(
   name: string,
   filePath: string,
-  port?: number,
-): Promise<ServerProcessType | undefined> {
-  const selectedPort: number = port ?? getFreePort();
-
+): Promise<BrokerServerProcess | undefined> {
   try {
-    return Processes.spawnServer({
+    return await handleServerProcess(
       name,
-      "port"   : selectedPort,
-      "program": { "type": "sidecar", "value": "txiki-server" },
-      "args"   : ["serve", "--port", selectedPort.toString(), filePath],
-    });
+      onEvent => Host.servers.serveFile({ name, filePath }, onEvent),
+    );
   } catch (error: unknown) {
     log.error(
       __PRE_BUNDLED_FILENAME__,

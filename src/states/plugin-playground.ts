@@ -18,41 +18,21 @@
 
 import { ref } from "vue";
 
-export const codeOutput = ref<string>("");
-export const codeToEvaluate = ref<string>(`// Imports, basically
-const { Txiki } = window.__KAEDE__.libs;
+import typedDefaultPluginDraft from "../../types/fixtures/sandbox/playground-default.ts?raw";
 
-const answer = await confirm("Do you want to host a txiki.js server?");
+const playgroundFixtureHeader =
+  "/// <reference path=\"../../kaede-sandbox.d.ts\" />\n\n";
 
-if (!answer) {
-  return;
+export function createPlaygroundDraft(fixtureSource: string): string {
+  const normalizedSource = fixtureSource.replace(/\r\n?/gu, "\n");
+
+  if (!normalizedSource.startsWith(playgroundFixtureHeader)) {
+    throw new TypeError("Playground fixture is missing its sandbox type header");
+  }
+
+  return normalizedSource.slice(playgroundFixtureHeader.length);
 }
 
-const name = "Txiki Server Test";
-// Unfortunately, the autocomplete only works when you directly use 'window.__KAEDE__'
-const globalStates = window.__KAEDE__.libs.GlobalStateHelpers.get();
+const defaultPluginDraft = createPlaygroundDraft(typedDefaultPluginDraft);
 
-const server = await new Txiki()
-  .defineGlobal("globalStates", globalStates)
-  .get("/delay", async () => {
-    const delay = Math.floor(Math.random() * 1000);
-
-    await new Promise(resolve => {
-      setTimeout(resolve, delay);
-    });
-
-    trace("hiii!");
-
-    return { delay };
-  })
-  .get("/hi", () => {
-    trace("hiii!");
-
-    return globalStates;
-  })
-  .listen(3001);
-const socket = Txiki.Socket(3001)
-  .on("log", (message) => console.log("socket", message));
-
-alert("Done");
-`);
+export const codeToEvaluate = ref<string>(defaultPluginDraft);

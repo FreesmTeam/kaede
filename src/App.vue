@@ -29,6 +29,7 @@ import CustomLayout from "@/components/general/layout/CustomLayout.vue";
 import Layout from "@/components/general/layout/Layout.vue";
 import Router from "@/components/general/layout/Router.vue";
 import ConfigSyncer from "@/components/general/misc/ConfigSyncer.vue";
+import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
@@ -51,56 +52,61 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
 </script>
 
 <template>
-  <!-- Global error boundary -->
-  <ErrorBoundary>
-    <template #default>
-      <Layout
-        v-if="globalStates.layout.custom !== true"
-        :page="globalStates.pages.current"
-        :to-show-sidebar="
-          !Array.isArray(globalStates.layout.custom) ||
-          !globalStates.layout.custom.includes('sidebar')
-        "
-        :to-show-context-menu="
-          !Array.isArray(globalStates.layout.custom) ||
-          !globalStates.layout.custom.includes('contextMenu')
-        "
-        :to-show-native-context-menu="globalStates.development?.enableNativeContextMenu ?? false"
-      >
-        <Router
-          v-if="globalStates.pages.current !== 'none'"
+  <!-- Keep process handles alive across layouts and error-boundary fallbacks. -->
+  <ContextProviders>
+    <!-- Global error boundary -->
+    <ErrorBoundary>
+      <template #default>
+        <Layout
+          v-if="globalStates.layout.custom !== true"
           :page="globalStates.pages.current"
-        />
+          :to-show-sidebar="
+            !Array.isArray(globalStates.layout.custom) ||
+            !globalStates.layout.custom.includes('sidebar')
+          "
+          :to-show-context-menu="
+            !Array.isArray(globalStates.layout.custom) ||
+            !globalStates.layout.custom.includes('contextMenu')
+          "
+          :to-show-native-context-menu="
+            globalStates.development?.enableNativeContextMenu ?? false
+          "
+        >
+          <Router
+            v-if="globalStates.pages.current !== 'none'"
+            :page="globalStates.pages.current"
+          />
 
-        <Transition name="pop">
-          <LogViewer v-if="globalStates.logs.show" />
-        </Transition>
+          <Transition name="pop">
+            <LogViewer v-if="globalStates.logs.show" />
+          </Transition>
 
-        <DevelopmentMode
-          v-if="globalStates.development"
-          :development="globalStates.development"
-        />
-        <NonBundledClasses />
-      </Layout>
-      <CustomLayout v-else />
+          <DevelopmentMode
+            v-if="globalStates.development"
+            :development="globalStates.development"
+          />
+          <NonBundledClasses />
+        </Layout>
+        <CustomLayout v-else />
 
-      <ConfigSyncer />
-    </template>
+        <ConfigSyncer />
+      </template>
 
-    <template #error="{ currentError }">
-      <GlobalError :error="currentError" />
-    </template>
-  </ErrorBoundary>
+      <template #error="{ currentError }">
+        <GlobalError :error="currentError" />
+      </template>
+    </ErrorBoundary>
 
-  <!-- Extension-level error boundary -->
-  <ErrorBoundary>
-    <template #default>
-      <CssThemeLoader />
-      <ExtensionLoader v-if="globalStates.extensions.enabled" />
-    </template>
+    <!-- Extension-level error boundary -->
+    <ErrorBoundary>
+      <template #default>
+        <CssThemeLoader />
+        <ExtensionLoader v-if="globalStates.extensions.enabled" />
+      </template>
 
-    <template #error="{ currentError }">
-      <ExtensionsError :error="currentError" />
-    </template>
-  </ErrorBoundary>
+      <template #error="{ currentError }">
+        <ExtensionsError :error="currentError" />
+      </template>
+    </ErrorBoundary>
+  </ContextProviders>
 </template>

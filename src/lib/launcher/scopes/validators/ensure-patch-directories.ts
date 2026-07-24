@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { exists, mkdir } from "@tauri-apps/plugin-fs";
-
 import FileStructure from "@/constants/file-structure.ts";
 import { CustomPatches, PatchUIDs } from "@/constants/meta.ts";
+import { Host } from "@/lib/capability-broker";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
@@ -42,15 +41,12 @@ export async function ensurePatchDirectories(
     logPrefix,
     `Checking if ${actualPatchUIDs.length} patch directories exist`,
   );
-  const existStatuses: Array<boolean> = await Promise.all(
-    actualPatchUIDs.map(uid => exists(
-      General.cachedJoin(
-        directories.base,
-        FileStructure.Folders.Cache.Path,
-        uid,
-      ),
-    )),
-  );
+  const patchPaths = actualPatchUIDs.map(uid => General.cachedJoin(
+    directories.base,
+    FileStructure.Folders.Cache.Path,
+    uid,
+  ));
+  const existStatuses = await Host.files.existsMany(patchPaths);
   const toCreate: Array<string> = [];
 
   for (const [index, status] of existStatuses.entries()) {
@@ -71,7 +67,5 @@ export async function ensurePatchDirectories(
     logPrefix,
     `Missing patch directories: ${toCreate.join(", ")}`,
   );
-  await Promise.all(
-    toCreate.map(path => mkdir(path)),
-  );
+  await Host.files.ensureDirectories(toCreate);
 }

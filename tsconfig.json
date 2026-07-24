@@ -12,7 +12,8 @@
      */
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "ark-of-atrahasis": ["./node_modules/ark-of-atrahasis/src/index.ts"]
     }
   }
 }

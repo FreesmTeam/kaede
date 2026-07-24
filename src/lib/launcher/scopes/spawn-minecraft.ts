@@ -17,14 +17,10 @@
  */
 
 import { LaunchStatus } from "@/constants/launcher.ts";
+import { type BrokerProcess, Host, type ProcessEvent } from "@/lib/capability-broker";
 import ExtensionsManager from "@/lib/extensions-manager";
 import { log } from "@/lib/logging/scopes/log.ts";
-import Processes from "@/lib/processes";
-import type {
-  LaunchResponseType,
-  MinecraftMetaType,
-  MinecraftProcessType,
-} from "@/types/launcher/launch/launch-response.type.ts";
+import type { LaunchResponseType } from "@/types/launcher/launch/launch-response.type.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
@@ -63,42 +59,97 @@ export async function spawnMinecraft({
     `Spawning a Minecraft process with the '${directories.instance}' working directory`,
   );
 
-  let process: MinecraftProcessType;
+  const decoders = {
+    "stdout": new TextDecoder,
+    "stderr": new TextDecoder,
+  } as const;
+  const decoderFlushOrder: Array<"stdout" | "stderr"> = ["stdout", "stderr"];
+  const processState: { "current"?: BrokerProcess } = {};
+  const queuedEvents: Array<ProcessEvent> = [];
+  let terminalEvent: Extract<ProcessEvent, { "kind": "terminated" | "failed" }> | undefined;
+  let launchSucceeded = false;
+  const decodeOutput = (kind: "stdout" | "stderr", bytes: Uint8Array): string => {
+    decoderFlushOrder.splice(decoderFlushOrder.indexOf(kind), 1);
+    decoderFlushOrder.push(kind);
+
+    return decoders[kind].decode(bytes, { "stream": true });
+  };
+  const flushOutput = (): void => {
+    for (const kind of decoderFlushOrder) {
+      const remaining = decoders[kind].decode();
+
+      if (remaining !== "") {
+        onInput(remaining);
+      }
+    }
+  };
+  const handleEvent = (event: ProcessEvent): void => {
+    const process = processState.current;
+
+    if (process === undefined) {
+      queuedEvents.push(event);
+
+      return;
+    }
+
+    if (terminalEvent !== undefined) {
+      return;
+    }
+
+    switch (event.kind) {
+      case "stdout":
+      case "stderr": {
+        const output = decodeOutput(event.kind, event.bytes);
+
+        if (output !== "") {
+          onInput(output);
+        }
+        break;
+      }
+      case "terminated": {
+        terminalEvent = event;
+        flushOutput();
+        if (!launchSucceeded) {
+          statuses.current = LaunchStatus.General.Aborted;
+        }
+        onClose(instanceId);
+        log.warn(logPrefix, log.templates.json.contents("Successfully closed. Payload", event));
+        void ExtensionsManager.catchAsyncVoidHooks({
+          "scope" : "onMinecraftKill",
+          "toPass": process.pid,
+          "timing": "after",
+        });
+        break;
+      }
+      case "error": {
+        log.error(logPrefix, log.templates.json.contents("Process diagnostic. Payload", event));
+        break;
+      }
+      case "failed": {
+        terminalEvent = event;
+        flushOutput();
+        onClose(instanceId);
+        statuses.current = LaunchStatus.Errors.UnhandledError;
+        log.error(logPrefix, log.templates.json.contents("Something went wrong. Payload", event));
+        void ExtensionsManager.catchAsyncVoidHooks({
+          "scope" : "onMinecraftKill",
+          "toPass": process.pid,
+          "timing": "after",
+        });
+        break;
+      }
+    }
+  };
+
+  let process: BrokerProcess;
 
   try {
-    process = await Processes.spawnProcess<MinecraftMetaType>({
-      "program": { "type": "path", "value": command.java },
-      "args"   : command.arguments,
-      "cwd"    : directories.instance,
-      "kind"   : "minecraft",
-      "meta"   : { instanceId },
-    }, {
-      "onOutput": onInput,
-      "onExit"  : payload => {
-        onClose(instanceId);
-        log.warn(logPrefix, log.templates.json.contents(
-          "Successfully closed. Payload",
-          payload,
-        ));
-        void ExtensionsManager.catchAsyncVoidHooks({
-          "scope" : "onMinecraftKill",
-          "toPass": payload.pid,
-          "timing": "after",
-        });
-      },
-      "onError": payload => {
-        statuses.current = LaunchStatus.Errors.UnhandledError;
-        log.error(logPrefix, log.templates.json.contents(
-          "Something went wrong. Payload",
-          payload,
-        ));
-        void ExtensionsManager.catchAsyncVoidHooks({
-          "scope" : "onMinecraftKill",
-          "toPass": payload.pid,
-          "timing": "after",
-        });
-      },
-    });
+    process = await Host.processes.launchMinecraft({
+      "executable": command.java,
+      "arguments" : command.arguments,
+      "cwd"       : directories.instance,
+      instanceId,
+    }, handleEvent);
   } catch (error: unknown) {
     statuses.current = LaunchStatus.Errors.UnhandledError;
     log.error(logPrefix, log.templates.json.contents(
@@ -109,14 +160,29 @@ export async function spawnMinecraft({
     return { "success": false, "process": undefined };
   }
 
+  processState.current = process;
+
+  for (const event of queuedEvents) {
+    handleEvent(event);
+  }
+
+  if (terminalEvent !== undefined) {
+    return { "success": false, "process": undefined };
+  }
+
   await ExtensionsManager.catchAsyncVoidHooks({
     "scope" : "onMinecraftLaunch",
     "toPass": { process, command, instanceId, necessaries },
     "timing": "after",
   });
 
+  if (terminalEvent !== undefined) {
+    return { "success": false, "process": undefined };
+  }
+
   log.info(logPrefix, `Successfully launched with the ${process.pid} PID`);
   statuses.current = LaunchStatus.General.Success;
+  launchSucceeded = true;
 
   return { "success": true, process };
 }

@@ -1,5 +1,6 @@
-import type { Static } from "typebox";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
-import type { ConfigSchema } from "@/lib/schemas/scopes/config";
-
-export type ConfigType = Static<typeof ConfigSchema>;
+export type ConfigType = Pick<
+  GlobalStatesType,
+  "development" | "extensions" | "layout" | "logs" | "minecraft" | "misc"
+>;

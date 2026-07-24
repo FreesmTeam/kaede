@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { computed, onMounted, type Ref } from "vue";
 
+import { DirectHost } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
@@ -33,7 +33,7 @@ onMounted(async () => {
         "User has enabled 'show-after-extensions-initialization';",
         "extensions loading has failed. Showing the webview now",
       );
-      await getCurrentWebviewWindow().show();
+      await DirectHost.showMainWebview();
     } catch (error: unknown) {
       log.error(
         __PRE_BUNDLED_FILENAME__,

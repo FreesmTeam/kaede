@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ask } from "@tauri-apps/plugin-dialog";
-
 import { ApplicationName } from "@/constants/application.ts";
+import { Host } from "@/lib/capability-broker";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 
 export async function toggleVirtualization({
@@ -29,14 +28,12 @@ export async function toggleVirtualization({
   "length"     : number;
 }): Promise<void> {
   if (virtualized && length >= 512) {
-    const answer = await ask(
-      "Virtualization was enabled because your log file is big. " +
-      "Disabling it may freeze your launcher for a bit. Do you want to disable virtualization?",
-      {
-        "title": ApplicationName,
-        "kind" : "warning",
-      },
-    );
+    const answer = await Host.dialogs.ask({
+      "message": "Virtualization was enabled because your log file is big. " +
+        "Disabling it may freeze your launcher for a bit. Do you want to disable virtualization?",
+      "title": ApplicationName,
+      "kind" : "warning",
+    });
 
     if (!answer) {
       return;

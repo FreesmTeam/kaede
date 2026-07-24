@@ -16,12 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { computed } from "vue";
+import { computed, type ComputedRef } from "vue";
 
 import General from "@/lib/general";
 import { globalStates } from "@/states/global.ts";
 
-export function useConfigColors() {
+export function useConfigColors(): {
+  readonly "styles": ComputedRef<ReturnType<typeof General.getSidebarInnerStyles>>;
+} {
   const styles = computed(
     (): ReturnType<typeof General.getSidebarInnerStyles> => (
       General.getSidebarInnerStyles(

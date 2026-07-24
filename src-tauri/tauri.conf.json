@@ -11,7 +11,7 @@
   },
   "app": {
     "macOSPrivateApi": true,
-    "withGlobalTauri": true,
+    "withGlobalTauri": false,
     "windows": [
       {
         "label": "main",
@@ -27,13 +27,42 @@
       }
     ],
     "security": {
-      "csp": null,
+      "csp": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'unsafe-eval'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:", "blob:", "https:", "http:"],
+        "media-src": ["'self'", "data:", "blob:", "https:", "http:"],
+        "font-src": ["'self'", "data:"],
+        "connect-src": ["'self'", "ipc:", "http://ipc.localhost"],
+        "worker-src": ["'none'"],
+        "child-src": ["'none'"],
+        "object-src": ["'none'"],
+        "frame-src": ["'none'"],
+        "frame-ancestors": ["'none'"],
+        "form-action": ["'none'"],
+        "base-uri": ["'none'"]
+      },
+      "devCsp": {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'unsafe-eval'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:", "blob:", "https:", "http:"],
+        "media-src": ["'self'", "data:", "blob:", "https:", "http:"],
+        "font-src": ["'self'", "data:"],
+        "connect-src": ["'self'", "ipc:", "http://ipc.localhost", "ws://localhost:5173"],
+        "worker-src": ["'none'"],
+        "child-src": ["'none'"],
+        "object-src": ["'none'"],
+        "frame-src": ["'none'"],
+        "frame-ancestors": ["'none'"],
+        "form-action": ["'none'"],
+        "base-uri": ["'none'"]
+      },
       "assetProtocol": {
-        "enable": true,
-        "scope": {
-          "allow": ["**/*"]
-        }
-      }
+        "enable": false
+      },
+      "capabilities": ["main"]
     }
   },
   "bundle": {

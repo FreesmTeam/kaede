@@ -1,4 +1,3 @@
-import { cancel, onInvalidUrl, onUrl, start } from "@fabianlars/tauri-plugin-oauth";
 import * as Vue from "vue";
 
 import _Application from "@/constants/application.ts";
@@ -30,14 +29,6 @@ import { getGlobalStates } from "@/states/global.ts";
 import { getInstanceStates } from "@/states/instance.ts";
 
 export function declareGlobals(): void {
-  window.__TAURI_PLUGINS_COMMUNITY__ = {
-    "oauth2": {
-      cancel,
-      onInvalidUrl,
-      onUrl,
-      start,
-    },
-  };
   window.__KAEDE_INTERNALS__ = GlobalInternals;
   window.__KAEDE__ = GlobalObject;
 
@@ -86,4 +77,9 @@ export function declareGlobals(): void {
     },
   };
   GlobalObject.packages.vue = Vue;
+}
+
+export function revokeExtensionGlobals(): void {
+  Reflect.deleteProperty(window, "__KAEDE__");
+  Reflect.deleteProperty(window, "__KAEDE_INTERNALS__");
 }

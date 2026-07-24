@@ -17,17 +17,6 @@
  */
 
 /* eslint-disable max-lines */
-import type * as TauriOAuth2 from "@fabianlars/tauri-plugin-oauth";
-import type * as TauriApi from "@tauri-apps/api";
-import type * as TauriClipboard from "@tauri-apps/plugin-clipboard-manager";
-import type * as TauriDialog from "@tauri-apps/plugin-dialog";
-import type * as TauriFs from "@tauri-apps/plugin-fs";
-import type * as TauriHttp from "@tauri-apps/plugin-http";
-import type * as TauriNotification from "@tauri-apps/plugin-notification";
-import type * as TauriOpener from "@tauri-apps/plugin-opener";
-import type * as TauriOs from "@tauri-apps/plugin-os";
-import type * as TauriProcess from "@tauri-apps/plugin-process";
-import type * as TauriUpload from "@tauri-apps/plugin-upload";
 import type { App } from "vue";
 
 import type _Application from "@/constants/application.ts";
@@ -41,6 +30,7 @@ import type _Meta from "@/constants/meta.ts";
 import type _Permissions from "@/constants/permissions.ts";
 import type _Routes from "@/constants/routes.ts";
 import type Browser from "@/lib/browser";
+import type { BrokerProcess, BrokerServerProcess } from "@/lib/capability-broker";
 import type Configs from "@/lib/configs";
 import type DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import type Errors from "@/lib/errors";
@@ -52,7 +42,7 @@ import type Instances from "@/lib/instances";
 import type Launcher from "@/lib/launcher";
 import type Logging from "@/lib/logging";
 import type Schemas from "@/lib/schemas";
-import Txiki from "@/lib/txiki";
+import type Txiki from "@/lib/txiki";
 import type {
   GlobalStatesChangerType,
   GlobalStatesType,
@@ -66,7 +56,6 @@ import type { RouteType } from "@/types/application/route.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 import type { HookReturnType } from "@/types/extensions/hook-return.type.ts";
-import type { PermissionType } from "@/types/extensions/permission.type.ts";
 import type { MappedArtifactType } from "@/types/launcher/artifacts/mapped-artifact.type.ts";
 import type {
   ArgumentAuthReplacementsType,
@@ -83,42 +72,21 @@ import type {
 import type { AtAGlanceType } from "@/types/misc/at-a-glance.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
-/* Expand the globals with Kaede and Tauri namespaces */
+/* Describe the temporary bootstrap aliases installed before extension isolation */
 declare global {
 
   /* This variable is replaced to the source code file name at build time */
   const __PRE_BUNDLED_FILENAME__: string;
 
-  /* Declared in the '@/lib/globals/scopes/declare-window.ts' */
+  /* Installed during bootstrap and revoked before sandbox evaluation */
   interface Window {
 
-    /* Tauri internals */
-    "__TAURI_INTERNALS__": object;
-
-    /* Tauri exposes these */
-    "__TAURI__": typeof TauriApi & {
-      "dialog"          : typeof TauriDialog;
-      "clipboardManager": typeof TauriClipboard;
-      "fs"              : typeof TauriFs;
-      "http"            : typeof TauriHttp;
-      "notification"    : typeof TauriNotification;
-      "opener"          : typeof TauriOpener;
-      "os"              : typeof TauriOs;
-      "process"         : typeof TauriProcess;
-      "upload"          : typeof TauriUpload;
-    };
-
-    /* Tauri community plugins */
-    "__TAURI_PLUGINS_COMMUNITY__": {
-      "oauth2": typeof TauriOAuth2;
-    };
-
     /**
-     * Workarounds for application internals.
+     * Bootstrap-only application internals.
      *
-     * These fields are generally not intended to be modified by extensions
+     * This alias is absent after extension isolation and is never a sandbox API.
      */
-    "__KAEDE_INTERNALS__": {
+    "__KAEDE_INTERNALS__"?: {
       // Gets current application global states (use 'libs.GlobalStateHelpers#get')
       "getGlobalStates"     : () => GlobalStatesType;
       // Changes application global states (use 'libs.GlobalStateHelpers#change')
@@ -127,11 +95,6 @@ declare global {
       "getInstanceStates"   : () => InstanceStatesType;
       // Changes application instance states (use 'libs.Instances#change')
       "changeInstanceStates": InstanceStatesChangerType;
-      // Requests plugin permissions from user
-      "requestPermissions"  : (
-        permissions: Array<PermissionType>,
-        extension: string
-      ) => Promise<Array<boolean>>;
       // Syncs the config file using global states
       "syncConfig"          : () => Promise<void>;
       // Platform-specific delimiter obtained by a single invoke of Tauri 'join'
@@ -161,14 +124,22 @@ declare global {
       /* Needed for browser environments (non-application) */
       "logsInBrowser"       : Array<string>;
       "indexedDB"          ?: IDBDatabase;
+
+      /* Stores the server processes */
+      "serverProcesses"     : Array<{
+        "name" : string;
+        "port" : number;
+        "value": BrokerServerProcess;
+      }>;
     };
 
     /**
-     * Application namespace.
+     * Bootstrap-only application namespace alias.
      *
-     * Extensions can extend this namespace
+     * Trusted extensions receive the namespace explicitly as `scopedThis.Kaede`.
+     * Sandboxed extensions cannot access this optional window alias.
      */
-    "__KAEDE__": {
+    "__KAEDE__"?: {
 
       /**
        * Exposed packages.
@@ -187,11 +158,11 @@ declare global {
        * Example:
        *
        * ```ts
-       * // Somewhere in a plugin.
+       * // Inside a trusted plugin.
        * // This assignment changes the config filename for everyone,
        * // meaning that now the config file will be stored
        * // under 'config.json5' instead of 'config.json'
-       * window.__KAEDE__.libs.FileStructure.Files.Config = "config.json5";
+       * scopedThis.Kaede.constants.FileStructure.Files.Config = "config.json5";
        * ```
        */
       "constants": {
@@ -266,8 +237,8 @@ declare global {
        * // This assignment overwrites the 'debug' field in the 'log' object
        * // with a reference to the 'customDebugFunction' function,
        * // so all upcoming 'log#debug' calls will use the 'customDebugFunction' function
-       * // even if calls were not made via accessing the 'window' object
-       * window.__KAEDE__.libs.Logging.log.debug = customDebugFunction;
+       * // even if calls were not made through the explicit trusted context
+       * scopedThis.Kaede.libs.Logging.log.debug = customDebugFunction;
        * ```
        */
       "libs": {
@@ -1680,11 +1651,7 @@ declare global {
            */
           "after": HookReturnType<
             {
-              "process": {
-                "pid"  : number;
-                "kill" : () => Promise<void>;
-                "write": (data: string | Uint8Array | number[]) => Promise<void>;
-              };
+              "process": BrokerProcess;
               // [javaBinary, launchCommand]
               "command": [string, string];
               "auth"   : {
@@ -1730,13 +1697,7 @@ declare global {
            * If the hook returns a 'continue' status,
            * code execution will continue as if that hook did not exist.
            */
-          "before": HookReturnType<
-            {
-              "pid" : number;
-              "kill": () => Promise<void>;
-            },
-            void
-          >;
+          "before": HookReturnType<BrokerProcess, void>;
 
           /**
            * Executes 'async' or 'sync' functions after the instance was killed.
@@ -1761,5 +1722,5 @@ declare global {
 }
 
 /* Export the Kaede namespace type */
-export type KaedeNamespaceType = Window["__KAEDE__"];
-export type KaedeInternalsType = Window["__KAEDE_INTERNALS__"];
+export type KaedeNamespaceType = NonNullable<Window["__KAEDE__"]>;
+export type KaedeInternalsType = NonNullable<Window["__KAEDE_INTERNALS__"]>;

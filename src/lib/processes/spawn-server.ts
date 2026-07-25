@@ -37,7 +37,7 @@ export async function spawnServer({ name, program, args, port }: {
     "kind": "extension-server",
     "meta": { name, port },
   }, {
-    "onOutput": (line, stream) => (stream === "stdout" ? log.debug : log.error)(
+    "onOutput": (line, stream) => (stream === "stdout" ? log.info : log.error)(
       __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", line,
     ),
     "onExit": () => {

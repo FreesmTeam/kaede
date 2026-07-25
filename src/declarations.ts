@@ -52,6 +52,7 @@ import type Instances from "@/lib/instances";
 import type Launcher from "@/lib/launcher";
 import type Logging from "@/lib/logging";
 import type Schemas from "@/lib/schemas";
+import Txiki from "@/lib/txiki";
 import type {
   GlobalStatesChangerType,
   GlobalStatesType,
@@ -330,6 +331,11 @@ declare global {
          * Launcher collection of typebox validation schemas
          */
         "Schemas": typeof Schemas;
+
+        /**
+         * Launcher utils for extensions to conveniently run txiki.js servers
+         */
+        "Txiki": typeof Txiki;
 
         /**
          * Launcher context menu related collection of utilities

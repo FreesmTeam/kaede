@@ -20,16 +20,21 @@ import Errors from "@/lib/errors";
 import { getFreePort } from "@/lib/extensions-manager/scopes/txiki/get-free-port.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import Processes from "@/lib/processes";
+import type { ServerProcessType } from "@/types/application/server-process.type.ts";
 
-export async function serveFile(name: string, filePath: string): Promise<void> {
-  const port: number = getFreePort();
+export async function serveFile(
+  name: string,
+  filePath: string,
+  port?: number,
+): Promise<ServerProcessType | undefined> {
+  const selectedPort: number = port ?? getFreePort();
 
   try {
-    await Processes.spawnServer({
+    return Processes.spawnServer({
       name,
-      port,
+      "port"   : selectedPort,
       "program": { "type": "sidecar", "value": "txiki-server" },
-      "args"   : ["serve", "--port", port.toString(), filePath],
+      "args"   : ["serve", "--port", selectedPort.toString(), filePath],
     });
   } catch (error: unknown) {
     log.error(

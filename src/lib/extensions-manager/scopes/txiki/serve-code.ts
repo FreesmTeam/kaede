@@ -23,8 +23,13 @@ import Errors from "@/lib/errors";
 import { serveFile } from "@/lib/extensions-manager/scopes/txiki/serve-file.ts";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
+import type { ServerProcessType } from "@/types/application/server-process.type.ts";
 
-export async function serveCode(name: string, code: string): Promise<void> {
+export async function serveCode(
+  name: string,
+  code: string,
+  port?: number,
+): Promise<ServerProcessType | undefined> {
   const hash: string = General.hashStringCrypto(code);
   const shortHash: string = hash.slice(0, 7);
   const filePath: string = General.cachedJoin(
@@ -49,5 +54,5 @@ export async function serveCode(name: string, code: string): Promise<void> {
     }
   }
 
-  return serveFile(name, filePath);
+  return serveFile(name, filePath, port);
 }

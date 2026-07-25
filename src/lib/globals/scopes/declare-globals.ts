@@ -25,6 +25,7 @@ import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import Logging from "@/lib/logging";
 import Schemas from "@/lib/schemas";
+import Txiki from "@/lib/txiki";
 import { getGlobalStates } from "@/states/global.ts";
 import { getInstanceStates } from "@/states/instance.ts";
 
@@ -70,6 +71,7 @@ export function declareGlobals(): void {
     Launcher,
     Logging,
     Schemas,
+    Txiki,
     "ContextMenu": {
 
       /* These fields will be overwritten later */

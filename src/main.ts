@@ -48,8 +48,10 @@ import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
-const startTime = performance.now();
-
+log.info(
+  __PRE_BUNDLED_FILENAME__,
+  `Starting to execute 'main.ts' at time mark: ${performance.now().toFixed(1)} ms`,
+);
 Watchers.watchErrors();
 
 // The global object is accessed not only by extensions but by the application itself
@@ -171,7 +173,7 @@ AppInstance.mount(ApplicationRootID);
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Initializing launcher");
 await General
-  .finalizeInitialization({ config, baseDirectory, startTime })
+  .finalizeInitialization({ config, baseDirectory })
   .catch((error: unknown) => {
     log.error(__PRE_BUNDLED_FILENAME__, "Failed to initialize launcher:", Errors.prettify(error));
   });

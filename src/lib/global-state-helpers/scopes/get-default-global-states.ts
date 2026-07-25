@@ -64,7 +64,10 @@ export function getDefaultGlobalStates(): GlobalStatesType {
     ],
     "contextMenuItems": [...ContextMenuItems],
     "development"     : {
+      "loadErudaDevTools"         : false,
       "showFPS"                   : false,
+      "showCPUUsage"              : false,
+      "showMemoryUsage"           : false,
       "enableDebugMode"           : false,
       "enableNativeContextMenu"   : false,
       "enableNativeReloadKeyBinds": false,

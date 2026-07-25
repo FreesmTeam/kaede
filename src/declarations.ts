@@ -153,8 +153,6 @@ declare global {
       "launchCount"         : number;
       // A temporary storage for the 'At a Glance' widget
       "atAGlance"          ?: AtAGlanceType;
-      // A timestamp for the application code initialization
-      "startTime"          ?: number;
       // A Java major version (for example, 8, 11, or 17)
       "javaMajor"          ?: number;
       "appInstance"        ?: App<Element>;

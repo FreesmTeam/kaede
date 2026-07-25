@@ -8,8 +8,16 @@ const testName = "Default Config: No arguments";
 
 test(testName, async () => {
   const defaultConfig: ConfigType = {
-    "development": null,
-    "extensions" : {
+    "development": {
+      "loadErudaDevTools"         : false,
+      "showFPS"                   : false,
+      "showCPUUsage"              : false,
+      "showMemoryUsage"           : false,
+      "enableDebugMode"           : false,
+      "enableNativeContextMenu"   : false,
+      "enableNativeReloadKeyBinds": false,
+    },
+    "extensions": {
       "enabled"                   : true,
       "allowUnrestrictedUntrusted": true,
     },

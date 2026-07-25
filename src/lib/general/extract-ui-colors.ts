@@ -20,5 +20,5 @@ import type { GlobalStatesLayoutType } from "@/types/application/global-states.t
 import type { UiColorsType } from "@/types/application/ui-colors.type.ts";
 
 export function extractUiColors(layout: GlobalStatesLayoutType): UiColorsType {
-
+  return layout as unknown as UiColorsType;
 }

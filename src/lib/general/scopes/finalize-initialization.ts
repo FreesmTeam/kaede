@@ -11,11 +11,9 @@ import type { ConfigType } from "@/types/configs/config.type.ts";
 export async function finalizeInitialization({
   config,
   baseDirectory,
-  startTime,
 }: {
   "config"       : ConfigType;
   "baseDirectory": string;
-  "startTime"    : number;
 }): Promise<void> {
   const afterExtensions =
     config.extensions.enabled &&
@@ -35,7 +33,7 @@ export async function finalizeInitialization({
      * The 'startTime' variable is not accessible by the deeply nested
      * 'ExtensionLoader.vue' component without exposing that variable through the 'window' object.
      */
-    GlobalInternals.startTime = startTime;
+    // GlobalInternals.startTime = startTime;
   } else {
     /*
      * Webview window is still hidden, so make it visible now
@@ -47,7 +45,7 @@ export async function finalizeInitialization({
     log.info(
       __PRE_BUNDLED_FILENAME__,
       "Launcher successfully initialized in:",
-      (performance.now() - startTime).toFixed(1),
+      performance.now().toFixed(1),
       "ms",
     );
   }

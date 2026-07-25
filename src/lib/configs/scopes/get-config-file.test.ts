@@ -3,8 +3,16 @@ import { expect, mock, test } from "bun:test";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 const defaultConfig: ConfigType = {
-  "development": null,
-  "extensions" : {
+  "development": {
+    "loadErudaDevTools"         : false,
+    "showFPS"                   : false,
+    "showCPUUsage"              : false,
+    "showMemoryUsage"           : false,
+    "enableDebugMode"           : false,
+    "enableNativeContextMenu"   : false,
+    "enableNativeReloadKeyBinds": false,
+  },
+  "extensions": {
     "enabled"                   : true,
     "allowUnrestrictedUntrusted": true,
   },

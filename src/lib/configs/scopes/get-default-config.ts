@@ -14,8 +14,16 @@ export async function getDefaultConfig(): Promise<ConfigType> {
   }
 
   return {
-    "development": null,
-    "extensions" : {
+    "development": {
+      "loadErudaDevTools"         : false,
+      "showFPS"                   : false,
+      "showCPUUsage"              : false,
+      "showMemoryUsage"           : false,
+      "enableDebugMode"           : false,
+      "enableNativeContextMenu"   : false,
+      "enableNativeReloadKeyBinds": false,
+    },
+    "extensions": {
       "enabled"                   : true,
       "allowUnrestrictedUntrusted": true,
     },

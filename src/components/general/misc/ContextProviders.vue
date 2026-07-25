@@ -268,3 +268,7 @@ provide<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey, logs)
 provide<(instanceId?: string) => Promise<void>>(LaunchInstanceContextKey, launchInstance);
 provide<(instanceId: string) => Promise<void>>(CloseInstanceContextKey, closeInstance);
 </script>
+
+<template>
+  <slot />
+</template>

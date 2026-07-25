@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Child, Command, makePowershellScript } from "tauri-plugin-shellx-api";
+// import { Child, Command, makePowershellScript } from "tauri-plugin-shellx-api";
 
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {

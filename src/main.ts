@@ -50,6 +50,8 @@ import type { TranslationsType } from "@/types/translations/translations.type.ts
 
 const startTime = performance.now();
 
+Watchers.watchErrors();
+
 // The global object is accessed not only by extensions but by the application itself
 Globals.declareGlobals();
 

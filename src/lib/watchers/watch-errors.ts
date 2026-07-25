@@ -16,13 +16,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchErrors } from "@/lib/watchers/watch-errors.ts";
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import { watchDevelopmentStates, watchLayoutStates } from "@/lib/watchers/watch-states.ts";
+import Errors from "@/lib/errors";
+import { log } from "@/lib/logging/scopes/log.ts";
 
-export default {
-  watchProcesses,
-  watchDevelopmentStates,
-  watchLayoutStates,
-  watchErrors,
-} as const;
+const handleError = (event: ErrorEvent): void => {
+  log.error(__PRE_BUNDLED_FILENAME__, "Uncaught error:", Errors.prettify(event.error));
+};
+const handleRejection = (event: PromiseRejectionEvent): void => {
+  log.error(__PRE_BUNDLED_FILENAME__, "Unhandled rejection:", Errors.prettify(event.reason));
+};
+
+export function watchErrors(): () => void {
+  window.addEventListener("error", handleError);
+  window.addEventListener("unhandledrejection", handleRejection);
+
+  return (): void => {
+    window.removeEventListener("error", handleError);
+    window.removeEventListener("unhandledrejection", handleRejection);
+  };
+}

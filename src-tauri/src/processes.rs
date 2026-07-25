@@ -173,3 +173,49 @@ pub fn write_process(registry: State<'_, ProcessRegistry>, pid: u32, data: Stdin
         StdinData::Bytes(b) => entry.child.write(b),
     }.map_err(|e| e.to_string())
 }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RunSpec {
+    program: Program,
+    #[serde(default)]
+    args: Vec<String>,
+    #[serde(default)]
+    cwd: Option<PathBuf>,
+    #[serde(default)]
+    env: Option<HashMap<String, String>>,
+}
+
+#[derive(Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct RunResult {
+    code: Option<i32>,
+    success: bool,
+    stdout: String,
+    stderr: String,
+}
+
+#[tauri::command]
+pub async fn run_process(app: AppHandle, spec: RunSpec) -> Result<RunResult, String> {
+    let mut command = match &spec.program {
+        Program::Path(program) => app.shell().command(program),
+        Program::Sidecar(name) => app.shell().sidecar(name).map_err(|e| e.to_string())?,
+    };
+
+    command = command.args(&spec.args);
+    if let Some(cwd) = &spec.cwd {
+        command = command.current_dir(cwd);
+    }
+    if let Some(env) = &spec.env {
+        command = command.envs(env.clone());
+    }
+
+    let output = command.output().await.map_err(|e| e.to_string())?;
+
+    Ok(RunResult {
+        code: output.status.code(),
+        success: output.status.success(),
+        stdout: String::from_utf8_lossy(&output.stdout).into_owned(),
+        stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
+    })
+}

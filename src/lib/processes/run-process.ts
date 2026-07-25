@@ -16,16 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { rehydrateProcesses } from "@/lib/processes/core.ts";
-import { hydrate } from "@/lib/processes/hydrate.ts";
-import { runProcess } from "@/lib/processes/run-process.ts";
-import { spawnProcess } from "@/lib/processes/spawn-process.ts";
-import { spawnServer } from "@/lib/processes/spawn-server.ts";
+import { invoke } from "@tauri-apps/api/core";
 
-export default {
-  rehydrateProcesses,
-  hydrate,
-  runProcess,
-  spawnProcess,
-  spawnServer,
-} as const;
+import type { ProgramSpecType, RunResultType } from "@/types/application/server-process.type.ts";
+
+export async function runProcess(options: {
+  "program": ProgramSpecType;
+  "args"?  : Array<string>;
+  "cwd"?   : string;
+  "env"?   : Record<string, string>;
+}): Promise<RunResultType> {
+  return invoke<RunResultType>("run_process", { "spec": options });
+}

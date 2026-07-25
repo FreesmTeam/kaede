@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { type Child } from "tauri-plugin-shellx-api";
 import { markRaw, provide, reactive, ref, type ShallowReactive, shallowReactive } from "vue";
 
 import {
@@ -17,9 +16,14 @@ import General from "@/lib/general";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/scopes/log.ts";
+import { rehydrateProcesses } from "@/lib/processes/core.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
-import type { LaunchResponseType } from "@/types/launcher/launch/launch-response.type.ts";
+import type {
+  LaunchResponseType,
+  MinecraftMetaType,
+  MinecraftProcessType,
+} from "@/types/launcher/launch/launch-response.type.ts";
 import type {
   LauncherStatusesType,
   WrappedInstanceLauncherStatusesType,
@@ -30,16 +34,42 @@ const accounts = ref<Array<AccountType>>(GlobalInternals.temporaryAccounts);
 const launches = reactive<Record<string, LauncherStatusesType>>({});
 const logs = shallowReactive<Record<string, Array<string>>>({});
 
-const childProcesses: Record<string, Child> = {};
+const childProcesses: Record<string, MinecraftProcessType> = {};
 
 // Do not expose accounts data to globals since extensions will easily access it
 GlobalInternals.temporaryAccounts = [];
 
 function onClose(instanceId: string): void {
-  const statuses: LauncherStatusesType = launches[instanceId];
+  const statuses: LauncherStatusesType | undefined = launches[instanceId];
+
+  // A closed process must not be killable/writable anymore
+  delete childProcesses[instanceId];
+
+  if (!statuses) {
+    return;
+  }
 
   statuses.launching = 0;
   statuses.current = LaunchStatus.General.Aborted;
+}
+
+function createLogSink(instanceId: string): (line: string) => void {
+  // Overwrite the previous launch logs
+  logs[instanceId] = [];
+
+  // Retrieving a reference to the logs array by using computed properties is quite expensive
+  const currentLogsArray: Array<string> = logs[instanceId];
+  // Avoid checking three references in a row just to get the line count limit
+  const lineLimit: number = GeneralSettings.Logs.LineLimit;
+
+  return (line: string): void => {
+    if (currentLogsArray.length > lineLimit) {
+      // Clear the array if the line count exceeded the limit
+      currentLogsArray.length = 0;
+    }
+
+    currentLogsArray.push(line);
+  };
 }
 
 async function launchInstance(instanceId?: string): Promise<void> {
@@ -81,22 +111,7 @@ async function launchInstance(instanceId?: string): Promise<void> {
   statuses.current = LaunchStatus.General.Starting;
 
   try {
-    // Overwrite the previous launch logs
-    logs[instanceId] = [];
-
-    // Retrieving a reference to the logs array by using computed properties is quite expensive
-    const currentLogsArray: Array<string> | undefined = logs[instanceId];
-    // Avoid checking three references in a row just to get the line count limit
-    const lineLimit: number = GeneralSettings.Logs.LineLimit;
-
-    const onInput = (line: string): void => {
-      if (currentLogsArray.length > lineLimit) {
-        // Clear the array if the line count exceeded the limit
-        currentLogsArray.length = 0;
-      }
-
-      currentLogsArray.push(line);
-    };
+    const onInput = createLogSink(instanceId);
     const javaMajor: number = GlobalInternals.javaMajor
       ?? await General.getJavaMajor();
 
@@ -139,11 +154,9 @@ async function launchInstance(instanceId?: string): Promise<void> {
     `Is success: '${statuses.launching === 2}'`,
   );
 }
+
 async function closeInstance(instanceId: string): Promise<void> {
-  const process: {
-    "pid" : number;
-    "kill": () => Promise<void>;
-  } | undefined = childProcesses[instanceId];
+  const process: MinecraftProcessType | undefined = childProcesses[instanceId];
 
   if (!process) {
     log.error(
@@ -165,13 +178,79 @@ async function closeInstance(instanceId: string): Promise<void> {
     return;
   }
 
-  await process.kill();
-  await ExtensionsManager.catchAsyncVoidHooks({
-    "scope" : "onMinecraftKill",
-    "toPass": process.pid,
-    "timing": "after",
-  });
+  try {
+    await process.kill();
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      `Could not kill the '${instanceId}' instance:`,
+      Errors.prettify(error),
+    );
+  }
 }
+
+async function rehydrateLaunchedInstances(): Promise<void> {
+  try {
+    const handles = await rehydrateProcesses(handle => {
+      if (handle.kind !== "minecraft") {
+        return;
+      }
+
+      const { instanceId } = handle.meta as MinecraftMetaType;
+
+      launches[instanceId] = {
+        "launching": 2,
+        "current"  : LaunchStatus.General.Success,
+        "downloads": {
+          "current": markRaw(new Map<string, [number, number]>),
+          "success": 0,
+          "failed" : 0,
+          "total"  : 0,
+        },
+      };
+
+      return {
+        "onOutput": createLogSink(instanceId),
+        "onExit"  : (payload): void => {
+          onClose(instanceId);
+          ExtensionsManager.catchAsyncVoidHooks({
+            "scope" : "onMinecraftKill",
+            "toPass": payload.pid,
+            "timing": "after",
+          });
+        },
+      };
+    });
+
+    let count: number = 0;
+
+    for (const handle of handles) {
+      if (handle.kind !== "minecraft") {
+        continue;
+      }
+
+      const _handle = handle as MinecraftProcessType;
+
+      childProcesses[_handle.meta.instanceId] = _handle;
+      count += 1;
+    }
+
+    if (count > 0) {
+      log.info(
+        __PRE_BUNDLED_FILENAME__,
+        `Rehydrated ${count} still-running instance(s) after a reload`,
+      );
+    }
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Failed to rehydrate launched instances:",
+      Errors.prettify(error),
+    );
+  }
+}
+
+rehydrateLaunchedInstances();
 
 /*
  * AFAIK, even unrestricted extensions should not be able to access this context
@@ -189,7 +268,3 @@ provide<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey, logs)
 provide<(instanceId?: string) => Promise<void>>(LaunchInstanceContextKey, launchInstance);
 provide<(instanceId: string) => Promise<void>>(CloseInstanceContextKey, closeInstance);
 </script>
-
-<template>
-  <slot />
-</template>

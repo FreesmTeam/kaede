@@ -1,6 +1,6 @@
 import { cancel, onInvalidUrl, onUrl, start } from "@fabianlars/tauri-plugin-oauth";
-import * as ShellXPlugin from "tauri-plugin-shellx-api";
 import * as Vue from "vue";
+
 import _Application from "@/constants/application.ts";
 import _ASCIIArt from "@/constants/ascii-art.ts";
 import _Browser from "@/constants/browser.ts";
@@ -35,9 +35,6 @@ export function declareGlobals(): void {
       onInvalidUrl,
       onUrl,
       start,
-    },
-    "shell": {
-      ...ShellXPlugin,
     },
   };
   window.__KAEDE_INTERNALS__ = GlobalInternals;

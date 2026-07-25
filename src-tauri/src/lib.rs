@@ -147,6 +147,7 @@ pub fn run() {
             processes::spawn_process,
             processes::kill_process,
             processes::write_process,
+            processes::run_process,
             system::get_system_memory,
             system::get_cpu_usage,
             zip::unzip_file,

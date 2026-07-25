@@ -55,3 +55,10 @@ export type ProcessDtoType<Meta = unknown> = {
   "kind" : string;
   "meta" : Meta;
 };
+
+export type RunResultType = {
+  "code"   : number | null;
+  "success": boolean;
+  "stdout" : string;
+  "stderr" : string;
+};

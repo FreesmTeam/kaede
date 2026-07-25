@@ -20,7 +20,15 @@ import { listen } from "@tauri-apps/api/event";
 
 import { ProcessHandlers } from "@/lib/processes/core.ts";
 
-export async function watchProcesses(): Promise<() => void> {
+let watchingPromise: Promise<() => void> | undefined;
+
+export function watchProcesses(): Promise<() => void> {
+  watchingPromise ??= attachListeners();
+
+  return watchingPromise;
+}
+
+async function attachListeners(): Promise<() => void> {
   const unlistenFunctions = await Promise.all([
     listen<{ "token": string; "pid": number; "stream": "stdout" | "stderr"; "line": string }>(
       "process-output",

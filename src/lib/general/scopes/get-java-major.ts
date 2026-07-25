@@ -1,19 +1,22 @@
-import { type ChildProcess, Command } from "tauri-plugin-shellx-api";
-
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
+import { runProcess } from "@/lib/processes/run-process.ts";
+import type { RunResultType } from "@/types/application/server-process.type.ts";
 
 const FamousAndOldJavaMajorVersion: number = 8;
 
 export async function getJavaMajor(): Promise<number> {
-  let process: ChildProcess<string>;
+  let result: RunResultType;
 
   try {
     log.debug(__PRE_BUNDLED_FILENAME__, "Getting the Java version");
-    process = await Command.create("java", [
-      // The '--version' arguments does not work in Java 8 and older
-      "-version",
-    ]).execute();
+    result = await runProcess({
+      "program": { "type": "path", "value": "java" },
+      "args"   : [
+        // The '--version' argument does not work in Java 8 and older
+        "-version",
+      ],
+    });
   } catch (error: unknown) {
     log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -31,7 +34,7 @@ export async function getJavaMajor(): Promise<number> {
    * Also, seems like the output is written into 'stderr' instead of 'stdout'
    * while the 'stdout' part remains an empty string
    */
-  const output: string = (process.stdout || process.stderr) ?? "";
+  const output: string = result.stdout || result.stderr;
   const parsed: Array<string> = output.split("\"");
   const possibleVersion: string | undefined = parsed?.[1];
 

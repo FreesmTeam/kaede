@@ -72,7 +72,7 @@ export default class Txiki {
   }
 
   public defineGlobal(name: string, value: unknown): Txiki {
-    this.globals.set(name, serialize(value, { "unsafe": true }));
+    this.globals.set(name, serialize(value, { "unsafe": true, "ignoreFunction": false }));
 
     return this;
   }

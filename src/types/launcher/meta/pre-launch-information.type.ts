@@ -7,6 +7,7 @@ export type PreLaunchInformationType = {
   "platform" : "windows" | "macos" | "linux";
   "arch"     : "x64" | "x86" | "arm64" | "arm32";
   "instance" : InstanceStateType;
+  "cancelId" : string;
   "user"     : {
     "javaBinary": string;
     "javaMajor" : number;

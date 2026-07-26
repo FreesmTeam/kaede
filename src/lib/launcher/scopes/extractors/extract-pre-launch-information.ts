@@ -54,6 +54,8 @@ export function extractPreLaunchInformation({
     return beforeHooksResult;
   }
 
+  const downloadTaskCancelId: string = `${instanceId}-download`;
+
   const providedPlatform: Platform = platform();
   const providedArch: Arch = arch();
 
@@ -144,6 +146,7 @@ export function extractPreLaunchInformation({
     "arch"       : compatibleArch,
     "instance"   : instance,
     "user"       : userPreferences,
+    "cancelId"   : downloadTaskCancelId,
     "directories": {
       "base"        : baseDirectory,
       "instance"    : instanceDirectory,

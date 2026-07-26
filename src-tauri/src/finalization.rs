@@ -135,7 +135,7 @@ fn major_from_spawn(java_exe: &Path) -> Option<u32> {
 
     let output = command.output().ok()?;
 
-    // Goes to stderr but we should probably check for stdout as well
+    // Goes to stderr, but we should probably check for stdout as well
     let stderr = String::from_utf8_lossy(&output.stderr);
     let banner = if stderr.trim().is_empty() {
         String::from_utf8_lossy(&output.stdout)

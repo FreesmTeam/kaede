@@ -16,12 +16,14 @@ export async function concurrentlyDownload({
   entries,
   statuses,
   label,
+  cancelId = `${Math.random()}`,
   delegateToRust = true,
 }: {
   "concurrency"    : number;
   "entries"        : Array<{ "url": string; "path": string }>;
   "statuses"       : LauncherStatusesType;
   "label"          : string;
+  "cancelId"      ?: string;
   "delegateToRust"?: boolean;
 }): Promise<DownloadReportType> {
   const logPrefix: string = `${label}:${__PRE_BUNDLED_FILENAME__}`;
@@ -41,10 +43,6 @@ export async function concurrentlyDownload({
     logPrefix,
     `Removed ${entries.length - uniqueArtifacts.length}/${entries.length} duplicates`,
   );
-
-  const indexReference: { "value": number } = {
-    "value": 0,
-  };
 
   log.debug(
     logPrefix,
@@ -105,6 +103,7 @@ export async function concurrentlyDownload({
       concurrency,
       label,
       onProgress,
+      cancelId,
     });
 
     applySnapshotData(report.success, report.failed);
@@ -115,13 +114,25 @@ export async function concurrentlyDownload({
 
     previousPaths = new Set;
 
+    if (report.cancelled) {
+      log.info(logPrefix, "The Minecraft download tasks were cancelled");
+      statuses.downloads.total = statuses.downloads.total - (
+        uniqueArtifacts.length - report.success - report.failed
+      );
+    }
+
     return report;
   }
 
+  const indexReference: { "value": number } = {
+    "value": 0,
+  };
+
   const report: DownloadReportType = {
-    "success" : 0,
-    "failed"  : 0,
-    "failures": [],
+    "success"  : 0,
+    "failed"   : 0,
+    "failures" : [],
+    "cancelled": false,
   };
 
   await Promise.all(

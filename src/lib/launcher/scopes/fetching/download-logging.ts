@@ -3,7 +3,7 @@ import { exists, mkdir } from "@tauri-apps/plugin-fs";
 import { LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
-import { downloadWithProgress } from "@/lib/launcher/scopes/fetching/download-with-progress.ts";
+import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
   PreLaunchInformationType,
@@ -41,7 +41,7 @@ export async function downloadLogging({
     return beforeHooksResult;
   }
 
-  const { directories, statuses } = necessaries;
+  const { directories, statuses, cancelId } = necessaries;
   const { url, path } = logging;
 
   log.debug(logPrefix, "Checking if the logging config exists");
@@ -67,13 +67,17 @@ export async function downloadLogging({
     log.warn(logPrefix, "The logging config file does not exist");
     log.debug(logPrefix, "Downloading the logging config file");
     try {
-      statuses.downloads.total++;
-      await downloadWithProgress({
-        path,
-        url,
+      const report = await General.concurrentlyDownload({
         statuses,
+        cancelId,
+        "concurrency": 1,
+        "entries"    : [{ path, url }],
+        "label"      : "logging",
       });
-      statuses.downloads.success++;
+
+      if (report.cancelled) {
+        return false;
+      }
     } catch (error: unknown) {
       log.error(
         logPrefix,

@@ -136,9 +136,11 @@ pub fn run() {
             Ok(())
         })
         .manage(processes::ProcessRegistry::default())
+        .manage(downloads::CancelFlags::default())
         // Register custom Tauri commands
         .invoke_handler(tauri::generate_handler![
             downloads::concurrently_download,
+            downloads::cancel_downloads,
             extensions::read_extensions,
             finalization::finalize_initialization,
             finalization::get_java_major,

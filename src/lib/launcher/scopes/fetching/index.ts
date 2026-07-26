@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { cancelAll } from "@/lib/launcher/scopes/fetching/cancel-all.ts";
 import { downloadAssets } from "@/lib/launcher/scopes/fetching/download-assets.ts";
 import { downloadClient } from "@/lib/launcher/scopes/fetching/download-client.ts";
 import { downloadLibraries } from "@/lib/launcher/scopes/fetching/download-libraries.ts";
@@ -25,6 +26,7 @@ import { fetchAllVersions } from "@/lib/launcher/scopes/fetching/fetch-all-versi
 import { fetchMetadata } from "@/lib/launcher/scopes/fetching/fetch-metadata.ts";
 
 export default {
+  cancelAll,
   downloadAssets,
   downloadClient,
   downloadLibraries,

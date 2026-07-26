@@ -11,6 +11,7 @@ import {
 } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
 import Instances from "@/lib/instances";
+import Fetching from "@/lib/launcher/scopes/fetching";
 import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
 import { instanceStates } from "@/states/instance.ts";
@@ -92,8 +93,16 @@ async function handleClose(): Promise<void> {
     return;
   }
 
+  const instanceId: string | undefined = currentInstance?.value?.id;
+
+  if (instanceId === undefined) {
+    return log.error(__PRE_BUNDLED_FILENAME__, "The current instance id is undefined");
+  }
+
   if (isDownloading.value) {
-    //
+    await Fetching.cancelAll(`${instanceId}-download`);
+
+    return;
   }
 
   if (closeInstance === undefined) {
@@ -101,12 +110,6 @@ async function handleClose(): Promise<void> {
       __PRE_BUNDLED_FILENAME__,
       "The injected 'closeInstance' function is undefined. What happened lol",
     );
-  }
-
-  const instanceId: string | undefined = currentInstance?.value?.id;
-
-  if (instanceId === undefined) {
-    return log.error(__PRE_BUNDLED_FILENAME__, "The current instance id is undefined");
   }
 
   try {
@@ -169,7 +172,7 @@ useIntervalFn((): void => {
     @click="handleLaunch"
     :disabled="statuses?.launching === 1 || statuses?.launching === 2"
     id="__home-page__launch-button"
-    class="relative w-fit rounded-l-md rounded-r-sm bg-white px-4 py-2 text-black transition-[opacity] disabled:opacity-80"
+    class="relative w-fit rounded-l-md rounded-r-sm bg-white px-4 py-2 text-black transition-[opacity] disabled:opacity-70"
   >
     <span
       id="__home-page__launch-label"
@@ -186,7 +189,7 @@ useIntervalFn((): void => {
     @click="handleClose"
     id="__home-page__launch-abort-button"
     :disabled="!isDownloading && statuses?.launching !== 2 || killing"
-    class="relative w-fit rounded-sm bg-white px-1 py-2 text-black transition-[opacity] disabled:opacity-80"
+    class="relative w-fit rounded-sm bg-white px-1 py-2 text-black transition-[opacity] disabled:opacity-70"
   >
     <span
       id="__home-page__launch-abort-icon"

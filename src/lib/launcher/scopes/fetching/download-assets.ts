@@ -42,7 +42,7 @@ export async function downloadAssets({
   "necessaries"   : PreLaunchInformationType;
   "finalizedPatch": FinalizedPatchType;
 }): Promise<boolean> {
-  const { directories, statuses, instance, logPrefix } = necessaries;
+  const { directories, statuses, instance, logPrefix, cancelId } = necessaries;
 
   log.debug(logPrefix, "Getting the assetIndex metadata");
   if (
@@ -185,12 +185,17 @@ export async function downloadAssets({
     return hashesToReDownload.has(path);
   });
 
-  await General.concurrentlyDownload({
+  const report = await General.concurrentlyDownload({
     statuses,
+    cancelId,
     "concurrency": GeneralSettings.ConcurrentDownloads.Assets,
     "entries"    : missingAssetObjects,
     "label"      : "assets",
   });
+
+  if (report.cancelled) {
+    return false;
+  }
 
   log.info(
     logPrefix,

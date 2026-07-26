@@ -16,15 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type DownloadSnapshotType = {
-  "current": Record<string, [number, number]>;
-  "success": number;
-  "failed" : number;
-};
+import { invoke } from "@tauri-apps/api/core";
 
-export type DownloadReportType = {
-  "success"  : number;
-  "failed"   : number;
-  "failures" : Array<{ "url": string; "path": string; "error": string }>;
-  "cancelled": boolean;
-};
+export function cancelAll(cancelId: string): Promise<boolean> {
+  return invoke<boolean>("cancel_downloads", { cancelId });
+}

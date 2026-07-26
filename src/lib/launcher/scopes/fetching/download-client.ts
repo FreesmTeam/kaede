@@ -3,7 +3,7 @@ import { mkdir } from "@tauri-apps/plugin-fs";
 import { LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
-import { downloadWithProgress } from "@/lib/launcher/scopes/fetching/download-with-progress.ts";
+import General from "@/lib/general";
 import { verifyArtifacts } from "@/lib/launcher/scopes/validators/verify-artifacts.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
@@ -35,7 +35,7 @@ export async function downloadClient({
     return false;
   }
 
-  const { statuses, instance, logPrefix } = necessaries;
+  const { statuses, instance, logPrefix, cancelId } = necessaries;
 
   log.debug(
     logPrefix,
@@ -60,13 +60,17 @@ export async function downloadClient({
 
     log.debug(logPrefix, "Downloading the main jar");
     try {
-      statuses.downloads.total++;
-      await downloadWithProgress({
-        "path": client.path,
-        "url" : client.url,
+      const report = await General.concurrentlyDownload({
         statuses,
+        cancelId,
+        "concurrency": 1,
+        "entries"    : [{ "path": client.path, "url": client.url }],
+        "label"      : "client",
       });
-      statuses.downloads.success++;
+
+      if (report.cancelled) {
+        return false;
+      }
     } catch (error: unknown) {
       log.error(
         logPrefix,

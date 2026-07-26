@@ -29,7 +29,7 @@ export async function downloadLibraries({
     return beforeHooksResult;
   }
 
-  const { statuses, instance, logPrefix } = necessaries;
+  const { statuses, instance, logPrefix, cancelId } = necessaries;
   const artifacts: Array<MappedArtifactType> = finalizedPatch
     .artifacts
     .filter(({ status }) => status !== "empty");
@@ -69,12 +69,18 @@ export async function downloadLibraries({
     )),
   );
 
-  await General.concurrentlyDownload({
+  const report = await General.concurrentlyDownload({
     statuses,
+    cancelId,
     "concurrency": GeneralSettings.ConcurrentDownloads.Libraries,
     "entries"    : missingArtifacts,
     "label"      : "libraries",
   });
+
+  if (report.cancelled) {
+    return false;
+  }
+
   await ExtensionsManager.catchAsyncVoidHooks({
     "scope" : "onMinecraftLibrariesGet",
     "toPass": { necessaries, finalizedPatch },

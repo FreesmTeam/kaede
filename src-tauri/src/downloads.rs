@@ -2,14 +2,14 @@ use std::{
     collections::HashMap,
     path::PathBuf,
     sync::{
-        atomic::{AtomicUsize, Ordering},
+        atomic::{AtomicBool, AtomicUsize, Ordering},
         Arc, Mutex,
     },
     time::Duration,
 };
 
 use serde::{Deserialize, Serialize};
-use tauri::ipc::Channel;
+use tauri::{ipc::Channel, State};
 use tokio::io::AsyncWriteExt;
 
 #[derive(Deserialize)]
@@ -26,7 +26,7 @@ struct FileProgress {
 
 #[derive(Serialize, Clone)]
 pub struct DownloadSnapshot {
-    /// path -> [percent, bytes_per_second]
+    // path -> [percent, bytes_per_second]
     current: HashMap<String, (u8, u64)>,
     success: usize,
     failed: usize,
@@ -43,16 +43,75 @@ pub struct FailedDownload {
 pub struct DownloadReport {
     success: usize,
     failed: usize,
+    cancelled: bool,
     failures: Vec<FailedDownload>,
+}
+
+enum DownloadError {
+    Cancelled,
+    Other(String),
+}
+
+impl DownloadError {
+    fn other(error: impl ToString) -> Self {
+        DownloadError::Other(error.to_string())
+    }
+}
+
+#[derive(Default)]
+pub struct CancelFlags(Mutex<HashMap<String, CancelEntry>>);
+
+struct CancelEntry {
+    flag: Arc<AtomicBool>,
+    batches: usize,
+}
+
+impl CancelFlags {
+    fn register(&self, id: &str) -> Arc<AtomicBool> {
+        let mut map = self.0.lock().unwrap();
+        let entry = map.entry(id.to_string()).or_insert_with(|| CancelEntry {
+            flag: Arc::default(),
+            batches: 0,
+        });
+
+        entry.batches += 1;
+
+        Arc::clone(&entry.flag)
+    }
+
+    fn deregister(&self, id: &str) {
+        let mut map = self.0.lock().unwrap();
+
+        if let Some(entry) = map.get_mut(id) {
+            entry.batches -= 1;
+
+            if entry.batches == 0 {
+                map.remove(id);
+            }
+        }
+    }
 }
 
 type Progress = Arc<Mutex<HashMap<String, FileProgress>>>;
 
 #[tauri::command]
+pub fn cancel_downloads(state: State<CancelFlags>, cancel_id: String) -> bool {
+    match state.0.lock().unwrap().get(&cancel_id) {
+        Some(entry) => {
+            entry.flag.store(true, Ordering::Relaxed);
+            true
+        }
+        None => false,
+    }
+}
+
+#[tauri::command]
 pub async fn concurrently_download(
+    state: State<'_, CancelFlags>,
     entries: Vec<DownloadEntry>,
     concurrency: usize,
     label: String,
+    cancel_id: String,
     on_progress: Channel<DownloadSnapshot>,
 ) -> Result<DownloadReport, String> {
     let concurrency = concurrency.max(1);
@@ -62,6 +121,7 @@ pub async fn concurrently_download(
         .read_timeout(Duration::from_secs(30))
         .build()
         .map_err(|error| error.to_string())?;
+    let cancel = state.register(&cancel_id);
 
     let entries = Arc::new(entries);
     let next_index = Arc::new(AtomicUsize::new(0));
@@ -69,7 +129,7 @@ pub async fn concurrently_download(
     let success = Arc::new(AtomicUsize::new(0));
     let failed = Arc::new(AtomicUsize::new(0));
 
-    // One snapshot per tick for the whole batch, regardless of file count.
+    // One snapshot per tick for the whole batch
     let ticker = tauri::async_runtime::spawn({
         let progress = Arc::clone(&progress);
         let success = Arc::clone(&success);
@@ -89,7 +149,7 @@ pub async fn concurrently_download(
                     files
                         .iter_mut()
                         .map(|(path, file)| {
-                            // Ticks are 100ms apart, so delta * 10 ≈ bytes/sec.
+                            // Ticks are 100ms apart, so delta * 10 is roughly bytes/sec
                             let speed = (file.downloaded - file.last_downloaded) * 10;
                             file.last_downloaded = file.downloaded;
 
@@ -122,19 +182,23 @@ pub async fn concurrently_download(
         let progress = Arc::clone(&progress);
         let success = Arc::clone(&success);
         let failed = Arc::clone(&failed);
+        let cancel = Arc::clone(&cancel);
 
         workers.push(tauri::async_runtime::spawn(async move {
             let mut failures: Vec<FailedDownload> = Vec::new();
 
-            // `indexReference.value++`, except actually atomic.
             loop {
+                if cancel.load(Ordering::Relaxed) {
+                    break;
+                }
+
                 let index = next_index.fetch_add(1, Ordering::Relaxed);
 
                 let Some(entry) = entries.get(index) else {
                     break;
                 };
 
-                let result = download_one(&client, entry, &progress).await;
+                let result = download_one(&client, entry, &progress, &cancel).await;
 
                 progress.lock().unwrap().remove(&entry.path);
 
@@ -143,7 +207,11 @@ pub async fn concurrently_download(
                         success.fetch_add(1, Ordering::Relaxed);
                         log::debug!("{label}: downloaded '{}'", entry.url);
                     }
-                    Err(error) => {
+                    Err(DownloadError::Cancelled) => {
+                        log::debug!("{label}: cancelled '{}'", entry.url);
+                        break;
+                    }
+                    Err(DownloadError::Other(error)) => {
                         failed.fetch_add(1, Ordering::Relaxed);
                         log::error!("{label}: could not download '{}': {error}", entry.url);
                         failures.push(FailedDownload {
@@ -159,7 +227,6 @@ pub async fn concurrently_download(
         }));
     }
 
-    // Promise.all
     let mut failures: Vec<FailedDownload> = Vec::new();
 
     for worker in workers {
@@ -169,14 +236,16 @@ pub async fn concurrently_download(
     }
 
     ticker.abort();
+    state.deregister(&cancel_id);
 
     let report = DownloadReport {
         success: success.load(Ordering::Relaxed),
         failed: failed.load(Ordering::Relaxed),
+        cancelled: cancel.load(Ordering::Relaxed),
         failures,
     };
 
-    // Final snapshot: empties the in-flight map, settles the counters.
+    // Final snapshot
     let _ = on_progress.send(DownloadSnapshot {
         current: HashMap::new(),
         success: report.success,
@@ -190,13 +259,14 @@ async fn download_one(
     client: &reqwest::Client,
     entry: &DownloadEntry,
     progress: &Progress,
-) -> Result<(), String> {
+    cancel: &AtomicBool,
+) -> Result<(), DownloadError> {
     let mut response = client
         .get(&entry.url)
         .send()
         .await
         .and_then(|response| response.error_for_status())
-        .map_err(|error| error.to_string())?;
+        .map_err(DownloadError::other)?;
 
     let total = response.content_length().unwrap_or(0);
 
@@ -210,31 +280,45 @@ async fn download_one(
     if let Some(parent) = path.parent() {
         tokio::fs::create_dir_all(parent)
             .await
-            .map_err(|error| error.to_string())?;
+            .map_err(DownloadError::other)?;
     }
 
-    // Write to `<path>.part`, rename on success — a crash mid-download can
-    // never leave a torn client.jar that your missing-check counts as present.
     let partial = PathBuf::from(format!("{}.part", entry.path));
     let file = tokio::fs::File::create(&partial)
         .await
-        .map_err(|error| error.to_string())?;
+        .map_err(DownloadError::other)?;
     let mut writer = tokio::io::BufWriter::new(file);
 
-    while let Some(chunk) = response.chunk().await.map_err(|error| error.to_string())? {
-        writer
-            .write_all(&chunk)
-            .await
-            .map_err(|error| error.to_string())?;
+    let streamed: Result<(), DownloadError> = async {
+        while let Some(chunk) = response.chunk().await.map_err(DownloadError::other)? {
+            if cancel.load(Ordering::Relaxed) {
+                return Err(DownloadError::Cancelled);
+            }
 
-        if let Some(file) = progress.lock().unwrap().get_mut(&entry.path) {
-            file.downloaded += chunk.len() as u64;
+            writer
+                .write_all(&chunk)
+                .await
+                .map_err(DownloadError::other)?;
+
+            if let Some(file) = progress.lock().unwrap().get_mut(&entry.path) {
+                file.downloaded += chunk.len() as u64;
+            }
         }
-    }
 
-    writer.flush().await.map_err(|error| error.to_string())?;
+        writer.flush().await.map_err(DownloadError::other)
+    }
+    .await;
+
+    if let Err(error) = streamed {
+        // Close the handle since Windows will not delete an open file
+        let _ = writer.shutdown().await;
+        drop(writer);
+        let _ = tokio::fs::remove_file(&partial).await;
+
+        return Err(error);
+    }
 
     tokio::fs::rename(&partial, &path)
         .await
-        .map_err(|error| error.to_string())
+        .map_err(DownloadError::other)
 }

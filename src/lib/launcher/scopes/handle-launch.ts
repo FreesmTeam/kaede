@@ -120,7 +120,23 @@ export async function handleLaunch({
     Fetching.downloadAssets({ necessaries, finalizedPatch }),
     Fetching.downloadClient({ necessaries, finalizedPatch }),
     Fetching.downloadLogging({ necessaries, finalizedPatch }),
-    Fetching.downloadLibraries({ necessaries, finalizedPatch }),
+    Fetching
+      .downloadLibraries({ necessaries, finalizedPatch })
+      .then(async result => {
+        if (!result) {
+          return false;
+        }
+
+        await Extractors.unzipNatives({
+          necessaries,
+          "paths": finalizedPatch
+            .artifacts
+            .filter(({ status }) => status === "native")
+            .map(({ path }) => path),
+        });
+
+        return true;
+      }),
   ]);
 
   for (const status of responses) {
@@ -134,19 +150,10 @@ export async function handleLaunch({
     }
   }
 
-  const [command]: [{
+  const command: {
     "java"     : string;
     "arguments": Array<string>;
-  }, void] = await Promise.all([
-    Launcher.createCommand({ necessaries, finalizedPatch }),
-    Extractors.unzipNatives({
-      necessaries,
-      "paths": finalizedPatch
-        .artifacts
-        .filter(({ status }) => status === "native")
-        .map(({ path }) => path),
-    }),
-  ]);
+  } = await Launcher.createCommand({ necessaries, finalizedPatch });
 
   return Launcher.spawnMinecraft({
     command,

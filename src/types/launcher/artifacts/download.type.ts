@@ -24,8 +24,6 @@ export type DownloadSnapshotType = {
 
 export type DownloadReportType = {
   "success" : number;
-  // Updated every 100 ms in case of 'delegateToRust'; instantly otherwise
   "failed"  : number;
-  // Filled in once the downloads finish in case of 'delegateToRust'; instantly otherwise
   "failures": Array<{ "url": string; "path": string; "error": string }>;
 };

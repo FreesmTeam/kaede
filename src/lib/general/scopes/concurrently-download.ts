@@ -54,12 +54,39 @@ export async function concurrentlyDownload({
 
   if (delegateToRust) {
     const onProgress = new Channel<DownloadSnapshotType>;
+
+    /*
+     * Snapshot data are cumulative, and since 'concurrentlyDownload'
+     * might be called more than once at a time, we need to handle proper merging of statuses
+     */
     let previousSuccess: number = 0;
-    let previousFailed: number = 0;
+    let previousFailed : number = 0;
+    let previousPaths  : Set<string> = new Set;
+
+    const applySnapshotData = (success: number, failed: number): void => {
+      if (success < previousSuccess || failed < previousFailed) {
+        return;
+      }
+
+      statuses.downloads.success = statuses.downloads.success + success - previousSuccess;
+      statuses.downloads.failed  = statuses.downloads.failed + failed - previousFailed;
+
+      previousSuccess = success;
+      previousFailed  = failed;
+    };
 
     // eslint-disable-next-line unicorn/prefer-add-event-listener
     onProgress.onmessage = (snapshot: DownloadSnapshotType): void => {
       const current = statuses.downloads.current;
+
+      for (const path of previousPaths) {
+        // If the path is missing, then the download task for this path was finished
+        if (!(path in snapshot.current)) {
+          current.delete(path);
+        }
+      }
+
+      previousPaths = new Set;
 
       for (const [path, fileProgress] of Object.entries(snapshot.current)) {
         /*
@@ -67,15 +94,10 @@ export async function concurrentlyDownload({
          * where 'progress' is accumulated while 'speed' is not
          */
         current.set(path, fileProgress);
+        previousPaths.add(path);
       }
 
-      // 'snapshot.success' is accumulated
-      statuses.downloads.success = statuses.downloads.success + snapshot.success - previousSuccess;
-      // 'snapshot.failed' is accumulated
-      statuses.downloads.failed  = statuses.downloads.failed + snapshot.failed - previousFailed;
-
-      previousSuccess = snapshot.success;
-      previousFailed = snapshot.failed;
+      applySnapshotData(snapshot.success, snapshot.failed);
     };
 
     const report = await invoke<DownloadReportType>("concurrently_download", {
@@ -85,8 +107,13 @@ export async function concurrentlyDownload({
       onProgress,
     });
 
-    statuses.downloads.success = statuses.downloads.success + report.success - previousSuccess;
-    statuses.downloads.failed  = statuses.downloads.failed + report.failed - previousFailed;
+    applySnapshotData(report.success, report.failed);
+
+    for (const path of previousPaths) {
+      statuses.downloads.current.delete(path);
+    }
+
+    previousPaths = new Set;
 
     return report;
   }

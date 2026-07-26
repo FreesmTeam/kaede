@@ -94,8 +94,8 @@ useIntervalFn(() => {
   }
 
   currentDownloadSpeed.value = (totalSpeed / divider).toFixed(2);
-  // Updates 25 times a second
-}, 40);
+  // Updates 10 times a second
+}, 100);
 </script>
 
 <template>

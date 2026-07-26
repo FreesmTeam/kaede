@@ -168,7 +168,7 @@ jobs:
       - name: Run ESLint
         run: bun run lint
 
-      - name: Run Vitest
+      - name: Run tests
         run: bun run test
 
       - name: Build a Tauri app (Non-Release)
@@ -197,6 +197,7 @@ jobs:
           New-Item -ItemType Directory -Force -Path portable-build
           Copy-Item "./src-tauri/target/release/${{ steps.json_properties.outputs.productName }}.exe" -Destination "portable-build/"
           Copy-Item "./src-tauri/binaries/txiki-server-x86_64-pc-windows-msvc.exe" -Destination "portable-build/txiki-server.exe"
+          Set-Content -Path "portable-build/portable.txt" -Value "This file is required here to enable portable mode in Kaede."
 
       - name: Upload binary (Windows, non-setup)
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows'

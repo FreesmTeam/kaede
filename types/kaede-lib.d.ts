@@ -11,6 +11,7 @@ import * as TauriOpener from '@tauri-apps/plugin-opener';
 import * as TauriOs from '@tauri-apps/plugin-os';
 import * as TauriProcess from '@tauri-apps/plugin-process';
 import * as TauriUpload from '@tauri-apps/plugin-upload';
+import { App } from 'vue';
 
 declare const PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
 declare const CustomPatches: {
@@ -223,7 +224,10 @@ export type GlobalStatesContextMenuItemsType = Array<{
 	"image"?: string;
 }>;
 export type GlobalStatesDevelopmentType = {
+	"loadErudaDevTools": boolean;
 	"showFPS": boolean;
+	"showCPUUsage": boolean;
+	"showMemoryUsage": boolean;
 	"enableDebugMode": boolean;
 	"enableNativeContextMenu": boolean;
 	"enableNativeReloadKeyBinds": boolean;
@@ -251,7 +255,7 @@ export type GlobalStatesExtensionsType = {
 	"allowUnrestrictedUntrusted": boolean;
 };
 export type GlobalStatesType = {
-	"development": GlobalStatesDevelopmentType | null;
+	"development": GlobalStatesDevelopmentType;
 	"extensions": GlobalStatesExtensionsType;
 	"layout": GlobalStatesLayoutType;
 	"logs": GlobalStatesLogsType;
@@ -672,6 +676,10 @@ export type PermissionType = {
 	[Key in PermissionsKeyType]: PermissionsObjectType[Key][keyof PermissionsObjectType[Key]];
 }[PermissionsKeyType];
 declare const Permissions$1: {
+	readonly UI: {
+		readonly Basic: "ui-basic";
+		readonly Style: "ui-style";
+	};
 	readonly Events: {
 		readonly All: "all-events";
 	};
@@ -691,6 +699,8 @@ declare const Permissions$1: {
 declare const _default$9: {
 	readonly GrantedScopes: Record<string, any>;
 	readonly IgnoredExtensionPermissions: Record<string, Partial<{
+		"ui-basic": boolean;
+		"ui-style": boolean;
 		"all-events": boolean;
 		internet: boolean;
 		"read-external-storage": boolean;
@@ -700,6 +710,10 @@ declare const _default$9: {
 		"write-to-log-file": boolean;
 	}>>;
 	readonly Permissions: {
+		readonly UI: {
+			readonly Basic: "ui-basic";
+			readonly Style: "ui-style";
+		};
 		readonly Events: {
 			readonly All: "all-events";
 		};
@@ -730,6 +744,31 @@ declare const _default$10: {
 	readonly readStoragePath: typeof readStoragePath;
 	readonly writeToStoragePath: typeof writeToStoragePath;
 };
+export type ParsedFile = {
+	"status": "loaded";
+	"data": unknown;
+} | {
+	"status": "missing";
+} | {
+	"status": "corrupt";
+	"raw": string;
+	"error": string;
+};
+export type InitialStateType = {
+	"basic": {
+		"launcherVersion": string;
+		"baseDirectory": string;
+		"launchCount": number;
+		"separator": string;
+		"portable": boolean;
+	};
+	"parsed": {
+		"config": ParsedFile;
+		"accounts": ParsedFile;
+		"instances": ParsedFile;
+		"translations": ParsedFile;
+	};
+};
 declare const AccountSchema: Type.TObject<{
 	msa: Type.TUnion<[
 		Type.TObject<{
@@ -757,17 +796,20 @@ declare const AccountSchema: Type.TObject<{
 	}>;
 }>;
 export type AccountType = Static<typeof AccountSchema>;
-declare function getAccounts(baseDirectory: string): Promise<Array<AccountType>>;
+declare function getAccounts(properties?: Partial<{
+	"baseDirectory": string;
+	"parsedFile": ParsedFile;
+}>): Promise<Array<AccountType>>;
 declare const ConfigSchema: Type.TObject<{
-	development: Type.TUnion<[
-		Type.TObject<{
-			showFPS: Type.TBoolean;
-			enableDebugMode: Type.TBoolean;
-			enableNativeContextMenu: Type.TBoolean;
-			enableNativeReloadKeyBinds: Type.TBoolean;
-		}>,
-		Type.TNull
-	]>;
+	development: Type.TObject<{
+		loadErudaDevTools: Type.TBoolean;
+		showFPS: Type.TBoolean;
+		showCPUUsage: Type.TBoolean;
+		showMemoryUsage: Type.TBoolean;
+		enableDebugMode: Type.TBoolean;
+		enableNativeContextMenu: Type.TBoolean;
+		enableNativeReloadKeyBinds: Type.TBoolean;
+	}>;
 	extensions: Type.TObject<{
 		enabled: Type.TBoolean;
 		allowUnrestrictedUntrusted: Type.TBoolean;
@@ -871,10 +913,21 @@ declare const ConfigSchema: Type.TObject<{
 }>;
 export type ConfigType = Static<typeof ConfigSchema>;
 declare function getCachedInitial(): ConfigType;
-declare function getConfigFile(baseDirectory: string): Promise<ConfigType>;
+declare function getConfigFile(properties?: Partial<{
+	"baseDirectory": string;
+	"parsedFile": ParsedFile;
+}>): Promise<ConfigType>;
 declare function getDefaultConfig(): Promise<ConfigType>;
-declare function getSafeConfigFile(baseDirectory?: string): Promise<ConfigType>;
-declare function getTranslations(baseDirectory: string, selected: string | undefined, isDefault?: boolean): Promise<TranslationsType>;
+declare function getSafeConfigFile(properties?: Partial<{
+	"baseDirectory": string;
+	"parsedFile": ParsedFile;
+}>): Promise<ConfigType>;
+declare function getTranslations(properties?: Partial<{
+	"baseDirectory": string;
+	"selected": string;
+	"isDefault": boolean;
+	"parsedFile": ParsedFile;
+}>): Promise<TranslationsType>;
 declare function initializeConfigFile(configFilePath: string): Promise<void>;
 declare function regenerateConfigFile({ baseDirectory, configFileDirectory, }: {
 	"baseDirectory": string;
@@ -891,19 +944,18 @@ declare const _default$11: {
 	readonly getCachedInitial: typeof getCachedInitial;
 	readonly getTranslations: typeof getTranslations;
 };
-declare function disableDebugMode(): void;
+declare function getCpuUsage(): Promise<string>;
+declare function getMemoryUsage(): Promise<{
+	"used": string;
+	"total": string;
+}>;
+declare function loadEruda(): Promise<void>;
 declare function enableDebugMode(developmentModeEntries?: GlobalStatesType["development"]): void;
-declare function exit(): void;
-declare function getDefaultDevelopmentStates(): GlobalStatesType["development"];
-declare function handleNativeReloadKeyBinds(event: KeyboardEvent, ignore?: boolean): void;
-declare function initialize(): void;
 declare const _default$12: {
-	readonly getDefault: typeof getDefaultDevelopmentStates;
-	readonly disableDebugMode: typeof disableDebugMode;
+	readonly loadEruda: typeof loadEruda;
+	readonly getCpuUsage: typeof getCpuUsage;
+	readonly getMemoryUsage: typeof getMemoryUsage;
 	readonly enableDebugMode: typeof enableDebugMode;
-	readonly exit: typeof exit;
-	readonly handleNativeReloadKeyBinds: typeof handleNativeReloadKeyBinds;
-	readonly initialize: typeof initialize;
 };
 export type NativeErrorType = {
 	"name": string;
@@ -1003,8 +1055,25 @@ declare function runInSandbox({ id, code, }: {
 declare function runInUnrestricted(id: string, code: string): Promise<void>;
 declare function showWebviewWindow(show: boolean | undefined): Promise<void>;
 declare function getFreePort(): number;
-declare function serveCode(name: string, code: string): Promise<void>;
-declare function serveFile(name: string, filePath: string): Promise<void>;
+export type ServerProcessType = {
+	"name": string;
+	"port": number;
+	"value": {
+		"pid": number;
+		"kill": () => Promise<void>;
+		"write": (data: string | Uint8Array | number[]) => Promise<void>;
+	};
+};
+export type ProcessHandleType<Meta = unknown> = {
+	"token": string;
+	"pid": number;
+	"kind": string;
+	"meta": Meta;
+	"kill": () => Promise<void>;
+	"write": (data: string | Uint8Array | number[]) => Promise<void>;
+};
+declare function serveCode(name: string, code: string, port?: number): Promise<ServerProcessType | undefined>;
+declare function serveFile(name: string, filePath: string, port?: number): Promise<ServerProcessType | undefined>;
 declare const _default$14: {
 	readonly requestPermissions: (permissions: Array<PermissionType>, extension: string) => Promise<Array<boolean>>;
 	readonly catchAsyncResponseHooks: typeof catchAsyncResponseHooks;
@@ -1032,7 +1101,6 @@ declare const _default$14: {
 declare function cachedJoin(...paths: Array<string>): string;
 declare function capitalize(input: string): string;
 declare function checkDaysDifference(from: Date, to: Date): number;
-declare function checkIsPortable(): Promise<boolean>;
 export type LaunchStatusObjectType = typeof LaunchStatus;
 export type LaunchKeyType = keyof LaunchStatusObjectType;
 export type LaunchStatusType = {
@@ -1061,16 +1129,21 @@ declare function concurrentlyDownload({ concurrency, entries, statuses, label, }
 	"statuses": LauncherStatusesType;
 	"label": string;
 }): Promise<Array<void>>;
+declare function finalizeInitialization({ config, baseDirectory, }: {
+	"config": ConfigType;
+	"baseDirectory": string;
+}): Promise<void>;
 declare function gcd(a: number, b: number): number;
 export type AtAGlanceType = {
 	"title": string;
 	"subtitle": string;
 };
 declare function getAtAGlance(currentTitle?: string): AtAGlanceType;
-declare function getBaseDirectory(portable?: boolean): Promise<string>;
+declare function getBaseDirectory(): string;
 declare function getCachedBaseDirectory(): string;
 declare function getCachedPortable(): boolean;
 declare function getExecutableDirectory(): Promise<string>;
+declare function getInitialState(): Promise<InitialStateType>;
 declare function getJavaMajor(): Promise<number>;
 declare function getLauncherVersion(): string;
 declare function getMissingPaths({ paths, }: {
@@ -1105,11 +1178,6 @@ declare function hashFileContents(image: Uint8Array): string;
 declare function hashOfflineNickname(input: string): string;
 declare function hashString(input: string): number;
 declare function hashStringCrypto(input: string): string;
-declare function initializeLauncher({ config, baseDirectory, startTime, }: {
-	"config": ConfigType;
-	"baseDirectory": string;
-	"startTime": number;
-}): Promise<void>;
 declare function unzip({ from, to, }: {
 	"from": string;
 	"to": string;
@@ -1119,14 +1187,15 @@ declare const _default$15: {
 	readonly cachedJoin: typeof cachedJoin;
 	readonly capitalize: typeof capitalize;
 	readonly checkDaysDifference: typeof checkDaysDifference;
-	readonly checkIsPortable: typeof checkIsPortable;
 	readonly concurrentlyDownload: typeof concurrentlyDownload;
+	readonly finalizeInitialization: typeof finalizeInitialization;
 	readonly gcd: typeof gcd;
 	readonly getAtAGlance: typeof getAtAGlance;
 	readonly getBaseDirectory: typeof getBaseDirectory;
 	readonly getCachedBaseDirectory: typeof getCachedBaseDirectory;
 	readonly getCachedPortable: typeof getCachedPortable;
 	readonly getExecutableDirectory: typeof getExecutableDirectory;
+	readonly getInitialState: typeof getInitialState;
 	readonly getJavaMajor: typeof getJavaMajor;
 	readonly getLauncherVersion: typeof getLauncherVersion;
 	readonly getMissingPaths: typeof getMissingPaths;
@@ -1138,7 +1207,6 @@ declare const _default$15: {
 	readonly hashOfflineNickname: typeof hashOfflineNickname;
 	readonly hashString: typeof hashString;
 	readonly hashStringCrypto: typeof hashStringCrypto;
-	readonly initializeLauncher: typeof initializeLauncher;
 	readonly unzip: typeof unzip;
 };
 declare function changeGlobalState<Key extends keyof GlobalStatesType>(key: Key, value: GlobalStatesType[Key]): void;
@@ -1174,11 +1242,13 @@ declare function cacheLauncherVersion(): Promise<void>;
 declare function cachePathJoin(): Promise<void>;
 declare function declareGlobals(): void;
 declare function getLaunchCount(): Promise<number>;
+declare function registerComponent(name: string, component: Component): void;
 declare const _default$17: {
 	readonly cacheLauncherVersion: typeof cacheLauncherVersion;
 	readonly cachePathJoin: typeof cachePathJoin;
 	readonly declareGlobals: typeof declareGlobals;
 	readonly getLaunchCount: typeof getLaunchCount;
+	readonly registerComponent: typeof registerComponent;
 };
 declare function addInstanceWithSync(id: string, content: {
 	"patchVersions": {
@@ -1198,7 +1268,10 @@ declare function getMinecraftDirectory({ baseDirectory, instanceId, }: {
 	"baseDirectory": string;
 	"instanceId": string;
 }): string;
-declare function readStoredInstances(baseDirectory: string): Promise<InstanceStatesType>;
+declare function readStoredInstances(properties?: Partial<{
+	"baseDirectory": string;
+	"parsedFile": ParsedFile;
+}>): Promise<InstanceStatesType>;
 declare function saveInstanceStatesToFile(instances: InstanceStatesType): Promise<void>;
 declare const _default$18: {
 	readonly get: () => InstanceStatesType;
@@ -1384,9 +1457,13 @@ declare function createCommand({ necessaries, finalizedPatch, }: {
 	"java": string;
 	"arguments": Array<string>;
 }>;
+export type MinecraftMetaType = {
+	"instanceId": string;
+};
+export type MinecraftProcessType = ProcessHandleType<MinecraftMetaType>;
 export type LaunchResponseType = {
 	"success": boolean;
-	"process": Child | undefined;
+	"process": MinecraftProcessType | undefined;
 };
 declare function handleLaunch({ instanceId, instance, statuses, userPreferences, onClose, onInput, }: {
 	"instanceId": string;
@@ -1406,32 +1483,6 @@ declare function spawnMinecraft({ command, instanceId, necessaries, onClose, onI
 	"onClose": (instanceId: string) => void;
 	"onInput": (line: string) => void;
 }): Promise<LaunchResponseType>;
-declare function useApplet({ actualCommand, instanceId, necessaries, onInput, }: {
-	"actualCommand": {
-		"applet": string;
-		"java": string;
-		"arguments": string;
-	};
-	"instanceId": string;
-	"necessaries": PreLaunchInformationType;
-	"onInput": (line: string) => void;
-}): Promise<{
-	"launchTask": Command<string>;
-	"process": Child;
-}>;
-declare function useShell({ actualCommand, instanceId, necessaries, onInput, }: {
-	"actualCommand": {
-		"applet": string;
-		"java": string;
-		"arguments": string;
-	};
-	"instanceId": string;
-	"necessaries": PreLaunchInformationType;
-	"onInput": (line: string) => void;
-}): Promise<{
-	"launchTask": Command<string>;
-	"process": Child;
-}>;
 declare function getAdditionalStartArguments({ necessaries, finalizedPatch, }: {
 	"necessaries": PreLaunchInformationType;
 	"finalizedPatch": FinalizedPatchType;
@@ -1616,10 +1667,7 @@ declare function verifyArtifacts({ paths, checksum, }: {
 	"checksum": boolean;
 }): Promise<Array<string>>;
 declare const _default$19: {
-	readonly __unused: {
-		readonly useApplet: typeof useApplet;
-		readonly useShell: typeof useShell;
-	};
+	readonly __unused: {};
 	readonly Arguments: {
 		readonly getAdditionalStartArguments: typeof getAdditionalStartArguments;
 		readonly getClassPaths: typeof getClassPaths;
@@ -1811,11 +1859,14 @@ declare const _default$21: {
 				filtering: string;
 			};
 			development: {
+				loadErudaDevTools: boolean;
 				showFPS: boolean;
+				showCPUUsage: boolean;
+				showMemoryUsage: boolean;
 				enableDebugMode: boolean;
 				enableNativeContextMenu: boolean;
 				enableNativeReloadKeyBinds: boolean;
-			} | null;
+			};
 			layout: {
 				sidebar: {
 					background: string | null;
@@ -1877,15 +1928,15 @@ declare const _default$21: {
 		}>;
 	}>>;
 	readonly ConfigValidator: import("typebox/compile").Validator<{}, import("typebox").TObject<{
-		development: import("typebox").TUnion<[
-			import("typebox").TObject<{
-				showFPS: import("typebox").TBoolean;
-				enableDebugMode: import("typebox").TBoolean;
-				enableNativeContextMenu: import("typebox").TBoolean;
-				enableNativeReloadKeyBinds: import("typebox").TBoolean;
-			}>,
-			import("typebox").TNull
-		]>;
+		development: import("typebox").TObject<{
+			loadErudaDevTools: import("typebox").TBoolean;
+			showFPS: import("typebox").TBoolean;
+			showCPUUsage: import("typebox").TBoolean;
+			showMemoryUsage: import("typebox").TBoolean;
+			enableDebugMode: import("typebox").TBoolean;
+			enableNativeContextMenu: import("typebox").TBoolean;
+			enableNativeReloadKeyBinds: import("typebox").TBoolean;
+		}>;
 		extensions: import("typebox").TObject<{
 			enabled: import("typebox").TBoolean;
 			allowUnrestrictedUntrusted: import("typebox").TBoolean;
@@ -2050,6 +2101,24 @@ declare const _default$21: {
 		import("typebox").TObject<{}>
 	]>>;
 };
+export type LightResponse<T> = Promise<T> | T;
+export type GetCallback = (request: {
+	"params": Record<string, unknown>;
+}) => LightResponse<unknown>;
+export type PostCallback = (request: {
+	"body": unknown;
+	"params": Record<string, unknown>;
+}) => LightResponse<unknown>;
+declare class Txiki {
+	private paths;
+	private globals;
+	private serializeRoutes;
+	private transformDefinedGlobals;
+	get(path: string, callback: GetCallback): Txiki;
+	post(path: string, callback: PostCallback): Txiki;
+	defineGlobal(name: string, value: unknown): Txiki;
+	listen(port: number): Promise<ServerProcessType | undefined>;
+}
 export type ArgumentReplacementsType = {
 	"assets_index_name": string;
 	"assets_root": string;
@@ -2097,7 +2166,6 @@ declare global {
 		};
 		"__TAURI_PLUGINS_COMMUNITY__": {
 			"oauth2": typeof TauriOAuth2;
-			"shell": object;
 		};
 		/**
 		 * Workarounds for application internals.
@@ -2117,22 +2185,14 @@ declare global {
 			"temporaryAccounts": Array<AccountType>;
 			"initialTranslations": TranslationsType;
 			"initialInstances": InstanceStatesType;
-			"initialPortable": boolean;
-			"initialBaseDirectory": string;
+			"portable": boolean;
+			"baseDirectory": string;
+			"launchCount": number;
 			"atAGlance"?: AtAGlanceType;
-			"startTime"?: number;
 			"javaMajor"?: number;
+			"appInstance"?: App<Element>;
 			"logsInBrowser": Array<string>;
 			"indexedDB"?: IDBDatabase;
-			"serverProcesses": Array<{
-				"name": string;
-				"port": number;
-				"value": {
-					"pid": number;
-					"kill": () => Promise<void>;
-					"write": (data: string | Uint8Array | number[]) => Promise<void>;
-				};
-			}>;
 		};
 		/**
 		 * Application namespace.
@@ -2140,6 +2200,13 @@ declare global {
 		 * Extensions can extend this namespace
 		 */
 		"__KAEDE__": {
+			/**
+			 * Exposed packages.
+			 *
+			 * Used for externalizing plugin dependencies.
+			 * Contains only Vue 3 as of now.
+			 */
+			"packages": Record<string, unknown>;
 			/**
 			 * Global constants.
 			 *
@@ -2270,6 +2337,10 @@ declare global {
 				 * Launcher collection of typebox validation schemas
 				 */
 				"Schemas": typeof _default$21;
+				/**
+				 * Launcher utils for extensions to conveniently run txiki.js servers
+				 */
+				"Txiki": typeof Txiki;
 				/**
 				 * Launcher context menu related collection of utilities
 				 */

@@ -20,7 +20,6 @@ import { ref } from "vue";
 
 export const codeOutput = ref<string>("");
 export const codeToEvaluate = ref<string>(`// Imports, basically
-const { General, ExtensionsManager } = window.__KAEDE__.libs;
 const FileStructure = window.__KAEDE__.constants.FileStructure;
 
 const answer = await confirm("Do you want to host a txiki.js server?");
@@ -29,15 +28,10 @@ if (!answer) {
   return;
 }
 
-const name = "Discord RPC";
-// Unfortunately, the autocomplete only works when you directly use 'window.__KAEDE_'
-const filePath = General.cachedJoin(
-  General.getCachedBaseDirectory(),
-  FileStructure.Folders.Extensions.Path,
-  "discord-rpc.tjs",
-);
+const name = "Txiki Server Test";
 
-await ExtensionsManager.serveFile(name, filePath);
+// Unfortunately, the autocomplete only works when you directly use 'window.__KAEDE_'
+const server = await new window.__KAEDE__.libs.Txiki();
 
 alert("Done");
 `);

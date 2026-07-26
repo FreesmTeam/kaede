@@ -12,7 +12,7 @@
     "test": "bun test --preload ./bun.setup.ts src",
     "lint": "eslint .",
     "typecheck": "vue-tsc -b",
-    "generate:types": "dts-bundle-generator ./src/declarations.ts -o ./types/kaede-lib.d.ts --project tsconfig.app.json --inline-declare-global"
+    "generate:types": "dts-bundle-generator ./src/declarations.ts -o ./types/kaede-lib.d.ts --project tsconfig.types.json --inline-declare-global"
   },
   "dependencies": {
     "@daidr/minecraft-skin-renderer": "^0.3.2",

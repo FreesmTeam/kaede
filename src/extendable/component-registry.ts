@@ -18,6 +18,7 @@
 
 import { type Component, shallowReactive } from "vue";
 
+// /*
 import AddInstance from "@/components/add-instance/AddInstance.vue";
 import CleanInstance from "@/components/add-instance/tabs/CleanInstance.vue";
 import ContextMenu from "@/components/general/layout/ContextMenu.vue";
@@ -25,6 +26,7 @@ import GlobalBackground from "@/components/general/layout/GlobalBackground.vue";
 import LaunchProgress from "@/components/general/layout/LaunchProgress.vue";
 import PagesSelector from "@/components/general/layout/PagesSelector.vue";
 import Sidebar from "@/components/general/layout/Sidebar.vue";
+// */
 
 interface ComponentRegistryType {
   [key: string]     : Component;
@@ -35,19 +37,25 @@ interface ComponentRegistryType {
   "PagesSelector"   : Component;
 }
 
-// Extensions can use this registry to replace existing components with their own ones
+/*
+ * Extensions can use this registry to replace existing components with their own ones.
+ * When generating types using 'dts-bundle-generator', make sure to remove any Vue components
+ */
+// // @ts-expect-error The registry is missing required properties only for 'dts-bundle-generator'
 export const C: ComponentRegistryType = shallowReactive({
+  // /*
 
-  /**
-   * Add Instance
-   */
+  // 'add-instance/'
   AddInstance,
   CleanInstance,
-  "Sidebar"         : Sidebar,
-  "ContextMenu"     : ContextMenu,
-  "LaunchProgress"  : LaunchProgress,
-  "GlobalBackground": GlobalBackground,
-  "PagesSelector"   : PagesSelector,
+
+  // 'general/'
+  Sidebar,
+  ContextMenu,
+  LaunchProgress,
+  GlobalBackground,
+  PagesSelector,
+  // */
 });
 
 export function __registerComponent(name: string, component: Component): void {

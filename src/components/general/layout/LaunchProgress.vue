@@ -113,7 +113,7 @@ useIntervalFn(() => {
   <div
     v-if="statuses?.downloads"
     id="__layout__launch-progress-downloads-count"
-    class="absolute right-2 top-2 z-10 flex flex-col items-end gap-1 rounded-md p-2 leading-none opacity-60"
+    class="pointer-events-none absolute right-2 top-2 z-10 flex flex-col items-end gap-1 rounded-md p-2 leading-none opacity-60"
     :style="cardStyles"
   >
     <div

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ask } from "@tauri-apps/plugin-dialog";
 import { useIntervalFn } from "@vueuse/core";
 import { computed, inject, ref, watchEffect } from "vue";
 
@@ -49,6 +50,12 @@ const statuses = computed((): LauncherStatusesType | undefined => {
 
   return instanceStatuses[instanceId];
 });
+const isDownloading = computed((): boolean => {
+  return (
+    statuses.value?.launching === 1 &&
+    (statuses.value?.downloads?.total ?? 0) > 0
+  );
+});
 
 function handleLaunch(): void {
   if (launchInstance === undefined) {
@@ -79,25 +86,32 @@ function handleLaunch(): void {
     });
 }
 async function handleClose(): Promise<void> {
+  const toClose: boolean = await ask("Do you really want to cancel Minecraft launch?");
+
+  if (!toClose) {
+    return;
+  }
+
+  if (isDownloading.value) {
+    //
+  }
+
   if (closeInstance === undefined) {
-    log.error(
+    return log.error(
       __PRE_BUNDLED_FILENAME__,
       "The injected 'closeInstance' function is undefined. What happened lol",
     );
-
-    return;
   }
 
   const instanceId: string | undefined = currentInstance?.value?.id;
 
   if (instanceId === undefined) {
-    log.error(__PRE_BUNDLED_FILENAME__, "The current instance id is undefined");
-
-    return;
+    return log.error(__PRE_BUNDLED_FILENAME__, "The current instance id is undefined");
   }
 
   try {
     killing.value = true;
+
     await closeInstance(instanceId);
   } catch (error: unknown) {
     log.error(
@@ -165,13 +179,13 @@ useIntervalFn((): void => {
     </span>
     <MaterialRipple
       :colors="{ ripple: '#00000010', sparkles: '0 0 0' }"
+      :disabled="statuses?.launching === 1 || statuses?.launching === 2"
     />
   </button>
   <button
-    v-if="statuses?.launching === 2"
     @click="handleClose"
     id="__home-page__launch-abort-button"
-    :disabled="killing"
+    :disabled="!isDownloading && statuses?.launching !== 2 || killing"
     class="relative w-fit rounded-sm bg-white px-1 py-2 text-black transition-[opacity] disabled:opacity-80"
   >
     <span
@@ -180,6 +194,7 @@ useIntervalFn((): void => {
     ></span>
     <MaterialRipple
       :colors="{ ripple: '#00000010', sparkles: '0 0 0' }"
+      :disabled="!isDownloading && statuses?.launching !== 2 || killing"
     />
   </button>
 </template>

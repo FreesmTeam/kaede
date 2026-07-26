@@ -7,6 +7,7 @@ import {
   TranslationsContextKey,
 } from "@/constants/application.ts";
 import { LaunchStatus } from "@/constants/launcher.ts";
+import General from "@/lib/general";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import { instanceStates } from "@/states/instance.ts";
@@ -23,6 +24,16 @@ const instanceStatuses = inject<WrappedInstanceLauncherStatusesType>(
   LaunchStatesContextKey,
 );
 const Translations = inject<TranslationsStateType>(TranslationsContextKey);
+
+const cardStyles = computed(
+  (): ReturnType<typeof General.getSidebarInnerStyles> => (
+    General.getSidebarInnerStyles(
+      globalStates?.layout?.sidebar?.background,
+      globalStates?.layout?.sidebar?.color,
+      globalStates?.layout?.sidebar?.blur,
+    )
+  ),
+);
 
 const currentDownloadSpeed = ref<string>("0");
 
@@ -102,7 +113,8 @@ useIntervalFn(() => {
   <div
     v-if="statuses?.downloads"
     id="__layout__launch-progress-downloads-count"
-    class="absolute right-2 top-2 z-10 flex flex-col items-end gap-1 leading-none opacity-50"
+    class="absolute right-2 top-2 z-10 flex flex-col items-end gap-1 rounded-md p-2 leading-none opacity-60"
+    :style="cardStyles"
   >
     <div
       v-if="currentDownloadSpeed !== '0.00'"

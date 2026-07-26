@@ -7,6 +7,6 @@ export default {
   loadEruda,
   getCpuUsage,
   getMemoryUsage,
-  // old
+  // Old
   enableDebugMode,
 } as const;

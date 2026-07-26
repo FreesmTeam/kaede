@@ -22,7 +22,10 @@ import Configs from "@/lib/configs";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
-import type { GlobalStatesDevelopmentType, GlobalStatesLayoutType } from "@/types/application/global-states.type.ts";
+import type {
+  GlobalStatesDevelopmentType,
+  GlobalStatesLayoutType,
+} from "@/types/application/global-states.type.ts";
 import type { CleanupType } from "@/types/watchers/cleanup.type.ts";
 
 const reload = (event: KeyboardEvent): void => {

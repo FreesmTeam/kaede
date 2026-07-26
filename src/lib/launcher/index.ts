@@ -10,8 +10,11 @@ import Validators from "@/lib/launcher/scopes/validators";
 
 export default {
   "__unused": {
-    // useApplet,
-    // useShell,
+
+    /*
+     * // useApplet,
+     * useShell,
+     */
   },
   Arguments,
   Extractors,

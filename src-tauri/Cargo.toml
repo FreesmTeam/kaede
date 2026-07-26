@@ -29,7 +29,8 @@ sha1 = "0.10.6"
 sysinfo = "0.36.1"
 rayon = "1.11.0"
 zip = { version = "3.0", default-features = false, features = ["deflate"] }
-tokio = { version = "1", features = ["fs", "macros", "rt"] }
+tokio = { version = "1", features = ["fs", "macros", "rt", "time", "io-util"] }
+reqwest = { version = "0.13" }
 
 # Non-default installed plugins
 tauri-plugin-fs = { version = "2", features = ["watch"] }

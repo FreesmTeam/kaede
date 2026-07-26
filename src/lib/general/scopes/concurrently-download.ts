@@ -1,21 +1,29 @@
+import { Channel, invoke } from "@tauri-apps/api/core";
+
 import Errors from "@/lib/errors";
 import { downloadWithProgress } from "@/lib/launcher/scopes/fetching/download-with-progress.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
+  DownloadReportType,
+  DownloadSnapshotType,
+} from "@/types/launcher/artifacts/download.type.ts";
+import type {
   LauncherStatusesType,
 } from "@/types/launcher/launch/launch-status.type.ts";
 
-export function concurrentlyDownload({
+export async function concurrentlyDownload({
   concurrency,
   entries,
   statuses,
   label,
+  delegateToRust = true,
 }: {
-  "concurrency": number;
-  "entries"    : Array<{ "url": string; "path": string }>;
-  "statuses"   : LauncherStatusesType;
-  "label"      : string;
-}): Promise<Array<void>> {
+  "concurrency"    : number;
+  "entries"        : Array<{ "url": string; "path": string }>;
+  "statuses"       : LauncherStatusesType;
+  "label"          : string;
+  "delegateToRust"?: boolean;
+}): Promise<DownloadReportType> {
   const logPrefix: string = `${label}:${__PRE_BUNDLED_FILENAME__}`;
 
   log.debug(logPrefix, `Removing duplicates for ${entries.length} objects`);
@@ -44,7 +52,52 @@ export function concurrentlyDownload({
   );
   statuses.downloads.total = statuses.downloads.total + uniqueArtifacts.length;
 
-  return Promise.all(
+  if (delegateToRust) {
+    const onProgress = new Channel<DownloadSnapshotType>;
+    let previousSuccess: number = 0;
+    let previousFailed: number = 0;
+
+    // eslint-disable-next-line unicorn/prefer-add-event-listener
+    onProgress.onmessage = (snapshot: DownloadSnapshotType): void => {
+      const current = statuses.downloads.current;
+
+      for (const [path, fileProgress] of Object.entries(snapshot.current)) {
+        /*
+         * 'fileProgress' is '[progress, speed]',
+         * where 'progress' is accumulated while 'speed' is not
+         */
+        current.set(path, fileProgress);
+      }
+
+      // 'snapshot.success' is accumulated
+      statuses.downloads.success = statuses.downloads.success + snapshot.success - previousSuccess;
+      // 'snapshot.failed' is accumulated
+      statuses.downloads.failed  = statuses.downloads.failed + snapshot.failed - previousFailed;
+
+      previousSuccess = snapshot.success;
+      previousFailed = snapshot.failed;
+    };
+
+    const report = await invoke<DownloadReportType>("concurrently_download", {
+      "entries": uniqueArtifacts,
+      concurrency,
+      label,
+      onProgress,
+    });
+
+    statuses.downloads.success = statuses.downloads.success + report.success - previousSuccess;
+    statuses.downloads.failed  = statuses.downloads.failed + report.failed - previousFailed;
+
+    return report;
+  }
+
+  const report: DownloadReportType = {
+    "success" : 0,
+    "failed"  : 0,
+    "failures": [],
+  };
+
+  await Promise.all(
     Array
       .from({ "length": concurrency })
       .map(async (_, groupIndex: number): Promise<void> => {
@@ -68,16 +121,23 @@ export function concurrentlyDownload({
               statuses,
             });
             statuses.downloads.success++;
+            report.success++;
           } catch (error: unknown) {
+            const errorMessage: string = Errors.prettify(error);
+
             log.error(
               logPrefix,
               `Concurrency group ${groupIndex}:`,
               `could not download the ${entryOutOfTotal} object:`,
-              Errors.prettify(error),
+              errorMessage,
             );
             statuses.downloads.failed++;
+            report.failed++;
+            report.failures.push({ url, path, "error": errorMessage });
           }
         }
       }),
   );
+
+  return report;
 }

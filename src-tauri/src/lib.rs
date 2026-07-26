@@ -1,6 +1,7 @@
 use tauri::Manager;
 use log::error;
 
+mod downloads;
 mod extensions;
 mod finalization;
 mod launcher;
@@ -137,6 +138,7 @@ pub fn run() {
         .manage(processes::ProcessRegistry::default())
         // Register custom Tauri commands
         .invoke_handler(tauri::generate_handler![
+            downloads::concurrently_download,
             extensions::read_extensions,
             finalization::finalize_initialization,
             finalization::get_java_major,

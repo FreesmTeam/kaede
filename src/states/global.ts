@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type ShallowReactive, shallowReactive } from "vue";
+import { type Reactive, reactive } from "vue";
 
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
@@ -25,7 +25,7 @@ import type { GlobalStatesType } from "@/types/application/global-states.type.ts
  * Contains all global application states.
  * Will be overwritten in 'main.ts' once the global states are ready
  */
-export let globalStates: ShallowReactive<GlobalStatesType>;
+export let globalStates: Reactive<GlobalStatesType>;
 
 /**
  * Returns a reference to the proxied object of global states.
@@ -39,5 +39,5 @@ export function getGlobalStates(): GlobalStatesType {
  * This function is called in 'main.ts'
  */
 export function declareGlobalStates(): void {
-  globalStates = shallowReactive<GlobalStatesType>(GlobalStateHelpers.getFromConfig());
+  globalStates = reactive<GlobalStatesType>(GlobalStateHelpers.getFromConfig());
 }

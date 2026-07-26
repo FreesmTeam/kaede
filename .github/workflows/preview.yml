@@ -59,6 +59,11 @@ jobs:
           file: "./kaede-extra.json"
           fields: "{\"useKaedeBase\": true}"
 
+      - name: Swap placeholder exports with actual Browser-only utils
+        run: |
+          Remove-Item -Recurse -Force ./src/lib/browser -ErrorAction SilentlyContinue
+          Rename-Item ./src/lib/__browser browser
+
       - name: Build
         run: bun run build:frontend
 

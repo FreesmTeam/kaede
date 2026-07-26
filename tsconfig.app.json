@@ -22,5 +22,6 @@
     /* 'bun' provides the 'bun:test' module types for '*.test.ts' files */
     "types": ["vite/client", "bun"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": ["src/lib/__browser/**/*.ts"]
 }

@@ -18,6 +18,7 @@
 
 import { shallowRef } from "vue";
 
+import { log } from "@/lib/logging/scopes/log.ts";
 import { rehydrateProcesses } from "@/lib/processes/core.ts";
 import { hydrate } from "@/lib/processes/hydrate.ts";
 import type {
@@ -44,6 +45,9 @@ export async function declareServerProcesses(): Promise<void> {
       "onExit": (): void => {
         serverProcesses.value = serverProcesses.value.filter(item => item.name !== meta.name);
       },
+      "onOutput": (line, stream): void => (stream === "stdout" ? log.debug : log.error)(
+        __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", line,
+      ),
     };
   });
 

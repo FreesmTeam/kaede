@@ -83,8 +83,7 @@ export default class Txiki {
     const getRoutes: string = this.serializeRoutes(this.paths.GET);
     const postRoutes: string = this.serializeRoutes(this.paths.POST);
     // eslint-disable-next-line vue/max-len
-    const code: string = `${generatedGlobals}const routes={GET:${getRoutes},POST:${postRoutes}};export default{async fetch(e){const t=new URL(e.url),r=e.method,s=routes[r];if(!s)return new Response("Method Not Allowed",{status:405});const a=s[t.pathname];if(!a)return new Response("Not Found",{status:404});try{const s={};let n;if(t.searchParams.forEach((e,t)=>{s[t]=e}),"POST"===r){const t=(e.headers.get("content-type")||"").includes("application/json")?await e.json():await e.text();n=await a({body:t,params:s})}else n=await a({params:s});return toResponse(n)}catch(e){return console.error("Handler error:",e),new Response("Internal Server Error",{status:500})}}};function toResponse(e){return e instanceof Response?e:"string"==typeof e?new Response(e):new Response(JSON.stringify(e),{headers:{"Content-Type":"application/json"}})}
-`.trim();
+    const code: string = `${generatedGlobals}const routes={GET:${getRoutes},POST:${postRoutes}};export default{async fetch(e){const t=new URL(e.url),r=e.method,s=routes[r];if(!s)return new Response("Method Not Allowed",{status:405});const a=s[t.pathname];if(!a)return new Response("Not Found",{status:404});try{const s={};let n;if(t.searchParams.forEach((e,t)=>{s[t]=e}),"POST"===r){const t=(e.headers.get("content-type")||"").includes("application/json")?await e.json():await e.text();n=await a({body:t,params:s})}else n=await a({params:s});return toResponse(n)}catch(e){return console.error("Handler error:",e),new Response("Internal Server Error",{status:500})}}};function toResponse(e){return e instanceof Response?e:"string"==typeof e?new Response(e):new Response(JSON.stringify(e),{headers:{"Content-Type":"application/json"}})}`.trim();
 
     return await ExtensionsManager.serveCode(name, code, port);
   }

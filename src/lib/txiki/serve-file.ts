@@ -16,43 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
-
-import FileStructure from "@/constants/file-structure.ts";
 import Errors from "@/lib/errors";
-import { serveFile } from "@/lib/extensions-manager/scopes/txiki/serve-file.ts";
-import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
+import Processes from "@/lib/processes";
+import { getFreePort } from "@/lib/txiki/get-free-port.ts";
 import type { ServerProcessType } from "@/types/application/server-process.type.ts";
 
-export async function serveCode(
+export async function serveFile(
   name: string,
-  code: string,
+  filePath: string,
   port?: number,
 ): Promise<ServerProcessType | undefined> {
-  const hash: string = General.hashStringCrypto(code);
-  const shortHash: string = hash.slice(0, 7);
-  const filePath: string = General.cachedJoin(
-    General.getCachedBaseDirectory(),
-    FileStructure.Folders.Extensions.Path,
-    `tjs-${name}-${shortHash}.tjs`,
-  );
-  const alreadyExists: boolean = await exists(filePath);
+  const selectedPort: number = port ?? getFreePort();
 
-  if (!alreadyExists) {
-    try {
-      log.debug(__PRE_BUNDLED_FILENAME__, "Writing code contents to host txiki");
-      await writeTextFile(filePath, code);
-    } catch (error: unknown) {
-      log.error(
-        __PRE_BUNDLED_FILENAME__,
-        "Failed to create a code file to host txiki:",
-        Errors.prettify(error),
-      );
-
-      return;
-    }
+  try {
+    return Processes.spawnServer({
+      name,
+      "port"   : selectedPort,
+      "program": { "type": "sidecar", "value": "txiki-server" },
+      "args"   : ["serve", "--port", selectedPort.toString(), filePath],
+    });
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Failed to spawn a txiki server:",
+      Errors.prettify(error),
+    );
   }
-
-  return serveFile(name, filePath, port);
 }

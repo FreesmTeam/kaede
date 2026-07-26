@@ -31,12 +31,28 @@ if (!answer) {
 const name = "Txiki Server Test";
 // Unfortunately, the autocomplete only works when you directly use 'window.__KAEDE__'
 const globalStates = window.__KAEDE__.libs.GlobalStateHelpers.get();
+
 const server = await new Txiki()
   .defineGlobal("globalStates", globalStates)
+  .get("/delay", async () => {
+    const delay = Math.floor(Math.random() * 1000);
+
+    await new Promise(resolve => {
+      setTimeout(resolve, delay);
+    });
+
+    trace("hiii!");
+
+    return { delay };
+  })
   .get("/hi", () => {
+    trace("hiii!");
+
     return globalStates;
   })
   .listen(3001);
+const socket = Txiki.Socket(3001)
+  .on("log", (message) => console.log("socket", message));
 
 alert("Done");
 `);

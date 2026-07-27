@@ -67,3 +67,9 @@ rustix = { version = "=1.1.4", default-features = false, features = ["fs"] }
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61", features = ["Win32_Foundation", "Win32_Security", "Win32_Storage_FileSystem"] }
+
+# tauri-utils 2.9.3 still selects ctor 0.8, whose Windows support is limited to
+# target_vendor="pc" and rejects Rust's target_vendor="win7". This is the exact
+# upstream Tauri migration to ctor 1; remove the patch after it ships on crates.io.
+[patch.crates-io]
+tauri-utils = { git = "https://github.com/tauri-apps/tauri", rev = "8a97d387a3a1a52f7c501762517e294d8c94e119" }

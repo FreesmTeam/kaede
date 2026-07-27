@@ -38,6 +38,12 @@ copy the target-specific sidecar without that incompatible preflight. The
 explicit `tauri/custom-protocol` feature is required to embed `frontendDist`
 instead of compiling Tauri's development context against `devUrl`.
 
+The released `tauri-utils 2.9.3` also depends on `ctor 0.8`, which recognizes
+Windows only when `target_vendor="pc"`; Rust deliberately reports `"win7"` for
+this target. Cargo therefore pins Tauri's already-merged migration to `ctor 1`
+at commit `8a97d387a3a1a52f7c501762517e294d8c94e119`. Remove that source patch when a
+crates.io `tauri-utils` release contains the same migration.
+
 ## What the workflow does not prove
 
 This is a compile contract, not a distribution or runtime certification. It
@@ -69,5 +75,7 @@ WebView2 109 runtime plus application startup before calling a build compatible.
 - [Pinned nightly archive manifest](https://static.rust-lang.org/dist/2026-06-28/channel-rust-nightly.toml)
 - [Tauri CLI target preflight](https://github.com/tauri-apps/tauri/blob/2e763a77756e13fe8c9da0c545bc1ef02730f831/crates/tauri-cli/src/interface/rust/desktop.rs)
 - [Tauri build-script config and sidecar handling](https://github.com/tauri-apps/tauri/blob/2e763a77756e13fe8c9da0c545bc1ef02730f831/crates/tauri-build/src/lib.rs)
+- [Tauri migration from `ctor 0.8` to `ctor 1`](https://github.com/tauri-apps/tauri/pull/15352)
+- [`ctor` Windows target detection fix](https://github.com/mmastrac/linktime/pull/443)
 - [Tauri Windows 7 installer guidance](https://v2.tauri.app/distribute/windows-installer/#supporting-windows-7)
 - [Microsoft Edge/WebView2 operating-system lifecycle](https://learn.microsoft.com/en-us/deployedge/microsoft-edge-supported-operating-systems)

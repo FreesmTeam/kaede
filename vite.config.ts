@@ -28,13 +28,13 @@ import kaedeExtraConfiguration from "./kaede-extra.json";
 function handleSourceFileNames(): {
   "name"     : string;
   "enforce"  : "pre";
-  "transform": (source: string, id: string) => string;
+  "transform": (source: string, id: string) => { "code": string; "map": null };
 } {
   return {
     "name"     : "handle-source-file-names",
     // Ensure that the sources we get are untouched by 'esbuild' and others
     "enforce"  : "pre",
-    "transform": (source: string, id: string): string => {
+    "transform": (source: string, id: string): { "code": string; "map": null } => {
       /*
        * Replacing is not an option since 'process.cwd'
        * returns 'letter:\path\...' when 'id' is 'letter:/path/...'
@@ -43,20 +43,23 @@ function handleSourceFileNames(): {
 
       // Avoid having 'const "/src/declarations.ts:90": string;' in the 'declarations.ts'
       if (relativePath === "/src/declarations.ts") {
-        return source;
+        return { "code": source, "map": null };
       }
 
-      return source
-        .split("\n")
-        .map((line, index) => {
-          const lineNumber: number = index + 1;
+      return {
+        "code": source
+          .split("\n")
+          .map((line, index) => {
+            const lineNumber: number = index + 1;
 
-          return line.replaceAll(
-            "__PRE_BUNDLED_FILENAME__",
-            `"${relativePath}:${lineNumber}"`,
-          );
-        })
-        .join("\n");
+            return line.replaceAll(
+              "__PRE_BUNDLED_FILENAME__",
+              `"${relativePath}:${lineNumber}"`,
+            );
+          })
+          .join("\n"),
+        "map": null,
+      };
     },
   };
 }
@@ -72,6 +75,16 @@ export default defineConfig({
     // Tauri requires a consistent port
     "strictPort": true,
   },
+
+  /*
+   * Experiments with bundle size
+   * "build": {
+   *   "rollupOptions": {
+   *     "external": ["typebox/compile", "typebox"],
+   *   },
+   * },
+   */
+
   // Handle '@/...' imports
   "resolve": {
     "alias": {

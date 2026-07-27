@@ -26,6 +26,8 @@ tauri-plugin-log = "2"
 
 time = "0.3"
 sha1 = "0.10.6"
+sha2 = "0.10.9"
+md-5 = "0.10.6"
 sysinfo = "0.36.1"
 rayon = "1.11.0"
 zip = { version = "3.0", default-features = false, features = ["deflate"] }

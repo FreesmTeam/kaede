@@ -4,6 +4,7 @@ use log::error;
 mod downloads;
 mod extensions;
 mod finalization;
+mod hashes;
 mod launcher;
 mod processes;
 mod system;
@@ -144,6 +145,8 @@ pub fn run() {
             extensions::read_extensions,
             finalization::finalize_initialization,
             finalization::get_java_major,
+            hashes::hash_md5,
+            hashes::hash_sha256,
             launcher::get_initial_state,
             launcher::get_missing_files,
             launcher::verify_file_paths,

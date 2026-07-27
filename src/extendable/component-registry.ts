@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Component, shallowReactive } from "vue";
+import { type Component, defineAsyncComponent, shallowReactive } from "vue";
 
 // /*
 import AddInstance from "@/components/add-instance/AddInstance.vue";
@@ -29,12 +29,13 @@ import Sidebar from "@/components/general/layout/Sidebar.vue";
 // */
 
 interface ComponentRegistryType {
-  [key: string]     : Component;
-  "Sidebar"         : Component;
-  "ContextMenu"     : Component;
-  "LaunchProgress"  : Component;
-  "GlobalBackground": Component;
-  "PagesSelector"   : Component;
+  [key: string]         : Component;
+  "Sidebar"             : Component;
+  "ContextMenu"         : Component;
+  "LaunchProgress"      : Component;
+  "GlobalBackground"    : Component;
+  "PagesSelector"       : Component;
+  "LazyPluginPlayground": Component;
 }
 
 /*
@@ -55,6 +56,11 @@ export const C: ComponentRegistryType = shallowReactive({
   LaunchProgress,
   GlobalBackground,
   PagesSelector,
+
+  // 'settings/'
+  "LazyPluginPlayground": defineAsyncComponent(() => (
+    import("@/components/settings/tabs/PluginPlayground.vue")
+  )),
   // */
 });
 

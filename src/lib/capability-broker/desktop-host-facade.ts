@@ -6,6 +6,7 @@ import {
 } from "@/lib/capability-broker/desktop-codecs.ts";
 import {
   toGlobalCpuUsage,
+  toHashDigest,
   toSystemMemory,
 } from "@/lib/capability-broker/desktop-host-codecs.ts";
 import { createDesktopHostIo } from "@/lib/capability-broker/desktop-host-io.ts";
@@ -63,6 +64,24 @@ export function createDesktopHostFacade(call: BrokerCall): HostFacade {
         );
 
         return toGlobalCpuUsage(response.usage);
+      },
+    }),
+    "hashes": Object.freeze({
+      "md5": async bytes => {
+        const response = expectResponse(
+          await call({ "kind": "host_hash_md5", "bytes": [...bytes] }),
+          "text",
+        );
+
+        return toHashDigest(response.text, "md5");
+      },
+      "sha256": async bytes => {
+        const response = expectResponse(
+          await call({ "kind": "host_hash_sha256", "bytes": [...bytes] }),
+          "text",
+        );
+
+        return toHashDigest(response.text, "sha256");
       },
     }),
     "runtime": Object.freeze({

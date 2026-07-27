@@ -80,6 +80,10 @@ export const Host: HostFacade = Object.freeze({
     "getSystemMemory"  : () => requireRuntime().host.diagnostics.getSystemMemory(),
     "getGlobalCpuUsage": () => requireRuntime().host.diagnostics.getGlobalCpuUsage(),
   }),
+  "hashes": Object.freeze({
+    "md5"   : bytes => requireRuntime().host.hashes.md5(bytes),
+    "sha256": bytes => requireRuntime().host.hashes.sha256(bytes),
+  }),
   "runtime": Object.freeze({
     "getSnapshot"           : () => requireRuntime().host.runtime.getSnapshot(),
     "getCachedSnapshot"     : () => requireRuntime().host.runtime.getCachedSnapshot(),

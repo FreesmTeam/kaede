@@ -1,4 +1,4 @@
-import { hashStringCrypto } from "@/lib/general/scopes/hash-string-crypto.ts";
+import { hashStringSha256Locally } from "@/lib/cryptography/local-hashes.ts";
 
 const PLUGIN_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9])?$/u;
 const SHA_256_PATTERN = /^[a-f0-9]{64}$/u;
@@ -302,5 +302,5 @@ export function createPluginPrincipalKey(principal: PluginPrincipal): PluginPrin
     canonicalPrincipal.artifactSha256,
   ].map(value => keySegment(value)).join("|");
 
-  return `plugin-principal-v2:sha256:${hashStringCrypto(serializedPrincipal)}`;
+  return `plugin-principal-v2:sha256:${hashStringSha256Locally(serializedPrincipal)}`;
 }

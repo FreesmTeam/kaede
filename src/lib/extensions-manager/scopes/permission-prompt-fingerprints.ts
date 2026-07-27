@@ -8,7 +8,7 @@ import type {
   PreparedPermissionRequest,
 } from "@/lib/capability-broker/types.ts";
 import { copyAndSort } from "@/lib/collections/copy-array.ts";
-import { hashStringCrypto } from "@/lib/general/scopes/hash-string-crypto.ts";
+import { hashStringSha256Locally } from "@/lib/cryptography/local-hashes.ts";
 import type {
   PermissionId,
   PermissionRequest,
@@ -41,7 +41,7 @@ function canonicalPermissionFingerprint(value: unknown): string {
 }
 
 export function getPermissionDecisionMemoryKey(key: PermissionDecisionStoreKey): string {
-  return `permission-decision-memory-v1:sha256:${hashStringCrypto(
+  return `permission-decision-memory-v1:sha256:${hashStringSha256Locally(
     canonicalPermissionFingerprint(key),
   )}`;
 }
@@ -67,7 +67,7 @@ export function getPermissionRequestFingerprint(
 
   const canonicalPreparedRequest = canonicalPermissionFingerprint(prepared);
 
-  return `permission-request-v2:sha256:${hashStringCrypto(canonicalPreparedRequest)}`;
+  return `permission-request-v2:sha256:${hashStringSha256Locally(canonicalPreparedRequest)}`;
 }
 
 function allPrepared(
@@ -96,7 +96,7 @@ export function getStaticPermissionSetFingerprint(
     preparedRequests.map(request => getPermissionRequestFingerprint(request)),
   );
 
-  return `static-permission-set-v2:sha256:${hashStringCrypto(
+  return `static-permission-set-v2:sha256:${hashStringSha256Locally(
     canonicalPermissionFingerprint(normalizedRequests),
   )}`;
 }
@@ -108,7 +108,7 @@ export function getDynamicPermissionBatchFingerprint(
     return getPermissionRequestFingerprint(request);
   });
 
-  return `dynamic-permission-batch-v2:sha256:${hashStringCrypto(
+  return `dynamic-permission-batch-v2:sha256:${hashStringSha256Locally(
     canonicalPermissionFingerprint(requestFingerprints),
   )}`;
 }

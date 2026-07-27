@@ -16,8 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Host } from "@/lib/capability-broker/index.ts";
+import { md5 } from "@noble/hashes/legacy.js";
+import { sha256 } from "@noble/hashes/sha2.js";
 
-export function hashFileContents(image: Uint8Array): Promise<string> {
-  return Host.hashes.sha256(image);
+function toLowercaseHex(bytes: Uint8Array): string {
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
+export function hashMd5Locally(bytes: Uint8Array): string {
+  return toLowercaseHex(md5(bytes));
+}
+
+export function hashSha256Locally(bytes: Uint8Array): string {
+  return toLowercaseHex(sha256(bytes));
+}
+
+export function hashStringSha256Locally(input: string): string {
+  return hashSha256Locally((new TextEncoder).encode(input));
 }

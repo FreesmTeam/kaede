@@ -25,6 +25,7 @@ system.
 |-----------|-------------------------|-------|
 | Runtime and direct app metadata | Simulated | Returns a fixed `browser-preview` runtime snapshot, Kaede app metadata, path join/normalize helpers, and a no-op main-webview show operation. |
 | Native CPU and memory diagnostics | Unsupported | Fails explicitly with `UnsupportedInBrowserPreviewError`; the preview does not invent native measurements. |
+| MD5 and SHA-256 hashing | Supported | Uses the typed host facade with a local `@noble/hashes` implementation; desktop builds route the same facade through host-only Rust broker operations. MD5 exists only for Minecraft's offline UUID compatibility. |
 | File lookup and reads | Supported | `exists`, batch existence checks, missing-path detection, directory listing, text reads, and byte reads use IndexedDB. |
 | File modification time | Unavailable | Returns `null` because IndexedDB values do not expose the desktop file timestamp contract. |
 | File mutation | Partially supported | Text writes and rename are supported. Directory creation is a no-op because storage is path-keyed. The host contract has no general remove or byte-write operation; downloads and icon copies can still persist binary data. |

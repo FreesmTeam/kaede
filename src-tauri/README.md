@@ -39,6 +39,9 @@ The `./src/plugin_broker` directory includes:
 - host-only initial-state and finalization operations that batch parsed launcher
   documents, reuse the page-scoped launch count, create required directories,
   and probe the configured Java runtime without exposing raw invoke commands;
+- host-only MD5 and SHA-256 operations over exact byte arrays; legacy raw hash
+  commands remain absent from the Tauri command handler and are covered by the
+  Runtime Authority negative smoke test;
 - pre-prompt canonical target preparation for external roots and executables,
   with device/inode revalidation plus versioned SHA-256 executable-content
   binding when the grant is installed, sealed memfd execution on Linux, and a

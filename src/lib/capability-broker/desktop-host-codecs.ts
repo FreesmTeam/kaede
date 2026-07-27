@@ -11,6 +11,17 @@ import type {
 import { copyAndSort } from "@/lib/collections/copy-array.ts";
 
 const SHA_256_PATTERN = /^[a-f0-9]{64}$/u;
+const MD5_PATTERN = /^[a-f0-9]{32}$/u;
+
+export function toHashDigest(value: string, algorithm: "md5" | "sha256"): string {
+  const pattern = algorithm === "md5" ? MD5_PATTERN : SHA_256_PATTERN;
+
+  if (!pattern.test(value)) {
+    throw new TypeError(`Host ${algorithm} digest must be lowercase hexadecimal`);
+  }
+
+  return value;
+}
 
 function requireNonnegativeFiniteNumber(value: number, label: string): number {
   if (!Number.isFinite(value) || value < 0) {

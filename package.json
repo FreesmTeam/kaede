@@ -24,12 +24,12 @@
   },
   "dependencies": {
     "@daidr/minecraft-skin-renderer": "^0.3.2",
+    "@noble/hashes": "2.2.0",
     "@tanstack/vue-query": "^5.101.4",
     "@tauri-apps/api": "^2.11.1",
     "@unocss/reset": "^66.7.5",
     "@vueuse/core": "^14.3.0",
     "ark-of-atrahasis": "github:Vantrongs/ark-of-atrahasis#928f1f3",
-    "jshashes": "^1.0.8",
     "m3ripple-vue": "^0.1.0",
     "prism-code-editor": "^5.3.0",
     "serialize-javascript": "^7.0.7",

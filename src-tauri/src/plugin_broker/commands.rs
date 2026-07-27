@@ -17,7 +17,7 @@ use crate::downloads::{
     DestinationLease, DownloadCancellation, DownloadEntry, DownloadReport, FailedDownload,
     PartialDownload,
 };
-use crate::{extensions, finalization, launcher, zip};
+use crate::{extensions, finalization, hashes, launcher, zip};
 use cap_fs_ext::{DirExt, MetadataExt};
 use cap_std::fs::{File as CapabilityFile, OpenOptions as CapabilityOpenOptions};
 use serde::{Deserialize, Serialize};
@@ -294,6 +294,12 @@ pub enum BrokerRequest {
     HostRuntimeSnapshot,
     HostSystemMemory,
     HostGlobalCpuUsage,
+    HostHashMd5 {
+        bytes: Vec<u8>,
+    },
+    HostHashSha256 {
+        bytes: Vec<u8>,
+    },
     HostReadExtensions {},
     HostFsExists {
         path: PathBuf,
@@ -868,6 +874,20 @@ async fn dispatch<R: Runtime>(
                 .await
                 .map_err(|error| operation_error("host_global_cpu_usage", error))?;
             Ok(BrokerResponse::GlobalCpuUsage { usage })
+        }
+        BrokerRequest::HostHashMd5 { bytes } => {
+            require_host(state, session)?;
+            let text = tokio::task::spawn_blocking(move || hashes::md5_hex(&bytes))
+                .await
+                .map_err(|error| operation_error("host_hash_md5", error))?;
+            Ok(BrokerResponse::Text { text })
+        }
+        BrokerRequest::HostHashSha256 { bytes } => {
+            require_host(state, session)?;
+            let text = tokio::task::spawn_blocking(move || hashes::sha256_hex(&bytes))
+                .await
+                .map_err(|error| operation_error("host_hash_sha256", error))?;
+            Ok(BrokerResponse::Text { text })
         }
         BrokerRequest::HostReadExtensions {} => {
             require_host(state, session)?;
@@ -5814,6 +5834,20 @@ mod tests {
         ));
         assert!(matches!(
             serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "host_hash_sha256",
+                "bytes": [0, 127, 128, 255]
+            }))
+            .expect("SHA-256 request should deserialize"),
+            BrokerRequest::HostHashSha256 { bytes }
+                if bytes == vec![0, 127, 128, 255]
+        ));
+        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
+            "kind": "host_hash_md5",
+            "bytes": [256]
+        }))
+        .is_err());
+        assert!(matches!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
                 "kind": "host_fs_metadata",
                 "path": "/tmp/cache.json",
                 "baseDirectory": null
@@ -5883,6 +5917,18 @@ mod tests {
             (BrokerRequest::HostSystemMemory, "system memory"),
             (BrokerRequest::HostGlobalCpuUsage, "global CPU usage"),
             (
+                BrokerRequest::HostHashMd5 {
+                    bytes: b"plugin".to_vec(),
+                },
+                "MD5 hashing",
+            ),
+            (
+                BrokerRequest::HostHashSha256 {
+                    bytes: b"plugin".to_vec(),
+                },
+                "SHA-256 hashing",
+            ),
+            (
                 BrokerRequest::HostFsMetadata {
                     path: temp_root.join("plugin-must-not-probe.json"),
                     base_directory: None,
@@ -5929,6 +5975,37 @@ mod tests {
         assert!(matches!(
             cpu,
             BrokerResponse::GlobalCpuUsage { usage } if usage.is_finite() && usage >= 0.0
+        ));
+
+        let md5 = dispatch(
+            app.handle(),
+            &state,
+            &host,
+            BrokerRequest::HostHashMd5 { bytes: Vec::new() },
+            None,
+        )
+        .await
+        .expect("host session should compute MD5");
+        assert!(matches!(
+            md5,
+            BrokerResponse::Text { text }
+                if text == "d41d8cd98f00b204e9800998ecf8427e"
+        ));
+
+        let sha256 = dispatch(
+            app.handle(),
+            &state,
+            &host,
+            BrokerRequest::HostHashSha256 { bytes: Vec::new() },
+            None,
+        )
+        .await
+        .expect("host session should compute SHA-256");
+        assert!(matches!(
+            sha256,
+            BrokerResponse::Text { text }
+                if text
+                    == "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         ));
 
         let metadata = dispatch(

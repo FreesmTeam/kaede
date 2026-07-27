@@ -5,6 +5,7 @@ import {
   toDownloadReport,
   toFileMetadata,
   toGlobalCpuUsage,
+  toHashDigest,
   toInstalledExtensionsReadResult,
   toSystemMemory,
 } from "@/lib/capability-broker/desktop-host-codecs.ts";
@@ -77,6 +78,18 @@ test("validates host diagnostics and file metadata DTOs", () => {
   expect(() => toSystemMemory(2, 1)).toThrow("totalBytes");
   expect(() => toGlobalCpuUsage(Number.NaN)).toThrow("global CPU usage");
   expect(() => toFileMetadata(Number.POSITIVE_INFINITY)).toThrow("modified time");
+});
+
+test("accepts only canonical fixed-width hash responses", () => {
+  expect(toHashDigest("d41d8cd98f00b204e9800998ecf8427e", "md5")).toBe(
+    "d41d8cd98f00b204e9800998ecf8427e",
+  );
+  expect(toHashDigest("a".repeat(64), "sha256")).toBe("a".repeat(64));
+
+  expect(() => toHashDigest("D41D8CD98F00B204E9800998ECF8427E", "md5"))
+    .toThrow("lowercase hexadecimal");
+  expect(() => toHashDigest("a".repeat(63), "sha256"))
+    .toThrow("lowercase hexadecimal");
 });
 
 test("validates and snapshots installed extension archive DTOs", () => {

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker/index.ts";
 
 /*
  * Source - https://stackoverflow.com/a/51732778
@@ -25,7 +25,7 @@ import { invoke } from "@tauri-apps/api/core";
  */
 export async function hashOfflineNickname(input: string): Promise<string> {
   const encoded: Uint8Array = (new TextEncoder).encode(`OfflinePlayer:${input}`);
-  const hashed: string = await invoke<string>("hash_md5", encoded);
+  const hashed: string = await Host.hashes.md5(encoded);
   const bytes: Array<number> = [];
 
   for (let index = 0; index < hashed.length; index += 2) {

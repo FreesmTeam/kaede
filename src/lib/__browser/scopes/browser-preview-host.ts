@@ -25,6 +25,10 @@ import {
   type PickedIcon,
   type RuntimeSnapshot,
 } from "@/lib/capability-broker/types.ts";
+import {
+  hashMd5Locally,
+  hashSha256Locally,
+} from "@/lib/cryptography/local-hashes.ts";
 
 type VerifySha1Input = Parameters<HostFacade["files"]["verifySha1"]>[0];
 type RenameInput = Parameters<HostFacade["files"]["rename"]>[0];
@@ -61,6 +65,10 @@ export function createBrowserHostFacade(
       "getGlobalCpuUsage": async (): Promise<never> => {
         throw new UnsupportedInBrowserPreviewError("global CPU diagnostics");
       },
+    }),
+    "hashes": Object.freeze({
+      "md5"   : async bytes => hashMd5Locally(bytes),
+      "sha256": async bytes => hashSha256Locally(bytes),
     }),
     "runtime": Object.freeze({
       "getSnapshot"      : async (): Promise<RuntimeSnapshot> => runtimeSnapshot,

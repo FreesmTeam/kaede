@@ -57,6 +57,21 @@ describe("browser-preview host HTTP", () => {
     });
   });
 
+  test("keeps exact hashing available in browser preview without native IPC", async () => {
+    const host = createBrowserHostFacade(
+      UNUSED_STORAGE,
+      BROWSER_RUNTIME_SNAPSHOT,
+      createBrowserDirectHostFacade(),
+    );
+
+    await expect(host.hashes.md5(new Uint8Array)).resolves.toBe(
+      "d41d8cd98f00b204e9800998ecf8427e",
+    );
+    await expect(host.hashes.sha256(new Uint8Array)).resolves.toBe(
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    );
+  });
+
   test("validates the narrowed contract and preserves credentialless responses", async () => {
     const nativeResponse = new Response("browser response", {
       "status"    : 401,

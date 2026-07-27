@@ -56,6 +56,8 @@ export type BrokerRequest =
   | Readonly<{ "kind": "host_runtime_snapshot" }>
   | Readonly<{ "kind": "host_system_memory" }>
   | Readonly<{ "kind": "host_global_cpu_usage" }>
+  | Readonly<{ "kind": "host_hash_md5"; "bytes": ReadonlyArray<number> }>
+  | Readonly<{ "kind": "host_hash_sha256"; "bytes": ReadonlyArray<number> }>
   | Readonly<{ "kind": "host_read_extensions" }>
   | Readonly<{ "kind": "host_initial_state" }>
   | Readonly<{

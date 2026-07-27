@@ -123,6 +123,8 @@ fn obtained_main_window_is_confined_to_broker_acl() {
             json!({ "invalid": true }),
             "get_system_memory",
         ),
+        ("hash_md5", json!([0, 1, 2]), "hash_md5"),
+        ("hash_sha256", json!([0, 1, 2]), "hash_sha256"),
         (
             "get_process_memory",
             json!({ "invalid": true }),

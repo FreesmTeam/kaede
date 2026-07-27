@@ -84,6 +84,17 @@ export function createIpcMock(): IpcMock {
         response = { "kind": "global_cpu_usage", "usage": 12.5 };
         break;
       }
+      case "host_hash_md5": {
+        response = { "kind": "text", "text": "d41d8cd98f00b204e9800998ecf8427e" };
+        break;
+      }
+      case "host_hash_sha256": {
+        response = {
+          "kind": "text",
+          "text": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        };
+        break;
+      }
       case "host_fs_metadata": {
         response = {
           "kind"                    : "file_metadata",

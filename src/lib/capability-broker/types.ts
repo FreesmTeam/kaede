@@ -132,6 +132,10 @@ export interface HostFacade {
     getSystemMemory(): Promise<SystemMemory>;
     getGlobalCpuUsage(): Promise<number>;
   }>;
+  readonly "hashes": Readonly<{
+    md5(bytes: Uint8Array): Promise<string>;
+    sha256(bytes: Uint8Array): Promise<string>;
+  }>;
   readonly "runtime": Readonly<{
     getSnapshot(): Promise<RuntimeSnapshot>;
     getCachedSnapshot(): RuntimeSnapshot;

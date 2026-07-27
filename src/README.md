@@ -52,26 +52,26 @@ Every folder has its own `README` file for more detailed explanations.
 
 ## Bundle size
 
-Last updated: `a4357d5d8c4585e449ca4d877aaff36a46a550bb` (27.07.2026)
+Last measured from `bun run build:frontend` on 27.07.2026. Values are the
+minified JavaScript chunks before gzip; image and CSS assets are excluded.
 
-| Part                             | Minified |
-|----------------------------------|----------|
-| `src/`                           | 205.9 KB |
-| `typebox`                        | 115.2 KB |
-| `vue`                            | 110.5 KB |
-| `ses`                            | 76.2 KB  |
-| `@daidr/minecraft-skin-renderer` | 46.8 KB  |
-| `@tanstack/vue-query`            | 35.4 KB  |
-| `vue-virtualised`                | 34.4 KB  |
-| tauri-plugins                    | 26.7 KB  |
-| `prism-code-editor`              | 25.7 KB  |
-| `jshashes`                       | 22.3 KB  |
-| `ark-of-atrahasis`               | 17.0 KB  |
-| `m3ripple-vue`                   | 7.2 KB   |
-| `@vueuse/core`                   | 6.6 KB   |
-| `serialize-javascript`           | 3.3 KB   |
-| bundler code?                    | ~4.1 KB  |
-| Total                            | 737.3 KB |
+| Logical chunk | Minified |
+|---------------|----------|
+| sandbox dependencies | 315.1 kB |
+| application entry | 171.3 kB |
+| framework dependencies | 154.6 kB |
+| other dependencies | 117.2 kB |
+| server management | 99.2 kB |
+| editor dependencies | 29.6 kB |
+| desktop capability adapter | 18.0 kB |
+| permission preparation | 7.1 kB |
+| plugin playground | 4.4 kB |
+| remaining runtime chunks | 2.8 kB |
+| **Total JavaScript** | **919.3 kB** |
+
+The shared dependency chunk includes the `@noble/hashes` fallback used for
+synchronous capability fingerprints and browser preview. Desktop launcher
+MD5/SHA-256 work goes through host-only typed broker operations backed by Rust.
 
 # References
 

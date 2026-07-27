@@ -1213,6 +1213,10 @@ export interface HostFacade {
 		getSystemMemory(): Promise<SystemMemory>;
 		getGlobalCpuUsage(): Promise<number>;
 	}>;
+	readonly "hashes": Readonly<{
+		md5(bytes: Uint8Array): Promise<string>;
+		sha256(bytes: Uint8Array): Promise<string>;
+	}>;
 	readonly "runtime": Readonly<{
 		getSnapshot(): Promise<RuntimeSnapshot>;
 		getCachedSnapshot(): RuntimeSnapshot;
@@ -1713,10 +1717,10 @@ declare function handleJsonFile({ baseDirectory, path, label, getDefaultValue, }
 	"label": string;
 	"getDefaultValue": () => Promise<unknown>;
 }): Promise<unknown>;
-declare function hashFileContents(image: Uint8Array): string;
-declare function hashOfflineNickname(input: string): string;
+declare function hashFileContents(image: Uint8Array): Promise<string>;
+declare function hashOfflineNickname(input: string): Promise<string>;
 declare function hashString(input: string): number;
-declare function hashStringCrypto(input: string): string;
+declare function hashStringCrypto(input: string): Promise<string>;
 declare function unzip({ from, to, }: {
 	"from": string;
 	"to": string;

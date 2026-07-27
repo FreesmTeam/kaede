@@ -11,11 +11,26 @@ vi.mock("@/components/general/layout/Sidebar.vue", () => ({ "default": {} }));
 
 import { C } from "@/extendable/component-registry.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import { SettingsComponents } from "@/extendable/settings-component-registry.ts";
 import { registerComponent } from "@/lib/globals/scopes/register-component.ts";
+
+const DefaultLazyPluginPlayground = SettingsComponents.LazyPluginPlayground;
 
 afterEach(() => {
   Reflect.deleteProperty(C, "TrustedComponent");
+  C.LazyPluginPlayground = DefaultLazyPluginPlayground;
   GlobalInternals.appInstance = undefined;
+});
+
+test("keeps the lazy settings slot replaceable through the public registry", () => {
+  const app = createApp({});
+  const component = { "template": "<p>replacement playground</p>" };
+
+  GlobalInternals.appInstance = app;
+  registerComponent("LazyPluginPlayground", component);
+
+  expect(C.LazyPluginPlayground).toBe(component);
+  expect(SettingsComponents.LazyPluginPlayground).toBe(component);
 });
 
 test("registers a trusted component on the Vue app and component registry", () => {

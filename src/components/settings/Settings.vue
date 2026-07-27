@@ -6,7 +6,7 @@ import Tabs from "@/components/general/layout/Tabs.vue";
 import ExtensionsSettings from "@/components/settings/tabs/ExtensionsSettings.vue";
 import GeneralSettings from "@/components/settings/tabs/GeneralSettings.vue";
 import { SettingsSections } from "@/constants/application.ts";
-import { getComponents } from "@/extendable/component-registry.ts";
+import { SettingsComponents } from "@/extendable/settings-component-registry.ts";
 import { globalStates } from "@/states/global.ts";
 
 const stateKey = "settings" as const;
@@ -15,7 +15,6 @@ const selected = computed((): string => (
   globalStates?.pages?.states?.[stateKey]?.tab ?? SettingsSections[0].id
 ));
 
-const C = getComponents();
 </script>
 
 <template>
@@ -30,7 +29,9 @@ const C = getComponents();
       />
       <GeneralSettings v-if="selected === 'general'" />
       <ExtensionsSettings v-else-if="selected === 'extensions'" />
-      <C.LazyPluginPlayground v-else-if="selected === 'plugin-playground'" />
+      <SettingsComponents.LazyPluginPlayground
+        v-else-if="selected === 'plugin-playground'"
+      />
     </div>
   </PageWrapper>
 </template>

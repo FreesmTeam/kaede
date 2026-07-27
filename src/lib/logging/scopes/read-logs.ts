@@ -35,7 +35,7 @@ export async function readLogs({
   "currentInstanceLogs": Array<string>;
 }> {
   log.debug(__PRE_BUNDLED_FILENAME__, "Mounted the component");
-  const currentMode: "launcher" | string = globalStates?.logs?.mode ?? "launcher";
+  const currentMode: string = globalStates?.logs?.mode ?? "launcher";
   const latestLogAbsolutePath = General.cachedJoin(
     General.getCachedBaseDirectory(),
     FileStructure.Folders.Logs.Path,

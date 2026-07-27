@@ -23,6 +23,7 @@ import stylistic from "@stylistic/eslint-plugin";
 import unocss from "@unocss/eslint-config/flat";
 import { defineConfigWithVueTs, vueTsConfigs } from "@vue/eslint-config-typescript";
 import { globalIgnores } from "eslint/config";
+import oxlint from "eslint-plugin-oxlint";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tsDoc from "eslint-plugin-tsdoc";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
@@ -36,8 +37,11 @@ import vueRequireID from "./eslint-rules/vue-require-id.js";
 const gitIgnorePath = fileURLToPath(
   new URL(".gitignore", import.meta.url),
 );
+const oxlintConfigPath = fileURLToPath(
+  new URL(".oxlintrc.json", import.meta.url),
+);
 
-export default defineConfigWithVueTs(
+const eslintConfig = defineConfigWithVueTs(
   // Ignore linting for every path that is specified in '.gitignore'
   includeIgnoreFile(gitIgnorePath),
   globalIgnores([
@@ -307,3 +311,9 @@ export default defineConfigWithVueTs(
     "rules": { "unicorn/prefer-https": ["off"] },
   },
 );
+
+export default [
+  ...eslintConfig,
+  // Keep ESLint only for rules and Vue template behavior that Oxlint does not cover.
+  ...oxlint.buildFromOxlintConfigFile(oxlintConfigPath),
+];

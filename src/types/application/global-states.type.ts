@@ -89,7 +89,7 @@ export type GlobalStatesLogsType = {
   "show"       : boolean;
   "lineBreaks" : boolean;
   "virtualized": boolean;
-  "mode"       : "launcher" | string;
+  "mode"       : string;
   "filtering"  : string;
 };
 export type GlobalStatesSidebarItemsType = Array<"divider" | {

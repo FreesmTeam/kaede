@@ -29,7 +29,16 @@ class ReceiverAwareCapability {
 
 describe("createSandboxRuntime security failures", () => {
   it("wraps callable authorities without exposing their own properties", () => {
-    const original = (new ReceiverAwareCapability("original:")).write;
+    const writeDescriptor = Object.getOwnPropertyDescriptor(
+      ReceiverAwareCapability.prototype,
+      "write",
+    );
+
+    if (typeof writeDescriptor?.value !== "function") {
+      throw new TypeError("Receiver-aware method descriptor is unavailable");
+    }
+
+    const original = writeDescriptor.value as ReceiverAwareCapability["write"];
 
     Object.defineProperty(original, "secret", { "value": "host authority" });
 

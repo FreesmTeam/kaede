@@ -49,14 +49,21 @@ const reservedGlobalNames = new Set(`
 const serverIdState = { "next": 0 };
 
 function assertValidGlobalName(name: string): void {
-  const [firstCharacter, ...remainingCharacters] = [...name];
-  const hasValidIdentifierCharacters = firstCharacter !== undefined &&
-    identifierStartPattern.test(firstCharacter) &&
-    remainingCharacters.every(character => {
-      return character === "\u{200C}" ||
-        character === "\u{200D}" ||
-        identifierContinuePattern.test(character);
-    });
+  const characters = name[Symbol.iterator]();
+  const firstCharacter = characters.next();
+  let hasValidIdentifierCharacters = !firstCharacter.done &&
+    identifierStartPattern.test(firstCharacter.value);
+
+  for (const character of characters) {
+    if (
+      character !== "\u{200C}" &&
+      character !== "\u{200D}" &&
+      !identifierContinuePattern.test(character)
+    ) {
+      hasValidIdentifierCharacters = false;
+      break;
+    }
+  }
 
   if (!hasValidIdentifierCharacters || reservedGlobalNames.has(name)) {
     throw new TypeError(`Invalid Txiki global identifier: ${JSON.stringify(name)}`);

@@ -3,6 +3,7 @@ import { hashStringSha256Locally } from "@/lib/cryptography/local-hashes.ts";
 const PLUGIN_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9])?$/u;
 const SHA_256_PATTERN = /^[a-f0-9]{64}$/u;
 const RAW_REPOSITORY_PATH_CHARACTER_PATTERN = /^[A-Za-z0-9._~!$&'()*+,;=:@-]$/u;
+const BACKEND_HOST_LABEL_PATTERN = /^[A-Za-z0-9-]+$/u;
 const UNICODE_CONTROL_OR_SURROGATE_PATTERN = /[\p{Cc}\p{Cs}]/u;
 const MAX_PLUGIN_VERSION_LENGTH = 128;
 const RESERVED_PLUGIN_IDS = new Set([
@@ -58,7 +59,7 @@ export function isSafePluginId(pluginId: string): boolean {
 export function isValidPluginVersion(version: string): boolean {
   return version.length > 0 &&
     version.trim() === version &&
-    [...version].length <= MAX_PLUGIN_VERSION_LENGTH &&
+    (version.match(/[\s\S]/gu)?.length ?? 0) <= MAX_PLUGIN_VERSION_LENGTH &&
     !UNICODE_CONTROL_OR_SURROGATE_PATTERN.test(version);
 }
 
@@ -172,11 +173,7 @@ function isBackendCompatibleHost(hostname: string): boolean {
       return label.length > 0 &&
         !label.startsWith("-") &&
         !label.endsWith("-") &&
-        [...label].every(character => {
-          const byte = character.codePointAt(0);
-
-          return byte !== undefined && (isAsciiAlphanumeric(byte) || character === "-");
-        });
+        BACKEND_HOST_LABEL_PATTERN.test(label);
     });
 }
 

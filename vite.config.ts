@@ -121,7 +121,7 @@ function handleSourceFileNames(): Plugin {
 export default defineConfig(({ mode }) => {
   const useBrowserAdapter = kaedeExtraConfiguration.useKaedeBase || mode === "test";
   const browserAdapterRoot = path.resolve(
-    __dirname,
+    import.meta.dirname,
     useBrowserAdapter ? "./src/lib/__browser" : "./src/lib/browser",
   );
 
@@ -183,7 +183,7 @@ export default defineConfig(({ mode }) => {
       "alias": {
         // Select a whole adapter root without mutating the source tree.
         "@/lib/browser": browserAdapterRoot,
-        "@"            : path.resolve(__dirname, "./src"),
+        "@"            : path.resolve(import.meta.dirname, "./src"),
 
         /*
          * Remove this source alias after Ark 1.0 is published to npm.
@@ -191,7 +191,7 @@ export default defineConfig(({ mode }) => {
          * dependencies do not run Ark's prepack build under Bun.
          */
         "ark-of-atrahasis": path.resolve(
-          __dirname,
+          import.meta.dirname,
           "./node_modules/ark-of-atrahasis/src/index.ts",
         ),
       },

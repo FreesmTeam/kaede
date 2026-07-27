@@ -32,7 +32,7 @@ export async function handleDatabase(): Promise<DatabaseType> {
     }
   }, { "once": true });
 
-  return new Promise(resolve => {
+  return new Promise((resolve, reject) => {
     let database: DatabaseType["database"];
 
     request.addEventListener("success", (): void => {
@@ -41,10 +41,7 @@ export async function handleDatabase(): Promise<DatabaseType> {
       resolve({ database });
     }, { "once": true });
     request.addEventListener("error", (): void => {
-      // eslint-disable-next-line no-console
-      console.log("Error in Indexed DB:", request.error);
-
-      resolve({ database });
+      reject(request.error ?? new Error("Failed to open the browser preview IndexedDB"));
     }, { "once": true });
   });
 }

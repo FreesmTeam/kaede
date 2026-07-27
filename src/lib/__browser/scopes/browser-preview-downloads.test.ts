@@ -35,6 +35,14 @@ function createMemoryStorage(): Readonly<{
   });
 }
 
+function requestUrl(input: RequestInfo | URL): string {
+  if (typeof input === "string") {
+    return input;
+  }
+
+  return input instanceof URL ? input.href : input.url;
+}
+
 afterEach(() => {
   vi.unstubAllGlobals();
 });
@@ -43,7 +51,7 @@ describe("browser-preview download batches", () => {
   test("reports per-path progress and isolates failures from completed downloads", async () => {
     const { storage, values } = createMemoryStorage();
     const fetchMock = vi.fn(async (input: RequestInfo | URL): Promise<Response> => {
-      return String(input).endsWith("/missing")
+      return requestUrl(input).endsWith("/missing")
         ? new Response("missing", { "status": 404, "statusText": "Not Found" })
         : new Response(Uint8Array.from([1, 2, 3, 4]), {
           "headers": { "content-length": "4" },
@@ -94,7 +102,7 @@ describe("browser-preview download batches", () => {
       "signal" : AbortSignal;
     }>>);
     const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
-      const url = String(input);
+      const url = requestUrl(input);
       const signal = init?.signal;
 
       if (signal === undefined || signal === null) {
@@ -162,7 +170,7 @@ describe("browser-preview download batches", () => {
       signals.push(signal);
 
       return new Promise((_resolve, reject) => {
-        if (String(input).endsWith("/first")) {
+        if (requestUrl(input).endsWith("/first")) {
           signal.addEventListener("abort", (): void => reject(signal.reason), { "once": true });
         } else {
           rejectSecond = reject;

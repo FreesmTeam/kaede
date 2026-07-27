@@ -25,15 +25,45 @@ See [Code of Conduct](./CODE_OF_CONDUCT.md)
 
 ## Static Analysis and Formatting
 
-All TypeScript files are checked with [ESLint](https://eslint.org/) using
-`eslint.config.js`. [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) provides
-a second, fast correctness pass through `.oxlintrc.json`; it supplements rather
-than replaces the repository-specific ESLint contract. Run both before
-committing:
+[Oxlint](https://oxc.rs/docs/guide/usage/linter.html) is the primary JavaScript,
+TypeScript, and Vue script-block linter. It runs first and uses
+`oxlint-tsgolint` for TS7-native type-aware rules. ESLint runs afterwards only
+for unsupported behavior: Vue templates, UnoCSS, TSDoc, the local element-ID
+rule, Stylistic, and newer Unicorn rules. `eslint-plugin-oxlint` reads the
+effective `.oxlintrc.json` and disables every rule already owned by Oxlint, so
+the tools do not repeat the same check. Run the combined gate before committing:
 
 ```bash
 bun run lint
 ```
+
+The application compiler remains TypeScript 6 while
+`@typescript-eslint/parser` declares `typescript <6.1`; the independent
+`oxlint-tsgolint` binary supplies the TypeScript 7 analyzer without violating
+that peer contract.
+
+### Maintaining the Oxlint/ESLint boundary
+
+`oxlint.eslint-coverage.json` is a generated snapshot of the ESLint rules that
+Oxlint 1.75 can execute natively. Regenerate it only together with an Oxlint
+upgrade, using the matching migrator version:
+
+```bash
+bunx @oxlint/migrate@1.75.0 eslint.config.js \
+  --output-file oxlint.eslint-coverage.json \
+  --type-aware --js-plugins=false --details
+```
+
+Keep project-specific additions and option corrections in `.oxlintrc.json`.
+For example, the source Unicorn 72 policy disables NaN checks in
+`prefer-number-properties`, because the ESLint-only
+`prefer-global-number-constants` rule owns that choice. The migrator currently
+drops those options, so the root Oxlint config restores them explicitly.
+
+After regeneration, inspect every skipped or option-changed rule, run Oxlint
+before ESLint, and compare both effective configs on representative `.ts` and
+`.vue` files. Any rule enabled by both tools is a configuration defect; do not
+resolve it with source-level disable comments.
 
 [Fallow](https://github.com/fallow-rs/fallow) checks the full import graph for
 dead code and circular dependencies as a blocking gate. Error-level findings

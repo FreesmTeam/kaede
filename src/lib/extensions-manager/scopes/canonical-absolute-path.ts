@@ -28,7 +28,7 @@ function isCanonicalWindowsAbsolutePath(filePath: string): boolean {
 
   const pathWithoutDrive = filePath.slice(3);
 
-  if (pathWithoutDrive.endsWith("\\") || pathWithoutDrive.includes("\\\\")) {
+  if (pathWithoutDrive.endsWith("\\") || pathWithoutDrive.includes(String.raw`\\`)) {
     return false;
   }
 

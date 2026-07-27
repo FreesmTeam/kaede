@@ -24,7 +24,7 @@ import type { PermissionRequest } from "@/types/extensions/permission.type.ts";
 
 export class PermissionPromptController {
   readonly #listeners = (new Set<PermissionPromptListener>);
-  readonly #queue = (new PermissionPromptQueue);
+  readonly #queue     : PermissionPromptQueue = (new PermissionPromptQueue);
   readonly #repository: PermissionDecisionRepository;
   #session            : PermissionPromptSession | undefined;
   #running = false;

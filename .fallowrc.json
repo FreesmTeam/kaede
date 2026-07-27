@@ -2,8 +2,6 @@
   "$schema": "./node_modules/fallow/schema.json",
   "entry": [
     "src/main.ts",
-    "src/lib/__browser/index.ts",
-    "src/__mocks__/**/*.cjs",
     "eslint.config.js",
     "vite.config.ts"
   ],
@@ -19,15 +17,95 @@
       "entryPoints": [
         "scripts/**/*.ts"
       ],
-      "entryPointRole": "test",
+      "entryPointRole": "support",
       "toolingDependencies": [
         "dts-bundle-generator"
+      ],
+      "usedExports": [
+        {
+          "pattern": "scripts/declaration-sources/vue-shim.d.ts",
+          "exports": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-test-tooling",
+      "enablers": [
+        "vitest"
+      ],
+      "entryPoints": [
+        "vitest.setup.ts",
+        "src/__mocks__/**/*.cjs"
+      ],
+      "entryPointRole": "test",
+      "usedExports": [
+        {
+          "pattern": "src/__mocks__/log.cjs",
+          "exports": [
+            "log"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-browser-adapter",
+      "enablers": [
+        "vite"
+      ],
+      "entryPoints": [
+        "src/lib/__browser/index.ts"
+      ],
+      "entryPointRole": "runtime",
+      "usedExports": [
+        {
+          "pattern": "src/lib/__browser/index.ts",
+          "exports": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-unocss-tooling",
+      "enablers": [
+        "unocss"
+      ],
+      "configPatterns": [
+        "uno.config.ts"
+      ],
+      "usedExports": [
+        {
+          "pattern": "uno.config.ts",
+          "exports": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-trusted-plugin-api",
+      "detection": {
+        "type": "fileExists",
+        "pattern": "src/lib/txiki/index.ts"
+      },
+      "usedClassMembers": [
+        {
+          "implements": "TrustedPluginServerBuilder",
+          "members": [
+            "get",
+            "post",
+            "defineGlobal"
+          ]
+        }
       ]
     }
   ],
   "rules": {
-    "unused-exports": "warn",
-    "unused-class-members": "warn"
+    "unused-exports": "error",
+    "unused-class-members": "error",
+    "dev-dependencies-in-production": "error"
   },
   "includeEntryExports": true
 }

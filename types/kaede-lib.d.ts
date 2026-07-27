@@ -2914,7 +2914,12 @@ export type PostCallback = (request: {
 	"body": unknown;
 	"params": Record<string, string>;
 }) => LightResponse<unknown>;
-declare class Txiki {
+export interface TrustedPluginServerBuilder {
+	get(path: string, callback: GetCallback): Txiki;
+	post(path: string, callback: PostCallback): Txiki;
+	defineGlobal(name: string, value: unknown): Txiki;
+}
+declare class Txiki implements TrustedPluginServerBuilder {
 	private readonly paths;
 	private readonly globals;
 	private serializeRoutes;

@@ -30,6 +30,12 @@ type PostCallback = (request: {
   "params": Record<string, string>;
 }) => LightResponse<unknown>;
 
+interface TrustedPluginServerBuilder {
+  get(path: string, callback: GetCallback): Txiki;
+  post(path: string, callback: PostCallback): Txiki;
+  defineGlobal(name: string, value: unknown): Txiki;
+}
+
 const identifierStartPattern = /^[$_\p{ID_Start}]$/u;
 const identifierContinuePattern = /^[$_\p{ID_Continue}]$/u;
 const reservedGlobalNames = new Set(`
@@ -63,7 +69,7 @@ function createServerName(): string {
   return `txiki-${serverIdState.next}`;
 }
 
-export default class Txiki {
+export default class Txiki implements TrustedPluginServerBuilder {
   private readonly paths: {
     "GET" : Map<string, string>;
     "POST": Map<string, string>;

@@ -1,7 +1,10 @@
+import {
+  mkdtemp,
+  rm,
+} from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-
-import { generateDtsBundle } from "dts-bundle-generator";
 
 const ARK_DECLARATION_SHA256 = "79f17ec644dc0e8b23ffe246b71637083e3f6c2172acc8ba7966ef519b31e4db";
 const ARK_SOURCE_COMMIT = "928f1f361abaa4d7204de0bb53dd7b916b04d45b";
@@ -11,6 +14,10 @@ const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url))
 const declarationsEntry = path.resolve(
   repositoryRoot,
   "scripts/declaration-sources/kaede-library.ts",
+);
+const declarationGeneratorCli = path.resolve(
+  repositoryRoot,
+  "node_modules/dts-bundle-generator/dist/bin/dts-bundle-generator.js",
 );
 const sandboxDeclarationsEntry = path.resolve(
   repositoryRoot,
@@ -30,47 +37,70 @@ async function sha256(filePath: string): Promise<string> {
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
-function generateDeclaration(entryPoint: string): string {
-  const [generated] = generateDtsBundle([{
-    "filePath": entryPoint,
-    "output"  : { "inlineDeclareGlobals": true },
-  }], { "preferredConfigPath": project });
+async function generateDeclaration(entryPoint: string): Promise<string> {
+  const temporaryDirectory = await mkdtemp(
+    path.join(os.tmpdir(), "kaede-declarations-"),
+  );
+  const outputPath = path.resolve(temporaryDirectory, "bundle.d.ts");
 
-  if (generated === undefined) {
-    throw new Error(`dts-bundle-generator did not return output for ${entryPoint}`);
+  try {
+    const generator = Bun.spawn([
+      process.execPath,
+      declarationGeneratorCli,
+      "--silent",
+      "--no-check",
+      "--inline-declare-global",
+      "--project",
+      project,
+      "--out-file",
+      outputPath,
+      entryPoint,
+    ], {
+      "cwd"   : repositoryRoot,
+      "stdout": "inherit",
+      "stderr": "inherit",
+    });
+    const exitCode = await generator.exited;
+
+    if (exitCode !== 0) {
+      throw new Error(`dts-bundle-generator failed for ${entryPoint}`);
+    }
+
+    const generated = await Bun.file(outputPath).text();
+    const bundled = generated.replaceAll("\r\n", "\n");
+    const arkReferenceCount = bundled.split(ARK_PACKAGE_REFERENCE).length - 1;
+
+    if (arkReferenceCount === 0) {
+      throw new Error("Generated declarations did not contain the expected Ark type references");
+    }
+
+    if (bundled.includes("\"@/")) {
+      throw new Error("Generated declarations contain a private @/ path alias");
+    }
+
+    const rewritten = bundled.replaceAll(ARK_PACKAGE_REFERENCE, () => ARK_SNAPSHOT_REFERENCE);
+
+    if (rewritten.includes(ARK_PACKAGE_REFERENCE)) {
+      throw new Error("Generated declarations still contain bare Ark package references");
+    }
+
+    const firstLineEnd = rewritten.indexOf("\n");
+
+    if (firstLineEnd === -1) {
+      throw new Error("Generated declarations are missing their generator header");
+    }
+
+    const provenance = [
+      "// Post-processed by scripts/generate-types.ts; do not edit directly.",
+      "// Ark 1.0 declaration snapshot: "
+      + `commit ${ARK_SOURCE_COMMIT}; SHA-256 ${ARK_DECLARATION_SHA256}`,
+    ].join("\n");
+
+    return `${rewritten.slice(0, firstLineEnd + 1)}${provenance}\n`
+      + rewritten.slice(firstLineEnd + 1);
+  } finally {
+    await rm(temporaryDirectory, { "force": true, "recursive": true });
   }
-
-  const bundled = generated.replaceAll("\r\n", "\n");
-  const arkReferenceCount = bundled.split(ARK_PACKAGE_REFERENCE).length - 1;
-
-  if (arkReferenceCount === 0) {
-    throw new Error("Generated declarations did not contain the expected Ark type references");
-  }
-
-  if (bundled.includes("\"@/")) {
-    throw new Error("Generated declarations contain a private @/ path alias");
-  }
-
-  const rewritten = bundled.replaceAll(ARK_PACKAGE_REFERENCE, () => ARK_SNAPSHOT_REFERENCE);
-
-  if (rewritten.includes(ARK_PACKAGE_REFERENCE)) {
-    throw new Error("Generated declarations still contain bare Ark package references");
-  }
-
-  const firstLineEnd = rewritten.indexOf("\n");
-
-  if (firstLineEnd === -1) {
-    throw new Error("Generated declarations are missing their generator header");
-  }
-
-  const provenance = [
-    "// Post-processed by scripts/generate-types.ts; do not edit directly.",
-    "// Ark 1.0 declaration snapshot: "
-    + `commit ${ARK_SOURCE_COMMIT}; SHA-256 ${ARK_DECLARATION_SHA256}`,
-  ].join("\n");
-
-  return `${rewritten.slice(0, firstLineEnd + 1)}${provenance}\n`
-    + rewritten.slice(firstLineEnd + 1);
 }
 
 async function writeOrCheck(filePath: string, contents: string): Promise<string> {
@@ -110,8 +140,8 @@ declare global {
 export {};
 `;
 
-const declaration = generateDeclaration(declarationsEntry);
-const sandboxDeclaration = generateDeclaration(sandboxDeclarationsEntry);
+const declaration = await generateDeclaration(declarationsEntry);
+const sandboxDeclaration = await generateDeclaration(sandboxDeclarationsEntry);
 const generatedHash = await writeOrCheck(generatedDeclaration, declaration);
 const sandboxHash = await writeOrCheck(generatedSandboxDeclaration, sandboxDeclaration);
 const trustedHash = await writeOrCheck(generatedTrustedDeclaration, TRUSTED_DECLARATION);

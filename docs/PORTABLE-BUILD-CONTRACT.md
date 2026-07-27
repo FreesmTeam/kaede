@@ -36,10 +36,10 @@ Git reference. Development non-portable artifact names retain the
 
 The primary validation job performs the frozen Bun install and audit,
 dependency compatibility check, TypeScript check, production Vite build,
-declaration verification, ESLint and Oxlint, Fallow report, Vitest, RustSec
-audit, Rust tests, formatting, Clippy, Hawk, and the Tauri ACL smoke. The ACL
-smoke is compiled and executed by the full Rust test command, so CI does not
-invoke the same test a second time.
+declaration verification, ESLint and Oxlint, the blocking Fallow graph/dead-code
+gate, Vitest, RustSec audit, Rust tests, formatting, Clippy, Hawk, and the Tauri
+ACL smoke. The ACL smoke is compiled and executed by the full Rust test
+command, so CI does not invoke the same test a second time.
 
 Packaging runners rebuild the small frontend bundle locally with
 `src-tauri/tauri.ci.conf.json`. This overlay runs Vite without repeating the

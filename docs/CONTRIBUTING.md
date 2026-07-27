@@ -36,12 +36,39 @@ bun run lint
 ```
 
 [Fallow](https://github.com/fallow-rs/fallow) checks the full import graph for
-dead code and circular dependencies in report mode. Its findings remain visible
-for review and are not hidden by a baseline:
+dead code and circular dependencies as a blocking gate. Error-level findings
+fail the command; external consumers are modeled explicitly in `.fallowrc.json`
+instead of being hidden by a baseline:
 
 ```bash
 bun run analyze:fallow
 ```
+
+### Maintaining the Fallow model
+
+Treat an unexpected Fallow finding as a missing or incorrect graph edge until
+the consumer has been traced. Keep the model precise rather than adding a
+baseline, `ignoreExports`, or a global class-member name:
+
+- If a private field's inferred type hides calls to another class, annotate the
+  field with its concrete receiver type. This lets Fallow follow real internal
+  calls without exempting the methods.
+- For exports loaded by a compiler, test runner, alias, or config discovery,
+  declare an exact `framework.usedExports` file/export pair under a framework
+  with the correct runtime, test, or support role.
+- For methods called by external plugin code, express the public surface as a
+  meaningful interface and scope `usedClassMembers` to the class's
+  `implements` clause. Never allow generic names such as `get` or `post`
+  globally.
+- Keep build-only packages in `devDependencies`. If a package-script entry is
+  classified as production because it imports a tool's library API, invoke the
+  installed tool as a CLI and list it in `toolingDependencies` instead.
+
+After changing this model, validate the effective config and activation with
+`fallow config` and `fallow plugin-check`. Then run the zero-finding gate and a
+temporary mutation (for example, remove one exact `usedExports` mapping) to
+prove that the relevant finding returns with exit code 1. Restore the contract
+and rerun the gate before committing.
 
 Rust visibility is checked separately with
 [Hawk](https://github.com/astral-sh/hawk), using the production targets declared

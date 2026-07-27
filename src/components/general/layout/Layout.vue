@@ -5,7 +5,7 @@ import { ref } from "vue";
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import PageError from "@/components/general/errors/PageError.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
-import { C } from "@/extendable/component-registry.ts";
+import { getComponents } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
 
@@ -68,6 +68,8 @@ useEventListener(window, "pointerdown", (event: PointerEvent) => {
 
   closeContextMenu();
 });
+
+const C = getComponents();
 </script>
 
 <template>

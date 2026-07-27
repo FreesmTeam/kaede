@@ -12,6 +12,7 @@
     "test": "bun test --preload ./bun.setup.ts src",
     "lint": "eslint .",
     "typecheck": "vue-tsc -b",
+    "generate:validators": "bun scripts/generate-validators.ts",
     "generate:types": "dts-bundle-generator ./src/declarations.ts -o ./types/kaede-lib.d.ts --project tsconfig.types.json --inline-declare-global"
   },
   "dependencies": {

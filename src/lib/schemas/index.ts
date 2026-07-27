@@ -1,24 +1,49 @@
-import { Compile } from "typebox/compile";
-
-import { AccountSchema } from "@/lib/schemas/scopes/accounts";
-import { ConfigSchema } from "@/lib/schemas/scopes/config";
-import { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
-import { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
-import { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
-import { validate } from "@/lib/schemas/scopes/validate.ts";
+import { getValidationErrors } from "@/lib/schemas/errors.ts";
+import {
+  CheckAccount,
+  CheckConfig,
+  CheckExtensionMetadata,
+  CheckInstanceMetadata,
+  CheckPatchMeta,
+} from "@/lib/schemas/generated/validators.ts";
+import { validate } from "@/lib/schemas/validate.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 import type { ExtensionMetadataType } from "@/types/extensions/extension-metadata.type.ts";
 import type { SpecificPatchMetaType } from "@/types/launcher/meta/specific-patch-meta.type.ts";
-import type { ValidationArgumentsType } from "@/types/schemas/validation-arguments.type.ts";
+import type {
+  CompiledValidatorType,
+  ValidationArgumentsType,
+} from "@/types/schemas/validation-arguments.type.ts";
 
-const AccountValidator = Compile(AccountSchema);
-const ConfigValidator = Compile(ConfigSchema);
-const InstanceMetadataValidator = Compile(InstanceMetadataSchema);
-const ExtensionMetadataValidator = Compile(ExtensionMetadataSchema);
+/*
+ * The checks are pre-compiled by 'typebox/compile' at build time
+ * ('bun generate:validators'), so the typebox runtime does not ship
+ * in the application bundle. Detailed validation errors are still
+ * produced on failures by a lazily loaded typebox runtime
+ */
+const AccountValidator: CompiledValidatorType = {
+  "Check" : CheckAccount,
+  "Errors": (value: unknown) => getValidationErrors("account", value),
+};
+const ConfigValidator: CompiledValidatorType = {
+  "Check" : CheckConfig,
+  "Errors": (value: unknown) => getValidationErrors("config", value),
+};
+const InstanceMetadataValidator: CompiledValidatorType = {
+  "Check" : CheckInstanceMetadata,
+  "Errors": (value: unknown) => getValidationErrors("instanceMetadata", value),
+};
+const ExtensionMetadataValidator: CompiledValidatorType = {
+  "Check" : CheckExtensionMetadata,
+  "Errors": (value: unknown) => getValidationErrors("extensionMetadata", value),
+};
 
-const PatchMetaValidator = Compile(PatchMetaSchema);
+const PatchMetaValidator: CompiledValidatorType = {
+  "Check" : CheckPatchMeta,
+  "Errors": (value: unknown) => getValidationErrors("patchMeta", value),
+};
 
 export default {
 

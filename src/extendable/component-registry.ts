@@ -24,7 +24,6 @@ import CleanInstance from "@/components/add-instance/tabs/CleanInstance.vue";
 import ContextMenu from "@/components/general/layout/ContextMenu.vue";
 import GlobalBackground from "@/components/general/layout/GlobalBackground.vue";
 import LaunchProgress from "@/components/general/layout/LaunchProgress.vue";
-import PagesSelector from "@/components/general/layout/PagesSelector.vue";
 import Sidebar from "@/components/general/layout/Sidebar.vue";
 // */
 
@@ -34,7 +33,6 @@ interface ComponentRegistryType {
   "ContextMenu"         : Component;
   "LaunchProgress"      : Component;
   "GlobalBackground"    : Component;
-  "PagesSelector"       : Component;
   "LazyPluginPlayground": Component;
 }
 
@@ -55,7 +53,6 @@ export const C: ComponentRegistryType = shallowReactive({
   ContextMenu,
   LaunchProgress,
   GlobalBackground,
-  PagesSelector,
 
   // 'settings/'
   "LazyPluginPlayground": defineAsyncComponent(() => (
@@ -63,6 +60,10 @@ export const C: ComponentRegistryType = shallowReactive({
   )),
   // */
 });
+
+export function getComponents(): ComponentRegistryType {
+  return C;
+}
 
 export function __registerComponent(name: string, component: Component): void {
   C[name] = component;

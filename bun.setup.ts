@@ -45,7 +45,6 @@ const testWindow = {
     "temporaryAccounts"   : [] as Array<AccountType>,
     "initialTranslations" : {} as TranslationsType,
     "initialInstances"    : {} as InstanceStatesType,
-    "serverProcesses"     : [],
     "logsInBrowser"       : [],
   },
   "__KAEDE__": {
@@ -98,10 +97,12 @@ const testWindow = {
 
 (globalThis as unknown as { "window": unknown }).window = testWindow;
 
-// @ts-expect-error top-level await works
-const logMock = await import("./src/__mocks__/log.cjs");
-// @ts-expect-error top-level await works
-const windowMock = await import("./src/__mocks__/api/window.cjs");
+// // @ts-expect-error top-level await works
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const logMock = require("./src/__mocks__/log.cjs");
+// // @ts-expect-error top-level await works
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const windowMock = require("./src/__mocks__/api/window.cjs");
 
 // Mock the logging utilities
 mock.module("@/lib/logging/scopes/log.ts", () => logMock);

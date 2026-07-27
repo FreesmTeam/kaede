@@ -1,4 +1,4 @@
-import { Errors } from "typebox/value";
+import type { TLocalizedValidationError } from "typebox/error";
 
 import {
   CheckAccount,
@@ -7,11 +7,6 @@ import {
   CheckInstanceMetadata,
   CheckPatchMeta,
 } from "@/lib/schemas/generated/validators.ts";
-import { AccountSchema } from "@/lib/schemas/scopes/accounts";
-import { ConfigSchema } from "@/lib/schemas/scopes/config";
-import { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
-import { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
-import { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
 import { validate } from "@/lib/schemas/validate.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
@@ -23,39 +18,60 @@ import type {
   ValidationArgumentsType,
 } from "@/types/schemas/validation-arguments.type.ts";
 
+const handleError = async (
+  kind: "account" | "config" | "instance" | "extension" | "patch",
+  value: unknown,
+): Promise<Array<TLocalizedValidationError>> => {
+  const {
+    AccountSchema,
+    ConfigSchema,
+    ExtensionMetadataSchema,
+    InstanceMetadataSchema,
+    PatchMetaSchema,
+    Errors,
+  } = await import("@/lib/schemas/scopes");
+
+  switch (kind) {
+    case "account": { return Errors(AccountSchema, value); }
+    case "config": { return Errors(ConfigSchema, value); }
+    case "extension": { return Errors(ExtensionMetadataSchema, value); }
+    case "instance": { return Errors(InstanceMetadataSchema, value); }
+    case "patch": { return Errors(PatchMetaSchema, value); }
+  }
+};
+
 /*
  * The checks are pre-compiled by 'typebox/compile' at build time
- * ('bun generate:validators'), so neither the typebox compiler
- * nor its 'new Function' evaluation run at startup.
+ * ('bun generate:validators'), so the typebox compiler is not bundled at runtime.
  *
- * Detailed errors for failed validations are produced by the typebox value engine
+ * Detailed errors for failed validations are produced by the typebox value engine,
+ * loaded dynamically at runtime when necessary (see 'handleError' above)
  */
 const AccountValidator: CompiledValidatorType = {
   "Check" : CheckAccount,
-  "Errors": (value: unknown) => Errors(AccountSchema, value),
+  "Errors": (value: unknown) => handleError("account", value),
 };
 const ConfigValidator: CompiledValidatorType = {
   "Check" : CheckConfig,
-  "Errors": (value: unknown) => Errors(ConfigSchema, value),
+  "Errors": (value: unknown) => handleError("config", value),
 };
 const InstanceMetadataValidator: CompiledValidatorType = {
   "Check" : CheckInstanceMetadata,
-  "Errors": (value: unknown) => Errors(InstanceMetadataSchema, value),
+  "Errors": (value: unknown) => handleError("instance", value),
 };
 const ExtensionMetadataValidator: CompiledValidatorType = {
   "Check" : CheckExtensionMetadata,
-  "Errors": (value: unknown) => Errors(ExtensionMetadataSchema, value),
+  "Errors": (value: unknown) => handleError("extension", value),
 };
-
 const PatchMetaValidator: CompiledValidatorType = {
   "Check" : CheckPatchMeta,
-  "Errors": (value: unknown) => Errors(PatchMetaSchema, value),
+  "Errors": (value: unknown) => handleError("patch", value),
 };
 
 export default {
 
   /*
-   * If there is additional unknown properties in object, validation will still pass,
+   * If there are additional unknown properties in the object, validation will still pass,
    * which is actually good since extensions can use the same config files as the app
    */
   "validate": {

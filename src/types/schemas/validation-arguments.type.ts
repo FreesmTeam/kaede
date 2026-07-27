@@ -2,7 +2,7 @@ import type { TLocalizedValidationError } from "typebox/error";
 
 export interface CompiledValidatorType {
   "Check" : (value: unknown) => boolean;
-  "Errors": (value: unknown) => Array<TLocalizedValidationError>;
+  "Errors": (value: unknown) => Promise<Array<TLocalizedValidationError>>;
 }
 
 export interface ValidationArgumentsType {

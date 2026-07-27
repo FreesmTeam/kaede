@@ -21,3 +21,5 @@ export { ConfigSchema } from "@/lib/schemas/scopes/config";
 export { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
 export { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
 export { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
+
+export { Errors } from "typebox/value";

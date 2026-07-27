@@ -33,17 +33,17 @@ export function validate<T>({
   const validated: boolean = schema.Check(value);
 
   if (!validated) {
-    const errors: string = JSON.stringify(
-      schema.Errors(value),
-      null,
-      2,
-    );
+    schema
+      .Errors(value)
+      .then(error => {
+        const errors: string = JSON.stringify(error, null, 2);
 
-    log.warn(
-      __PRE_BUNDLED_FILENAME__,
-      `The provided ${label} (${entryInfo}) is not valid:`,
-      "\n" + errors,
-    );
+        log.error(
+          __PRE_BUNDLED_FILENAME__,
+          `The provided ${label} (${entryInfo}) is not valid:`,
+          "\n" + errors,
+        );
+      });
 
     return false;
   }

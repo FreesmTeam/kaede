@@ -16,17 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// @ts-expect-error No TypeScript declaration file found
-import * as Hashes from "jshashes";
+import { invoke } from "@tauri-apps/api/core";
 
 /*
  * Source - https://stackoverflow.com/a/51732778
  * Posted by Mahesh Bongani
  * Retrieved 2026-06-13, License - CC BY-SA 4.0
  */
-export function hashOfflineNickname(input: string): string {
-  const MD5 = new Hashes.MD5;
-  const hashed: string = MD5.hex(`OfflinePlayer:${input}`);
+export async function hashOfflineNickname(input: string): Promise<string> {
+  const encoded: Uint8Array = (new TextEncoder).encode(`OfflinePlayer:${input}`);
+  const hashed: string = await invoke<string>("hash_md5", encoded);
   const bytes: Array<number> = [];
 
   for (let index = 0; index < hashed.length; index += 2) {

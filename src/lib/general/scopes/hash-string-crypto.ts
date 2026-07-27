@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// @ts-expect-error No TypeScript declaration file found
-import * as Hashes from "jshashes";
+import { invoke } from "@tauri-apps/api/core";
 
-export function hashStringCrypto(input: string): string {
-  const SHA256 = new Hashes.SHA256;
+export function hashStringCrypto(input: string): Promise<string> {
+  const bytes: Uint8Array = (new TextEncoder).encode(input);
 
-  return SHA256.hex(input);
+  return invoke<string>("hash_sha256", bytes);
 }

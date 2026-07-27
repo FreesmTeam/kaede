@@ -16,20 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// @ts-expect-error No TypeScript declaration file found
-import * as Hashes from "jshashes";
+import { invoke } from "@tauri-apps/api/core";
 
-export function hashFileContents(image: Uint8Array): string {
-  const SHA256 = new Hashes.SHA256;
-
-  SHA256.setUTF8(false);
-
-  const contents: Array<string> = [];
-
-  // 'image.map' does not really work in this case
-  for (const byte of image) {
-    contents.push(String.fromCodePoint(byte));
-  }
-
-  return SHA256.hex(contents.join(""));
+export function hashFileContents(image: Uint8Array): Promise<string> {
+  return invoke<string>("hash_sha256", image);
 }

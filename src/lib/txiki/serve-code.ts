@@ -30,7 +30,7 @@ export async function serveCode(
   code: string,
   port?: number,
 ): Promise<ServerProcessType | undefined> {
-  const hash: string = General.hashStringCrypto(code);
+  const hash: string = await General.hashStringCrypto(code);
   const shortHash: string = hash.slice(0, 7);
   const filePath: string = General.cachedJoin(
     General.getCachedBaseDirectory(),

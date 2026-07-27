@@ -103,7 +103,7 @@ function isCanonicalRepositoryPath(repositoryPath: string): boolean {
     repositoryPath.toLowerCase().endsWith(".git") ||
     repositoryPath.split("/").slice(1)
       .some(segment => {
-        return segment === "" || segment === "." || segment === "..";
+        return ["", ".", ".."].includes(segment);
       })
   ) {
     return false;
@@ -141,7 +141,7 @@ function isCanonicalRepositoryPath(repositoryPath: string): boolean {
   }
 
   try {
-    const decoded = (new TextDecoder("utf8", { "fatal": true })).decode(
+    const decoded = (new TextDecoder("utf-8", { "fatal": true })).decode(
       Uint8Array.from(decodedPath),
     );
 

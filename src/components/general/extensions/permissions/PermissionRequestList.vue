@@ -17,7 +17,7 @@ import {
 defineProps<{
   "prompt"          : PermissionPrompt;
   "dynamicDecisions": ReadonlyArray<boolean | undefined>;
-  "onChooseDynamic" : (index: number, decision: boolean) => void;
+  "onChooseDynamic" : (index: number, isAllowed: boolean) => void;
 }>();
 
 function permissionDescription(request: PreparedPermissionRequest): string {

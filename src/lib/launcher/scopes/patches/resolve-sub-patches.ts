@@ -30,28 +30,29 @@ export async function resolveSubPatches({
   "necessaries": PreLaunchInformationType;
   "patchMeta"  : SpecificPatchMetaType;
 }): Promise<Array<SpecificPatchMetaType>> {
-  const toResolve: Array<Array<PatchDependencyType> | undefined> = [patchMeta?.requires];
+  const toResolve: Array<Array<PatchDependencyType>> = patchMeta.requires === undefined
+    ? []
+    : [patchMeta.requires];
   const patches: Array<SpecificPatchMetaType> = [patchMeta];
 
-  for (const currentGroup of toResolve) {
-    if (currentGroup === undefined) {
-      continue;
-    }
-
+  while (toResolve.length > 0) {
+    const currentGroup = toResolve.shift() ?? [];
     const currentResolved: Array<SpecificPatchMetaType | false> = await Promise.all(
       currentGroup.map(required => resolvePatch({
         "metadata": required,
         necessaries,
       })),
     );
+    const resolvedPatches: Array<SpecificPatchMetaType> = currentResolved.filter(
+      (resolvedPatch): resolvedPatch is SpecificPatchMetaType => resolvedPatch !== false,
+    );
 
-    for (const resolvedPatch of currentResolved) {
-      if (resolvedPatch === false) {
-        continue;
-      }
-
+    for (const resolvedPatch of resolvedPatches) {
       patches.push(resolvedPatch);
-      toResolve.push(resolvedPatch.requires);
+
+      if (resolvedPatch.requires !== undefined) {
+        toResolve.push(resolvedPatch.requires);
+      }
     }
   }
 

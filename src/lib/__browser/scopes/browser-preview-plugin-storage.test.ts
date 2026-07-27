@@ -13,7 +13,7 @@ import {
 } from "@/lib/extensions-manager/scopes/principal.ts";
 
 function noEventCapability(): undefined {
-  return undefined;
+  return;
 }
 
 test("plugin external storage cannot cross into private broker records", async () => {

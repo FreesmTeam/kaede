@@ -69,11 +69,11 @@ test("dynamic persistence remains opt-in", async () => {
 
 test("static completion waits for its durable decision save", async () => {
   let finishSave: (() => void) | undefined;
-  let saveStarted = false;
+  let isSaveStarted = false;
   const store: PermissionDecisionStore = {
     "load": (): undefined => undefined,
     "save": async () => {
-      saveStarted = true;
+      isSaveStarted = true;
       await new Promise<void>(resolve => {
         finishSave = resolve;
       });
@@ -81,33 +81,33 @@ test("static completion waits for its durable decision save", async () => {
   };
   const controller = new PermissionPromptController(store);
   const request = controller.requestStatic(principal("a"), [BASIC_UI]);
-  let completed = false;
+  let isCompleted = false;
 
   void request.then(() => {
-    completed = true;
+    isCompleted = true;
 
-    return completed;
+    return isCompleted;
   });
   await waitForPrompt(controller);
   controller.resolveStatic(true);
 
-  for (let attempt = 0; attempt < 5 && !saveStarted; attempt++) {
+  for (let attempt = 0; !isSaveStarted && attempt < 5; attempt++) {
     await Promise.resolve();
   }
 
-  expect(saveStarted).toBe(true);
-  expect(completed).toBe(false);
+  expect(isSaveStarted).toBe(true);
+  expect(isCompleted).toBe(false);
   finishSave?.();
   await expect(request).resolves.toBe(true);
 });
 
 test("remembered dynamic completion waits for every durable decision save", async () => {
   let finishSave: (() => void) | undefined;
-  let saveStarted = false;
+  let isSaveStarted = false;
   const store: PermissionDecisionStore = {
     "load": (): undefined => undefined,
     "save": async () => {
-      saveStarted = true;
+      isSaveStarted = true;
       await new Promise<void>(resolve => {
         finishSave = resolve;
       });
@@ -115,22 +115,22 @@ test("remembered dynamic completion waits for every durable decision save", asyn
   };
   const controller = new PermissionPromptController(store);
   const request = controller.requestDynamic(principal("a"), [LOGGING]);
-  let completed = false;
+  let isCompleted = false;
 
   void request.then(() => {
-    completed = true;
+    isCompleted = true;
 
-    return completed;
+    return isCompleted;
   });
   await waitForPrompt(controller);
   controller.resolveDynamic([true], true);
 
-  for (let attempt = 0; attempt < 5 && !saveStarted; attempt++) {
+  for (let attempt = 0; !isSaveStarted && attempt < 5; attempt++) {
     await Promise.resolve();
   }
 
-  expect(saveStarted).toBe(true);
-  expect(completed).toBe(false);
+  expect(isSaveStarted).toBe(true);
+  expect(isCompleted).toBe(false);
   finishSave?.();
   await expect(request).resolves.toEqual([true]);
 });

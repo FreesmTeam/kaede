@@ -29,12 +29,12 @@ function cancellationGate(): Readonly<{
 }
 
 export class PermissionPromptSession {
-  readonly item           : QueueItem;
   readonly #repository    : PermissionDecisionRepository;
   readonly #onPromptChange: () => void;
   #cancelWaiter           : (() => void) | undefined;
   #currentPrompt          : PermissionPrompt | undefined;
   #resume                 : ((response: PromptResponse) => void) | undefined;
+  readonly item           : QueueItem;
 
   constructor(
     item: QueueItem,
@@ -44,50 +44,6 @@ export class PermissionPromptSession {
     this.item = item;
     this.#repository = repository;
     this.#onPromptChange = onPromptChange;
-  }
-
-  get currentPrompt(): PermissionPrompt | undefined {
-    return this.#currentPrompt;
-  }
-
-  async run(): Promise<void> {
-    const operations: PermissionPromptSessionOperations = {
-      "waitForOperation": async <Value>(operation: Promise<Value>) => {
-        return await this.#waitForOperation(operation);
-      },
-      "showPrompt": async prompt => await this.#showPrompt(prompt),
-    };
-
-    await (this.item.kind === "static"
-      ? processStaticPermissionPrompt(this.item, this.#repository, operations)
-      : processDynamicPermissionPrompt(this.item, this.#repository, operations));
-  }
-
-  resolveStatic(decision: boolean): boolean {
-    if (this.item.kind !== "static" || this.#currentPrompt?.kind !== "static") {
-      return false;
-    }
-
-    this.#resume?.({ "kind": "static", decision });
-
-    return true;
-  }
-
-  resolveDynamic(decisions: ReadonlyArray<boolean>, remember = false): boolean {
-    if (this.item.kind !== "dynamic" || this.#currentPrompt?.kind !== "dynamic") {
-      return false;
-    }
-
-    this.#resume?.(validateDynamicPromptResponse(this.item, decisions, remember));
-
-    return true;
-  }
-
-  cancel(): void {
-    this.item.cancelled = true;
-    this.#clearPrompt();
-    this.#cancelWaiter?.();
-    this.#resume?.({ "kind": "cancel" });
   }
 
   async #waitForOperation<Value>(
@@ -123,9 +79,55 @@ export class PermissionPromptSession {
   }
 
   #clearPrompt(): void {
-    if (this.#currentPrompt !== undefined) {
-      this.#currentPrompt = undefined;
-      this.#onPromptChange();
+    if (this.#currentPrompt === undefined) {
+      return;
     }
+
+    this.#currentPrompt = undefined;
+    this.#onPromptChange();
+  }
+
+  get currentPrompt(): PermissionPrompt | undefined {
+    return this.#currentPrompt;
+  }
+
+  async run(): Promise<void> {
+    const operations: PermissionPromptSessionOperations = {
+      "waitForOperation": async <Value>(operation: Promise<Value>) => {
+        return await this.#waitForOperation(operation);
+      },
+      "showPrompt": async prompt => await this.#showPrompt(prompt),
+    };
+
+    await (this.item.kind === "static"
+      ? processStaticPermissionPrompt(this.item, this.#repository, operations)
+      : processDynamicPermissionPrompt(this.item, this.#repository, operations));
+  }
+
+  resolveStatic(isAllowed: boolean): boolean {
+    if (this.item.kind !== "static" || this.#currentPrompt?.kind !== "static") {
+      return false;
+    }
+
+    this.#resume?.({ "kind": "static", "decision": isAllowed });
+
+    return true;
+  }
+
+  resolveDynamic(decisions: ReadonlyArray<boolean>, shouldRemember = false): boolean {
+    if (this.item.kind !== "dynamic" || this.#currentPrompt?.kind !== "dynamic") {
+      return false;
+    }
+
+    this.#resume?.(validateDynamicPromptResponse(this.item, decisions, shouldRemember));
+
+    return true;
+  }
+
+  cancel(): void {
+    this.item.cancelled = true;
+    this.#clearPrompt();
+    this.#cancelWaiter?.();
+    this.#resume?.({ "kind": "cancel" });
   }
 }

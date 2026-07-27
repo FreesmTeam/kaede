@@ -163,11 +163,11 @@ class BrokeredHttpResponse extends Response {
     body: BodyInit | null,
     init: ResponseInit,
     url: string,
-    redirected: boolean,
+    isRedirected: boolean,
   ) {
     super(body, init);
     this.#url = url;
-    this.#redirected = redirected;
+    this.#redirected = isRedirected;
   }
 
   override get url(): string {
@@ -245,7 +245,7 @@ export function externalStoragePath(target: ExternalStorageTarget): string {
   if (
     target.relativePath.startsWith("/") ||
     target.relativePath.startsWith("\\") ||
-    segments.some(segment => segment === "" || segment === "." || segment === "..")
+    segments.some(segment => ["", ".", ".."].includes(segment))
   ) {
     throw new TypeError(
       `Invalid external storage relative path: ${JSON.stringify(target.relativePath)}`,
@@ -254,9 +254,9 @@ export function externalStoragePath(target: ExternalStorageTarget): string {
 
   const separator = target.root.includes("\\") ? "\\" : "/";
 
-  return target.root.endsWith(separator)
-    ? target.root + segments.join(separator)
-    : target.root + separator + segments.join(separator);
+  const root = target.root.endsWith(separator) ? target.root : target.root + separator;
+
+  return root + segments.join(separator);
 }
 
 export function createProcessResult(

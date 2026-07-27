@@ -83,7 +83,7 @@ function validateCanonicalAbsolutePath(filePath: string, label: string): string 
 
 function validateArguments(argumentsList: ReadonlyArray<string>): ReadonlyArray<string> {
   for (const argument of argumentsList) {
-    if (argument.includes("\u0000")) {
+    if (argument.includes("\u{0}")) {
       throw invalidScope("process argument", argument);
     }
   }
@@ -95,6 +95,10 @@ function executableKey(executable: ProcessExecutableScope): string {
   const segments = [executable.path, ...executable.arguments];
 
   return segments.map(segment => `${segment.length}:${segment}`).join("|");
+}
+
+function compareExecutables(left: ProcessExecutableScope, right: ProcessExecutableScope): number {
+  return compareStrings(executableKey(left), executableKey(right));
 }
 
 function permissionRequestId(request: PermissionRequest): string {
@@ -115,7 +119,7 @@ export function normalizePermissionRequests(
   let hasNetworkPermission = false;
   let hasProcessPermission = false;
 
-  for (const request of requests) {
+  permissionRequests: for (const request of requests) {
     if (typeof request === "string") {
       if (!isSimplePermissionId(request)) {
         throw invalidScope("simple permission ID", request);
@@ -148,7 +152,7 @@ export function normalizePermissionRequests(
 
           networkMethods.add(method);
         }
-        break;
+        continue permissionRequests;
       }
       case "storage/internal/read":
       case "storage/internal/write": {
@@ -157,7 +161,7 @@ export function normalizePermissionRequests(
         }
 
         internalStoragePermissions.add(request.id);
-        break;
+        continue permissionRequests;
       }
       case "storage/external/read":
       case "storage/external/write": {
@@ -174,7 +178,7 @@ export function normalizePermissionRequests(
         for (const root of request.scope.roots) {
           roots.add(validateCanonicalAbsolutePath(root, "external storage root"));
         }
-        break;
+        continue permissionRequests;
       }
       case "system/process/spawn": {
         if (request.scope.executables.length === 0) {
@@ -191,7 +195,7 @@ export function normalizePermissionRequests(
 
           processExecutables.set(executableKey(normalizedExecutable), normalizedExecutable);
         }
-        break;
+        continue permissionRequests;
       }
       default: {
         throw new TypeError(
@@ -209,47 +213,48 @@ export function normalizePermissionRequests(
   const normalized: Array<PermissionRequest> = [...simplePermissions];
 
   if (hasNetworkPermission) {
+    const origins = Object.freeze(copyAndSort([...networkOrigins], compareStrings));
+    const methods = Object.freeze(copyAndSort([...networkMethods], compareStrings));
+    const scope = Object.freeze({ origins, methods });
     const networkRequest: NetworkPermissionRequest = Object.freeze({
-      "id"   : "network/http",
-      "scope": Object.freeze({
-        "origins": Object.freeze(copyAndSort([...networkOrigins], compareStrings)),
-        "methods": Object.freeze(copyAndSort([...networkMethods], compareStrings)),
-      }),
+      "id": "network/http",
+      scope,
     });
 
     normalized.push(networkRequest);
   }
 
   for (const permissionId of internalStoragePermissions) {
-    normalized.push(Object.freeze({
-      "id"   : permissionId,
-      "scope": Object.freeze({ "directory": "principal" }),
-    }));
+    const scope = Object.freeze({ "directory": "principal" as const });
+    const request = Object.freeze({
+      "id": permissionId,
+      scope,
+    });
+
+    normalized.push(request);
   }
 
   for (const permissionId of EXTERNAL_STORAGE_PERMISSION_IDS) {
     const roots = externalRoots.get(permissionId);
 
     if (roots !== undefined && roots.size > 0) {
-      normalized.push(Object.freeze({
-        "id"   : permissionId,
-        "scope": Object.freeze({
-          "roots": Object.freeze(copyAndSort([...roots], compareStrings)),
-        }),
-      }));
+      const normalizedRoots = Object.freeze(copyAndSort([...roots], compareStrings));
+      const scope = Object.freeze({ "roots": normalizedRoots });
+      const request = Object.freeze({
+        "id": permissionId,
+        scope,
+      });
+
+      normalized.push(request);
     }
   }
 
   if (hasProcessPermission) {
+    const executables = copyAndSort([...processExecutables.values()], compareExecutables);
+    const scope = Object.freeze({ "executables": Object.freeze(executables) });
     const processRequest: ProcessPermissionRequest = Object.freeze({
-      "id"   : "system/process/spawn",
-      "scope": Object.freeze({
-        "executables": Object.freeze(
-          copyAndSort([...processExecutables.values()], (left, right) => {
-            return compareStrings(executableKey(left), executableKey(right));
-          }),
-        ),
-      }),
+      "id": "system/process/spawn",
+      scope,
     });
 
     normalized.push(processRequest);

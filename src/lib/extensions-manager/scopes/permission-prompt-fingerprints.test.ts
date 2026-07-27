@@ -8,24 +8,26 @@ import {
 } from "@/lib/extensions-manager/scopes/permission-prompt-fingerprints.ts";
 
 function preparedExecutable(contentSha256: string): PreparedPermissionRequest {
+  const executable = Object.freeze({
+    "path"     : "/usr/bin/tool",
+    "arguments": Object.freeze(["--version"]),
+  });
+  const descriptor = Object.freeze({
+    "id"   : "system/process/spawn" as const,
+    "scope": Object.freeze({ "executables": Object.freeze([executable]) }),
+  });
+  const targetIdentity = Object.freeze({
+    "kind"            : "process_executable" as const,
+    "path"            : "/usr/bin/tool",
+    "identityProvider": "desktop-executable-sha256-v1" as const,
+    "device"          : "8",
+    "inode"           : "80",
+    contentSha256,
+  });
+
   return Object.freeze({
-    "descriptor": Object.freeze({
-      "id"   : "system/process/spawn" as const,
-      "scope": Object.freeze({
-        "executables": Object.freeze([Object.freeze({
-          "path"     : "/usr/bin/tool",
-          "arguments": Object.freeze(["--version"]),
-        })]),
-      }),
-    }),
-    "targetIdentities": Object.freeze([Object.freeze({
-      "kind"            : "process_executable" as const,
-      "path"            : "/usr/bin/tool",
-      "identityProvider": "desktop-executable-sha256-v1" as const,
-      "device"          : "8",
-      "inode"           : "80",
-      contentSha256,
-    })]),
+    descriptor,
+    "targetIdentities": Object.freeze([targetIdentity]),
   });
 }
 

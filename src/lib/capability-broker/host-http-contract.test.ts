@@ -5,6 +5,11 @@ import type {
   HostHttpRequestInit,
 } from "@/lib/capability-broker/types.ts";
 
+function typecheckImmutableHostHttpRequestInit(init: HostHttpRequestInit): void {
+  // @ts-expect-error Host request initialization is immutable.
+  init.method = "POST";
+}
+
 function typecheckNarrowHostHttpContract(hostFetch: HostFacade["http"]["fetch"]): void {
   void hostFetch("https://example.test", { "method": "GET" });
   void hostFetch(new URL("https://example.test"), {
@@ -18,11 +23,6 @@ function typecheckNarrowHostHttpContract(hostFetch: HostFacade["http"]["fetch"])
   void hostFetch("https://example.test", { "redirect": "manual" });
   // @ts-expect-error Host fetch does not accept caller cancellation signals.
   void hostFetch("https://example.test", { "signal": (new AbortController).signal });
-
-  const init: HostHttpRequestInit = { "method": "GET" };
-
-  // @ts-expect-error Host request initialization is immutable.
-  init.method = "POST";
 }
 
 test("exposes a narrow immutable host HTTP contract", () => {
@@ -31,4 +31,5 @@ test("exposes a narrow immutable host HTTP contract", () => {
   expectTypeOf<Parameters<HostFacade["http"]["fetch"]>[1]>()
     .toEqualTypeOf<HostHttpRequestInit | undefined>();
   expectTypeOf(typecheckNarrowHostHttpContract).toBeFunction();
+  expectTypeOf(typecheckImmutableHostHttpRequestInit).toBeFunction();
 });

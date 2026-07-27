@@ -40,39 +40,54 @@ export type {
   InitializationFinalizationReport,
 } from "@/types/application/initial-state.type.ts";
 
-let activeRuntime: CapabilityBrokerRuntime | undefined;
-let eventCapabilityFactory: PluginEventCapabilityFactory | undefined;
+const brokerState: {
+  "runtime"               : CapabilityBrokerRuntime | undefined;
+  "eventCapabilityFactory": PluginEventCapabilityFactory | undefined;
+} = {
+  "runtime"               : undefined,
+  "eventCapabilityFactory": undefined,
+};
 
 function requireRuntime(): CapabilityBrokerRuntime {
-  if (activeRuntime === undefined) {
+  if (brokerState.runtime === undefined) {
     throw new CapabilityBrokerNotInitializedError;
   }
 
-  return activeRuntime;
+  return brokerState.runtime;
 }
 
 function getConfiguredEventCapabilityFactory(): PluginEventCapabilityFactory | undefined {
-  return eventCapabilityFactory;
+  return brokerState.eventCapabilityFactory;
 }
 
 export async function initializeCapabilityBroker(
   options: Readonly<{ "browserPreview": boolean }>,
 ): Promise<void> {
-  if (activeRuntime !== undefined) {
+  if (brokerState.runtime !== undefined) {
     return;
   }
 
-  activeRuntime = options.browserPreview
-    ? await import("@/lib/browser/scopes/create-browser-capability-broker.ts")
-      .then(module => module.createBrowserCapabilityBroker(getConfiguredEventCapabilityFactory))
-    : await import("@/lib/capability-broker/desktop-adapter.ts")
-      .then(module => module.createDesktopCapabilityBroker(getConfiguredEventCapabilityFactory));
+  if (options.browserPreview) {
+    const browserBroker = await import(
+      "@/lib/browser/scopes/create-browser-capability-broker.ts",
+    );
+
+    brokerState.runtime = await browserBroker.createBrowserCapabilityBroker(
+      getConfiguredEventCapabilityFactory,
+    );
+  } else {
+    const desktopBroker = await import("@/lib/capability-broker/desktop-adapter.ts");
+
+    brokerState.runtime = await desktopBroker.createDesktopCapabilityBroker(
+      getConfiguredEventCapabilityFactory,
+    );
+  }
 }
 
 export function configurePluginEventCapabilityFactory(
   factory: PluginEventCapabilityFactory,
 ): void {
-  eventCapabilityFactory = factory;
+  brokerState.eventCapabilityFactory = factory;
 }
 
 export const Host: HostFacade = Object.freeze({
@@ -174,7 +189,7 @@ export const DirectHost: DirectHostFacade = Object.freeze({
 
 export const brokerDecisionStore: BrokerDecisionStore = Object.freeze({
   "load": key => requireRuntime().decisionStore.load(key),
-  "save": (key, decision) => requireRuntime().decisionStore.save(key, decision),
+  "save": (key, isAllowed) => requireRuntime().decisionStore.save(key, isAllowed),
 } satisfies BrokerDecisionStore);
 
 export function preparePermissionRequests(

@@ -76,7 +76,7 @@ export function createBrowserHostFacade(
       "getInitialState"  : async () => {
         const placeholder = "buh";
         const joined = await directHost.path.join(placeholder, placeholder);
-        const separator = joined.slice(placeholder.length, -1 * placeholder.length);
+        const separator = joined.slice(placeholder.length, -placeholder.length);
 
         return Object.freeze({
           "basic": Object.freeze({

@@ -57,14 +57,14 @@ function toggleTypeFilter(): void {
     ? "all"
     : "release";
 }
-function handleDropdown(state: boolean, event?: PointerEvent): void {
+function handleDropdown(isOpen: boolean, event?: PointerEvent): void {
   const target = event?.target as HTMLButtonElement | undefined;
 
   if (target?.id === "__add-instance-page__instance-version-dropdown-wrapper") {
     return;
   }
 
-  selector.value = state;
+  selector.value = isOpen;
 }
 function handleVersionSearch(input: string): void {
   GlobalStateHelpers.Pages.addToState("add-instance", {

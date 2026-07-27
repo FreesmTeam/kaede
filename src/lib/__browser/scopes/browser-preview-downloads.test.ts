@@ -64,7 +64,9 @@ describe("browser-preview download batches", () => {
       "concurrency": 2,
       "label"      : "client",
       "cancelId"   : "client-downloads",
-    }, snapshot => snapshots.push(snapshot));
+    }, snapshot => {
+      snapshots.push(snapshot);
+    });
 
     expect(report).toEqual({
       "success"  : 1,

@@ -73,7 +73,7 @@ export async function fetchAllVersions(
     throw new Error("No version field in the parsed versions");
   }
 
-  if (uid !== Patches.Minecraft && minecraftPatchVersion) {
+  if (minecraftPatchVersion && uid !== Patches.Minecraft) {
     return parsed.versions.filter(currentVersion => {
       const requires: Array<PatchDependencyType> =
         currentVersion?.requires ?? [];

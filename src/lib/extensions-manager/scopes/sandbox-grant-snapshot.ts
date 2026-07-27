@@ -40,9 +40,15 @@ export function cloneCapability<Value>(
       return existing as Value;
     }
 
-    const wrapped = function (this: unknown, ...argumentsList: Array<unknown>): unknown {
-      return Reflect.apply(value, this, argumentsList);
+    /* Keep the original callable authority reachable only through the closure. */
+    const callableShell = (): never => {
+      throw new TypeError(`Unreachable callable shell for ${typeof value}`);
     };
+    const wrapped = new Proxy(callableShell, {
+      "apply": (_target, thisArgument, argumentsList): unknown => {
+        return Reflect.apply(value, thisArgument, argumentsList);
+      },
+    });
 
     copies.set(value, wrapped);
 
@@ -73,7 +79,7 @@ export function cloneCapability<Value>(
 
   const prototype = Object.getPrototypeOf(value);
 
-  if (prototype !== Object.prototype && prototype !== null) {
+  if (prototype !== null && prototype !== Object.prototype) {
     throw new TypeError(
       "Capability values must be plain records, arrays, functions, or primitives",
     );

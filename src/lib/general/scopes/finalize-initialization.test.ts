@@ -59,10 +59,10 @@ const browserSnapshot: RuntimeSnapshot = {
   "appDataDirectory"   : "indexed_db",
 };
 
-function config(showAfterExtensionsInitialization = false): ConfigType {
+function config(shouldShowAfterExtensionsInitialization = false): ConfigType {
   return {
     "extensions": { "enabled": true },
-    "misc"      : { showAfterExtensionsInitialization },
+    "misc"      : { "showAfterExtensionsInitialization": shouldShowAfterExtensionsInitialization },
     "minecraft" : { "javaBinary": "/opt/java/bin/java" },
   } as ConfigType;
 }

@@ -73,7 +73,7 @@ function cloneSnapshot(
 
   const prototype = Object.getPrototypeOf(value);
 
-  if (!Array.isArray(value) && prototype !== Object.prototype && prototype !== null) {
+  if (prototype !== null && !Array.isArray(value) && prototype !== Object.prototype) {
     throw invalidSnapshot("non-plain object");
   }
 
@@ -145,14 +145,14 @@ export class EventBroker {
 
     listeners.add(listener);
     this.#listeners.set(principalKey, listeners);
-    let subscribed = true;
+    let isSubscribed = true;
 
     return (): void => {
-      if (!subscribed) {
+      if (!isSubscribed) {
         return;
       }
 
-      subscribed = false;
+      isSubscribed = false;
 
       const currentListeners = this.#listeners.get(principalKey);
 

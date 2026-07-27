@@ -32,9 +32,9 @@ export async function ensureMinecraftDirectory(
     logPrefix,
     `Checking if the minecraft directory exists (${directory})`,
   );
-  const directoryExists: boolean = await Host.files.exists(directory);
+  const isDirectoryPresent: boolean = await Host.files.exists(directory);
 
-  if (!directoryExists) {
+  if (!isDirectoryPresent) {
     log.warn(
       logPrefix,
       `The minecraft directory does not exist; creating it (${directory})`,

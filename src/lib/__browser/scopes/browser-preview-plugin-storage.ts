@@ -47,7 +47,7 @@ export function createBrowserPluginStorageFactories(
     requireGrant(id);
 
     if (relativePath.split(/[\\/]/u).some(segment => {
-      return segment === "" || segment === "." || segment === "..";
+      return ["", ".", ".."].includes(segment);
     })) {
       throw new TypeError(`Invalid internal storage path: ${JSON.stringify(relativePath)}`);
     }
@@ -65,11 +65,15 @@ export function createBrowserPluginStorageFactories(
   ): string => {
     const grants = requireGrant(id);
 
-    if (!grants.some(grant => {
-      return typeof grant !== "string" &&
-        (grant.id === "storage/external/read" || grant.id === "storage/external/write") &&
-        grant.id === id &&
-        grant.scope.roots.includes(target.root);
+    if (grants.every(grant => {
+      if (
+        typeof grant === "string" ||
+        (grant.id !== "storage/external/read" && grant.id !== "storage/external/write")
+      ) {
+        return true;
+      }
+
+      return grant.id !== id || !grant.scope.roots.includes(target.root);
     })) {
       throw new Error(
         `Browser preview external storage root is outside its grant: ${target.root}`,

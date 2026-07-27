@@ -21,13 +21,13 @@ import type { PermissionRequest } from "@/types/extensions/permission.type.ts";
 
 type PermissionPromptRequest = PermissionRequest | PreparedPermissionRequest;
 
-function allPrepared(
+function areAllPrepared(
   requests: ReadonlyArray<PermissionPromptRequest>,
 ): requests is ReadonlyArray<PreparedPermissionRequest> {
   return requests.every(request => isPreparedPermissionRequest(request));
 }
 
-function allUnprepared(
+function areAllUnprepared(
   requests: ReadonlyArray<PermissionPromptRequest>,
 ): requests is ReadonlyArray<PermissionRequest> {
   return requests.every(request => !isPreparedPermissionRequest(request));
@@ -35,13 +35,13 @@ function allUnprepared(
 
 function preparePromptRequests(
   requests: ReadonlyArray<PermissionPromptRequest>,
-  normalizeAsSet: boolean,
+  shouldNormalizeAsSet: boolean,
 ): ReadonlyArray<PreparedPermissionRequest> {
-  if (!allPrepared(requests) && !allUnprepared(requests)) {
+  if (!areAllPrepared(requests) && !areAllUnprepared(requests)) {
     throw new TypeError("Permission prompts cannot mix prepared and unprepared requests");
   }
 
-  if (allPrepared(requests)) {
+  if (areAllPrepared(requests)) {
     return Object.freeze(
       requests.map(request => snapshotPreparedPermissionRequest(request)),
     );
@@ -49,7 +49,7 @@ function preparePromptRequests(
 
   return prepareIdentityFreePermissionRequests(
     requests,
-    normalizeAsSet,
+    shouldNormalizeAsSet,
   );
 }
 

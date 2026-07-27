@@ -17,13 +17,13 @@ export function createDecisionStore(call: BrokerCall): BrokerDecisionStore {
 
       return response.decision ?? undefined;
     },
-    "save": async (key: PermissionDecisionStoreKey, decision: boolean): Promise<void> => {
+    "save": async (key: PermissionDecisionStoreKey, isAllowed: boolean): Promise<void> => {
       expectResponse(await call({
         "kind"              : "decision_save",
         "decisionKind"      : key.kind,
         "principalKey"      : key.principalKey,
         "requestFingerprint": key.requestFingerprint,
-        decision,
+        "decision"          : isAllowed,
       }), "decision_saved");
     },
   });

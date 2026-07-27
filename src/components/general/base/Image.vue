@@ -18,7 +18,7 @@ const { id, src, alt, classNames, style } = defineProps<{
 }>();
 const shown = ref<boolean>(false);
 const resolvedSource = ref<string>(src);
-let sourceRevision = 0;
+const sourceRevision = ref(0);
 
 async function updateStoredImageSource(
   source: string,
@@ -31,11 +31,11 @@ async function updateStoredImageSource(
       await Host.files.readBytes(storedPath),
     );
 
-    if (revision === sourceRevision) {
+    if (revision === sourceRevision.value) {
       resolvedSource.value = nextSource;
     }
   } catch (error: unknown) {
-    if (revision === sourceRevision) {
+    if (revision === sourceRevision.value) {
       resolvedSource.value = "";
     }
 
@@ -45,7 +45,7 @@ async function updateStoredImageSource(
 
 watch(() => src, (source, _previousSource, onCleanup) => {
   shown.value = false;
-  const revision = ++sourceRevision;
+  const revision = ++sourceRevision.value;
   let storedPath: string | undefined;
 
   try {
@@ -64,7 +64,7 @@ watch(() => src, (source, _previousSource, onCleanup) => {
   }
 
   const unsubscribe = subscribeImageObjectUrl(storedPath, nextSource => {
-    sourceRevision += 1;
+    sourceRevision.value += 1;
     shown.value = false;
     resolvedSource.value = nextSource;
   });

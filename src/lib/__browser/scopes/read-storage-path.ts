@@ -72,9 +72,11 @@ export async function readStorageValue(path: string): Promise<BrowserStorageRead
       } else if (value instanceof Uint8Array) {
         resolve(Object.freeze({ "kind": "value", "value": Uint8Array.from(value) }));
       } else if (value instanceof ArrayBuffer) {
+        const bytes = new Uint8Array(value);
+
         resolve(Object.freeze({
           "kind" : "value",
-          "value": Uint8Array.from(new Uint8Array(value)),
+          "value": Uint8Array.from(bytes),
         }));
       } else {
         reject(new Error(`Unsupported browser storage value: ${JSON.stringify(path)}`));

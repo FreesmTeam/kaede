@@ -1,3 +1,10 @@
 export function reportBackgroundBrokerError(message: string, cause: unknown): void {
-  reportError(Object.assign(new Error(message), { cause }));
+  const error = new Error(message);
+
+  Object.defineProperty(error, "cause", {
+    "configurable": true,
+    "value"       : cause,
+    "writable"    : true,
+  });
+  reportError(error);
 }

@@ -41,7 +41,7 @@ const nonVirtualList = useTemplateRef("nonVirtualList");
 
 const logs = shallowRef<Array<string>>(["__kaede-trigger-loading"]);
 // References the launcher logs even if user is viewing instance logs
-let launcherLogsReference: Array<string> = logs.value;
+const launcherLogsReference = shallowRef<Array<string>>(logs.value);
 
 const fileData = ref<{
   "size": string | undefined;
@@ -126,30 +126,31 @@ watchEffect(() => {
 
   log.debug(__PRE_BUNDLED_FILENAME__, `The selected logs mode is '${currentLogsMode}'`);
   if (currentLogsMode === "launcher") {
-    const logsLength: number = launcherLogsReference.length;
+    const logsLength: number = launcherLogsReference.value.length;
 
     log.debug(
       __PRE_BUNDLED_FILENAME__,
       `Using a previously saved reference to the launcher logs (length: ${logsLength})`,
     );
-    logs.value = launcherLogsReference;
+    logs.value = launcherLogsReference.value;
   } else {
     const currentInstanceLogs: Array<string> | undefined = instanceLogs?.[currentLogsMode];
-    let needsReassignment: boolean = true;
+    let shouldReassignLauncherLogs: boolean = true;
+    const allInstanceLogs = Object.values(instanceLogs ?? {});
 
     log.debug(
       __PRE_BUNDLED_FILENAME__,
       `Using an instance logs (length: ${currentInstanceLogs?.length})`,
     );
-    for (const instanceLogsReference of Object.values(instanceLogs ?? {})) {
+    for (const instanceLogsReference of allInstanceLogs) {
       if (logs.value === instanceLogsReference) {
-        needsReassignment = false;
+        shouldReassignLauncherLogs = false;
       }
     }
 
-    if (needsReassignment) {
+    if (shouldReassignLauncherLogs) {
       // Re-assign the launcher logs reference only if the current logs are actually launcher logs
-      launcherLogsReference = logs.value;
+      launcherLogsReference.value = logs.value;
     }
 
     logs.value = currentInstanceLogs ?? [];
@@ -172,7 +173,7 @@ onMounted(async () => {
 
   logs.value = globalStates?.logs?.mode === "launcher" ? existingLogs : currentInstanceLogs;
   // Update the reference to the launcher logs
-  launcherLogsReference = existingLogs;
+  launcherLogsReference.value = existingLogs;
 
   const endTime = performance.now();
   const totalTime = ((endTime - startTime) / 1000).toFixed(2);

@@ -32,8 +32,8 @@ function assertDeeplyHardened(
   seen: WeakSet<object> = new WeakSet,
 ): void {
   if (
-    (typeof value !== "object" || value === null) &&
-    typeof value !== "function"
+    typeof value !== "function" &&
+    (value === null || typeof value !== "object")
   ) {
     return;
   }

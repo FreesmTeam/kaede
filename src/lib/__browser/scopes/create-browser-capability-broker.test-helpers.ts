@@ -62,7 +62,7 @@ export function createMemoryStorage(): BrowserStorage & Readonly<{
 }
 
 export function noEventCapability(): undefined {
-  return undefined;
+  return;
 }
 
 export async function grant(

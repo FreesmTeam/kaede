@@ -70,13 +70,13 @@ export function getPermissionRequestFingerprint(
   return `permission-request-v2:sha256:${hashStringSha256Locally(canonicalPreparedRequest)}`;
 }
 
-function allPrepared(
+function areAllPrepared(
   requests: ReadonlyArray<PermissionRequest | PreparedPermissionRequest>,
 ): requests is ReadonlyArray<PreparedPermissionRequest> {
   return requests.every(request => isPreparedPermissionRequest(request));
 }
 
-function allUnprepared(
+function areAllUnprepared(
   requests: ReadonlyArray<PermissionRequest | PreparedPermissionRequest>,
 ): requests is ReadonlyArray<PermissionRequest> {
   return requests.every(request => !isPreparedPermissionRequest(request));
@@ -85,11 +85,11 @@ function allUnprepared(
 export function getStaticPermissionSetFingerprint(
   requests: ReadonlyArray<PermissionRequest | PreparedPermissionRequest>,
 ): string {
-  if (!allPrepared(requests) && !allUnprepared(requests)) {
+  if (!areAllPrepared(requests) && !areAllUnprepared(requests)) {
     throw new TypeError("Permission request sets cannot mix prepared and unprepared entries");
   }
 
-  const preparedRequests = allPrepared(requests)
+  const preparedRequests = areAllPrepared(requests)
     ? requests.map(request => snapshotPreparedPermissionRequest(request))
     : prepareIdentityFreePermissionRequests(requests, true);
   const normalizedRequests = copyAndSort(
@@ -115,9 +115,9 @@ export function getDynamicPermissionBatchFingerprint(
 
 export function getDynamicBatchDecisions(
   rememberedDecisions: ReadonlyArray<boolean | undefined>,
-  decision: boolean,
+  isFallbackAllowed: boolean,
 ): ReadonlyArray<boolean> {
-  return rememberedDecisions.map(remembered => remembered ?? decision);
+  return rememberedDecisions.map(remembered => remembered ?? isFallbackAllowed);
 }
 
 export function reconcileDynamicDraftDecisions(

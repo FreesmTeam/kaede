@@ -38,13 +38,13 @@ export async function hashOfflineNickname(input: string): Promise<string> {
   }
 
   // Clear version
-  bytes[6] = bytes[6] & 0x0F;
+  bytes[6] &= 0x0F;
   // Set to version 3
-  bytes[6] = bytes[6] | 0x30;
+  bytes[6] |= 0x30;
   // Clear variant
-  bytes[8] = bytes[8] & 0x3F;
+  bytes[8] &= 0x3F;
   // Set to IETF variant
-  bytes[8] = bytes[8] | 0x80;
+  bytes[8] |= 0x80;
 
   return bytes
     .map(byte => byte.toString(16).padStart(2, "0"))

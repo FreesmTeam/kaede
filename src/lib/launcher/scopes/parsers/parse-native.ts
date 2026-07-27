@@ -23,9 +23,7 @@ export function parseNative({
 }): Required<MappedArtifactType> | false {
   const { directories, platform, arch, logPrefix } = necessaries;
   const descriptiveLogPrefix: string = patchUid + ":" + library?.name + ":" + logPrefix;
-  const classifiers: SpecificPatchClassifiersType | undefined = library?.downloads?.classifiers;
   const name: string | undefined = library?.name;
-  const newFormattedUrl: string | undefined = library?.downloads?.artifact?.url;
 
   if (name === undefined) {
     log.warn(descriptiveLogPrefix, "The native is invalid");
@@ -33,6 +31,8 @@ export function parseNative({
     return false;
   }
 
+  const classifiers: SpecificPatchClassifiersType | undefined = library?.downloads?.classifiers;
+  const newFormattedUrl: string | undefined = library?.downloads?.artifact?.url;
   const { "directory": relativeDirectory, file, classifier } = normalizeArtifactPath(name);
   const directory: string = General.cachedJoin(
     directories.libraries,

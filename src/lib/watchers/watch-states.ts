@@ -29,9 +29,9 @@ import type {
 import type { CleanupType } from "@/types/watchers/cleanup.type.ts";
 
 const reload = (event: KeyboardEvent): void => {
-  const allow: boolean = globalStates.development.enableNativeReloadKeyBinds;
+  const isNativeReloadAllowed = globalStates.development.enableNativeReloadKeyBinds;
 
-  if (allow) {
+  if (isNativeReloadAllowed) {
     return;
   }
 
@@ -49,28 +49,26 @@ const reload = (event: KeyboardEvent): void => {
 };
 
 export function watchDevelopmentStates(): CleanupType<GlobalStatesDevelopmentType> {
-  const cleanup: CleanupType<GlobalStatesDevelopmentType> = {};
+  const cleanup: CleanupType<GlobalStatesDevelopmentType> = {
+    "enableDebugMode": watchEffect(() => {
+      const isEnabled: boolean = globalStates.development.enableDebugMode;
+      const field = isEnabled ? "__debug-defined" : "__debug-undefined";
 
-  cleanup.enableDebugMode = watchEffect(() => {
-    const enabled: boolean = globalStates.development.enableDebugMode;
-    const field = enabled ? "__debug-defined" : "__debug-undefined";
-
-    log.debug = log[field];
-  });
+      log.debug = log[field];
+    }),
+    "enableNativeReloadKeyBinds": (): void => window.removeEventListener("keydown", reload),
+  };
 
   window.addEventListener("keydown", reload);
-  cleanup.enableNativeReloadKeyBinds = (): void => window.removeEventListener("keydown", reload);
 
   return cleanup;
 }
 
 export function watchLayoutStates(): CleanupType<GlobalStatesLayoutType> {
-  const cleanup: CleanupType<GlobalStatesLayoutType> = {};
-
   /**
    * Updates translations on locale change.
    */
-  cleanup.locale = watchEffect(async () => {
+  const cleanup: CleanupType<GlobalStatesLayoutType> = { "locale": watchEffect(async () => {
     const baseDirectory: string = General.getBaseDirectory();
     const locale: string = globalStates.layout.locale;
 
@@ -80,7 +78,7 @@ export function watchLayoutStates(): CleanupType<GlobalStatesLayoutType> {
       "selected": locale,
     });
     log.info(__PRE_BUNDLED_FILENAME__, `Successfully set translations to '${locale}'`);
-  });
+  }) };
 
   return cleanup;
 }

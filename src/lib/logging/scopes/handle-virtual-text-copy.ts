@@ -2,12 +2,12 @@ import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
 
 export async function handleVirtualTextCopy(
-  copied: boolean,
+  isCopied: boolean,
   range: [number, number] | undefined,
   logs: Array<string | [number, string]>,
-  setCopied: (state: boolean) => void,
+  setCopied: (isCopied: boolean) => void,
 ): Promise<void> {
-  if (copied || !range || !logs[0]) {
+  if (isCopied || !range || !logs[0]) {
     return;
   }
 

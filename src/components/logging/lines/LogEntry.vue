@@ -67,7 +67,7 @@ const isInRange = computed((): boolean => {
     (rangeEnd >= index)
   );
 });
-const toCollapseTarget: boolean = GlobalObject.variables.logs.targetCollapse;
+const shouldCollapseTarget: boolean = GlobalObject.variables.logs.targetCollapse;
 const collapsedTargetLength: number = GlobalObject.variables.logs.collapsedTargetLength;
 </script>
 
@@ -126,7 +126,7 @@ const collapsedTargetLength: number = GlobalObject.variables.logs.collapsedTarge
         v-if="typeof extractedInformation.target === 'string'"
         :class="['__log-entry__target', Logging.getLogTargetColor(information.target)]"
       >
-        {{ toCollapseTarget && extractedInformation.target.length > 0
+        {{ shouldCollapseTarget && extractedInformation.target.length > 0
             ? `...${extractedInformation.target.slice(-1 * collapsedTargetLength)}`
             : extractedInformation.target }}
       </span>

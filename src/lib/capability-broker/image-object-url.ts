@@ -6,7 +6,7 @@ const LEGACY_TAURI_ASSET_PREFIXES = [
   "http://asset.localhost/",
   "https://asset.localhost/",
 ] as const;
-let cleanupRegistered = false;
+const imageObjectUrlState = { "isCleanupRegistered": false };
 
 function legacyTauriAssetPath(source: string): string | undefined {
   const prefix = LEGACY_TAURI_ASSET_PREFIXES.find(candidate => source.startsWith(candidate));
@@ -68,8 +68,8 @@ function allocateImageObjectUrl(path: string, bytes: Uint8Array): string {
 
   imageObjectUrls.set(path, url);
 
-  if (!cleanupRegistered) {
-    cleanupRegistered = true;
+  if (!imageObjectUrlState.isCleanupRegistered) {
+    imageObjectUrlState.isCleanupRegistered = true;
     window.addEventListener("pagehide", revokeAllImageObjectUrls, { "once": true });
   }
 
@@ -82,8 +82,9 @@ export function createImageObjectUrl(path: string, bytes: Uint8Array): string {
 
 export function replaceImageObjectUrl(path: string, bytes: Uint8Array): void {
   const source = allocateImageObjectUrl(path, bytes);
+  const subscribers = imageObjectUrlSubscribers.get(path) ?? [];
 
-  for (const subscriber of imageObjectUrlSubscribers.get(path) ?? []) {
+  for (const subscriber of subscribers) {
     subscriber(source);
   }
 }

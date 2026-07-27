@@ -38,36 +38,38 @@ const autoConfigSync = computed((): boolean => (
   globalStates?.misc?.autoConfigSync === true
 ));
 
-function overrideExtensions(
+async function overrideExtensions(
   input: Partial<GlobalStatesType["extensions"]>,
-): void {
+): Promise<void> {
   GlobalStateHelpers.change("extensions", {
     ...GlobalStateHelpers.get().extensions,
     ...input,
   });
 
   // Global states have changed, persist them to the config file
-  nextTick().then(() => Configs.sync());
+  await nextTick();
+  await Configs.sync();
 }
-function overrideMisc(
+async function overrideMisc(
   input: Partial<GlobalStatesType["misc"]>,
-): void {
+): Promise<void> {
   GlobalStateHelpers.change("misc", {
     ...GlobalStateHelpers.get().misc,
     ...input,
   });
 
   // Global states have changed, persist them to the config file
-  nextTick().then(() => Configs.sync());
+  await nextTick();
+  await Configs.sync();
 }
-function handleEnabledToggle(value: boolean): void {
-  overrideExtensions({ "enabled": value });
+async function handleEnabledToggle(isEnabled: boolean): Promise<void> {
+  await overrideExtensions({ "enabled": isEnabled });
 }
-function handleShowAfterInitializationToggle(value: boolean): void {
-  overrideMisc({ "showAfterExtensionsInitialization": value });
+async function handleShowAfterInitializationToggle(isEnabled: boolean): Promise<void> {
+  await overrideMisc({ "showAfterExtensionsInitialization": isEnabled });
 }
-function handleAutoConfigSyncToggle(value: boolean): void {
-  overrideMisc({ "autoConfigSync": value });
+async function handleAutoConfigSyncToggle(isEnabled: boolean): Promise<void> {
+  await overrideMisc({ "autoConfigSync": isEnabled });
 }
 </script>
 

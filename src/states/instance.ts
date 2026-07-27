@@ -22,9 +22,10 @@ import Instances from "@/lib/instances";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 
 /**
- * Contains all Minecraft instance states.
+ * Stable shallow-reactive object containing all Minecraft instance states.
  */
-export let instanceStates: ShallowReactive<InstanceStatesType>;
+export const instanceStates: ShallowReactive<InstanceStatesType> =
+  shallowReactive<InstanceStatesType>({});
 
 /**
  * Returns a reference to the proxied object of instance states.
@@ -34,9 +35,9 @@ export function getInstanceStates(): InstanceStatesType {
 }
 
 /**
- * Assign the actual instance states to 'instanceStates'.
+ * Populate 'instanceStates' with the actual initial state.
  * This function is called in 'main.ts'
  */
 export function declareInstanceStates(): void {
-  instanceStates = shallowReactive<InstanceStatesType>(Instances.getFromConfig());
+  Object.assign(instanceStates, Instances.getFromConfig());
 }

@@ -30,10 +30,10 @@ describe("lockdownEnvironment", () => {
 
   it("uses the Compartment authority captured before cooperative plugins", () => {
     const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Compartment");
-    let poisonedConstructorCalled = false;
+    let isPoisonedConstructorCalled = false;
 
     function PoisonedCompartment(): void {
-      poisonedConstructorCalled = true;
+      isPoisonedConstructorCalled = true;
     }
 
     Object.defineProperty(globalThis, "Compartment", {
@@ -46,7 +46,7 @@ describe("lockdownEnvironment", () => {
       const compartment = createCompartmentWithCapturedAuthority({ "answer": 42 });
 
       expect(compartment.evaluate("answer")).toBe(42);
-      expect(poisonedConstructorCalled).toBe(false);
+      expect(isPoisonedConstructorCalled).toBe(false);
     } finally {
       if (originalDescriptor === undefined) {
         Reflect.deleteProperty(globalThis, "Compartment");

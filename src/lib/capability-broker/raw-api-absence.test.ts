@@ -42,8 +42,9 @@ test("raw Tauri and community APIs stay confined to broker adapters", async () =
       !relativePath.endsWith("/capability-broker/desktop-adapter.ts") &&
       !relativePath.endsWith("/capability-broker/direct-desktop.ts");
   });
+  const sources = await readSources(filePaths);
 
-  for (const { filePath, source } of await readSources(filePaths)) {
+  for (const { filePath, source } of sources) {
     const relativePath = filePath.slice(sourceRoot.length);
 
     if (
@@ -67,8 +68,9 @@ test("legacy broad global permission requests stay removed", async () => {
     path.resolve(workspaceRoot, "types/kaede-lib.d.ts"),
   ];
   const violations: Array<string> = [];
+  const sources = await readSources(files);
 
-  for (const { filePath, source } of await readSources(files)) {
+  for (const { filePath, source } of sources) {
     if ((/requestPermissions[\s\S]{0,180}Promise<Array<boolean>>/u).test(source)) {
       violations.push(path.relative(workspaceRoot, filePath));
     }
@@ -82,8 +84,9 @@ test("revoked extension window globals stay optional", async () => {
     path.resolve(sourceRoot, "declarations.ts"),
     path.resolve(workspaceRoot, "types/kaede-lib.d.ts"),
   ];
+  const sources = await readSources(files);
 
-  for (const { source } of await readSources(files)) {
+  for (const { source } of sources) {
     expect(source).toMatch(/"__KAEDE__"\?:/u);
     expect(source).toMatch(/"__KAEDE_INTERNALS__"\?:/u);
   }

@@ -64,20 +64,17 @@ export async function resolvePatch({
   statuses.current = LaunchStatus.PatchMetadata.Reading;
   try {
     const refetch = async (): Promise<unknown> => {
-      const url: string = metadata.uid === CustomPatches.OptiFine
-        ? (
-          APIEndpoints.KaedeCache.Base +
-          APIEndpoints.KaedeCache.Paths.OptiFine.Base +
-          fileName
-        )
-        : APIEndpoints.Meta.Base + metadata.uid + "/" + fileName;
+      const baseUrl: string = metadata.uid === CustomPatches.OptiFine
+        ? APIEndpoints.KaedeCache.Base + APIEndpoints.KaedeCache.Paths.OptiFine.Base
+        : APIEndpoints.Meta.Base + metadata.uid + "/";
+      const url: string = baseUrl + fileName;
 
       log.warn(
         descriptiveLogPrefix,
         "No cache; fetching the patch metadata",
       );
       statuses.current = LaunchStatus.PatchMetadata.Fetching;
-      const fetched: { "data": unknown } | LaunchStatusType = await Fetching.fetchMetadata({
+      const fetched: LaunchStatusType | { "data": unknown } = await Fetching.fetchMetadata({
         "url"   : url,
         "label" : "patch metadata",
         "scope" : "PatchMetadata",

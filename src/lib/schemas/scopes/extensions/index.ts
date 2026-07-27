@@ -21,18 +21,16 @@ const HttpMethodSchema = Type.Union([
   Type.Literal("POST"),
   Type.Literal("PUT"),
 ]);
+const HttpOriginSchema = Type.Refine(
+  Type.String(),
+  isExactHttpOrigin,
+  () => "Expected an exact HTTP(S) origin",
+);
 
 const NetworkPermissionRequestSchema = Type.Object({
   "id"   : Type.Literal("network/http"),
   "scope": Type.Object({
-    "origins": Type.Array(
-      Type.Refine(
-        Type.String(),
-        isExactHttpOrigin,
-        () => "Expected an exact HTTP(S) origin",
-      ),
-      { "minItems": 1, "uniqueItems": true },
-    ),
+    "origins": Type.Array(HttpOriginSchema, { "minItems": 1, "uniqueItems": true }),
     "methods": Type.Array(HttpMethodSchema, { "minItems": 1, "uniqueItems": true }),
   }, { "additionalProperties": false }),
 }, { "additionalProperties": false });
@@ -66,17 +64,20 @@ const ExternalStoragePermissionRequestSchema = Type.Object({
   }, { "additionalProperties": false }),
 }, { "additionalProperties": false });
 
+const ProcessArgumentSchema = Type.Refine(
+  Type.String(),
+  argument => !argument.includes("\u{0}"),
+  () => "Process arguments cannot contain NUL",
+);
+const ProcessExecutableSchema = Type.Object({
+  "path"     : CanonicalAbsolutePathSchema,
+  "arguments": Type.Array(ProcessArgumentSchema),
+}, { "additionalProperties": false });
+
 const ProcessPermissionRequestSchema = Type.Object({
   "id"   : Type.Literal("system/process/spawn"),
   "scope": Type.Object({
-    "executables": Type.Array(Type.Object({
-      "path"     : CanonicalAbsolutePathSchema,
-      "arguments": Type.Array(Type.Refine(
-        Type.String(),
-        argument => !argument.includes("\u0000"),
-        () => "Process arguments cannot contain NUL",
-      )),
-    }, { "additionalProperties": false }), {
+    "executables": Type.Array(ProcessExecutableSchema, {
       "minItems"   : 1,
       "uniqueItems": true,
     }),
@@ -129,24 +130,29 @@ const PluginVersionSchema = Type.Refine(
   () => "Plugin version must contain at most 128 Unicode scalar values and no controls",
 );
 
+const ExtensionTypeSchema = Type.Union([
+  Type.Literal("sandbox"),
+  Type.Literal("unrestricted"),
+]);
+const StringArraySchema = Type.Array(Type.String());
+const RequiredExtensionMetadataSchema = Type.Object({
+  "id"        : PluginIdSchema,
+  "logo"      : Type.String(),
+  "name"      : Type.String(),
+  "type"      : ExtensionTypeSchema,
+  "source"    : RepositoryOriginSchema,
+  "version"   : PluginVersionSchema,
+  "authors"   : StringArraySchema,
+  "languages" : StringArraySchema,
+  "categories": StringArraySchema,
+});
+const OptionalExtensionMetadataSchema = Type.Partial(Type.Object({
+  "description": Type.String(),
+  "permissions": PermissionsSchema,
+  "enabled"    : Type.Boolean(),
+}));
+
 export const ExtensionMetadataSchema = Type.Intersect([
-  Type.Object({
-    "id"  : PluginIdSchema,
-    "logo": Type.String(),
-    "name": Type.String(),
-    "type": Type.Union([
-      Type.Literal("sandbox"),
-      Type.Literal("unrestricted"),
-    ]),
-    "source"    : RepositoryOriginSchema,
-    "version"   : PluginVersionSchema,
-    "authors"   : Type.Array(Type.String()),
-    "languages" : Type.Array(Type.String()),
-    "categories": Type.Array(Type.String()),
-  }),
-  Type.Partial(Type.Object({
-    "description": Type.String(),
-    "permissions": PermissionsSchema,
-    "enabled"    : Type.Boolean(),
-  })),
+  RequiredExtensionMetadataSchema,
+  OptionalExtensionMetadataSchema,
 ]);

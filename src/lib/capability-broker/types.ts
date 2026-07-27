@@ -261,7 +261,7 @@ export type PermissionDecisionStoreKey = Readonly<{
 
 export interface BrokerDecisionStore {
   load(key: PermissionDecisionStoreKey): Promise<boolean | undefined>;
-  save(key: PermissionDecisionStoreKey, decision: boolean): Promise<void>;
+  save(key: PermissionDecisionStoreKey, isAllowed: boolean): Promise<void>;
 }
 
 export type CapabilityBrokerRuntime = Readonly<{

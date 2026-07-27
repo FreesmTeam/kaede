@@ -27,20 +27,20 @@ const playTime = computed((): string => {
 
   const currentTime: number = currentMillisecondsTime / 1000;
   const totalMinutes: number = currentTime / 60;
-  const totalHours: number = totalMinutes / 60;
 
   const milliseconds: number = currentMillisecondsTime % 1000;
   const seconds: number = Math.floor(currentTime % 60);
   const minutes: number = Math.floor(totalMinutes % 60);
-  const hours: number = Math.floor(totalHours);
 
   if (minutes <= 0) {
     return `${seconds}.${milliseconds} seconds`;
   }
 
-  if (hours <= 0) {
+  if (totalMinutes < 60) {
     return `${minutes} minutes, ${seconds}.${milliseconds} seconds`;
   }
+
+  const hours: number = Math.floor(totalMinutes / 60);
 
   return `${hours} hours, ${minutes} minutes, ${seconds}.${milliseconds} seconds`;
 });

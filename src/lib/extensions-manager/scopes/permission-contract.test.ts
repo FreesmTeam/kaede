@@ -20,6 +20,8 @@ import type {
 const SHA_A = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 const SHA_B = "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb";
 
+function noOperation(): void {}
+
 function preparedProcessIdentity(contentSha256: string): PreparedPermissionRequest {
   return {
     "descriptor": {
@@ -129,11 +131,13 @@ describe("permission request normalization", () => {
         listener({ "type": "undefined", "value": undefined });
         listener({ "type": "bigint", "value": 1n });
 
-        return (): void => {};
+        return noOperation;
       },
     });
 
-    events.subscribe(event => received.push(event.value));
+    events.subscribe(event => {
+      received.push(event.value);
+    });
 
     expect(received).toEqual([undefined, 1n]);
   });

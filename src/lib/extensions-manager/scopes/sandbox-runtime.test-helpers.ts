@@ -17,8 +17,8 @@ export const testHarden: Hardener = <Value>(value: Value): Value => {
 
   const freeze = (candidate: unknown): void => {
     if (
-      (typeof candidate !== "object" || candidate === null) &&
-      typeof candidate !== "function"
+      typeof candidate !== "function" &&
+      (candidate === null || typeof candidate !== "object")
     ) {
       return;
     }

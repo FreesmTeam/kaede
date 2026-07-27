@@ -57,7 +57,7 @@
     "eslint": "^10.8.0",
     "eslint-plugin-simple-import-sort": "^14.0.0",
     "eslint-plugin-tsdoc": "^0.5.2",
-    "eslint-plugin-unicorn": "^60.0.0",
+    "eslint-plugin-unicorn": "72.0.0",
     "eslint-plugin-vue": "^10.10.0",
     "fallow": "~3.9.1",
     "globals": "^17.8.0",

@@ -8,6 +8,19 @@ import {
   createPluginProcess,
 } from "@/lib/capability-broker/desktop-processes.ts";
 
+async function observeSettlement(
+  promise: Promise<unknown>,
+  onSettled: () => void,
+): Promise<void> {
+  try {
+    await promise;
+  } catch {
+    // This observer intentionally ignores the outcome and records only settlement.
+  }
+
+  onSettled();
+}
+
 test("keeps plugin process wait pending after an error until termination", async () => {
   let onEvent: ((event: RawBrokerEvent) => void) | undefined;
   const call: BrokerCall = async (_request, eventHandler) => {
@@ -16,20 +29,11 @@ test("keeps plugin process wait pending after an error until termination", async
     return { "kind": "process_spawned", "handle": "process:test", "pid": 41 };
   };
   const process = await createPluginProcess(call, "/bin/test", []);
-  let settled = false;
+  let isSettled = false;
 
-  void process.wait().then(
-    () => {
-      settled = true;
-
-      return settled;
-    },
-    () => {
-      settled = true;
-
-      return settled;
-    },
-  );
+  void observeSettlement(process.wait(), () => {
+    isSettled = true;
+  });
 
   onEvent?.({
     "kind"   : "error",
@@ -37,7 +41,7 @@ test("keeps plugin process wait pending after an error until termination", async
     "message": "diagnostic only",
   });
   await Promise.resolve();
-  expect(settled).toBe(false);
+  expect(isSettled).toBe(false);
 
   onEvent?.({
     "kind"  : "terminated",

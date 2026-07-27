@@ -45,7 +45,7 @@ export function validateHostHttpFetchArguments(
   }
 
   for (const field of UNSUPPORTED_REQUEST_INIT_FIELDS) {
-    if (field in init) {
+    if (Reflect.has(init, field)) {
       throw new TypeError(
         `Host.http.fetch init does not support field ${JSON.stringify(field)}`,
       );

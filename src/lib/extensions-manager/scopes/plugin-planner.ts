@@ -140,14 +140,15 @@ export function planPlugins({
     [...extensionsById.keys()].filter(pluginId => !metadataById.has(pluginId)),
     compareStrings,
   );
-  const missingArtifacts = copyAndSort(
-    [...metadataById.keys()].filter(pluginId => !extensionsById.has(pluginId)),
-    compareStrings,
-  );
 
   if (unknownArtifacts.length > 0) {
     throw mismatchError("Artifacts without metadata", unknownArtifacts);
   }
+
+  const missingArtifacts = copyAndSort(
+    [...metadataById.keys()].filter(pluginId => !extensionsById.has(pluginId)),
+    compareStrings,
+  );
 
   if (missingArtifacts.length > 0) {
     throw mismatchError("Metadata without artifacts", missingArtifacts);

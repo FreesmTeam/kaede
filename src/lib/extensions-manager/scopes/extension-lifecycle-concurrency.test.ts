@@ -16,6 +16,16 @@ import type { ExtensionMetadataType } from "@/types/extensions/extension-metadat
 
 function noOperation(): void {}
 
+async function captureRejection(promise: Promise<unknown>): Promise<unknown> {
+  try {
+    await promise;
+
+    return undefined;
+  } catch (error: unknown) {
+    return error;
+  }
+}
+
 describe("Extension lifecycle concurrency", () => {
   it("treats immediate disposal as a barrier for an in-flight start", async () => {
     let releaseReads = noOperation;
@@ -109,16 +119,10 @@ describe("Extension lifecycle concurrency", () => {
       "runSandbox": async options => {
         const failing = options.requestPermissions(["logging/write", "ui/basic"]);
         const sibling = options.requestPermissions(["logging/write"]);
-        const failure = await failing.then(
-          (): unknown => undefined,
-          (error: unknown): unknown => error,
-        );
+        const failure = await captureRejection(failing);
 
         resolveSecond?.([true]);
-        siblingError = await sibling.then(
-          (): unknown => undefined,
-          (error: unknown): unknown => error,
-        );
+        siblingError = await captureRejection(sibling);
 
         throw failure;
       },

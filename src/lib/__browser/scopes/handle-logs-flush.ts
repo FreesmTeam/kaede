@@ -22,7 +22,7 @@ import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { getDatabaseStore } from "@/lib/browser/scopes/get-database-store.ts";
 import General from "@/lib/general";
 
-let firstTime: boolean = true;
+const logFlushState = { "isFirstFlush": true };
 
 export function handleLogsFlush(): void {
   setInterval(async () => {
@@ -49,12 +49,12 @@ export function handleLogsFlush(): void {
         parsedLogs.push(...currentLogs);
         store.put({
           "path" : logsKey,
-          "value": firstTime
+          "value": logFlushState.isFirstFlush
             ? currentLogs.join("\n")
             : parsedLogs.join("\n"),
         });
 
-        firstTime = false;
+        logFlushState.isFirstFlush = false;
         resolve(true);
       }, { "once": true });
       logsRequest.addEventListener("error", error => {

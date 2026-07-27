@@ -37,11 +37,11 @@ function isCanonicalWindowsAbsolutePath(filePath: string): boolean {
     .every(segment => segment !== "" && segment !== "." && segment !== "..");
 }
 
-function containsAsciiControlCharacter(value: string): boolean {
+function hasAsciiControlCharacter(value: string): boolean {
   for (const character of value) {
     const codePoint = character.codePointAt(0);
 
-    if (codePoint !== undefined && (codePoint <= 0x1F || codePoint === 0x7F)) {
+    if (codePoint !== undefined && (codePoint === 0x7F || codePoint <= 0x1F)) {
       return true;
     }
   }
@@ -51,6 +51,6 @@ function containsAsciiControlCharacter(value: string): boolean {
 
 export function isCanonicalAbsolutePath(filePath: string): boolean {
   return filePath.length > 0 &&
-    !containsAsciiControlCharacter(filePath) &&
+    !hasAsciiControlCharacter(filePath) &&
     (isCanonicalPosixAbsolutePath(filePath) || isCanonicalWindowsAbsolutePath(filePath));
 }

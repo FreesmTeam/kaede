@@ -120,7 +120,7 @@ test("updates the mounted img when the same stored path gets new bytes", async (
   await Promise.resolve();
   await nextTick();
 
-  const image = root.children[0];
+  const [image] = root.children;
 
   expect(image?.type).toBe("img");
   expect(image?.props.src).toBe("blob:first-image");

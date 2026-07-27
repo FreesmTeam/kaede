@@ -38,7 +38,7 @@ function createSnapshot(
   success: number,
   failed: number,
 ): DownloadBatchSnapshot {
-  const entries = [...current.entries()].map(([path, progress]) => {
+  const entries = [...current].map(([path, progress]) => {
     const frozenProgress: readonly [number, number] = Object.freeze([
       progress[0],
       progress[1],

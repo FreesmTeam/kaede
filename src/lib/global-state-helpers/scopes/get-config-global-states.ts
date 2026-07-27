@@ -13,9 +13,9 @@ export function getConfigGlobalStates(): GlobalStatesType {
   const searchParameters = new URLSearchParams(location.search);
 
   const configFile: ConfigType = GlobalObject.libs.Configs.getCachedInitial();
-  const portable: boolean = GlobalObject.libs.General.getCachedPortable();
+  const isPortable: boolean = GlobalObject.libs.General.getCachedPortable();
 
-  const portableVersion = portable ? "Portable" : "Non-portable";
+  const portableVersion = isPortable ? "Portable" : "Non-portable";
 
   log.info(__PRE_BUNDLED_FILENAME__, `Running in the '${portableVersion}' version`);
   log.debug(__PRE_BUNDLED_FILENAME__, "Finishing 'getConfigGlobalStates' execution");

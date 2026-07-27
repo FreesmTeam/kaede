@@ -39,9 +39,9 @@ export async function handleServerProcess(
     "stderr": new TextDecoder,
   } as const;
   const decoderFlushOrder: Array<"stdout" | "stderr"> = ["stdout", "stderr"];
-  let registered = false;
-  let terminalBeforeRegistration = false;
-  let terminalEventReceived = false;
+  let isRegistered = false;
+  let isTerminalBeforeRegistration = false;
+  let isTerminalEventReceived = false;
   let process: BrokerServerProcess | undefined;
   const decodeOutput = (kind: "stdout" | "stderr", bytes: Uint8Array): string => {
     decoderFlushOrder.splice(decoderFlushOrder.indexOf(kind), 1);
@@ -59,16 +59,16 @@ export async function handleServerProcess(
     }
   };
   const handleTerminalEvent = (): void => {
-    terminalEventReceived = true;
+    isTerminalEventReceived = true;
     flushOutput();
-    if (registered && process !== undefined) {
+    if (isRegistered && process !== undefined) {
       removeServer(process.handle);
     } else {
-      terminalBeforeRegistration = true;
+      isTerminalBeforeRegistration = true;
     }
   };
   const onEvent = (event: ProcessEvent): void => {
-    if (terminalEventReceived) {
+    if (isTerminalEventReceived) {
       return;
     }
 
@@ -100,20 +100,20 @@ export async function handleServerProcess(
   try {
     process = await start(onEvent);
   } catch (error: unknown) {
-    if (!terminalEventReceived) {
-      terminalEventReceived = true;
+    if (!isTerminalEventReceived) {
+      isTerminalEventReceived = true;
       flushOutput();
     }
 
     throw error;
   }
 
-  if (terminalBeforeRegistration) {
+  if (isTerminalBeforeRegistration) {
     return;
   }
 
   GlobalInternals.serverProcesses.push({ name, "port": process.port, "value": process });
-  registered = true;
+  isRegistered = true;
   serverProcesses.value = [...GlobalInternals.serverProcesses];
 
   return process;

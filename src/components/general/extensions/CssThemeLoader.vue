@@ -22,7 +22,7 @@ async function transformToPromise(path: string, filename: string): Promise<Custo
   const fileCode = await Host.files.readText(filePath);
 
   return {
-    "id"     : filename.slice(0, -1 * CSSThemeExtensions.Enabled.length),
+    "id"     : filename.slice(0, -CSSThemeExtensions.Enabled.length),
     "content": fileCode,
   };
 }
@@ -57,7 +57,7 @@ onMounted(async () => {
 
     stylesheets.disabled = disabledThemeFiles.map(filename => filename.slice(
       0,
-      -1 * CSSThemeExtensions.Disabled.length,
+      -CSSThemeExtensions.Disabled.length,
     ));
     stylesheets.applied = await Promise.all(
       actualThemeFiles.map(filename => (

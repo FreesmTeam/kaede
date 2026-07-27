@@ -115,7 +115,7 @@ export async function createSandboxRuntime({
   const normalizedStaticPermissions = normalizePermissionRequests(staticPermissions);
   const hostBoundary = hostFactory(trustedContainer, normalizedMaxBounds);
   let safeDocument: SafeDocument | undefined;
-  let disposed = false;
+  let isDisposed = false;
 
   try {
     const hasStaticFormsPermission = normalizedStaticPermissions.includes(
@@ -146,7 +146,7 @@ export async function createSandboxRuntime({
     const requestPermissions = hardener(async (
       requestedPermissions: ReadonlyArray<PermissionRequest>,
     ): Promise<PermissionGrant> => {
-      if (disposed) {
+      if (isDisposed) {
         throw new TypeError("Sandbox runtime has been disposed");
       }
 
@@ -165,7 +165,7 @@ export async function createSandboxRuntime({
         } satisfies PermissionGrant
         : await requestHostPermissions(forwardedRequests);
 
-      if (disposed) {
+      if (isDisposed) {
         throw new TypeError("Sandbox runtime was disposed during the permission request");
       }
 
@@ -188,11 +188,11 @@ export async function createSandboxRuntime({
       );
     });
     const dispose = hardener((): void => {
-      if (disposed) {
+      if (isDisposed) {
         return;
       }
 
-      disposed = true;
+      isDisposed = true;
       cleanupRuntimeResources(safeDocument, disposeEvents, hostBoundary);
     });
 

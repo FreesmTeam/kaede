@@ -27,22 +27,24 @@ export function createDesktopHostFacade(call: BrokerCall): HostFacade {
   const storage = createDesktopHostStorage(call);
   const io = createDesktopHostIo(call);
   const processes = createDesktopHostProcesses(call);
-  const getRuntimeSnapshot = (): Promise<RuntimeSnapshot> => {
-    runtimeSnapshotTask ??= call({ "kind": "host_runtime_snapshot" }).then(response => {
-      const snapshot = expectResponse(response, "runtime_snapshot");
+  const loadRuntimeSnapshot = async (): Promise<RuntimeSnapshot> => {
+    const response = await call({ "kind": "host_runtime_snapshot" });
+    const snapshot = expectResponse(response, "runtime_snapshot");
 
-      runtimeSnapshot = Object.freeze({
-        "kind"               : snapshot.runtimeKind,
-        "launchCount"        : snapshot.launchCount,
-        "portable"           : snapshot.portable,
-        "baseDirectory"      : snapshot.baseDirectory,
-        "executableDirectory": snapshot.executableDirectory,
-        "appDataDirectory"   : snapshot.appDataDirectory,
-        "os"                 : Object.freeze({ ...snapshot.os }),
-      });
-
-      return runtimeSnapshot;
+    runtimeSnapshot = Object.freeze({
+      "kind"               : snapshot.runtimeKind,
+      "launchCount"        : snapshot.launchCount,
+      "portable"           : snapshot.portable,
+      "baseDirectory"      : snapshot.baseDirectory,
+      "executableDirectory": snapshot.executableDirectory,
+      "appDataDirectory"   : snapshot.appDataDirectory,
+      "os"                 : Object.freeze({ ...snapshot.os }),
     });
+
+    return runtimeSnapshot;
+  };
+  const getRuntimeSnapshot = (): Promise<RuntimeSnapshot> => {
+    runtimeSnapshotTask ??= loadRuntimeSnapshot();
 
     return runtimeSnapshotTask;
   };

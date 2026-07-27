@@ -15,7 +15,10 @@ function requestBody(body: string | BrokerBytes | undefined): string | ArrayBuff
   return Uint8Array.from(body).buffer;
 }
 
-function networkGrantAllows(
+const REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302, 303, 307, 308]);
+const POST_TO_GET_REDIRECT_STATUSES: ReadonlySet<number> = new Set([301, 302]);
+
+function isNetworkGrantAllowed(
   grant: PermissionRequest,
   url: URL,
   method: NetworkHttpRequest["method"],
@@ -31,7 +34,9 @@ function requireNetworkGrant(
   url: URL,
   method: NetworkHttpRequest["method"],
 ): void {
-  if (!requireGrant("network/http").some(grant => networkGrantAllows(grant, url, method))) {
+  if (requireGrant("network/http").every(grant => {
+    return !isNetworkGrantAllowed(grant, url, method);
+  })) {
     throw new Error(
       `Browser preview network request is outside its grant: ${url.href}`,
     );
@@ -39,14 +44,14 @@ function requireNetworkGrant(
 }
 
 function isRedirect(status: number): boolean {
-  return status === 301 || status === 302 || status === 303 || status === 307 || status === 308;
+  return REDIRECT_STATUSES.has(status);
 }
 
 function redirectedMethod(
   status: number,
   method: NetworkHttpRequest["method"],
 ): NetworkHttpRequest["method"] {
-  if ((status === 301 || status === 302) && method === "POST") {
+  if (method === "POST" && POST_TO_GET_REDIRECT_STATUSES.has(status)) {
     return "GET";
   }
 
@@ -72,13 +77,14 @@ function removeSensitiveHeaders(
 }
 
 async function toNetworkResponse(response: Response): Promise<NetworkHttpResponse> {
+  const headers = [...response.headers].map(header => Object.freeze(header));
+  const body = new Uint8Array(await response.arrayBuffer());
+
   return Object.freeze({
     "status"    : response.status,
     "statusText": response.statusText,
-    "headers"   : Object.freeze(
-      [...response.headers].map(header => Object.freeze(header)),
-    ),
-    "body": Object.freeze([...new Uint8Array(await response.arrayBuffer())]),
+    "headers"   : Object.freeze(headers),
+    "body"      : Object.freeze([...body]),
   });
 }
 

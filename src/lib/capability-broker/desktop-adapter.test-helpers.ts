@@ -20,7 +20,7 @@ type IpcCall = Readonly<{ "command": string; "args": unknown }>;
 type IpcMock = Readonly<{ "calls": Array<IpcCall>; "ipc": DesktopIpc }>;
 
 export function noEventCapability(): undefined {
-  return undefined;
+  return;
 }
 
 export function principal(pluginId: string): PluginPrincipal {

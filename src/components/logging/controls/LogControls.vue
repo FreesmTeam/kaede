@@ -68,7 +68,7 @@ async function copyTextSelection(): Promise<void> {
     copied.value,
     textSelectionRange,
     logsArray,
-    (state: boolean) => copied.value = state,
+    (isCopied: boolean) => copied.value = isCopied,
   );
 }
 async function viewInExplorer(): Promise<void> {
@@ -183,16 +183,16 @@ useEventListener("click", (event: MouseEvent) => {
 });
 useEventListener("keydown", (event: KeyboardEvent) => {
   if (
-    textIsInSelection.value &&
-    textSelectionRange &&
-    event.ctrlKey &&
-    event.code === "KeyC"
+    !textSelectionRange ||
+    event.code !== "KeyC" ||
+    !event.ctrlKey ||
+    !textIsInSelection.value
   ) {
-    event.preventDefault();
-    copyTextSelection();
-
     return;
   }
+
+  event.preventDefault();
+  copyTextSelection();
 });
 </script>
 

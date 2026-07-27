@@ -30,12 +30,12 @@ export function gcd(a: number, b: number): number {
       return first;
     }
 
-    first = first % second;
+    first %= second;
 
     if (first == 0) {
       return second;
     }
 
-    second = second % first;
+    second %= first;
   }
 }

@@ -29,6 +29,7 @@ import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
 
+import unicornPolicyRules from "./eslint-rules/unicorn-policy.js";
 import vueRequireID from "./eslint-rules/vue-require-id.js";
 
 // Get an absolute path of the '.gitignore' file
@@ -74,29 +75,16 @@ export default defineConfigWithVueTs(
 
       /* Disabled rules */
       // Not all components need multi-word names, e.g. 'Layout.vue'
-      "vue/multi-word-component-names"   : ["off"],
+      "vue/multi-word-component-names": ["off"],
       // Not needed since Vue 3.x
-      "vue/no-multiple-template-root"    : ["off"],
-      // The second argument of 'JSON#stringify' does not accept 'undefined' to save formatting
-      "unicorn/no-null"                  : ["off"],
-      // Not needed for fully client-side applications with no Web Workers used
-      "unicorn/prefer-global-this"       : ["off"],
-      // Top level await appears to be broken
-      "unicorn/prefer-top-level-await"   : ["off"],
-      // 'document#getElementById' is faster and easier to use
-      "unicorn/prefer-query-selector"    : ["off"],
-      // Requires a different compiler lib version
-      "unicorn/prefer-at"                : ["off"],
-      // Requires a different compiler lib version
-      "unicorn/no-array-reverse"         : ["off"],
-      // Requires a different compiler lib version
-      "unicorn/prefer-string-replace-all": ["off"],
+      "vue/no-multiple-template-root" : ["off"],
+      ...unicornPolicyRules,
       // Conflicts with 'eslint@stylistic/key-spacing'
-      "@stylistic/no-multi-spaces"       : ["off"],
+      "@stylistic/no-multi-spaces"    : ["off"],
       // Conflicts with git
-      "@stylistic/linebreak-style"       : ["off"],
+      "@stylistic/linebreak-style"    : ["off"],
       // Conflicts with git
-      "@stylistic/eol-last"              : ["off"],
+      "@stylistic/eol-last"           : ["off"],
 
       /* Important */
       "@stylistic/semi"              : ["error", "always"],
@@ -197,15 +185,6 @@ export default defineConfigWithVueTs(
         "ignoreHTMLTextContents"   : true,
         "ignoreUrls"               : true,
       }],
-
-      /* Unicorn */
-      "unicorn/filename-case": ["warn", {
-        "cases": {
-          "kebabCase" : true,
-          "pascalCase": true,
-        },
-      }],
-      "unicorn/prevent-abbreviations": ["warn"],
 
       /* Stylistic */
       "@stylistic/array-bracket-newline"         : ["warn", "consistent"],
@@ -317,5 +296,14 @@ export default defineConfigWithVueTs(
   {
     "files": ["**/*.{cts,mts,ts,tsx,vue}"],
     "rules": { "@typescript-eslint/explicit-function-return-type": ["warn"] },
+  },
+  {
+    // These literals model Tauri's fixed HTTP asset protocol and HTTP rejection/canonicalization.
+    "files": [
+      "src/lib/capability-broker/image-object-url.{test.,}ts",
+      "src/lib/extensions-manager/scopes/principal.test.ts",
+      "src/lib/security/tauri-config.test.ts",
+    ],
+    "rules": { "unicorn/prefer-https": ["off"] },
   },
 );

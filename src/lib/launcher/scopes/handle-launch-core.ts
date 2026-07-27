@@ -155,27 +155,31 @@ export function createHandleLaunch({
       },
     ));
 
+    const downloadLibrariesAndExtractNatives = async (): Promise<boolean> => {
+      const hasDownloadedLibraries = await Fetching.downloadLibraries({
+        necessaries,
+        finalizedPatch,
+      });
+
+      if (!hasDownloadedLibraries) {
+        return false;
+      }
+
+      await Extractors.unzipNatives({
+        necessaries,
+        "paths": finalizedPatch
+          .artifacts
+          .filter(({ status }) => status === "native")
+          .map(({ path }) => path),
+      });
+
+      return true;
+    };
     const responses: Array<boolean> = await Promise.all([
       Fetching.downloadAssets({ necessaries, finalizedPatch }),
       Fetching.downloadClient({ necessaries, finalizedPatch }),
       Fetching.downloadLogging({ necessaries, finalizedPatch }),
-      Fetching
-        .downloadLibraries({ necessaries, finalizedPatch })
-        .then(async result => {
-          if (!result) {
-            return false;
-          }
-
-          await Extractors.unzipNatives({
-            necessaries,
-            "paths": finalizedPatch
-              .artifacts
-              .filter(({ status }) => status === "native")
-              .map(({ path }) => path),
-          });
-
-          return true;
-        }),
+      downloadLibrariesAndExtractNatives(),
     ]);
 
     for (const status of responses) {

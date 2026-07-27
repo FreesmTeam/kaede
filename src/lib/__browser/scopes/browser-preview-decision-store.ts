@@ -113,11 +113,11 @@ function parseDecisionRecord(
   const decision = Reflect.get(parsed, "decision");
 
   if (
-    version !== DECISION_RECORD_VERSION ||
-    (kind !== "dynamic" && kind !== "static") ||
     typeof principalKey !== "string" ||
     typeof requestFingerprint !== "string" ||
     typeof decision !== "boolean" ||
+    version !== DECISION_RECORD_VERSION ||
+    (kind !== "dynamic" && kind !== "static") ||
     !isValidOpaqueKey(principalKey) ||
     !isValidOpaqueKey(requestFingerprint) ||
     kind !== expectedKey.kind ||
@@ -138,14 +138,14 @@ function parseDecisionRecord(
 
 function serializeDecisionRecord(
   key: PermissionDecisionStoreKey,
-  decision: boolean,
+  isAllowed: boolean,
 ): string {
   const record: BrowserDecisionRecord = Object.freeze({
     "version"           : DECISION_RECORD_VERSION,
     "kind"              : key.kind,
     "principalKey"      : key.principalKey,
     "requestFingerprint": key.requestFingerprint,
-    decision,
+    "decision"          : isAllowed,
   });
 
   return JSON.stringify(record);
@@ -163,7 +163,7 @@ export function createBrowserDecisionStore(storage: BrowserStorage): BrokerDecis
 
       return parseDecisionRecord(result.value, key, path).decision;
     },
-    "save": async (key: PermissionDecisionStoreKey, decision: boolean): Promise<void> => {
+    "save": async (key: PermissionDecisionStoreKey, isAllowed: boolean): Promise<void> => {
       const path = decisionStorageKey(key);
       const result = await storage.read(path);
 
@@ -171,7 +171,7 @@ export function createBrowserDecisionStore(storage: BrowserStorage): BrokerDecis
         parseDecisionRecord(result.value, key, path);
       }
 
-      await storage.write(path, serializeDecisionRecord(key, decision));
+      await storage.write(path, serializeDecisionRecord(key, isAllowed));
     },
   });
 }

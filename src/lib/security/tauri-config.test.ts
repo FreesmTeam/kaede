@@ -11,6 +11,10 @@ import type { PermissionRequest } from "@/types/extensions/permission.type.ts";
 
 type Csp = Record<string, string[]>;
 
+function compareStrings(first: string, second: string): number {
+  return first.localeCompare(second);
+}
+
 interface Capability {
   "identifier"  : string;
   "permissions" : string[];
@@ -47,7 +51,7 @@ const EXPECTED_PERMISSIONS = [
   "core:path:allow-normalize",
   "core:path:allow-resolve",
   "core:window:allow-show",
-].toSorted();
+].toSorted(compareStrings);
 
 const EXPECTED_CSP: Csp = {
   "default-src"    : ["'self'"],
@@ -90,7 +94,7 @@ function readJson<T>(filePath: string): T {
 const config = readJson<TauriConfig>(path.resolve(repositoryRoot, "src-tauri/tauri.conf.json"));
 const capabilities = readdirSync(capabilitiesDirectory)
   .filter(fileName => fileName.endsWith(".json"))
-  .toSorted()
+  .toSorted(compareStrings)
   .map(fileName => readJson<Capability>(path.resolve(capabilitiesDirectory, fileName)));
 const buildWorkflow = readFileSync(
   path.resolve(repositoryRoot, ".github/workflows/build.yml"),
@@ -120,7 +124,9 @@ describe("Tauri security boundary", () => {
   });
 
   test("rejects raw privileged APIs outside the minimal bootstrap allowlist", () => {
-    expect((capabilities[0]?.permissions ?? []).toSorted()).toEqual(EXPECTED_PERMISSIONS);
+    expect((capabilities[0]?.permissions ?? []).toSorted(compareStrings)).toEqual(
+      EXPECTED_PERMISSIONS,
+    );
   });
 
   test("keeps production CSP closed and isolates the Vite HMR exception to development", () => {

@@ -68,7 +68,7 @@ const handleInput = useDebounceFn((event: Event): void => {
 }, debounceTime);
 
 function handleKeyDown(event: KeyboardEvent): void {
-  if (event.key === "Escape" && blurOnEscape) {
+  if (blurOnEscape && event.key === "Escape") {
     unFocus(event);
     onEscape?.();
   }

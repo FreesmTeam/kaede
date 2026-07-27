@@ -35,7 +35,7 @@ export async function fetchMetadata({
   "label" : string;
   "scope" : Extract<LaunchKeyType, "PatchIndex" | "PatchMetadata" | "AssetIndex">;
   "prefix": string;
-}): Promise<{ "data": unknown } | LaunchStatusType> {
+}): Promise<LaunchStatusType | { "data": unknown }> {
   let response: Response;
   let data: unknown;
 

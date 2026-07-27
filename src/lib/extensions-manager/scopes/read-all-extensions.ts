@@ -179,7 +179,7 @@ export async function readAllExtensions(): Promise<Array<ExtensionInfoType>> {
       extensionFiles.push(file.name);
     }
   }
-  extensionFiles.sort();
+  extensionFiles.sort(compareStrings);
 
   log.debug(
     __PRE_BUNDLED_FILENAME__,

@@ -149,7 +149,9 @@ describe("createSandboxRuntime", () => {
     expect(receivedDocumentOptions?.urlPolicy?.sinks["image.src"]?.allowedOrigins).toEqual([
       "https://static.example.test",
     ]);
-    expect(Reflect.ownKeys(runtime.capabilities).toSorted()).toEqual([
+    expect(Reflect.ownKeys(runtime.capabilities).toSorted((first, second) => {
+      return String(first).localeCompare(String(second));
+    })).toEqual([
       "logging/write",
       "network/http",
       "system/shell",

@@ -48,18 +48,18 @@ const sandboxVendorFragments: readonly string[] = [
   "/node_modules/typebox/",
 ];
 
-function includesVendorFragment(moduleId: string, fragments: readonly string[]): boolean {
+function hasVendorFragment(moduleId: string, fragments: readonly string[]): boolean {
   const normalizedModuleId: string = moduleId.replaceAll("\\", "/");
 
   return fragments.some(fragment => normalizedModuleId.includes(fragment));
 }
 
 function isFrameworkVendor(moduleId: string): boolean {
-  return includesVendorFragment(moduleId, frameworkVendorFragments);
+  return hasVendorFragment(moduleId, frameworkVendorFragments);
 }
 
 function isSandboxVendor(moduleId: string): boolean {
-  return includesVendorFragment(moduleId, sandboxVendorFragments);
+  return hasVendorFragment(moduleId, sandboxVendorFragments);
 }
 
 function handleSourceFileNames(): Plugin {
@@ -137,6 +137,8 @@ export default defineConfig(({ mode }) => {
       "strictPort": true,
     },
     "build": {
+      // Modern builds stay on ESNext; the isolated Win7 gate targets its final WebView2 (Chromium 109).
+      "target": process.env.VITE_BUILD_TARGET ?? "esnext",
       "rolldownOptions": {
         "output": {
 

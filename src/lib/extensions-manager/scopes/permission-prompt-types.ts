@@ -14,7 +14,7 @@ export type PermissionDecisionKind = "dynamic" | "static";
 
 export interface PermissionDecisionStore {
   load(key: PermissionDecisionStoreKey): MaybePromise<boolean | undefined>;
-  save(key: PermissionDecisionStoreKey, decision: boolean): MaybePromise<void>;
+  save(key: PermissionDecisionStoreKey, isAllowed: boolean): MaybePromise<void>;
 }
 
 export type StaticPermissionPrompt = Readonly<{
@@ -52,7 +52,7 @@ type QueueItemBase = {
 
 export type StaticQueueItem = QueueItemBase & {
   "kind"    : "static";
-  "complete": (decision: boolean) => void;
+  "complete": (isAllowed: boolean) => void;
 };
 
 export type DynamicQueueItem = QueueItemBase & {

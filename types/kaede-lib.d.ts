@@ -405,16 +405,16 @@ declare const _default$2: {
 		{
 			readonly name: "Open Root Folder";
 			readonly icon: "i-lucide-folder";
-			readonly action: () => void;
+			readonly action: () => Promise<void>;
 		},
 		{
 			readonly name: "Open Instance Folder";
 			readonly icon: "i-lucide-box";
-			readonly action: () => void;
+			readonly action: () => Promise<void>;
 		}
 	];
 };
-declare function getASCIIArt(portable: boolean, launchCount: number): string;
+declare function getASCIIArt(isPortable: boolean, launchCount: number): string;
 declare const _default$3: {
 	readonly getASCIIArt: typeof getASCIIArt;
 };
@@ -1767,7 +1767,7 @@ declare const _default$14: {
 		overrideSidebar: (input: Partial<GlobalStatesType["layout"]["sidebar"]>) => void;
 	};
 	readonly Logs: {
-		toggle: <Key extends keyof GlobalStatesType["logs"]>(key: Key, state?: boolean) => void;
+		toggle: <Key extends keyof GlobalStatesType["logs"]>(key: Key, isEnabled?: boolean) => void;
 		filterBy: (newValue: string) => void;
 		selectMode: (newValue: string) => void;
 	};
@@ -2099,9 +2099,9 @@ declare function fetchMetadata({ url, label, scope, prefix, }: {
 	"label": string;
 	"scope": Extract<LaunchKeyType, "PatchIndex" | "PatchMetadata" | "AssetIndex">;
 	"prefix": string;
-}): Promise<{
+}): Promise<LaunchStatusType | {
 	"data": unknown;
-} | LaunchStatusType>;
+}>;
 declare function getDownloadCancelId(instanceId: string): string;
 declare function isDownloadCancellationActive(statuses: LauncherStatusesType | undefined): boolean;
 declare function buildUrlFromBase({ baseUrl, name, file, descriptiveLogPrefix, }: {
@@ -2110,7 +2110,7 @@ declare function buildUrlFromBase({ baseUrl, name, file, descriptiveLogPrefix, }
 	"file": string;
 	"descriptiveLogPrefix": string;
 }): string | false;
-declare function checkIsNative(library: SpecificPatchLibraryType): boolean;
+declare function isNativeLibrary(library: SpecificPatchLibraryType): boolean;
 declare function finalizePatches({ patches, necessaries, }: {
 	"patches": Array<SpecificPatchMetaType>;
 	"necessaries": PreLaunchInformationType;
@@ -2118,7 +2118,7 @@ declare function finalizePatches({ patches, necessaries, }: {
 export type DeepRequired<T> = T extends object ? {
 	[P in keyof T]-?: DeepRequired<T[P]>;
 } : T;
-declare function handlePlatformRule({ platform, arch, rule, current, }: {
+declare function isPlatformRuleAllowed({ platform, arch, rule, current, }: {
 	"platform": PreLaunchInformationType["platform"];
 	"arch": PreLaunchInformationType["arch"];
 	"rule": DeepRequired<SpecificPatchLibraryRuleType>;
@@ -2240,9 +2240,9 @@ declare const Launcher: {
 	};
 	readonly Parsers: {
 		readonly buildUrlFromBase: typeof buildUrlFromBase;
-		readonly checkIsNative: typeof checkIsNative;
+		readonly checkIsNative: typeof isNativeLibrary;
 		readonly finalizePatches: typeof finalizePatches;
-		readonly handlePlatformRule: typeof handlePlatformRule;
+		readonly handlePlatformRule: typeof isPlatformRuleAllowed;
 		readonly normalizeArtifactPath: typeof normalizeArtifactPath;
 		readonly parseLibraries: typeof parseLibraries;
 		readonly parseLibrary: typeof parseLibrary;
@@ -2295,13 +2295,13 @@ declare function handleVirtualListTextSelection(event: MouseEvent, isSelection: 
 	number,
 	number
 ] | "save" | undefined;
-declare function handleVirtualTextCopy(copied: boolean, range: [
+declare function handleVirtualTextCopy(isCopied: boolean, range: [
 	number,
 	number
 ] | undefined, logs: Array<string | [
 	number,
 	string
-]>, setCopied: (state: boolean) => void): Promise<void>;
+]>, setCopied: (isCopied: boolean) => void): Promise<void>;
 declare function openViewer(): void;
 declare function readLogs({ globalStates, instanceLogs, }: {
 	"globalStates": GlobalStatesType | undefined;

@@ -104,7 +104,9 @@ describe("desktop host downloads", () => {
       "concurrency": 4,
       "label"      : "assets",
       "cancelId"   : "instance-download",
-    }, snapshot => snapshots.push(snapshot));
+    }, snapshot => {
+      snapshots.push(snapshot);
+    });
 
     await expect(downloads.cancel("instance-download")).resolves.toBe(true);
     expect(requests).toEqual([

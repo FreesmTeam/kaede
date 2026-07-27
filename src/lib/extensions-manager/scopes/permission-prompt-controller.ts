@@ -35,76 +35,6 @@ export class PermissionPromptController {
     this.#repository = new PermissionDecisionRepository(store);
   }
 
-  get currentPrompt(): PermissionPrompt | undefined {
-    return this.#session?.currentPrompt;
-  }
-
-  subscribe(listener: PermissionPromptListener): () => void {
-    this.#listeners.add(listener);
-    listener(this.currentPrompt);
-
-    return (): void => {
-      this.#listeners.delete(listener);
-    };
-  }
-
-  setDecisionStore(store: PermissionDecisionStore): void {
-    if (
-      this.#session !== undefined ||
-      this.currentPrompt !== undefined ||
-      this.#queue.length > 0
-    ) {
-      throw new Error("Cannot configure the decision store while prompts are active or queued");
-    }
-
-    this.#repository.replaceStore(store);
-  }
-
-  requestStatic(
-    principal: PluginPrincipal,
-    requests: ReadonlyArray<PermissionRequest | PreparedPermissionRequest>,
-  ): Promise<boolean> {
-    const pending = this.#queue.requestStatic(principal, requests);
-
-    void this.#processQueue();
-
-    return pending;
-  }
-
-  requestDynamic(
-    principal: PluginPrincipal,
-    requests: ReadonlyArray<PermissionRequest | PreparedPermissionRequest>,
-  ): Promise<ReadonlyArray<boolean>> {
-    const pending = this.#queue.requestDynamic(principal, requests);
-
-    void this.#processQueue();
-
-    return pending;
-  }
-
-  resolveStatic(decision: boolean): boolean {
-    return this.#session?.resolveStatic(decision) ?? false;
-  }
-
-  resolveDynamic(decisions: ReadonlyArray<boolean>, remember = false): boolean {
-    return this.#session?.resolveDynamic(decisions, remember) ?? false;
-  }
-
-  cancelAll(principal?: PluginPrincipal): void {
-    const principalKey = principal === undefined
-      ? undefined
-      : createPluginPrincipalKey(principal);
-
-    this.#queue.cancel(principalKey);
-
-    if (
-      this.#session !== undefined &&
-      (principalKey === undefined || this.#session.item.principalKey === principalKey)
-    ) {
-      this.#session.cancel();
-    }
-  }
-
   async #processQueue(): Promise<void> {
     if (this.#running) {
       return;
@@ -152,6 +82,76 @@ export class PermissionPromptController {
       } catch {
         // A failed view must not strand the broker-owned request queue.
       }
+    }
+  }
+
+  get currentPrompt(): PermissionPrompt | undefined {
+    return this.#session?.currentPrompt;
+  }
+
+  subscribe(listener: PermissionPromptListener): () => void {
+    this.#listeners.add(listener);
+    listener(this.currentPrompt);
+
+    return (): void => {
+      this.#listeners.delete(listener);
+    };
+  }
+
+  setDecisionStore(store: PermissionDecisionStore): void {
+    if (
+      this.#session !== undefined ||
+      this.currentPrompt !== undefined ||
+      this.#queue.length > 0
+    ) {
+      throw new Error("Cannot configure the decision store while prompts are active or queued");
+    }
+
+    this.#repository.replaceStore(store);
+  }
+
+  requestStatic(
+    principal: PluginPrincipal,
+    requests: ReadonlyArray<PermissionRequest | PreparedPermissionRequest>,
+  ): Promise<boolean> {
+    const pending = this.#queue.requestStatic(principal, requests);
+
+    void this.#processQueue();
+
+    return pending;
+  }
+
+  requestDynamic(
+    principal: PluginPrincipal,
+    requests: ReadonlyArray<PermissionRequest | PreparedPermissionRequest>,
+  ): Promise<ReadonlyArray<boolean>> {
+    const pending = this.#queue.requestDynamic(principal, requests);
+
+    void this.#processQueue();
+
+    return pending;
+  }
+
+  resolveStatic(isAllowed: boolean): boolean {
+    return this.#session?.resolveStatic(isAllowed) ?? false;
+  }
+
+  resolveDynamic(decisions: ReadonlyArray<boolean>, shouldRemember = false): boolean {
+    return this.#session?.resolveDynamic(decisions, shouldRemember) ?? false;
+  }
+
+  cancelAll(principal?: PluginPrincipal): void {
+    const principalKey = principal === undefined
+      ? undefined
+      : createPluginPrincipalKey(principal);
+
+    this.#queue.cancel(principalKey);
+
+    if (
+      this.#session !== undefined &&
+      (principalKey === undefined || this.#session.item.principalKey === principalKey)
+    ) {
+      this.#session.cancel();
     }
   }
 }

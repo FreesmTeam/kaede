@@ -48,15 +48,17 @@ function snapshotDescriptor(descriptor: PermissionRequest): PermissionRequest {
       });
     }
     case "system/process/spawn": {
+      const executables = descriptor.scope.executables.map(executable => {
+        return Object.freeze({
+          "path"     : executable.path,
+          "arguments": Object.freeze([...executable.arguments]),
+        });
+      });
+
       return Object.freeze({
         "id"   : descriptor.id,
         "scope": Object.freeze({
-          "executables": Object.freeze(descriptor.scope.executables.map(executable => {
-            return Object.freeze({
-              "path"     : executable.path,
-              "arguments": Object.freeze([...executable.arguments]),
-            });
-          })),
+          "executables": Object.freeze(executables),
         }),
       });
     }
@@ -195,9 +197,9 @@ export function snapshotPreparedPermissionRequest(
 
 export function prepareIdentityFreePermissionRequests(
   requests: ReadonlyArray<PermissionRequest>,
-  normalizeAsSet: boolean,
+  shouldNormalizeAsSet: boolean,
 ): ReadonlyArray<PreparedPermissionRequest> {
-  const normalized = normalizeAsSet
+  const normalized = shouldNormalizeAsSet
     ? normalizePermissionRequests(requests)
     : requests.map(request => {
       const normalizedRequest = normalizePermissionRequests([request])[0];

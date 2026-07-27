@@ -67,7 +67,7 @@ test("singleton store configuration is used by the first request", async () => {
     "load": (): undefined => {
       loadCount++;
 
-      return undefined;
+      return;
     },
     "save": (): void => {
       saveCount++;

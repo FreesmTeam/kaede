@@ -36,7 +36,7 @@ import type {
 } from "@/types/launcher/meta/patch-index.type.ts";
 
 const { handleDropdown, currentFilter } = defineProps<{
-  "handleDropdown": (state: boolean, event?: PointerEvent) => void;
+  "handleDropdown": (isOpen: boolean, event?: PointerEvent) => void;
   "currentFilter" : "release" | "all";
 }>();
 
@@ -188,12 +188,12 @@ function selectVersion(event: MouseEvent): void {
 
   if (
     !extractedVersion ||
-    !currentInstance.value ||
-    !currentPatch.value ||
     // Sometimes it may happen...
     extractedVersion === "Loading..." ||
     // This can happen as well if the user click "No Matches"
-    extractedVersion === noMatches.version
+    extractedVersion === noMatches.version ||
+    !currentInstance.value ||
+    !currentPatch.value
   ) {
     return;
   }

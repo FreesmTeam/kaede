@@ -54,6 +54,43 @@ export class ExtensionLifecycleController {
     );
   }
 
+  async #retryCleanupUntilComplete(retryDelayMilliseconds: number): Promise<void> {
+    if (!Number.isSafeInteger(retryDelayMilliseconds) || retryDelayMilliseconds < 0) {
+      throw new TypeError("Cleanup retry delay must be a non-negative safe integer");
+    }
+
+    for (;;) {
+      try {
+        await this.dispose();
+
+        return;
+      } catch (error: unknown) {
+        this.#dependencies.reportError(
+          "Sandbox cleanup is incomplete and will be retried",
+          error,
+        );
+        await new Promise<void>(resolve => {
+          setTimeout(resolve, retryDelayMilliseconds);
+        });
+      }
+    }
+  }
+
+  #clearCleanupTask(cleanup: Promise<void>): void {
+    if (this.#cleanupUntilComplete === cleanup) {
+      this.#cleanupUntilComplete = undefined;
+    }
+  }
+
+  #assertCurrent(state: ExtensionLifecycleState): void {
+    if (
+      this.#state !== state ||
+      state.generation !== this.#generation
+    ) {
+      throw new ExtensionLifecycleInterruptedError;
+    }
+  }
+
   async initialize({
     trustedContainer,
     maxBounds,
@@ -94,7 +131,7 @@ export class ExtensionLifecycleController {
       throw error;
     }
 
-    let globalsRevoked = false;
+    let isGlobalsRevoked = false;
 
     try {
       const [extensions, metadata] = await Promise.all([
@@ -135,7 +172,7 @@ export class ExtensionLifecycleController {
 
       this.#assertCurrent(state);
       this.#dependencies.revokeExtensionGlobals();
-      globalsRevoked = true;
+      isGlobalsRevoked = true;
       this.#dependencies.lockdownEnvironment();
 
       for (const plugin of plan.sandboxed) {
@@ -150,7 +187,7 @@ export class ExtensionLifecycleController {
 
       return catalog;
     } catch (error: unknown) {
-      if (!globalsRevoked) {
+      if (!isGlobalsRevoked) {
         try {
           this.#dependencies.revokeExtensionGlobals();
         } catch (revocationError: unknown) {
@@ -190,48 +227,10 @@ export class ExtensionLifecycleController {
     const cleanup = this.#retryCleanupUntilComplete(retryDelayMilliseconds);
 
     this.#cleanupUntilComplete = cleanup;
-    void cleanup.then(
-      (): void => this.#clearCleanupTask(cleanup),
-      (): void => this.#clearCleanupTask(cleanup),
-    );
+    void cleanup
+      .then((): void => this.#clearCleanupTask(cleanup))
+      .catch((): void => this.#clearCleanupTask(cleanup));
 
     return cleanup;
-  }
-
-  async #retryCleanupUntilComplete(retryDelayMilliseconds: number): Promise<void> {
-    if (!Number.isSafeInteger(retryDelayMilliseconds) || retryDelayMilliseconds < 0) {
-      throw new TypeError("Cleanup retry delay must be a non-negative safe integer");
-    }
-
-    for (;;) {
-      try {
-        await this.dispose();
-
-        return;
-      } catch (error: unknown) {
-        this.#dependencies.reportError(
-          "Sandbox cleanup is incomplete and will be retried",
-          error,
-        );
-        await new Promise<void>(resolve => {
-          setTimeout(resolve, retryDelayMilliseconds);
-        });
-      }
-    }
-  }
-
-  #clearCleanupTask(cleanup: Promise<void>): void {
-    if (this.#cleanupUntilComplete === cleanup) {
-      this.#cleanupUntilComplete = undefined;
-    }
-  }
-
-  #assertCurrent(state: ExtensionLifecycleState): void {
-    if (
-      this.#state !== state ||
-      state.generation !== this.#generation
-    ) {
-      throw new ExtensionLifecycleInterruptedError;
-    }
   }
 }

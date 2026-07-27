@@ -40,15 +40,15 @@ const reservedGlobalNames = new Set(`
   this throw true try typeof var void while with yield
   routes readBody toResponse
 `.trim().split(/\s+/u));
-let nextServerId = 0;
+const serverIdState = { "next": 0 };
 
 function assertValidGlobalName(name: string): void {
   const [firstCharacter, ...remainingCharacters] = [...name];
   const hasValidIdentifierCharacters = firstCharacter !== undefined &&
     identifierStartPattern.test(firstCharacter) &&
     remainingCharacters.every(character => {
-      return character === "\u200C" ||
-        character === "\u200D" ||
+      return character === "\u{200C}" ||
+        character === "\u{200D}" ||
         identifierContinuePattern.test(character);
     });
 
@@ -58,9 +58,9 @@ function assertValidGlobalName(name: string): void {
 }
 
 function createServerName(): string {
-  nextServerId += 1;
+  serverIdState.next += 1;
 
-  return `txiki-${nextServerId}`;
+  return `txiki-${serverIdState.next}`;
 }
 
 export default class Txiki {

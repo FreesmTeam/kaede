@@ -39,6 +39,100 @@ export class ExtensionSandboxLifecycle {
     this.#assertCurrent = assertCurrent;
   }
 
+  async #cleanupSandbox(active: ActiveSandbox): Promise<boolean> {
+    this.#pendingRevocations.add(active);
+
+    const existingAttempt = active.cleanupAttempt;
+
+    if (existingAttempt !== undefined) {
+      const complete = await existingAttempt;
+
+      if (complete) {
+        this.#pendingRevocations.delete(active);
+      }
+
+      return complete;
+    }
+
+    const attempt = this.#attemptCleanupSandbox(active);
+
+    active.cleanupAttempt = attempt;
+
+    try {
+      const complete = await attempt;
+
+      if (complete) {
+        this.#pendingRevocations.delete(active);
+      }
+
+      return complete;
+    } finally {
+      if (active.cleanupAttempt === attempt) {
+        delete active.cleanupAttempt;
+      }
+    }
+  }
+
+  async #attemptCleanupSandbox(active: ActiveSandbox): Promise<boolean> {
+    if (active.runtime !== undefined) {
+      const runtime = active.runtime;
+
+      delete active.runtime;
+      this.#disposeRuntime(active.plugin, runtime);
+    }
+
+    try {
+      this.#dependencies.revokeEventListeners(active.plugin.principalKey);
+    } catch (error: unknown) {
+      this.#dependencies.reportError(
+        `Failed to revoke event listeners for '${active.plugin.metadata.id}'`,
+        error,
+      );
+    }
+
+    try {
+      await active.session.revoke();
+
+      return true;
+    } catch (error: unknown) {
+      this.#dependencies.reportError(
+        `Failed to revoke the '${active.plugin.metadata.id}' broker session`,
+        error,
+      );
+
+      return false;
+    }
+  }
+
+  #isInterrupted(state: ExtensionLifecycleState): boolean {
+    try {
+      this.#assertCurrent(state);
+
+      return false;
+    } catch {
+      return true;
+    }
+  }
+
+  #assertActive(state: ExtensionLifecycleState, active: ActiveSandbox): void {
+    this.#assertCurrent(state);
+
+    if (state.sandboxes.get(active.plugin.principalKey) !== active) {
+      throw new TypeError("Sandbox session is no longer active");
+    }
+  }
+
+  #disposeRuntime(plugin: PlannedPlugin, runtime: SandboxRuntimeHandle): void {
+    try {
+      runtime.dispose();
+    } catch (error: unknown) {
+      this.#dependencies.reportError(
+        `Failed to dispose the '${plugin.metadata.id}' sandbox runtime`,
+        error,
+      );
+    }
+  }
+
   async initialize(
     state: ExtensionLifecycleState,
     plugin: PlannedPlugin,
@@ -160,107 +254,15 @@ export class ExtensionSandboxLifecycle {
       state.sandboxes.clear();
     }
 
-    for (const active of new Set(this.#pendingRevocations)) {
+    const pendingRevocations = new Set(this.#pendingRevocations);
+
+    for (const active of pendingRevocations) {
       await this.#cleanupSandbox(active);
     }
 
     if (this.#pendingRevocations.size > 0) {
       throw new Error(
         `Sandbox cleanup remains incomplete for ${this.#pendingRevocations.size} broker session(s)`,
-      );
-    }
-  }
-
-  async #cleanupSandbox(active: ActiveSandbox): Promise<boolean> {
-    this.#pendingRevocations.add(active);
-
-    const existingAttempt = active.cleanupAttempt;
-
-    if (existingAttempt !== undefined) {
-      const complete = await existingAttempt;
-
-      if (complete) {
-        this.#pendingRevocations.delete(active);
-      }
-
-      return complete;
-    }
-
-    const attempt = this.#attemptCleanupSandbox(active);
-
-    active.cleanupAttempt = attempt;
-
-    try {
-      const complete = await attempt;
-
-      if (complete) {
-        this.#pendingRevocations.delete(active);
-      }
-
-      return complete;
-    } finally {
-      if (active.cleanupAttempt === attempt) {
-        delete active.cleanupAttempt;
-      }
-    }
-  }
-
-  async #attemptCleanupSandbox(active: ActiveSandbox): Promise<boolean> {
-    if (active.runtime !== undefined) {
-      const runtime = active.runtime;
-
-      delete active.runtime;
-      this.#disposeRuntime(active.plugin, runtime);
-    }
-
-    try {
-      this.#dependencies.revokeEventListeners(active.plugin.principalKey);
-    } catch (error: unknown) {
-      this.#dependencies.reportError(
-        `Failed to revoke event listeners for '${active.plugin.metadata.id}'`,
-        error,
-      );
-    }
-
-    try {
-      await active.session.revoke();
-
-      return true;
-    } catch (error: unknown) {
-      this.#dependencies.reportError(
-        `Failed to revoke the '${active.plugin.metadata.id}' broker session`,
-        error,
-      );
-
-      return false;
-    }
-  }
-
-  #isInterrupted(state: ExtensionLifecycleState): boolean {
-    try {
-      this.#assertCurrent(state);
-
-      return false;
-    } catch {
-      return true;
-    }
-  }
-
-  #assertActive(state: ExtensionLifecycleState, active: ActiveSandbox): void {
-    this.#assertCurrent(state);
-
-    if (state.sandboxes.get(active.plugin.principalKey) !== active) {
-      throw new TypeError("Sandbox session is no longer active");
-    }
-  }
-
-  #disposeRuntime(plugin: PlannedPlugin, runtime: SandboxRuntimeHandle): void {
-    try {
-      runtime.dispose();
-    } catch (error: unknown) {
-      this.#dependencies.reportError(
-        `Failed to dispose the '${plugin.metadata.id}' sandbox runtime`,
-        error,
       );
     }
   }

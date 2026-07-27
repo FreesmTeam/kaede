@@ -68,8 +68,9 @@ export async function readBrowserDirectory(
   const normalizedDirectory = normalizeBrowserPath(directory).replace(/\/$/u, "");
   const prefix = normalizedDirectory === "" ? "" : normalizedDirectory + "/";
   const entries = new Map<string, DirectoryEntry>;
+  const storageKeys = await storage.keys();
 
-  for (const key of await storage.keys()) {
+  for (const key of storageKeys) {
     const normalizedKey = normalizeBrowserPath(key);
 
     if (!normalizedKey.startsWith(prefix)) {
@@ -104,7 +105,7 @@ export function externalStoragePath(target: ExternalStorageTarget): string {
     target.relativePath.startsWith("/") ||
     target.relativePath.startsWith("\\") ||
     target.relativePath.split(/[\\/]/u).some(segment => {
-      return segment === "" || segment === "." || segment === "..";
+      return ["", ".", ".."].includes(segment);
     })
   ) {
     throw new TypeError(

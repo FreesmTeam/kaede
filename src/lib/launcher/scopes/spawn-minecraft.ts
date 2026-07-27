@@ -67,7 +67,7 @@ export async function spawnMinecraft({
   const processState: { "current"?: BrokerProcess } = {};
   const queuedEvents: Array<ProcessEvent> = [];
   let terminalEvent: Extract<ProcessEvent, { "kind": "terminated" | "failed" }> | undefined;
-  let launchSucceeded = false;
+  let didLaunchSucceed = false;
   const decodeOutput = (kind: "stdout" | "stderr", bytes: Uint8Array): string => {
     decoderFlushOrder.splice(decoderFlushOrder.indexOf(kind), 1);
     decoderFlushOrder.push(kind);
@@ -109,7 +109,7 @@ export async function spawnMinecraft({
       case "terminated": {
         terminalEvent = event;
         flushOutput();
-        if (!launchSucceeded) {
+        if (!didLaunchSucceed) {
           statuses.current = LaunchStatus.General.Aborted;
         }
         onClose(instanceId);
@@ -182,7 +182,7 @@ export async function spawnMinecraft({
 
   log.info(logPrefix, `Successfully launched with the ${process.pid} PID`);
   statuses.current = LaunchStatus.General.Success;
-  launchSucceeded = true;
+  didLaunchSucceed = true;
 
   return { "success": true, process };
 }

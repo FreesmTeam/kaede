@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export function detectIsBrowser(): boolean {
+function isBrowser(): boolean {
   return import.meta.env.TAURI_ENV_PLATFORM === undefined;
 }
+
+export { isBrowser as detectIsBrowser };

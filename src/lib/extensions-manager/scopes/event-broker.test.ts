@@ -27,8 +27,12 @@ describe("EventBroker", () => {
       "routes"  : ["home", "settings"],
     };
 
-    broker.subscribe("principal:first", event => first.push(event));
-    broker.subscribe("principal:second", event => second.push(event));
+    broker.subscribe("principal:first", event => {
+      first.push(event);
+    });
+    broker.subscribe("principal:second", event => {
+      second.push(event);
+    });
     broker.publish("instance", source);
 
     source.instance.id = "mutated";

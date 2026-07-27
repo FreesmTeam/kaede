@@ -140,7 +140,7 @@ export async function processDynamicPermissionPrompt(
 export function validateDynamicPromptResponse(
   item: DynamicQueueItem,
   decisions: ReadonlyArray<boolean>,
-  remember: boolean,
+  shouldRemember: boolean,
 ): PromptResponse {
   if (
     decisions.length !== item.requests.length ||
@@ -149,7 +149,7 @@ export function validateDynamicPromptResponse(
     throw new RangeError("Dynamic decisions must positionally match every permission request");
   }
 
-  if (remember) {
+  if (shouldRemember) {
     const decisionsByFingerprint = (new Map<string, boolean>);
 
     for (const [index, request] of item.requests.entries()) {
@@ -169,5 +169,5 @@ export function validateDynamicPromptResponse(
     }
   }
 
-  return { "kind": "dynamic", "decisions": [...decisions], remember };
+  return { "kind": "dynamic", "decisions": [...decisions], "remember": shouldRemember };
 }

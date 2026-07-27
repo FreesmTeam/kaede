@@ -90,7 +90,7 @@ export async function getJvmArguments({
       .argument
       .replace(
         "${path}",
-        logFilePath,
+        () => logFilePath,
       );
 
     jvmArguments.push(loggingArguments);

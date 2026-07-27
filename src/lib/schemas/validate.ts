@@ -30,9 +30,9 @@ export function validate<T>({
     : `id: ${info?.id}; index: ${info.index}`;
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Checking if the provided ${label} (${entryInfo}) is valid`);
-  const validated: boolean = schema.Check(value);
+  const isValid: boolean = schema.Check(value);
 
-  if (!validated) {
+  if (!isValid) {
     const errors: string = JSON.stringify(
       schema.Errors(value),
       null,

@@ -64,13 +64,15 @@ test("playground draft state has only editor and state-module consumers", async 
   })));
 
   for (const { filePath, source } of sources) {
-    if (source.includes("codeToEvaluate")) {
-      consumers.push(path.relative(process.cwd(), filePath));
-      expectNoDynamicCodeSink(source);
+    if (!source.includes("codeToEvaluate")) {
+      continue;
     }
+
+    consumers.push(path.relative(process.cwd(), filePath));
+    expectNoDynamicCodeSink(source);
   }
 
-  expect(consumers.toSorted()).toEqual([
+  expect(consumers.toSorted((a, b) => a.localeCompare(b))).toEqual([
     "src/components/settings/tabs/PluginPlayground.vue",
     "src/states/plugin-playground.ts",
   ]);

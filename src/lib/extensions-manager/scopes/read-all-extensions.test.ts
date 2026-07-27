@@ -115,6 +115,28 @@ describe("readAllExtensions archive integration", () => {
     );
   });
 
+  test("orders legacy filenames by locale-independent code units", async () => {
+    mocks.readDirectory.mockResolvedValue([
+      {
+        "name"       : "a.js",
+        "isFile"     : true,
+        "isDirectory": false,
+        "isSymlink"  : false,
+      },
+      {
+        "name"       : "Z.js",
+        "isFile"     : true,
+        "isDirectory": false,
+        "isSymlink"  : false,
+      },
+    ]);
+    mocks.readText.mockImplementation(async (filePath: string) => filePath);
+
+    const extensions = await readAllExtensions();
+
+    expect(extensions.map(extension => extension.id)).toEqual(["Z", "a"]);
+  });
+
   test("fails deterministically when legacy and archive artifacts claim the same ID", async () => {
     mocks.readDirectory.mockResolvedValue([{
       "name"       : "duplicate.js",

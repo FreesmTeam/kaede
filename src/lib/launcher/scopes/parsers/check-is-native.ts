@@ -3,7 +3,7 @@ import type {
   SpecificPatchLibraryType,
 } from "@/types/launcher/meta/specific-patch-meta.type.ts";
 
-export function checkIsNative(library: SpecificPatchLibraryType): boolean {
+function isNativeLibrary(library: SpecificPatchLibraryType): boolean {
   const name: string | undefined = library?.name;
 
   if (!name) {
@@ -17,3 +17,5 @@ export function checkIsNative(library: SpecificPatchLibraryType): boolean {
     name.includes("native")
   );
 }
+
+export { isNativeLibrary as checkIsNative };

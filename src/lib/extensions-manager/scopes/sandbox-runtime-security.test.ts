@@ -2,6 +2,9 @@ import type { SafeDocument } from "ark-of-atrahasis";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  cloneCapability,
+} from "@/lib/extensions-manager/scopes/sandbox-grant-snapshot.ts";
+import {
   ALL_URL_SINKS,
   NOOP_DISPOSE,
   testHarden,
@@ -12,7 +15,32 @@ import {
 } from "@/lib/extensions-manager/scopes/sandbox-runtime.ts";
 import type { PermissionGrant } from "@/types/extensions/permission.type.ts";
 
+class ReceiverAwareCapability {
+  readonly prefix: string;
+
+  constructor(prefix: string) {
+    this.prefix = prefix;
+  }
+
+  write(suffix: string): string {
+    return `${this.prefix}${suffix}`;
+  }
+}
+
 describe("createSandboxRuntime security failures", () => {
+  it("wraps callable authorities without exposing their own properties", () => {
+    const original = (new ReceiverAwareCapability("original:")).write;
+
+    Object.defineProperty(original, "secret", { "value": "host authority" });
+
+    const cloned = cloneCapability(original);
+    const result = Reflect.apply(cloned, { "prefix": "sandbox:" }, ["ok"]);
+
+    expect(result).toBe("sandbox:ok");
+    expect(cloned).not.toBe(original);
+    expect(Reflect.get(cloned, "secret")).toBeUndefined();
+  });
+
   it("does not invoke the Ark loader when lockdown assertion fails", async () => {
     const loadArk = vi.fn();
 

@@ -25,7 +25,7 @@ import type {
 } from "@/types/launcher/meta/specific-patch-meta.type.ts";
 import type { DeepRequired } from "@/types/utils/deep-required.type.ts";
 
-export function handlePlatformRule({
+function isPlatformRuleAllowed({
   platform,
   arch,
   rule,
@@ -63,3 +63,5 @@ export function handlePlatformRule({
 
   return rule.action === "allow";
 }
+
+export { isPlatformRuleAllowed as handlePlatformRule };

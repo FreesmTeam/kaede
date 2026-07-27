@@ -21,7 +21,9 @@ test("exposes host-only download batching and cancel-id-scoped cancellation", as
     "concurrency": 8,
     "label"      : "libraries",
     "cancelId"   : "example-download",
-  }, snapshot => snapshots.push(snapshot));
+  }, snapshot => {
+    snapshots.push(snapshot);
+  });
 
   await expect(runtime.host.downloads.cancel("example-download")).resolves.toBe(true);
   expect(report).toEqual({

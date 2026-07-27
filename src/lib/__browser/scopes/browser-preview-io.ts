@@ -13,13 +13,13 @@ export async function pickBrowserIcon(
   input.accept = allowedExtensions.map(extension => `.${extension}`).join(",");
 
   return new Promise(resolve => {
-    let settled = false;
+    let isSettled = false;
     const finish = (file: File | null): void => {
-      if (settled) {
+      if (isSettled) {
         return;
       }
 
-      settled = true;
+      isSettled = true;
       input.remove();
       resolve(file);
     };

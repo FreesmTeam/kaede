@@ -14,16 +14,16 @@ export function createEventSubscribeCapability(
 ): EventSubscribeCapability {
   const principalKey = createPluginPrincipalKey(principal);
   const revocations = CapabilityRevocations.get(principalKey) ?? new Set<() => void>;
-  let active = true;
+  let isActive = true;
 
   revocations.add((): void => {
-    active = false;
+    isActive = false;
   });
   CapabilityRevocations.set(principalKey, revocations);
 
   return Object.freeze({
     "subscribe": (listener: ExtensionEventListener) => {
-      if (!active) {
+      if (!isActive) {
         throw new TypeError("Event subscription capability has been revoked");
       }
 
@@ -39,7 +39,9 @@ export function revokeEventListeners(principalKey: PluginPrincipalKey): void {
 
   CapabilityRevocations.delete(principalKey);
 
-  for (const revoke of revocations ?? []) {
+  const activeRevocations = revocations ?? [];
+
+  for (const revoke of activeRevocations) {
     revoke();
   }
 }

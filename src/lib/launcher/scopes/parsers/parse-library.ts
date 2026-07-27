@@ -23,9 +23,6 @@ export function parseLibrary({
   const { directories, logPrefix } = necessaries;
   const descriptiveLogPrefix: string = patchUid + ":" + library?.name + ":" + logPrefix;
   const name: string | undefined = library?.name;
-  const baseUrl: string | undefined = library?.url;
-  const url: string | undefined = library?.downloads?.artifact?.url;
-  const hash: string | undefined = library?.downloads?.artifact?.sha1;
 
   if (name === undefined) {
     log.warn(descriptiveLogPrefix, `The '${JSON.stringify(library)}' library is invalid`);
@@ -33,6 +30,9 @@ export function parseLibrary({
     return false;
   }
 
+  const baseUrl: string | undefined = library?.url;
+  const url: string | undefined = library?.downloads?.artifact?.url;
+  const hash: string | undefined = library?.downloads?.artifact?.sha1;
   const { "directory": relativeDirectory, file, "id": artifactID } = normalizeArtifactPath(name);
   const directory: string = General.cachedJoin(
     directories.libraries,

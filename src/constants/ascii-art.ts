@@ -3,7 +3,7 @@ import { Host } from "@/lib/capability-broker";
 
 const date = (new Date).toISOString();
 
-function getASCIIArt(portable: boolean, launchCount: number): string {
+function getASCIIArt(isPortable: boolean, launchCount: number): string {
   const snapshot = Host.runtime.getCachedSnapshot();
   const launchStatus: string = snapshot.kind === "browser-preview" ? (
     "browser"
@@ -22,7 +22,7 @@ function getASCIIArt(portable: boolean, launchCount: number): string {
     "\n  / //_/ __ `/ _ \\/ __  / _ \\" +
     "  arch   " + snapshot.os.arch +
     "\n / ,< / /_/ /  __/ /_/ /  __/" +
-    "  mode   " + (portable ? "portable" : "non-portable") +
+    "  mode   " + (isPortable ? "portable" : "non-portable") +
     "\n/_/|_|\\__,_/\\___/\\__,_/\\___/ " +
     "  date   " + date +
     "\n                               launch " + launchStatus +

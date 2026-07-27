@@ -20,6 +20,27 @@ import type {
 
 afterEach(() => vi.unstubAllGlobals());
 
+async function captureOutcome<Value>(promise: Promise<Value>): Promise<unknown> {
+  try {
+    return await promise;
+  } catch (error: unknown) {
+    return error;
+  }
+}
+
+async function observeSettlement(
+  promise: Promise<unknown>,
+  onSettled: () => void,
+): Promise<void> {
+  try {
+    await promise;
+  } catch {
+    // This observer records settlement only; the test asserts the outcome separately.
+  }
+
+  onSettled();
+}
+
 test("browser session revocation drains a started storage write and denies new work", async () => {
   const writeStarted = createDeferred();
   const releaseWrite = createDeferred();
@@ -60,32 +81,25 @@ test("browser session revocation drains a started storage write and denies new w
   });
   const internalWrite = session.capabilityFactories["storage/internal/write"]();
   const write = internalWrite.writeText("started.txt", "committed before revoke resolves");
-  const writeOutcome = write.then(
-    () => "resolved",
-    (error: unknown) => error,
-  );
+  const writeOutcome = captureOutcome(write);
 
   await writeStarted.promise;
 
   const firstRevoke = session.revoke();
   const repeatedRevoke = session.revoke();
-  let firstRevokeSettled = false;
-  let repeatedRevokeSettled = false;
+  let isFirstRevokeSettled = false;
+  let isRepeatedRevokeSettled = false;
 
-  void firstRevoke.then(() => {
-    firstRevokeSettled = true;
-
-    return firstRevokeSettled;
+  void observeSettlement(firstRevoke, () => {
+    isFirstRevokeSettled = true;
   });
-  void repeatedRevoke.then(() => {
-    repeatedRevokeSettled = true;
-
-    return repeatedRevokeSettled;
+  void observeSettlement(repeatedRevoke, () => {
+    isRepeatedRevokeSettled = true;
   });
   await Promise.resolve();
 
-  expect(firstRevokeSettled).toBe(false);
-  expect(repeatedRevokeSettled).toBe(false);
+  expect(isFirstRevokeSettled).toBe(false);
+  expect(isRepeatedRevokeSettled).toBe(false);
   expect(activeWrites).toBe(1);
   await expect(internalWrite.writeText("denied.txt", "must not start"))
     .rejects.toThrow("session has been revoked");
@@ -143,24 +157,19 @@ test("browser session revocation withholds a response while its body is being re
     "method" : "GET",
     "headers": [],
   });
-  const fetchOutcome = fetchResult.then(
-    value => value,
-    (error: unknown) => error,
-  );
+  const fetchOutcome = captureOutcome(fetchResult);
 
   await bodyReadStarted.promise;
 
   const revoke = session.revoke();
-  let revokeSettled = false;
+  let isRevokeSettled = false;
 
-  void revoke.then(() => {
-    revokeSettled = true;
-
-    return revokeSettled;
+  void observeSettlement(revoke, () => {
+    isRevokeSettled = true;
   });
   await Promise.resolve();
 
-  expect(revokeSettled).toBe(false);
+  expect(isRevokeSettled).toBe(false);
   expect(activeBodyReads).toBe(1);
 
   releaseBody.resolve();

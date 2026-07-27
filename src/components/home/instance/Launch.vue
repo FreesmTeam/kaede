@@ -63,7 +63,7 @@ const closeDisabled = computed((): boolean => {
   );
 });
 
-function handleLaunch(): void {
+async function handleLaunch(): Promise<void> {
   if (launchInstance === undefined) {
     log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -76,26 +76,25 @@ function handleLaunch(): void {
   const instanceId: string | undefined = currentInstance?.value?.id;
   const instanceContent: InstanceStateType | undefined = currentInstance?.value?.instance;
 
-  launchInstance(instanceId)
-    .then(() => {
-      if (!instanceId || !instanceContent) {
-        return log.error(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
-          "The instance ID or data is invalid. Provided contents",
-          { instanceId, instanceContent },
-        ));
-      }
+  await launchInstance(instanceId);
 
-      Instances.change(instanceId, {
-        ...instanceContent,
-        "lastLaunch": Date.now(),
-      });
-    });
+  if (!instanceId || !instanceContent) {
+    return log.error(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
+      "The instance ID or data is invalid. Provided contents",
+      { instanceId, instanceContent },
+    ));
+  }
+
+  Instances.change(instanceId, {
+    ...instanceContent,
+    "lastLaunch": Date.now(),
+  });
 }
 async function handleClose(): Promise<void> {
-  let toClose: boolean;
+  let shouldClose: boolean;
 
   try {
-    toClose = await Host.dialogs.ask({
+    shouldClose = await Host.dialogs.ask({
       "message": "Do you really want to cancel Minecraft launch?",
       "title"  : "Cancel Minecraft launch",
       "kind"   : "warning",
@@ -110,7 +109,7 @@ async function handleClose(): Promise<void> {
     return;
   }
 
-  if (!toClose) {
+  if (!shouldClose) {
     return;
   }
 
@@ -161,10 +160,10 @@ async function handleClose(): Promise<void> {
 }
 
 watchEffect((): void => {
-  const launchingInstance: boolean = statuses.value?.launching === 1;
-  const closingInstance: boolean = killing.value || cancelling.value;
+  const isLaunchingInstance: boolean = statuses.value?.launching === 1;
+  const isClosingInstance: boolean = killing.value || cancelling.value;
 
-  document.body.style.cursor = (launchingInstance || closingInstance)
+  document.body.style.cursor = (isLaunchingInstance || isClosingInstance)
     ? "progress"
     : "";
 });
@@ -172,30 +171,32 @@ watchEffect((): void => {
 const previousIntervalTime = ref<number>(Date.now());
 
 useIntervalFn((): void => {
-  if (statuses.value?.launching === 2) {
-    const currentId: string | undefined = currentInstance.value?.id;
-    const currentInstanceContent: InstanceStateType | undefined = currentInstance.value?.instance;
-    const currentPlayTime: number | undefined = currentInstanceContent?.playTime;
+  if (statuses.value?.launching !== 2) {
+    return;
+  }
 
-    // 'currentTime' might be zero
-    if (!currentId || !currentInstanceContent || currentPlayTime === undefined) {
-      return;
-    }
+  const currentId: string | undefined = currentInstance.value?.id;
+  const currentInstanceContent: InstanceStateType | undefined = currentInstance.value?.instance;
+  const currentPlayTime: number | undefined = currentInstanceContent?.playTime;
 
-    const currentAbsoluteTime: number = Date.now();
-    const previousAbsoluteTime: number = previousIntervalTime.value;
-    const timeToAdd: number = currentAbsoluteTime - previousAbsoluteTime;
+  // 'currentTime' might be zero
+  if (!currentId || !currentInstanceContent || currentPlayTime === undefined) {
+    return;
+  }
 
-    Instances.change(currentId, {
-      ...currentInstanceContent,
-      "playTime": currentPlayTime + timeToAdd,
-    });
+  const currentAbsoluteTime: number = Date.now();
+  const previousAbsoluteTime: number = previousIntervalTime.value;
+  const timeToAdd: number = currentAbsoluteTime - previousAbsoluteTime;
 
-    previousIntervalTime.value = currentAbsoluteTime;
+  Instances.change(currentId, {
+    ...currentInstanceContent,
+    "playTime": currentPlayTime + timeToAdd,
+  });
 
-    if (instanceStates) {
-      Instances.syncMetadata(instanceStates);
-    }
+  previousIntervalTime.value = currentAbsoluteTime;
+
+  if (instanceStates) {
+    Instances.syncMetadata(instanceStates);
   }
 }, 2000);
 </script>

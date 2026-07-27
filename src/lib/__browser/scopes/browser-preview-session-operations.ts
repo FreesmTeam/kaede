@@ -13,9 +13,9 @@ export function createBrowserSessionOperationBarrier(
   onRevoke: () => void,
 ): BrowserSessionOperationBarrier {
   const inFlight = new Set<Promise<void>>;
-  let revoked = false;
+  let isRevoked = false;
   const requireActive = (): void => {
-    if (revoked) {
+    if (isRevoked) {
       throw new Error(`Plugin capability session has been revoked: ${pluginId}`);
     }
   };
@@ -49,10 +49,10 @@ export function createBrowserSessionOperationBarrier(
     })();
   };
   const revoke = async (): Promise<Readonly<{ "alreadyRevoked": boolean }>> => {
-    const alreadyRevoked = revoked;
+    const alreadyRevoked = isRevoked;
 
-    if (!revoked) {
-      revoked = true;
+    if (!isRevoked) {
+      isRevoked = true;
       onRevoke();
     }
 

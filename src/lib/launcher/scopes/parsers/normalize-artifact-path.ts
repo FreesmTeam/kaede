@@ -35,7 +35,6 @@ export function normalizeArtifactPath(artifact: string): {
   const group: string | undefined = paths?.[0];
   const name: string | undefined = paths?.[1];
   const version: string | undefined = paths?.[2];
-  const classifier: string | undefined = paths?.[3];
 
   // The 'group', 'name', and 'version' elements should be always present
   if (!group || !name || !version) {
@@ -46,6 +45,8 @@ export function normalizeArtifactPath(artifact: string): {
       `Could not normalize artifact path ${specifiedMessage}`,
     );
   }
+
+  const classifier: string | undefined = paths?.[3];
 
   const folders: Array<string> = [
     ...group.split("."),

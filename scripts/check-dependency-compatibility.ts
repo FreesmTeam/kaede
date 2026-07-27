@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 interface PackageJson {
   "exports"?: {
     "."?: {
-      "import"?: { "default"?: string } | string;
+      "import"?: string | { "default"?: string };
     };
   };
   "module"? : string;
@@ -75,14 +75,14 @@ const collectFromNodeModules = async (directory: string): Promise<void> => {
 
 const expectMatch = (
   label: string,
-  matcher: (candidate: string, pattern: string) => boolean,
+  isMatch: (candidate: string, pattern: string) => boolean,
 ): void => {
-  const actual = matcher(candidate, pattern);
+  const isMatching = isMatch(candidate, pattern);
 
-  if (actual !== true) {
+  if (!isMatching) {
     const expectation = `${JSON.stringify(candidate)} to match ${JSON.stringify(pattern)}`;
 
-    throw new Error(`${label}: expected ${expectation}, got ${actual}`);
+    throw new Error(`${label}: expected ${expectation}, got ${isMatching}`);
   }
 };
 
@@ -97,7 +97,7 @@ const installedMajors = (new Set<number>);
 await Promise.all(minimatchPackages.map(async ({ directory, manifest }) => {
   if (!manifest.version) throw new Error(`Missing minimatch version in ${directory}`);
 
-  const major = Number.parseInt(manifest.version, 10);
+  const major = Number(manifest.version.split(".", 1)[0]);
 
   installedMajors.add(major);
   const label = `minimatch@${manifest.version} (${path.relative(projectRoot, directory)})`;

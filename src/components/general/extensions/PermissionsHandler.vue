@@ -16,10 +16,10 @@ import GlobalStateHelpers from "@/lib/global-state-helpers";
 const prompt = ref<PermissionPrompt>();
 const rememberDecision = ref(false);
 const dynamicDecisions = ref<Array<boolean | undefined>>([]);
-let unsubscribe: (() => void) | undefined;
+const unsubscribe = ref<(() => void) | undefined>();
 
 onMounted(() => {
-  unsubscribe = permissionPromptController.subscribe(nextPrompt => {
+  unsubscribe.value = permissionPromptController.subscribe(nextPrompt => {
     prompt.value = nextPrompt;
     rememberDecision.value = false;
     dynamicDecisions.value = nextPrompt?.kind === "dynamic"
@@ -28,7 +28,7 @@ onMounted(() => {
   });
 });
 onUnmounted(() => {
-  unsubscribe?.();
+  unsubscribe.value?.();
 });
 watch(rememberDecision, remember => {
   if (remember && prompt.value?.kind === "dynamic") {
@@ -39,13 +39,13 @@ watch(rememberDecision, remember => {
   }
 });
 
-function decisionsAreComplete(
+function areDecisionsComplete(
   decisions: ReadonlyArray<boolean | undefined>,
 ): decisions is ReadonlyArray<boolean> {
-  return decisions.every((decision): decision is boolean => decision !== undefined);
+  return decisions.every((isAllowed): isAllowed is boolean => isAllowed !== undefined);
 }
 
-function chooseDynamic(index: number, decision: boolean): void {
+function chooseDynamic(index: number, isAllowed: boolean): void {
   if (
     prompt.value?.kind !== "dynamic" ||
     prompt.value.rememberedDecisions[index] !== undefined
@@ -53,7 +53,7 @@ function chooseDynamic(index: number, decision: boolean): void {
     return;
   }
 
-  dynamicDecisions.value[index] = decision;
+  dynamicDecisions.value[index] = isAllowed;
 
   if (rememberDecision.value) {
     const selectedRequest = prompt.value.requests[index];
@@ -66,13 +66,13 @@ function chooseDynamic(index: number, decision: boolean): void {
           prompt.value.rememberedDecisions[requestIndex] === undefined &&
           getPermissionRequestFingerprint(request) === selectedFingerprint
         ) {
-          dynamicDecisions.value[requestIndex] = decision;
+          dynamicDecisions.value[requestIndex] = isAllowed;
         }
       }
     }
   }
 
-  if (decisionsAreComplete(dynamicDecisions.value)) {
+  if (areDecisionsComplete(dynamicDecisions.value)) {
     permissionPromptController.resolveDynamic(
       dynamicDecisions.value,
       rememberDecision.value,
@@ -80,21 +80,21 @@ function chooseDynamic(index: number, decision: boolean): void {
   }
 }
 
-function chooseDynamicBatch(decision: boolean): void {
+function chooseDynamicBatch(isAllowed: boolean): void {
   if (prompt.value?.kind !== "dynamic") {
     return;
   }
 
   const decisions = getDynamicBatchDecisions(
     prompt.value.rememberedDecisions,
-    decision,
+    isAllowed,
   );
 
   permissionPromptController.resolveDynamic(decisions, rememberDecision.value);
 }
 
-function chooseStatic(decision: boolean): void {
-  permissionPromptController.resolveStatic(decision);
+function chooseStatic(isAllowed: boolean): void {
+  permissionPromptController.resolveStatic(isAllowed);
 }
 </script>
 

@@ -51,9 +51,15 @@ export async function handleJsonFile({
 
   try {
     log.debug(__PRE_BUNDLED_FILENAME__, `Checking if the '${label}' file exists`);
-    const fileExists: boolean = await Host.files.exists(filePath).catch(() => false);
+    let isFilePresent = false;
 
-    if (!fileExists) {
+    try {
+      isFilePresent = await Host.files.exists(filePath);
+    } catch {
+      // An inaccessible path is handled like a missing file so the default can be initialized.
+    }
+
+    if (!isFilePresent) {
       log.warn(__PRE_BUNDLED_FILENAME__, `The '${label}' file does not exist`);
       log.debug(__PRE_BUNDLED_FILENAME__, `Getting the default value for '${label}'`);
       const defaultValue = await getDefaultValue();
@@ -67,7 +73,7 @@ export async function handleJsonFile({
       log.debug(__PRE_BUNDLED_FILENAME__, `Checking if '${label}' needs cache invalidation`);
       const { modifiedTimeMilliseconds } = await Host.files.getMetadata(filePath);
       // No last modified time = invalid
-      let invalid = modifiedTimeMilliseconds === null;
+      let isInvalid = modifiedTimeMilliseconds === null;
 
       if (modifiedTimeMilliseconds !== null) {
         const difference = General.checkDaysDifference(
@@ -76,10 +82,10 @@ export async function handleJsonFile({
         );
 
         // Stale = invalid
-        invalid = difference > invalidation.days;
+        isInvalid = difference > invalidation.days;
       }
 
-      if (invalid) {
+      if (isInvalid) {
         const newValue = await invalidation.getNewValue();
 
         return await overwrite(newValue);

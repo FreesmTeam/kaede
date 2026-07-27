@@ -87,7 +87,7 @@ export async function concurrentlyDownload({
     previousFailed = snapshot.failed;
 
     for (const path of previousPaths) {
-      if (!(path in snapshot.current)) {
+      if (!Object.prototype.hasOwnProperty.call(snapshot.current, path)) {
         downloads.current.delete(path);
       }
     }

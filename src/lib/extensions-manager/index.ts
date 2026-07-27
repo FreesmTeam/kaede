@@ -49,14 +49,16 @@ import { createSandboxRuntime } from "@/lib/extensions-manager/scopes/sandbox-ru
 import { showWebviewWindow } from "@/lib/extensions-manager/scopes/show-webview-window.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 
-let extensionLifecycleController: ExtensionLifecycleController | undefined;
+const extensionLifecycleState: {
+  "controller"?: ExtensionLifecycleController;
+} = {};
 
 function createExtensionLifecycleController({
   revokeExtensionGlobals,
 }: Readonly<{
   "revokeExtensionGlobals": () => void;
 }>): ExtensionLifecycleController {
-  extensionLifecycleController ??= new ExtensionLifecycleController({
+  extensionLifecycleState.controller ??= new ExtensionLifecycleController({
     readAllExtensions,
     readAllMetadata,
     planPlugins,
@@ -93,7 +95,7 @@ function createExtensionLifecycleController({
     },
   });
 
-  return extensionLifecycleController;
+  return extensionLifecycleState.controller;
 }
 
 export default {

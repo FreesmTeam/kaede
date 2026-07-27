@@ -27,9 +27,8 @@ describe("desktop capability broker", () => {
     const routed = calls.filter(({ args }) => {
       const kind = (args as Partial<InvokeArguments>)?.request?.kind;
 
-      return kind === "host_system_memory" ||
-        kind === "host_global_cpu_usage" ||
-        kind === "host_fs_metadata";
+      return ["host_system_memory", "host_global_cpu_usage", "host_fs_metadata"]
+        .includes(kind ?? "");
     });
 
     expect(routed.map(({ args }) => args)).toEqual([

@@ -42,7 +42,9 @@ for (const context of contexts) {
   try {
     await mkdir(isolatedFixture, { "recursive": true });
 
-    for (const fileName of generatedFiles[context]) {
+    const generatedContextFiles = generatedFiles[context];
+
+    for (const fileName of generatedContextFiles) {
       await copyFile(
         path.resolve(repositoryRoot, "types", fileName),
         path.resolve(isolatedTypes, fileName),
@@ -54,7 +56,9 @@ for (const context of contexts) {
       path.resolve(isolatedTypes, "package.json"),
     );
 
-    for (const fileName of fixtureFiles[context]) {
+    const fixtureContextFiles = fixtureFiles[context];
+
+    for (const fileName of fixtureContextFiles) {
       await copyFile(
         path.resolve(repositoryRoot, "types", "fixtures", context, fileName),
         path.resolve(isolatedFixture, fileName),

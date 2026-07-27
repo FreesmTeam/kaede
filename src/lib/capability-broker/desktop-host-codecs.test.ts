@@ -76,8 +76,8 @@ test("validates host diagnostics and file metadata DTOs", () => {
 
   expect(() => toSystemMemory(-1, 1)).toThrow("usedBytes");
   expect(() => toSystemMemory(2, 1)).toThrow("totalBytes");
-  expect(() => toGlobalCpuUsage(Number.NaN)).toThrow("global CPU usage");
-  expect(() => toFileMetadata(Number.POSITIVE_INFINITY)).toThrow("modified time");
+  expect(() => toGlobalCpuUsage(NaN)).toThrow("global CPU usage");
+  expect(() => toFileMetadata(Infinity)).toThrow("modified time");
 });
 
 test("accepts only canonical fixed-width hash responses", () => {

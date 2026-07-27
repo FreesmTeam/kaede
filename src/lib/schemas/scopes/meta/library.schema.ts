@@ -10,21 +10,22 @@ const LibraryRuleSchema = Type.Object({
     "name": Type.String(),
   }),
 });
+const OptionalLibrarySchema = Type.Partial(
+  Type.Object({
+    "downloads": LibraryDownloadsSchema,
+    "extract"  : LibraryExtractSchema,
+    "natives"  : LibraryNativesSchema,
+    "rules"    : Type.Array(
+      LibraryRuleSchema,
+    ),
+    "url"     : Type.String(),
+    "MMC-hint": Type.String(),
+  }),
+);
 
 export const LibrarySchema = Type.Intersect([
   Type.Object({
     "name": Type.String(),
   }),
-  Type.Partial(
-    Type.Object({
-      "downloads": LibraryDownloadsSchema,
-      "extract"  : LibraryExtractSchema,
-      "natives"  : LibraryNativesSchema,
-      "rules"    : Type.Array(
-        LibraryRuleSchema,
-      ),
-      "url"     : Type.String(),
-      "MMC-hint": Type.String(),
-    }),
-  ),
+  OptionalLibrarySchema,
 ]);

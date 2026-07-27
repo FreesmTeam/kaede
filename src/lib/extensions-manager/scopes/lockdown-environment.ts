@@ -17,30 +17,31 @@ type CompartmentImplementation = new (
 /* Capture bootstrap authorities before any cooperative TCB plugin can execute. */
 const capturedLockdown: LockdownImplementation = lockdown;
 const CapturedCompartmentConstructor: CompartmentImplementation = Compartment;
-let capturedHarden: HardenImplementation | undefined;
-
-let lockdownCompleted = false;
+const lockdownState: {
+  "capturedHarden"?: HardenImplementation;
+  "isCompleted"    : boolean;
+} = { "isCompleted": false };
 
 export function lockdownEnvironment(
   lockdownImplementation: LockdownImplementation = capturedLockdown,
   hardenImplementation?: HardenImplementation,
 ): void {
-  if (lockdownCompleted) {
+  if (lockdownState.isCompleted) {
     return;
   }
 
   /* A thrown lockdown error deliberately leaves the sandbox runtime unavailable. */
   lockdownImplementation({ "evalTaming": "safe-eval" });
-  capturedHarden = hardenImplementation ?? harden;
-  lockdownCompleted = true;
+  lockdownState.capturedHarden = hardenImplementation ?? harden;
+  lockdownState.isCompleted = true;
 }
 
 export function hardenWithCapturedAuthority<Value>(value: Value): Value {
-  if (capturedHarden === undefined) {
+  if (lockdownState.capturedHarden === undefined) {
     throw new TypeError("SES harden authority is unavailable before successful lockdown");
   }
 
-  return capturedHarden(value);
+  return lockdownState.capturedHarden(value);
 }
 
 export function createCompartmentWithCapturedAuthority(
@@ -50,11 +51,11 @@ export function createCompartmentWithCapturedAuthority(
 }
 
 export function isEnvironmentLockdownCompleted(): boolean {
-  return lockdownCompleted;
+  return lockdownState.isCompleted;
 }
 
 export function assertEnvironmentLockdownCompleted(): void {
-  if (!lockdownCompleted) {
+  if (!lockdownState.isCompleted) {
     throw new TypeError("Sandbox runtime requires a successfully completed SES lockdown");
   }
 }

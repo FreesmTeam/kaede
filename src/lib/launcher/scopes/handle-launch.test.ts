@@ -149,9 +149,9 @@ const finalizedPatch: FinalizedPatchType = {
 
 function deferred(): Readonly<{
   "promise": Promise<boolean>;
-  "resolve": (value: boolean) => void;
+  "resolve": (isResolved: boolean) => void;
 }> {
-  let resolve!: (value: boolean) => void;
+  let resolve!: (isResolved: boolean) => void;
   const promise = new Promise<boolean>(promiseResolve => {
     resolve = promiseResolve;
   });

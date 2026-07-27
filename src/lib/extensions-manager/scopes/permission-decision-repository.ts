@@ -15,8 +15,8 @@ export class InMemoryPermissionDecisionStore implements PermissionDecisionStore 
     return this.#decisions.get(getPermissionDecisionMemoryKey(key));
   }
 
-  save(key: PermissionDecisionStoreKey, decision: boolean): void {
-    this.#decisions.set(getPermissionDecisionMemoryKey(key), decision);
+  save(key: PermissionDecisionStoreKey, isAllowed: boolean): void {
+    this.#decisions.set(getPermissionDecisionMemoryKey(key), isAllowed);
   }
 }
 
@@ -27,6 +27,33 @@ export class PermissionDecisionRepository {
 
   constructor(store: PermissionDecisionStore) {
     this.#store = store;
+  }
+
+  async #rememberEntries(
+    entries: ReadonlyArray<Readonly<{
+      "key"     : PermissionDecisionStoreKey;
+      "decision": boolean;
+    }>>,
+    isCurrent: () => boolean,
+  ): Promise<void> {
+    const store = this.#store;
+    const storeGeneration = this.#storeGeneration;
+
+    for (const { key, decision } of entries) {
+      if (storeGeneration !== this.#storeGeneration || !isCurrent()) {
+        return;
+      }
+
+      await store.save(key, decision);
+    }
+
+    if (storeGeneration !== this.#storeGeneration || !isCurrent()) {
+      return;
+    }
+
+    for (const { key, decision } of entries) {
+      this.#sessionDecisions.set(getPermissionDecisionMemoryKey(key), decision);
+    }
   }
 
   replaceStore(store: PermissionDecisionStore): void {
@@ -85,10 +112,10 @@ export class PermissionDecisionRepository {
 
   async remember(
     key: PermissionDecisionStoreKey,
-    decision: boolean,
+    isAllowed: boolean,
     isCurrent: () => boolean,
   ): Promise<void> {
-    await this.#rememberEntries([{ key, decision }], isCurrent);
+    await this.#rememberEntries([{ key, "decision": isAllowed }], isCurrent);
   }
 
   async rememberMissing(
@@ -123,32 +150,5 @@ export class PermissionDecisionRepository {
     }
 
     await this.#rememberEntries(entries, isCurrent);
-  }
-
-  async #rememberEntries(
-    entries: ReadonlyArray<Readonly<{
-      "key"     : PermissionDecisionStoreKey;
-      "decision": boolean;
-    }>>,
-    isCurrent: () => boolean,
-  ): Promise<void> {
-    const store = this.#store;
-    const storeGeneration = this.#storeGeneration;
-
-    for (const { key, decision } of entries) {
-      if (storeGeneration !== this.#storeGeneration || !isCurrent()) {
-        return;
-      }
-
-      await store.save(key, decision);
-    }
-
-    if (storeGeneration !== this.#storeGeneration || !isCurrent()) {
-      return;
-    }
-
-    for (const { key, decision } of entries) {
-      this.#sessionDecisions.set(getPermissionDecisionMemoryKey(key), decision);
-    }
   }
 }

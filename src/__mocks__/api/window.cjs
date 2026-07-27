@@ -17,6 +17,7 @@
  */
 
 module.exports = {
+  "Window"          : class Window {},
   "getCurrentWindow": () => ({
     "theme": async () => "dark",
   }),

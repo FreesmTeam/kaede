@@ -85,17 +85,25 @@ jobs:
       - name: Build frontend for WebView2 109
         run: bun run build:frontend
 
+      # Tauri CLI 2.11.x validates --target only against `rustup target list`.
+      # The nightly-only Win7 target is built from rust-src instead, so invoke
+      # Cargo directly while preserving the same Tauri configuration overlay.
       - name: Compile Tauri app for the Win7 target
         shell: pwsh
-        run: >-
-          bun x tauri build
-          --ci
-          --config src-tauri/tauri.win7.conf.json
-          --target $env:WIN7_TARGET
-          --no-bundle
-          --
-          --locked
-          -Z build-std
+        run: |
+          $env:TAURI_CONFIG = Get-Content -LiteralPath "src-tauri/tauri.win7.conf.json" -Raw
+          $cargoArgs = @(
+            "build"
+            "--manifest-path", "src-tauri/Cargo.toml"
+            "--bins"
+            "--features", "tauri/custom-protocol"
+            "--target", $env:WIN7_TARGET
+            "--release"
+            "--locked"
+            "-Z", "build-std"
+          )
+
+          cargo @cargoArgs
 
       - name: Verify Win7-target PE binaries
         shell: pwsh

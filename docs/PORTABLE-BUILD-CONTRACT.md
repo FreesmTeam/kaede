@@ -27,6 +27,9 @@ bound runner cost if a tool or platform build hangs.
   action uploads the non-portable bundles before portable packaging begins.
 - Linux and Windows copy the shipping executable and sidecar into a separate
   portable layout, then add the marker there.
+- Unix sidecar binaries are tracked with Git mode `100755`. Tauri copies that
+  executable bit into macOS application bundles, while the Linux portable layout
+  also applies mode `0755` explicitly.
 
 The portable artifact names retain the platform identifier, version, and safe
 Git reference. Development non-portable artifact names retain the

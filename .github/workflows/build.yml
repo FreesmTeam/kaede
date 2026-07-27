@@ -14,6 +14,15 @@ on:
     tags:
       - "*"
   workflow_dispatch:
+    inputs:
+      scope:
+        description: "Run the complete build or only the Windows 7 compatibility gate"
+        required: true
+        default: "full"
+        type: choice
+        options:
+          - "full"
+          - "windows7"
 
 concurrency:
   group: "build-${{ github.workflow }}-${{ github.ref }}"
@@ -25,13 +34,16 @@ env:
 
 jobs:
   windows7-compat:
-    if: github.event_name == 'workflow_dispatch'
+    if: >-
+      ${{ always() && github.event_name == 'workflow_dispatch' &&
+      (inputs.scope == 'windows7' || needs.validation.result == 'success') }}
     needs: validation
     permissions:
       contents: read
     uses: ./.github/workflows/windows7-compat.yml
 
   validation:
+    if: github.event_name != 'workflow_dispatch' || inputs.scope == 'full'
     permissions:
       contents: read
     runs-on: ubuntu-22.04

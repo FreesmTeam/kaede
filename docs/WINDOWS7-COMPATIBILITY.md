@@ -4,8 +4,11 @@ Kaede's normal build remains on the current stable Rust toolchain and modern
 frontend target. Windows 7 compatibility is isolated in the manual/reusable
 `.github/workflows/windows7-compat.yml` workflow so it does not multiply the
 regular four-platform packaging matrix or duplicate its validation suite.
-The existing Build workflow calls this gate only for `workflow_dispatch`, which
-allows a feature-branch manual run while keeping push builds unchanged.
+Because a new workflow cannot be dispatched from a feature branch until it
+exists on the default branch, the existing Build workflow exposes
+`scope: windows7` as a cheap entry point that skips validation and the regular
+platform matrix. Its default `scope: full` runs validation, normal packaging,
+and this gate together.
 
 ## What the workflow proves
 

@@ -95,6 +95,28 @@ input::-webkit-inner-spin-button {
   }
 }
 
+.__log-viewer__log-line {
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+
+  white-space: pre-wrap;
+  word-break: break-all;
+  line-clamp: 1;
+  overflow: hidden;
+  position: sticky;
+  width: 100%;
+  cursor: pointer;
+}
+
+.__log-viewer__log-line--expanded {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  display: block;
+  overflow: visible;
+  height: auto;
+}
+
 .__log-entry__time {
   white-space: pre-wrap;
 }

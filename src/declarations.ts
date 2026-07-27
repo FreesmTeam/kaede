@@ -152,6 +152,7 @@ declare global {
       "baseDirectory"       : string;
       // This counter starts as 0 and increases by 1 each time the UI is reloaded via window#reload
       "launchCount"         : number;
+      "logLineHeight"       : number;
       // A temporary storage for the 'At a Glance' widget
       "atAGlance"          ?: AtAGlanceType;
       // A Java major version (for example, 8, 11, or 17)

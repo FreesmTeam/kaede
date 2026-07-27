@@ -6,6 +6,7 @@ mod extensions;
 mod finalization;
 mod hashes;
 mod launcher;
+mod logging;
 mod processes;
 mod system;
 mod zip;
@@ -99,6 +100,7 @@ pub fn run() {
                 tauri_plugin_log::Builder::new().clear_targets()
             };
 
+            app.manage(logging::LogTail::new(path.join("latest.log")));
             app.handle().plugin(
                 logging_builder
                     // Do not log log messages from 'reqwest::connect'
@@ -150,6 +152,8 @@ pub fn run() {
             launcher::get_initial_state,
             launcher::get_missing_files,
             launcher::verify_file_paths,
+            logging::stream_logs,
+            logging::stop_log_stream,
             processes::list_processes,
             processes::spawn_process,
             processes::kill_process,

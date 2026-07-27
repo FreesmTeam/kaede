@@ -19,6 +19,7 @@
 <script setup lang="ts">
 import { refThrottled, useWindowSize } from "@vueuse/core";
 import { useTemplateRef } from "vue";
+// @ts-expect-error Later
 import { VirtualisedList } from "vue-virtualised";
 
 import LogEntry from "@/components/logging/lines/LogEntry.vue";

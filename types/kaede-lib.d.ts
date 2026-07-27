@@ -4,880 +4,6 @@
 
 import { App } from 'vue';
 
-declare const PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
-declare const CustomPatches: {
-	readonly OptiFine: "optifine.OptiFine";
-	readonly MCPHackersLaunchWrapper: "org.mcphackers.launchwrapper";
-};
-declare const _default: {
-	readonly Patches: {
-		readonly AzulJava: "com.azul.java";
-		readonly LiteLoader: "com.mumfrey.liteloader";
-		readonly AdoptiumJava: "net.adoptium.java";
-		readonly FabricLoader: "net.fabricmc.fabric-loader";
-		readonly FabricIntermediary: "net.fabricmc.intermediary";
-		readonly Minecraft: "net.minecraft";
-		readonly MinecraftJava: "net.minecraft.java";
-		readonly MinecraftForge: "net.minecraftforge";
-		readonly NeoForged: "net.neoforged";
-		readonly LWJGL: "org.lwjgl";
-		readonly LWJGL3: "org.lwjgl3";
-		readonly Quilt: "org.quiltmc.quilt-loader";
-	};
-	readonly PrettyPatchLabels: {
-		readonly "com.azul.java": "Azul JDK";
-		readonly "com.mumfrey.liteloader": "Lite Loader";
-		readonly "net.adoptium.java": "Temurin JDK";
-		readonly "net.fabricmc.fabric-loader": "Fabric MC";
-		readonly "net.fabricmc.intermediary": "Fabric MC (intermediary)";
-		readonly "net.minecraft": "Vanilla Minecraft";
-		readonly "net.minecraft.java": "Minecraft Java";
-		readonly "net.minecraftforge": "Forge";
-		readonly "net.neoforged": "NeoForge";
-		readonly "org.lwjgl": "LWJGL";
-		readonly "org.lwjgl3": "LWJGL3";
-		readonly "org.quiltmc.quilt-loader": "QuiltMC";
-		readonly "optifine.OptiFine": "OptiFine";
-		readonly "org.mcphackers.launchwrapper": "Vanilla Minecraft (custom launchwrapper)";
-	};
-	readonly PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
-	readonly CustomPatches: {
-		readonly OptiFine: "optifine.OptiFine";
-		readonly MCPHackersLaunchWrapper: "org.mcphackers.launchwrapper";
-	};
-	readonly InstallablePatches: {
-		id: string;
-		uid: ExtendedPatchUIDType;
-		name: string;
-		icon?: string;
-		action?: (uid: string) => Promise<void>;
-	}[];
-};
-export type PatchUIDType = (typeof PatchUIDs)[number];
-export type ExtendedPatchUIDType = PatchUIDType | (typeof CustomPatches)[keyof typeof CustomPatches];
-export type PatchVariantType = "release" | "snapshot" | "experiment" | "old_alpha" | "old_beta" | "old_snapshot";
-export type PatchDependencyType = {
-	"uid": ExtendedPatchUIDType;
-	"equals"?: string;
-	"suggests"?: string;
-};
-export type PatchIndexVersionType = {
-	"recommended": boolean;
-	"releaseTime": string;
-	"sha256": string;
-	"version": string;
-	"conflicts"?: Array<PatchDependencyType>;
-	"requires"?: Array<PatchDependencyType>;
-	"type"?: PatchVariantType;
-	"volatile"?: boolean;
-};
-export type InstanceStateType = GlobalStatesType["minecraft"] & {
-	"name": string;
-	"checksum": boolean;
-	"playTime": number;
-	"lastLaunch": number;
-	"entry": ExtendedPatchUIDType;
-	"pinned": boolean;
-	"groups": Array<string>;
-	"patchVersions": {
-		"net.minecraft": string;
-	} & Partial<Record<ExtendedPatchUIDType, string>>;
-};
-export type InstanceStatesType = Record<string, InstanceStateType>;
-export type InstanceStatesChangerType = <Key extends keyof InstanceStatesType>(key: Key, value: InstanceStatesType[Key]) => void;
-declare const Routes: {
-	readonly Home: "home";
-	readonly Library: "library";
-	readonly Settings: "settings";
-	readonly AddInstance: "add-instance";
-	readonly Profile: "profile";
-	readonly None: "none";
-};
-declare const _default$1: {
-	readonly Routes: {
-		readonly Home: "home";
-		readonly Library: "library";
-		readonly Settings: "settings";
-		readonly AddInstance: "add-instance";
-		readonly Profile: "profile";
-		readonly None: "none";
-	};
-	readonly SidebarRouteGroupItems: readonly [
-		{
-			readonly Path: "home";
-			readonly Icon: "i-lucide-home";
-		},
-		{
-			readonly Path: "library";
-			readonly Icon: "i-lucide-boxes";
-		},
-		{
-			readonly Path: "settings";
-			readonly Icon: "i-lucide-settings";
-		}
-	];
-};
-export type RouteType = (typeof Routes)[keyof typeof Routes];
-declare const TRANSLATION_KEYS: readonly [
-	"general.errors.global-error.emoji",
-	"general.errors.global-error.message",
-	"general.errors.page-error.message",
-	"general.sidebar.add-instance",
-	"general.sidebar.home",
-	"general.sidebar.library",
-	"general.sidebar.settings",
-	"general.sidebar.profile",
-	"general.sidebar.none",
-	"general.launch-status.general-pending-starting",
-	"general.launch-status.general-aborted",
-	"general.launch-status.general-success",
-	"general.launch-status.patch-index-pending-reading",
-	"general.launch-status.patch-index-pending-fetching",
-	"general.launch-status.patch-index-error-fetch",
-	"general.launch-status.patch-index-error-parse",
-	"general.launch-status.patch-index-error-validation",
-	"general.launch-status.patch-index-success",
-	"general.launch-status.patch-metadata-pending-reading",
-	"general.launch-status.patch-metadata-pending-fetching",
-	"general.launch-status.patch-metadata-error-fetch",
-	"general.launch-status.patch-metadata-error-parse",
-	"general.launch-status.patch-metadata-error-validation",
-	"general.launch-status.patch-metadata-success",
-	"general.launch-status.asset-index-pending-reading",
-	"general.launch-status.asset-index-pending-fetching",
-	"general.launch-status.asset-index-error-get",
-	"general.launch-status.asset-index-error-fetch",
-	"general.launch-status.asset-index-error-parse",
-	"general.launch-status.asset-index-error-validation",
-	"general.launch-status.asset-index-success",
-	"general.launch-status.asset-objects-success",
-	"general.launch-status.libraries-error-validation",
-	"general.launch-status.libraries-success",
-	"general.launch-status.logging-checking",
-	"general.launch-status.logging-error-parse",
-	"general.launch-status.logging-success",
-	"general.launch-status.client-checking",
-	"general.launch-status.client-error-parse",
-	"general.launch-status.client-success",
-	"general.launch-status.errors-unhandled-error",
-	"general.launch-status.errors-incompatible-platform",
-	"general.launch-status.errors-incompatible-arch",
-	"home.instance.current-playtime.label",
-	"home.instance.last-launch.label"
-];
-export type TranslationKey = (typeof TRANSLATION_KEYS)[number];
-export type TranslationInfoType = {
-	"Code": string;
-	"Name": string;
-	"Flag": string;
-	"RTL": boolean;
-};
-export type TranslationsType = {
-	"Info": TranslationInfoType;
-	"Messages": Record<TranslationKey, string>;
-};
-export type GlobalStatesLayoutType = {
-	"locale": string;
-	"stats": "playtime" | "last-launch";
-	"currentInstance": string | null;
-	"enableMaterialYouRipple": boolean;
-	"custom": boolean | Array<"sidebar" | "contextMenu">;
-	"background": {
-		"url": string | null;
-		"key": string | number | null;
-		"blur": number | null;
-		"color": string | null;
-		"isVideo": boolean;
-	};
-	"sidebar": {
-		"blur": number | null;
-		"color": string | null;
-		"ripple": string | null;
-		"sparkles": string | null;
-		"background": string | null;
-	};
-	"atAGlance": {
-		"title": string | null;
-		"subtitle": string | null;
-	};
-};
-export type GlobalStatesPagesType = {
-	"current": RouteType;
-	"states": {
-		"home": Partial<{
-			"stats": unknown;
-		}>;
-		"library": Partial<{
-			"group": unknown;
-		}>;
-		"settings": Partial<{
-			"tab": string;
-		}>;
-		"add-instance": Partial<{
-			"instanceVersionSearch": {
-				"patch": ExtendedPatchUIDType;
-				"input": string;
-			};
-			"instance": {
-				"name": string;
-				"entry": ExtendedPatchUIDType;
-				"checksum": boolean;
-				"groups": Array<string>;
-				"javaBinary": string;
-				"patchVersions": InstanceStateType["patchVersions"];
-				"windowHeight": number;
-				"windowWidth": number;
-				"icon"?: string;
-				"add": {
-					"jvmArguments": Array<string>;
-					"gameArguments": Array<string>;
-				};
-			};
-			"full": boolean;
-			"tab": string;
-			"customSettings": Array<{
-				"label"?: string;
-				"input"?: {
-					"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
-					"iconClassName": string;
-					"placeholder": string;
-					"defaultValue"?: () => string | undefined;
-					"tooltip"?: string;
-					"type"?: "text" | "number";
-					"debounceTime"?: number;
-				};
-			}>;
-		}>;
-		"none": Record<string, unknown>;
-	};
-};
-export type GlobalStatesLogsType = {
-	"show": boolean;
-	"lineBreaks": boolean;
-	"virtualized": boolean;
-	"mode": "launcher" | string;
-	"filtering": string;
-};
-export type GlobalStatesSidebarItemsType = Array<"divider" | {
-	"path": RouteType;
-	"name": string;
-	"action": () => void;
-	"icon"?: string;
-	"image"?: string;
-}>;
-export type GlobalStatesContextMenuItemsType = Array<{
-	"name": string;
-	"action": () => void;
-	"icon"?: string;
-	"image"?: string;
-}>;
-export type GlobalStatesDevelopmentType = {
-	"loadErudaDevTools": boolean;
-	"showFPS": boolean;
-	"showCPUUsage": boolean;
-	"showMemoryUsage": boolean;
-	"enableDebugMode": boolean;
-	"enableNativeContextMenu": boolean;
-	"enableNativeReloadKeyBinds": boolean;
-};
-export type GlobalStatesMiscType = {
-	"showAfterExtensionsInitialization": boolean;
-	"autoConfigSync": boolean;
-};
-export type GlobalStatesMinecraftType = {
-	"windowHeight": number;
-	"windowWidth": number;
-	"icon": string;
-	"javaBinary": string;
-	"add": Partial<{
-		"jvmArguments": Array<string>;
-		"gameArguments": Array<string>;
-	}>;
-	"remove": Partial<{
-		"jvmArguments": Array<string>;
-		"gameArguments": Array<string>;
-	}>;
-};
-export type GlobalStatesExtensionsType = {
-	"enabled": boolean;
-};
-export type GlobalStatesType = {
-	"development": GlobalStatesDevelopmentType;
-	"extensions": GlobalStatesExtensionsType;
-	"layout": GlobalStatesLayoutType;
-	"logs": GlobalStatesLogsType;
-	"misc": GlobalStatesMiscType;
-	"minecraft": GlobalStatesMinecraftType;
-	"translations": TranslationsType;
-	"sidebarItems": GlobalStatesSidebarItemsType;
-	"contextMenuItems": GlobalStatesContextMenuItemsType;
-	"pages": GlobalStatesPagesType;
-};
-export type GlobalStatesChangerType = <Key extends keyof GlobalStatesType>(key: Key, value: GlobalStatesType[Key]) => void;
-export type TabSectionType = {
-	"id": string;
-	"name": string;
-	"icon"?: string;
-	"image"?: string;
-	"action"?: (id: string) => Promise<void>;
-};
-declare const TranslationsContextKey: unique symbol;
-declare const AuthStatesContextKey: unique symbol;
-declare const LaunchStatesContextKey: unique symbol;
-declare const InstanceLogsContextKey: unique symbol;
-declare const LaunchInstanceContextKey: unique symbol;
-declare const CloseInstanceContextKey: unique symbol;
-declare const _default$2: {
-	readonly AsyncFunction: FunctionConstructor;
-	readonly ApplicationName: "Kaede";
-	readonly ApplicationRootID: "#app";
-	readonly DefaultLocale: "en";
-	readonly TranslationsContextKey: typeof TranslationsContextKey;
-	readonly AuthStatesContextKey: typeof AuthStatesContextKey;
-	readonly LaunchStatesContextKey: typeof LaunchStatesContextKey;
-	readonly InstanceLogsContextKey: typeof InstanceLogsContextKey;
-	readonly LaunchInstanceContextKey: typeof LaunchInstanceContextKey;
-	readonly CloseInstanceContextKey: typeof CloseInstanceContextKey;
-	readonly CSSThemeExtensions: {
-		readonly Enabled: ".css";
-		readonly Disabled: ".css.disabled";
-	};
-	readonly DefaultGlobalStatesPagesStates: {
-		home: Partial<{
-			"stats": unknown;
-		}>;
-		library: Partial<{
-			"group": unknown;
-		}>;
-		settings: Partial<{
-			"tab": string;
-		}>;
-		"add-instance": Partial<{
-			"instanceVersionSearch": {
-				"patch": ExtendedPatchUIDType;
-				"input": string;
-			};
-			"instance": {
-				"name": string;
-				"entry": ExtendedPatchUIDType;
-				"checksum": boolean;
-				"groups": Array<string>;
-				"javaBinary": string;
-				"patchVersions": InstanceStateType["patchVersions"];
-				"windowHeight": number;
-				"windowWidth": number;
-				"icon"?: string;
-				"add": {
-					"jvmArguments": Array<string>;
-					"gameArguments": Array<string>;
-				};
-			};
-			"full": boolean;
-			"tab": string;
-			"customSettings": Array<{
-				"label"?: string;
-				"input"?: {
-					"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
-					"iconClassName": string;
-					"placeholder": string;
-					"defaultValue"?: () => string | undefined;
-					"tooltip"?: string;
-					"type"?: "text" | "number";
-					"debounceTime"?: number;
-				};
-			}>;
-		}>;
-		none: Record<string, unknown>;
-	};
-	readonly InstanceCreationSections: TabSectionType[];
-	readonly SettingsSections: TabSectionType[];
-	readonly ContextMenuItems: readonly [
-		{
-			readonly name: "Restart UI";
-			readonly icon: "i-lucide-rotate-ccw";
-			readonly action: () => void;
-		},
-		{
-			readonly name: "Show Logs";
-			readonly icon: "i-lucide-bug";
-			readonly action: () => void;
-		},
-		{
-			readonly name: "Open Root Folder";
-			readonly icon: "i-lucide-folder";
-			readonly action: () => Promise<void>;
-		},
-		{
-			readonly name: "Open Instance Folder";
-			readonly icon: "i-lucide-box";
-			readonly action: () => Promise<void>;
-		}
-	];
-};
-declare function getASCIIArt(isPortable: boolean, launchCount: number): string;
-declare const _default$3: {
-	readonly getASCIIArt: typeof getASCIIArt;
-};
-declare const _default$4: {
-	readonly BrowserStorageKey: "kaedeBrowserDB";
-	readonly BrowserStorageStoreKey: "storage";
-	readonly LogInfo: {
-		readonly delimiter: " | ";
-		readonly levels: {
-			readonly "1": "TRACE";
-			readonly "2": "DEBUG";
-			readonly "3": "INFO";
-			readonly "4": "WARN";
-			readonly "5": "ERROR";
-		};
-	};
-};
-export type PluginPrincipal = Readonly<{
-	"repositoryOrigin": string;
-	"pluginId": string;
-	"version": string;
-	"artifactSha256": string;
-}>;
-export type PluginPrincipalKey = string;
-export type EventSnapshotPrimitive = null | undefined | boolean | number | bigint | string;
-declare const EVENT_SNAPSHOT_ARRAY: unique symbol;
-export interface EventSnapshotArray extends ReadonlyArray<EventSnapshotValue> {
-	readonly [EVENT_SNAPSHOT_ARRAY]?: never;
-}
-export interface EventSnapshotRecord {
-	readonly [key: string]: EventSnapshotValue;
-}
-export type EventSnapshotValue = EventSnapshotPrimitive | EventSnapshotArray | EventSnapshotRecord;
-export type ExtensionEventSnapshot<Type extends string = string> = Readonly<{
-	"type": Type;
-	"value": EventSnapshotValue;
-}>;
-export type ExtensionEventListener = (event: ExtensionEventSnapshot) => void;
-declare class EventBroker {
-	#private;
-	subscribe(principalKey: PluginPrincipalKey, listener: ExtensionEventListener): () => void;
-	unsubscribePrincipal(principalKey: PluginPrincipalKey): void;
-	publish(type: string, value: unknown): void;
-	dispose(): void;
-}
-declare const AllEventListeners: {
-	readonly "all-clicks": true;
-	readonly "left-click": true;
-	readonly "middle-click": true;
-	readonly "right-click": true;
-	readonly routing: true;
-	readonly instance: true;
-};
-declare const _default$5: {
-	readonly AllEventListeners: {
-		readonly "all-clicks": true;
-		readonly "left-click": true;
-		readonly "middle-click": true;
-		readonly "right-click": true;
-		readonly routing: true;
-		readonly instance: true;
-	};
-	readonly ExtensionEvents: EventBroker;
-};
-declare const _default$6: {
-	readonly Folders: {
-		readonly Assets: {
-			readonly Path: "assets";
-			readonly Folders: {
-				readonly Indexes: {
-					readonly Path: "indexes";
-				};
-				readonly Objects: {
-					readonly Path: "objects";
-				};
-				readonly LogConfigs: {
-					readonly Path: "log_configs";
-				};
-			};
-		};
-		readonly Libraries: {
-			readonly Path: "libraries";
-		};
-		readonly Cache: {
-			readonly Path: "cache";
-			readonly Files: {
-				readonly ManifestV2: "manifest_v2.json";
-			};
-		};
-		readonly Resources: {
-			readonly Path: "resources";
-		};
-		readonly Themes: {
-			readonly Path: "themes";
-		};
-		readonly Translations: {
-			readonly Path: "translations";
-		};
-		readonly Extensions: {
-			readonly Path: "extensions";
-		};
-		readonly Instances: {
-			readonly Path: "instances";
-			readonly Folders: {
-				readonly _Entry_: {
-					readonly Folders: {
-						readonly Minecraft: {
-							readonly Path: "minecraft";
-						};
-						readonly Natives: {
-							readonly Path: "natives";
-						};
-					};
-				};
-			};
-		};
-		readonly Logs: {
-			readonly Path: "logs";
-			readonly Files: {
-				readonly LatestLog: "latest.log";
-			};
-		};
-	};
-	readonly Files: {
-		readonly Accounts: "accounts.json";
-		readonly Metadata: "instances.json";
-		readonly Config: "config.json";
-		readonly Extensions: "extensions.json";
-	};
-};
-declare const HookResponseStatus: {
-	readonly Stop: "stop";
-	readonly Continue: "continue";
-};
-declare const _default$7: {
-	readonly HookMappings: {
-		readonly translations: "onTranslationsChange";
-		readonly layout: "onLayoutChange";
-		readonly pages: "onPagesChange";
-		readonly logs: "onLogsChange";
-		readonly sidebarItems: "onSidebarItemsChange";
-		readonly contextMenuItems: "onContextMenuItemsChange";
-		readonly development: "onDevelopmentChange";
-		readonly misc: "onMiscChange";
-		readonly minecraft: "onMinecraftChange";
-		readonly extensions: "onExtensionsChange";
-	};
-	readonly HookResponseStatus: {
-		readonly Stop: "stop";
-		readonly Continue: "continue";
-	};
-	readonly ExtraHookResponseStatus: {
-		readonly ContinueLoop: "continue-hooks-loop";
-	};
-};
-declare const LaunchStatus: {
-	readonly General: {
-		readonly Starting: "general-pending-starting";
-		readonly Aborted: "general-aborted";
-		readonly Success: "general-success";
-	};
-	readonly PatchIndex: {
-		readonly Reading: "patch-index-pending-reading";
-		readonly Fetching: "patch-index-pending-fetching";
-		readonly FailedToFetch: "patch-index-error-fetch";
-		readonly FailedToParse: "patch-index-error-parse";
-		readonly FailedToValidate: "patch-index-error-validation";
-		readonly Success: "patch-index-success";
-	};
-	readonly PatchMetadata: {
-		readonly Reading: "patch-metadata-pending-reading";
-		readonly Fetching: "patch-metadata-pending-fetching";
-		readonly FailedToFetch: "patch-metadata-error-fetch";
-		readonly FailedToParse: "patch-metadata-error-parse";
-		readonly FailedToValidate: "patch-metadata-error-validation";
-		readonly Success: "patch-metadata-success";
-	};
-	readonly AssetIndex: {
-		readonly Reading: "asset-index-pending-reading";
-		readonly Fetching: "asset-index-pending-fetching";
-		readonly FailedToGet: "asset-index-error-get";
-		readonly FailedToFetch: "asset-index-error-fetch";
-		readonly FailedToParse: "asset-index-error-parse";
-		readonly FailedToValidate: "asset-index-error-validation";
-		readonly Success: "asset-index-success";
-	};
-	readonly AssetObjects: {
-		readonly Success: "asset-objects-success";
-	};
-	readonly Libraries: {
-		readonly FailedToValidate: "libraries-error-validation";
-		readonly Success: "libraries-success";
-	};
-	readonly Logging: {
-		readonly Checking: "logging-checking";
-		readonly FailedToParse: "logging-error-parse";
-		readonly Success: "logging-success";
-	};
-	readonly Client: {
-		readonly Checking: "client-checking";
-		readonly FailedToParse: "client-error-parse";
-		readonly Success: "client-success";
-	};
-	readonly Errors: {
-		readonly UnhandledError: "errors-unhandled-error";
-		readonly IncompatiblePlatform: "errors-incompatible-platform";
-		readonly IncompatibleArch: "errors-incompatible-arch";
-	};
-};
-declare const _default$8: {
-	readonly DefaultInstanceIcon: "https://minecraft.wiki/images/Minecraft_Preview_App_Store_icon_2.png";
-	readonly DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions">;
-	readonly JVMArguments: {
-		readonly Default: {
-			readonly Log4J: "-Dlog4j2.formatMsgNoLookups=true";
-			readonly SystemProxies: "-Djava.net.useSystemProxiestrue";
-			readonly FMLIgnoreCertificates: "-Dfml.ignoreInvalidMinecraftCertificates=true";
-			readonly FMLIgnorePatchDiscrepancies: "-Dfml.ignorePatchDiscrepancies=true";
-			readonly LibrariesDirectory: "-DlibraryDirectory=${libraries_directory}";
-			readonly NativesPath: "-Djava.library.path=${natives_directory}";
-			readonly ClientJAR: "-Dminecraft.client.jar=${main_jar_path}";
-			readonly TemporaryNativesPath: "-Djna.tmpdir=${natives_directory}";
-			readonly SharedLibraryExtractPath: "-Dorg.lwjgl.system.SharedLibraryExtractPath=${natives_directory}";
-			readonly NettyWorkingDirectory: "-Dio.netty.native.workdir=${natives_directory}";
-			readonly LauncherBrand: "-Dminecraft.launcher.brand=${launcher_name}";
-			readonly LauncherVersion: "-Dminecraft.launcher.version=${launcher_version}";
-			readonly UserLanguage: "-Duser.language=en";
-		};
-		readonly WindowsNonIterable: {
-			readonly DosName: "-Dos.name=Windows 10";
-			readonly DosVersion: "-Dos.version=10.0";
-			readonly MojangTricks: "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump";
-		};
-		readonly MacOSNonIterable: {
-			readonly FirstThread: "-XstartOnFirstThread";
-		};
-		readonly LinuxNonIterable: {};
-	};
-	readonly LaunchStatus: {
-		readonly General: {
-			readonly Starting: "general-pending-starting";
-			readonly Aborted: "general-aborted";
-			readonly Success: "general-success";
-		};
-		readonly PatchIndex: {
-			readonly Reading: "patch-index-pending-reading";
-			readonly Fetching: "patch-index-pending-fetching";
-			readonly FailedToFetch: "patch-index-error-fetch";
-			readonly FailedToParse: "patch-index-error-parse";
-			readonly FailedToValidate: "patch-index-error-validation";
-			readonly Success: "patch-index-success";
-		};
-		readonly PatchMetadata: {
-			readonly Reading: "patch-metadata-pending-reading";
-			readonly Fetching: "patch-metadata-pending-fetching";
-			readonly FailedToFetch: "patch-metadata-error-fetch";
-			readonly FailedToParse: "patch-metadata-error-parse";
-			readonly FailedToValidate: "patch-metadata-error-validation";
-			readonly Success: "patch-metadata-success";
-		};
-		readonly AssetIndex: {
-			readonly Reading: "asset-index-pending-reading";
-			readonly Fetching: "asset-index-pending-fetching";
-			readonly FailedToGet: "asset-index-error-get";
-			readonly FailedToFetch: "asset-index-error-fetch";
-			readonly FailedToParse: "asset-index-error-parse";
-			readonly FailedToValidate: "asset-index-error-validation";
-			readonly Success: "asset-index-success";
-		};
-		readonly AssetObjects: {
-			readonly Success: "asset-objects-success";
-		};
-		readonly Libraries: {
-			readonly FailedToValidate: "libraries-error-validation";
-			readonly Success: "libraries-success";
-		};
-		readonly Logging: {
-			readonly Checking: "logging-checking";
-			readonly FailedToParse: "logging-error-parse";
-			readonly Success: "logging-success";
-		};
-		readonly Client: {
-			readonly Checking: "client-checking";
-			readonly FailedToParse: "client-error-parse";
-			readonly Success: "client-success";
-		};
-		readonly Errors: {
-			readonly UnhandledError: "errors-unhandled-error";
-			readonly IncompatiblePlatform: "errors-incompatible-platform";
-			readonly IncompatibleArch: "errors-incompatible-arch";
-		};
-	};
-	readonly APIEndpoints: {
-		readonly KaedeCache: {
-			readonly Base: "https://raw.githubusercontent.com/kaede-basement/cache/main/";
-			readonly Paths: {
-				readonly OptiFine: {
-					readonly Id: "optifine.OptiFine";
-					readonly Base: "optifine.OptiFine/";
-				};
-			};
-		};
-		readonly Meta: {
-			readonly Base: "https://meta.prismlauncher.org/v1/";
-			readonly Paths: {
-				readonly Minecraft: {
-					readonly Id: "net.minecraft";
-					readonly Base: "net.minecraft/";
-				};
-			};
-		};
-		readonly Libraries: {
-			readonly Base: "https://libraries.minecraft.net/";
-		};
-		readonly Resources: {
-			readonly Base: "https://resources.download.minecraft.net/";
-		};
-	};
-	readonly GeneralSettings: {
-		readonly ConcurrentDownloads: {
-			readonly Assets: 64;
-			readonly Libraries: 8;
-		};
-		readonly Logs: {
-			readonly LineLimit: 65536;
-		};
-	};
-};
-declare const PERMISSION_CATALOG: {
-	readonly "ui/basic": {
-		readonly description: "Render basic, non-interactive user interface content.";
-		readonly dangerLevel: "low";
-		readonly scoped: false;
-	};
-	readonly "ui/forms/non-credential": {
-		readonly description: "Render forms that must not collect credentials or other secrets.";
-		readonly dangerLevel: "medium";
-		readonly scoped: false;
-	};
-	readonly "network/http": {
-		readonly description: "Send HTTP requests to the explicitly granted origins and methods.";
-		readonly dangerLevel: "high";
-		readonly scoped: true;
-	};
-	readonly "storage/internal/read": {
-		readonly description: "Read files in storage isolated to this exact plugin principal.";
-		readonly dangerLevel: "low";
-		readonly scoped: true;
-	};
-	readonly "storage/internal/write": {
-		readonly description: "Write files in storage isolated to this exact plugin principal.";
-		readonly dangerLevel: "medium";
-		readonly scoped: true;
-	};
-	readonly "storage/external/read": {
-		readonly description: "Read files below explicitly granted absolute filesystem roots.";
-		readonly dangerLevel: "high";
-		readonly scoped: true;
-	};
-	readonly "storage/external/write": {
-		readonly description: "Write files below explicitly granted absolute filesystem roots.";
-		readonly dangerLevel: "critical";
-		readonly scoped: true;
-	};
-	readonly "system/process/spawn": {
-		readonly description: "Spawn exact executable paths with exact argument arrays.";
-		readonly dangerLevel: "critical";
-		readonly scoped: true;
-	};
-	readonly "system/shell": {
-		readonly description: "Execute unrestricted shell commands outside the capability sandbox.";
-		readonly dangerLevel: "critical";
-		readonly scoped: false;
-	};
-	readonly "events/subscribe": {
-		readonly description: "Subscribe to launcher lifecycle and state-change events.";
-		readonly dangerLevel: "low";
-		readonly scoped: false;
-	};
-	readonly "logging/write": {
-		readonly description: "Write entries to the launcher log.";
-		readonly dangerLevel: "low";
-		readonly scoped: false;
-	};
-};
-declare const _default$9: {
-	readonly PERMISSION_CATALOG: {
-		readonly "ui/basic": {
-			readonly description: "Render basic, non-interactive user interface content.";
-			readonly dangerLevel: "low";
-			readonly scoped: false;
-		};
-		readonly "ui/forms/non-credential": {
-			readonly description: "Render forms that must not collect credentials or other secrets.";
-			readonly dangerLevel: "medium";
-			readonly scoped: false;
-		};
-		readonly "network/http": {
-			readonly description: "Send HTTP requests to the explicitly granted origins and methods.";
-			readonly dangerLevel: "high";
-			readonly scoped: true;
-		};
-		readonly "storage/internal/read": {
-			readonly description: "Read files in storage isolated to this exact plugin principal.";
-			readonly dangerLevel: "low";
-			readonly scoped: true;
-		};
-		readonly "storage/internal/write": {
-			readonly description: "Write files in storage isolated to this exact plugin principal.";
-			readonly dangerLevel: "medium";
-			readonly scoped: true;
-		};
-		readonly "storage/external/read": {
-			readonly description: "Read files below explicitly granted absolute filesystem roots.";
-			readonly dangerLevel: "high";
-			readonly scoped: true;
-		};
-		readonly "storage/external/write": {
-			readonly description: "Write files below explicitly granted absolute filesystem roots.";
-			readonly dangerLevel: "critical";
-			readonly scoped: true;
-		};
-		readonly "system/process/spawn": {
-			readonly description: "Spawn exact executable paths with exact argument arrays.";
-			readonly dangerLevel: "critical";
-			readonly scoped: true;
-		};
-		readonly "system/shell": {
-			readonly description: "Execute unrestricted shell commands outside the capability sandbox.";
-			readonly dangerLevel: "critical";
-			readonly scoped: false;
-		};
-		readonly "events/subscribe": {
-			readonly description: "Subscribe to launcher lifecycle and state-change events.";
-			readonly dangerLevel: "low";
-			readonly scoped: false;
-		};
-		readonly "logging/write": {
-			readonly description: "Write entries to the launcher log.";
-			readonly dangerLevel: "low";
-			readonly scoped: false;
-		};
-	};
-	readonly PERMISSION_IDS: readonly [
-		"ui/basic",
-		"ui/forms/non-credential",
-		"network/http",
-		"storage/internal/read",
-		"storage/internal/write",
-		"storage/external/read",
-		"storage/external/write",
-		"system/process/spawn",
-		"system/shell",
-		"events/subscribe",
-		"logging/write"
-	];
-};
-declare const Browser: {
-	readonly detectIsBrowser: () => boolean;
-	readonly handleLogsFlush: () => void;
-	readonly readStoragePath: (path: string) => Promise<string>;
-	readonly writeToStoragePath: (path: string, value: string | Uint8Array) => Promise<void>;
-};
 export type DirectoryEntry = Readonly<{
 	"name": string;
 	"isDirectory": boolean;
@@ -970,6 +96,13 @@ export type InstalledExtensionsReadResult = Readonly<{
 	"extensions": ReadonlyArray<InstalledExtensionArchive>;
 	"failures": ReadonlyArray<InstalledExtensionFailure>;
 }>;
+export type PluginPrincipal = Readonly<{
+	"repositoryOrigin": string;
+	"pluginId": string;
+	"version": string;
+	"artifactSha256": string;
+}>;
+export type PluginPrincipalKey = string;
 export type ParsedFile = {
 	"status": "loaded";
 	"data": unknown;
@@ -1005,6 +138,156 @@ export type InitializationFinalizationReport = Readonly<{
 	"javaMajor": number | null;
 	"javaMajorSource": "release-file" | "spawn" | "unresolved";
 }>;
+declare const PERMISSION_CATALOG: {
+	readonly "ui/basic": {
+		readonly description: "Render basic, non-interactive user interface content.";
+		readonly dangerLevel: "low";
+		readonly scoped: false;
+	};
+	readonly "ui/forms/non-credential": {
+		readonly description: "Render forms that must not collect credentials or other secrets.";
+		readonly dangerLevel: "medium";
+		readonly scoped: false;
+	};
+	readonly "network/http": {
+		readonly description: "Send HTTP requests to the explicitly granted origins and methods.";
+		readonly dangerLevel: "high";
+		readonly scoped: true;
+	};
+	readonly "storage/internal/read": {
+		readonly description: "Read files in storage isolated to this exact plugin principal.";
+		readonly dangerLevel: "low";
+		readonly scoped: true;
+	};
+	readonly "storage/internal/write": {
+		readonly description: "Write files in storage isolated to this exact plugin principal.";
+		readonly dangerLevel: "medium";
+		readonly scoped: true;
+	};
+	readonly "storage/external/read": {
+		readonly description: "Read files below explicitly granted absolute filesystem roots.";
+		readonly dangerLevel: "high";
+		readonly scoped: true;
+	};
+	readonly "storage/external/write": {
+		readonly description: "Write files below explicitly granted absolute filesystem roots.";
+		readonly dangerLevel: "critical";
+		readonly scoped: true;
+	};
+	readonly "system/process/spawn": {
+		readonly description: "Spawn exact executable paths with exact argument arrays.";
+		readonly dangerLevel: "critical";
+		readonly scoped: true;
+	};
+	readonly "system/shell": {
+		readonly description: "Execute unrestricted shell commands outside the capability sandbox.";
+		readonly dangerLevel: "critical";
+		readonly scoped: false;
+	};
+	readonly "events/subscribe": {
+		readonly description: "Subscribe to launcher lifecycle and state-change events.";
+		readonly dangerLevel: "low";
+		readonly scoped: false;
+	};
+	readonly "logging/write": {
+		readonly description: "Write entries to the launcher log.";
+		readonly dangerLevel: "low";
+		readonly scoped: false;
+	};
+};
+declare const _default: {
+	readonly PERMISSION_CATALOG: {
+		readonly "ui/basic": {
+			readonly description: "Render basic, non-interactive user interface content.";
+			readonly dangerLevel: "low";
+			readonly scoped: false;
+		};
+		readonly "ui/forms/non-credential": {
+			readonly description: "Render forms that must not collect credentials or other secrets.";
+			readonly dangerLevel: "medium";
+			readonly scoped: false;
+		};
+		readonly "network/http": {
+			readonly description: "Send HTTP requests to the explicitly granted origins and methods.";
+			readonly dangerLevel: "high";
+			readonly scoped: true;
+		};
+		readonly "storage/internal/read": {
+			readonly description: "Read files in storage isolated to this exact plugin principal.";
+			readonly dangerLevel: "low";
+			readonly scoped: true;
+		};
+		readonly "storage/internal/write": {
+			readonly description: "Write files in storage isolated to this exact plugin principal.";
+			readonly dangerLevel: "medium";
+			readonly scoped: true;
+		};
+		readonly "storage/external/read": {
+			readonly description: "Read files below explicitly granted absolute filesystem roots.";
+			readonly dangerLevel: "high";
+			readonly scoped: true;
+		};
+		readonly "storage/external/write": {
+			readonly description: "Write files below explicitly granted absolute filesystem roots.";
+			readonly dangerLevel: "critical";
+			readonly scoped: true;
+		};
+		readonly "system/process/spawn": {
+			readonly description: "Spawn exact executable paths with exact argument arrays.";
+			readonly dangerLevel: "critical";
+			readonly scoped: true;
+		};
+		readonly "system/shell": {
+			readonly description: "Execute unrestricted shell commands outside the capability sandbox.";
+			readonly dangerLevel: "critical";
+			readonly scoped: false;
+		};
+		readonly "events/subscribe": {
+			readonly description: "Subscribe to launcher lifecycle and state-change events.";
+			readonly dangerLevel: "low";
+			readonly scoped: false;
+		};
+		readonly "logging/write": {
+			readonly description: "Write entries to the launcher log.";
+			readonly dangerLevel: "low";
+			readonly scoped: false;
+		};
+	};
+	readonly PERMISSION_IDS: readonly [
+		"ui/basic",
+		"ui/forms/non-credential",
+		"network/http",
+		"storage/internal/read",
+		"storage/internal/write",
+		"storage/external/read",
+		"storage/external/write",
+		"system/process/spawn",
+		"system/shell",
+		"events/subscribe",
+		"logging/write"
+	];
+};
+export type EventSnapshotPrimitive = null | undefined | boolean | number | bigint | string;
+declare const EVENT_SNAPSHOT_ARRAY: unique symbol;
+export interface EventSnapshotArray extends ReadonlyArray<EventSnapshotValue> {
+	readonly [EVENT_SNAPSHOT_ARRAY]?: never;
+}
+export interface EventSnapshotRecord {
+	readonly [key: string]: EventSnapshotValue;
+}
+export type EventSnapshotValue = EventSnapshotPrimitive | EventSnapshotArray | EventSnapshotRecord;
+export type ExtensionEventSnapshot<Type extends string = string> = Readonly<{
+	"type": Type;
+	"value": EventSnapshotValue;
+}>;
+export type ExtensionEventListener = (event: ExtensionEventSnapshot) => void;
+declare class EventBroker {
+	#private;
+	subscribe(principalKey: PluginPrincipalKey, listener: ExtensionEventListener): () => void;
+	unsubscribePrincipal(principalKey: PluginPrincipalKey): void;
+	publish(type: string, value: unknown): void;
+	dispose(): void;
+}
 export type PermissionId = keyof typeof PERMISSION_CATALOG;
 export type SimplePermissionId = "ui/basic" | "ui/forms/non-credential" | "system/shell" | "events/subscribe" | "logging/write";
 export type HttpMethod = "DELETE" | "GET" | "HEAD" | "OPTIONS" | "PATCH" | "POST" | "PUT";
@@ -1307,6 +590,316 @@ export interface HostFacade {
 		}>): void;
 	}>;
 }
+declare const PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
+declare const CustomPatches: {
+	readonly OptiFine: "optifine.OptiFine";
+	readonly MCPHackersLaunchWrapper: "org.mcphackers.launchwrapper";
+};
+declare const _default$1: {
+	readonly Patches: {
+		readonly AzulJava: "com.azul.java";
+		readonly LiteLoader: "com.mumfrey.liteloader";
+		readonly AdoptiumJava: "net.adoptium.java";
+		readonly FabricLoader: "net.fabricmc.fabric-loader";
+		readonly FabricIntermediary: "net.fabricmc.intermediary";
+		readonly Minecraft: "net.minecraft";
+		readonly MinecraftJava: "net.minecraft.java";
+		readonly MinecraftForge: "net.minecraftforge";
+		readonly NeoForged: "net.neoforged";
+		readonly LWJGL: "org.lwjgl";
+		readonly LWJGL3: "org.lwjgl3";
+		readonly Quilt: "org.quiltmc.quilt-loader";
+	};
+	readonly PrettyPatchLabels: {
+		readonly "com.azul.java": "Azul JDK";
+		readonly "com.mumfrey.liteloader": "Lite Loader";
+		readonly "net.adoptium.java": "Temurin JDK";
+		readonly "net.fabricmc.fabric-loader": "Fabric MC";
+		readonly "net.fabricmc.intermediary": "Fabric MC (intermediary)";
+		readonly "net.minecraft": "Vanilla Minecraft";
+		readonly "net.minecraft.java": "Minecraft Java";
+		readonly "net.minecraftforge": "Forge";
+		readonly "net.neoforged": "NeoForge";
+		readonly "org.lwjgl": "LWJGL";
+		readonly "org.lwjgl3": "LWJGL3";
+		readonly "org.quiltmc.quilt-loader": "QuiltMC";
+		readonly "optifine.OptiFine": "OptiFine";
+		readonly "org.mcphackers.launchwrapper": "Vanilla Minecraft (custom launchwrapper)";
+	};
+	readonly PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
+	readonly CustomPatches: {
+		readonly OptiFine: "optifine.OptiFine";
+		readonly MCPHackersLaunchWrapper: "org.mcphackers.launchwrapper";
+	};
+	readonly InstallablePatches: {
+		id: string;
+		uid: ExtendedPatchUIDType;
+		name: string;
+		icon?: string;
+		action?: (uid: string) => Promise<void>;
+	}[];
+};
+export type PatchUIDType = (typeof PatchUIDs)[number];
+export type ExtendedPatchUIDType = PatchUIDType | (typeof CustomPatches)[keyof typeof CustomPatches];
+export type PatchVariantType = "release" | "snapshot" | "experiment" | "old_alpha" | "old_beta" | "old_snapshot";
+export type PatchDependencyType = {
+	"uid": ExtendedPatchUIDType;
+	"equals"?: string;
+	"suggests"?: string;
+};
+export type PatchIndexVersionType = {
+	"recommended": boolean;
+	"releaseTime": string;
+	"sha256": string;
+	"version": string;
+	"conflicts"?: Array<PatchDependencyType>;
+	"requires"?: Array<PatchDependencyType>;
+	"type"?: PatchVariantType;
+	"volatile"?: boolean;
+};
+export type InstanceStateType = GlobalStatesType["minecraft"] & {
+	"name": string;
+	"checksum": boolean;
+	"playTime": number;
+	"lastLaunch": number;
+	"entry": ExtendedPatchUIDType;
+	"pinned": boolean;
+	"groups": Array<string>;
+	"patchVersions": {
+		"net.minecraft": string;
+	} & Partial<Record<ExtendedPatchUIDType, string>>;
+};
+export type InstanceStatesType = Record<string, InstanceStateType>;
+export type InstanceStatesChangerType = <Key extends keyof InstanceStatesType>(key: Key, value: InstanceStatesType[Key]) => void;
+declare const Routes: {
+	readonly Home: "home";
+	readonly Library: "library";
+	readonly Settings: "settings";
+	readonly AddInstance: "add-instance";
+	readonly Profile: "profile";
+	readonly None: "none";
+};
+declare const _default$2: {
+	readonly Routes: {
+		readonly Home: "home";
+		readonly Library: "library";
+		readonly Settings: "settings";
+		readonly AddInstance: "add-instance";
+		readonly Profile: "profile";
+		readonly None: "none";
+	};
+	readonly SidebarRouteGroupItems: readonly [
+		{
+			readonly Path: "home";
+			readonly Icon: "i-lucide-home";
+		},
+		{
+			readonly Path: "library";
+			readonly Icon: "i-lucide-boxes";
+		},
+		{
+			readonly Path: "settings";
+			readonly Icon: "i-lucide-settings";
+		}
+	];
+};
+export type RouteType = (typeof Routes)[keyof typeof Routes];
+declare const TRANSLATION_KEYS: readonly [
+	"general.errors.global-error.emoji",
+	"general.errors.global-error.message",
+	"general.errors.page-error.message",
+	"general.sidebar.add-instance",
+	"general.sidebar.home",
+	"general.sidebar.library",
+	"general.sidebar.settings",
+	"general.sidebar.profile",
+	"general.sidebar.none",
+	"general.launch-status.general-pending-starting",
+	"general.launch-status.general-aborted",
+	"general.launch-status.general-success",
+	"general.launch-status.patch-index-pending-reading",
+	"general.launch-status.patch-index-pending-fetching",
+	"general.launch-status.patch-index-error-fetch",
+	"general.launch-status.patch-index-error-parse",
+	"general.launch-status.patch-index-error-validation",
+	"general.launch-status.patch-index-success",
+	"general.launch-status.patch-metadata-pending-reading",
+	"general.launch-status.patch-metadata-pending-fetching",
+	"general.launch-status.patch-metadata-error-fetch",
+	"general.launch-status.patch-metadata-error-parse",
+	"general.launch-status.patch-metadata-error-validation",
+	"general.launch-status.patch-metadata-success",
+	"general.launch-status.asset-index-pending-reading",
+	"general.launch-status.asset-index-pending-fetching",
+	"general.launch-status.asset-index-error-get",
+	"general.launch-status.asset-index-error-fetch",
+	"general.launch-status.asset-index-error-parse",
+	"general.launch-status.asset-index-error-validation",
+	"general.launch-status.asset-index-success",
+	"general.launch-status.asset-objects-success",
+	"general.launch-status.libraries-error-validation",
+	"general.launch-status.libraries-success",
+	"general.launch-status.logging-checking",
+	"general.launch-status.logging-error-parse",
+	"general.launch-status.logging-success",
+	"general.launch-status.client-checking",
+	"general.launch-status.client-error-parse",
+	"general.launch-status.client-success",
+	"general.launch-status.errors-unhandled-error",
+	"general.launch-status.errors-incompatible-platform",
+	"general.launch-status.errors-incompatible-arch",
+	"home.instance.current-playtime.label",
+	"home.instance.last-launch.label"
+];
+export type TranslationKey = (typeof TRANSLATION_KEYS)[number];
+export type TranslationInfoType = {
+	"Code": string;
+	"Name": string;
+	"Flag": string;
+	"RTL": boolean;
+};
+export type TranslationsType = {
+	"Info": TranslationInfoType;
+	"Messages": Record<TranslationKey, string>;
+};
+export type GlobalStatesLayoutType = {
+	"locale": string;
+	"stats": "playtime" | "last-launch";
+	"currentInstance": string | null;
+	"enableMaterialYouRipple": boolean;
+	"custom": boolean | Array<"sidebar" | "contextMenu">;
+	"background": {
+		"url": string | null;
+		"key": string | number | null;
+		"blur": number | null;
+		"color": string | null;
+		"isVideo": boolean;
+	};
+	"sidebar": {
+		"blur": number | null;
+		"color": string | null;
+		"ripple": string | null;
+		"sparkles": string | null;
+		"background": string | null;
+	};
+	"atAGlance": {
+		"title": string | null;
+		"subtitle": string | null;
+	};
+};
+export type GlobalStatesPagesType = {
+	"current": RouteType;
+	"states": {
+		"home": Partial<{
+			"stats": unknown;
+		}>;
+		"library": Partial<{
+			"group": unknown;
+		}>;
+		"settings": Partial<{
+			"tab": string;
+		}>;
+		"add-instance": Partial<{
+			"instanceVersionSearch": {
+				"patch": ExtendedPatchUIDType;
+				"input": string;
+			};
+			"instance": {
+				"name": string;
+				"entry": ExtendedPatchUIDType;
+				"checksum": boolean;
+				"groups": Array<string>;
+				"javaBinary": string;
+				"patchVersions": InstanceStateType["patchVersions"];
+				"windowHeight": number;
+				"windowWidth": number;
+				"icon"?: string;
+				"add": {
+					"jvmArguments": Array<string>;
+					"gameArguments": Array<string>;
+				};
+			};
+			"full": boolean;
+			"tab": string;
+			"customSettings": Array<{
+				"label"?: string;
+				"input"?: {
+					"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
+					"iconClassName": string;
+					"placeholder": string;
+					"defaultValue"?: () => string | undefined;
+					"tooltip"?: string;
+					"type"?: "text" | "number";
+					"debounceTime"?: number;
+				};
+			}>;
+		}>;
+		"none": Record<string, unknown>;
+	};
+};
+export type GlobalStatesLogsType = {
+	"show": boolean;
+	"lineBreaks": boolean;
+	"virtualized": boolean;
+	"mode": string;
+	"filtering": string;
+};
+export type GlobalStatesSidebarItemsType = Array<"divider" | {
+	"path": RouteType;
+	"name": string;
+	"action": () => void;
+	"icon"?: string;
+	"image"?: string;
+}>;
+export type GlobalStatesContextMenuItemsType = Array<{
+	"name": string;
+	"action": () => void;
+	"icon"?: string;
+	"image"?: string;
+}>;
+export type GlobalStatesDevelopmentType = {
+	"loadErudaDevTools": boolean;
+	"showFPS": boolean;
+	"showCPUUsage": boolean;
+	"showMemoryUsage": boolean;
+	"enableDebugMode": boolean;
+	"enableNativeContextMenu": boolean;
+	"enableNativeReloadKeyBinds": boolean;
+};
+export type GlobalStatesMiscType = {
+	"showAfterExtensionsInitialization": boolean;
+	"autoConfigSync": boolean;
+};
+export type GlobalStatesMinecraftType = {
+	"windowHeight": number;
+	"windowWidth": number;
+	"icon": string;
+	"javaBinary": string;
+	"add": Partial<{
+		"jvmArguments": Array<string>;
+		"gameArguments": Array<string>;
+	}>;
+	"remove": Partial<{
+		"jvmArguments": Array<string>;
+		"gameArguments": Array<string>;
+	}>;
+};
+export type GlobalStatesExtensionsType = {
+	"enabled": boolean;
+};
+export type GlobalStatesType = {
+	"development": GlobalStatesDevelopmentType;
+	"extensions": GlobalStatesExtensionsType;
+	"layout": GlobalStatesLayoutType;
+	"logs": GlobalStatesLogsType;
+	"misc": GlobalStatesMiscType;
+	"minecraft": GlobalStatesMinecraftType;
+	"translations": TranslationsType;
+	"sidebarItems": GlobalStatesSidebarItemsType;
+	"contextMenuItems": GlobalStatesContextMenuItemsType;
+	"pages": GlobalStatesPagesType;
+};
+export type GlobalStatesChangerType = <Key extends keyof GlobalStatesType>(key: Key, value: GlobalStatesType[Key]) => void;
 export type AccountType = {
 	"msa": {
 		"token": string;
@@ -1324,11 +917,1862 @@ export type AccountType = {
 		"variant": "classic" | "slim";
 	};
 };
+export type ConfigType = Pick<GlobalStatesType, "development" | "extensions" | "layout" | "logs" | "minecraft" | "misc">;
+export type AtAGlanceType = {
+	"title": string;
+	"subtitle": string;
+};
+export type KaedeInternalsSurfaceType<ApplicationType> = {
+	"getGlobalStates": () => GlobalStatesType;
+	"changeGlobalStates": GlobalStatesChangerType;
+	"getInstanceStates": () => InstanceStatesType;
+	"changeInstanceStates": InstanceStatesChangerType;
+	"syncConfig": () => Promise<void>;
+	"joinDelimiter": string;
+	"launcherVersion": string;
+	"initialConfig": ConfigType;
+	"temporaryAccounts": Array<AccountType>;
+	"initialTranslations": TranslationsType;
+	"initialInstances": InstanceStatesType;
+	"portable": boolean;
+	"baseDirectory": string;
+	"launchCount": number;
+	"atAGlance"?: AtAGlanceType;
+	"javaMajor"?: number;
+	"appInstance"?: ApplicationType;
+	"logsInBrowser": Array<string>;
+	"indexedDB"?: IDBDatabase;
+	"serverProcesses": Array<{
+		"name": string;
+		"port": number;
+		"value": BrokerServerProcess;
+	}>;
+};
+declare const TranslationsContextKey: unique symbol;
+declare const AuthStatesContextKey: unique symbol;
+declare const LaunchStatesContextKey: unique symbol;
+declare const InstanceLogsContextKey: unique symbol;
+declare const LaunchInstanceContextKey: unique symbol;
+declare const CloseInstanceContextKey: unique symbol;
+export type TabSectionType = {
+	"id": string;
+	"name": string;
+	"icon"?: string;
+	"image"?: string;
+	"action"?: (id: string) => Promise<void>;
+};
+declare const _default$3: {
+	readonly AsyncFunction: FunctionConstructor;
+	readonly ApplicationName: "Kaede";
+	readonly ApplicationRootID: "#app";
+	readonly DefaultLocale: "en";
+	readonly TranslationsContextKey: typeof TranslationsContextKey;
+	readonly AuthStatesContextKey: typeof AuthStatesContextKey;
+	readonly LaunchStatesContextKey: typeof LaunchStatesContextKey;
+	readonly InstanceLogsContextKey: typeof InstanceLogsContextKey;
+	readonly LaunchInstanceContextKey: typeof LaunchInstanceContextKey;
+	readonly CloseInstanceContextKey: typeof CloseInstanceContextKey;
+	readonly CSSThemeExtensions: {
+		readonly Enabled: ".css";
+		readonly Disabled: ".css.disabled";
+	};
+	readonly DefaultGlobalStatesPagesStates: {
+		home: Partial<{
+			"stats": unknown;
+		}>;
+		library: Partial<{
+			"group": unknown;
+		}>;
+		settings: Partial<{
+			"tab": string;
+		}>;
+		"add-instance": Partial<{
+			"instanceVersionSearch": {
+				"patch": ExtendedPatchUIDType;
+				"input": string;
+			};
+			"instance": {
+				"name": string;
+				"entry": ExtendedPatchUIDType;
+				"checksum": boolean;
+				"groups": Array<string>;
+				"javaBinary": string;
+				"patchVersions": InstanceStateType["patchVersions"];
+				"windowHeight": number;
+				"windowWidth": number;
+				"icon"?: string;
+				"add": {
+					"jvmArguments": Array<string>;
+					"gameArguments": Array<string>;
+				};
+			};
+			"full": boolean;
+			"tab": string;
+			"customSettings": Array<{
+				"label"?: string;
+				"input"?: {
+					"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
+					"iconClassName": string;
+					"placeholder": string;
+					"defaultValue"?: () => string | undefined;
+					"tooltip"?: string;
+					"type"?: "text" | "number";
+					"debounceTime"?: number;
+				};
+			}>;
+		}>;
+		none: Record<string, unknown>;
+	};
+	readonly InstanceCreationSections: TabSectionType[];
+	readonly SettingsSections: TabSectionType[];
+	readonly ContextMenuItems: readonly [
+		{
+			readonly name: "Restart UI";
+			readonly icon: "i-lucide-rotate-ccw";
+			readonly action: () => void;
+		},
+		{
+			readonly name: "Show Logs";
+			readonly icon: "i-lucide-bug";
+			readonly action: () => void;
+		},
+		{
+			readonly name: "Open Root Folder";
+			readonly icon: "i-lucide-folder";
+			readonly action: () => Promise<void>;
+		},
+		{
+			readonly name: "Open Instance Folder";
+			readonly icon: "i-lucide-box";
+			readonly action: () => Promise<void>;
+		}
+	];
+};
+declare function getASCIIArt(isPortable: boolean, launchCount: number): string;
+declare const _default$4: {
+	readonly getASCIIArt: typeof getASCIIArt;
+};
+declare const _default$5: {
+	readonly BrowserStorageKey: "kaedeBrowserDB";
+	readonly BrowserStorageStoreKey: "storage";
+	readonly LogInfo: {
+		readonly delimiter: " | ";
+		readonly levels: {
+			readonly "1": "TRACE";
+			readonly "2": "DEBUG";
+			readonly "3": "INFO";
+			readonly "4": "WARN";
+			readonly "5": "ERROR";
+		};
+	};
+};
+declare const AllEventListeners: {
+	readonly "all-clicks": true;
+	readonly "left-click": true;
+	readonly "middle-click": true;
+	readonly "right-click": true;
+	readonly routing: true;
+	readonly instance: true;
+};
+declare const _default$6: {
+	readonly AllEventListeners: {
+		readonly "all-clicks": true;
+		readonly "left-click": true;
+		readonly "middle-click": true;
+		readonly "right-click": true;
+		readonly routing: true;
+		readonly instance: true;
+	};
+	readonly ExtensionEvents: EventBroker;
+};
+declare const _default$7: {
+	readonly Folders: {
+		readonly Assets: {
+			readonly Path: "assets";
+			readonly Folders: {
+				readonly Indexes: {
+					readonly Path: "indexes";
+				};
+				readonly Objects: {
+					readonly Path: "objects";
+				};
+				readonly LogConfigs: {
+					readonly Path: "log_configs";
+				};
+			};
+		};
+		readonly Libraries: {
+			readonly Path: "libraries";
+		};
+		readonly Cache: {
+			readonly Path: "cache";
+			readonly Files: {
+				readonly ManifestV2: "manifest_v2.json";
+			};
+		};
+		readonly Resources: {
+			readonly Path: "resources";
+		};
+		readonly Themes: {
+			readonly Path: "themes";
+		};
+		readonly Translations: {
+			readonly Path: "translations";
+		};
+		readonly Extensions: {
+			readonly Path: "extensions";
+		};
+		readonly Instances: {
+			readonly Path: "instances";
+			readonly Folders: {
+				readonly _Entry_: {
+					readonly Folders: {
+						readonly Minecraft: {
+							readonly Path: "minecraft";
+						};
+						readonly Natives: {
+							readonly Path: "natives";
+						};
+					};
+				};
+			};
+		};
+		readonly Logs: {
+			readonly Path: "logs";
+			readonly Files: {
+				readonly LatestLog: "latest.log";
+			};
+		};
+	};
+	readonly Files: {
+		readonly Accounts: "accounts.json";
+		readonly Metadata: "instances.json";
+		readonly Config: "config.json";
+		readonly Extensions: "extensions.json";
+	};
+};
+declare const HookResponseStatus: {
+	readonly Stop: "stop";
+	readonly Continue: "continue";
+};
+declare const _default$8: {
+	readonly HookMappings: {
+		readonly translations: "onTranslationsChange";
+		readonly layout: "onLayoutChange";
+		readonly pages: "onPagesChange";
+		readonly logs: "onLogsChange";
+		readonly sidebarItems: "onSidebarItemsChange";
+		readonly contextMenuItems: "onContextMenuItemsChange";
+		readonly development: "onDevelopmentChange";
+		readonly misc: "onMiscChange";
+		readonly minecraft: "onMinecraftChange";
+		readonly extensions: "onExtensionsChange";
+	};
+	readonly HookResponseStatus: {
+		readonly Stop: "stop";
+		readonly Continue: "continue";
+	};
+	readonly ExtraHookResponseStatus: {
+		readonly ContinueLoop: "continue-hooks-loop";
+	};
+};
+declare const LaunchStatus: {
+	readonly General: {
+		readonly Starting: "general-pending-starting";
+		readonly Aborted: "general-aborted";
+		readonly Success: "general-success";
+	};
+	readonly PatchIndex: {
+		readonly Reading: "patch-index-pending-reading";
+		readonly Fetching: "patch-index-pending-fetching";
+		readonly FailedToFetch: "patch-index-error-fetch";
+		readonly FailedToParse: "patch-index-error-parse";
+		readonly FailedToValidate: "patch-index-error-validation";
+		readonly Success: "patch-index-success";
+	};
+	readonly PatchMetadata: {
+		readonly Reading: "patch-metadata-pending-reading";
+		readonly Fetching: "patch-metadata-pending-fetching";
+		readonly FailedToFetch: "patch-metadata-error-fetch";
+		readonly FailedToParse: "patch-metadata-error-parse";
+		readonly FailedToValidate: "patch-metadata-error-validation";
+		readonly Success: "patch-metadata-success";
+	};
+	readonly AssetIndex: {
+		readonly Reading: "asset-index-pending-reading";
+		readonly Fetching: "asset-index-pending-fetching";
+		readonly FailedToGet: "asset-index-error-get";
+		readonly FailedToFetch: "asset-index-error-fetch";
+		readonly FailedToParse: "asset-index-error-parse";
+		readonly FailedToValidate: "asset-index-error-validation";
+		readonly Success: "asset-index-success";
+	};
+	readonly AssetObjects: {
+		readonly Success: "asset-objects-success";
+	};
+	readonly Libraries: {
+		readonly FailedToValidate: "libraries-error-validation";
+		readonly Success: "libraries-success";
+	};
+	readonly Logging: {
+		readonly Checking: "logging-checking";
+		readonly FailedToParse: "logging-error-parse";
+		readonly Success: "logging-success";
+	};
+	readonly Client: {
+		readonly Checking: "client-checking";
+		readonly FailedToParse: "client-error-parse";
+		readonly Success: "client-success";
+	};
+	readonly Errors: {
+		readonly UnhandledError: "errors-unhandled-error";
+		readonly IncompatiblePlatform: "errors-incompatible-platform";
+		readonly IncompatibleArch: "errors-incompatible-arch";
+	};
+};
+declare const _default$9: {
+	readonly DefaultInstanceIcon: "https://minecraft.wiki/images/Minecraft_Preview_App_Store_icon_2.png";
+	readonly DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions">;
+	readonly JVMArguments: {
+		readonly Default: {
+			readonly Log4J: "-Dlog4j2.formatMsgNoLookups=true";
+			readonly SystemProxies: "-Djava.net.useSystemProxiestrue";
+			readonly FMLIgnoreCertificates: "-Dfml.ignoreInvalidMinecraftCertificates=true";
+			readonly FMLIgnorePatchDiscrepancies: "-Dfml.ignorePatchDiscrepancies=true";
+			readonly LibrariesDirectory: "-DlibraryDirectory=${libraries_directory}";
+			readonly NativesPath: "-Djava.library.path=${natives_directory}";
+			readonly ClientJAR: "-Dminecraft.client.jar=${main_jar_path}";
+			readonly TemporaryNativesPath: "-Djna.tmpdir=${natives_directory}";
+			readonly SharedLibraryExtractPath: "-Dorg.lwjgl.system.SharedLibraryExtractPath=${natives_directory}";
+			readonly NettyWorkingDirectory: "-Dio.netty.native.workdir=${natives_directory}";
+			readonly LauncherBrand: "-Dminecraft.launcher.brand=${launcher_name}";
+			readonly LauncherVersion: "-Dminecraft.launcher.version=${launcher_version}";
+			readonly UserLanguage: "-Duser.language=en";
+		};
+		readonly WindowsNonIterable: {
+			readonly DosName: "-Dos.name=Windows 10";
+			readonly DosVersion: "-Dos.version=10.0";
+			readonly MojangTricks: "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump";
+		};
+		readonly MacOSNonIterable: {
+			readonly FirstThread: "-XstartOnFirstThread";
+		};
+		readonly LinuxNonIterable: {};
+	};
+	readonly LaunchStatus: {
+		readonly General: {
+			readonly Starting: "general-pending-starting";
+			readonly Aborted: "general-aborted";
+			readonly Success: "general-success";
+		};
+		readonly PatchIndex: {
+			readonly Reading: "patch-index-pending-reading";
+			readonly Fetching: "patch-index-pending-fetching";
+			readonly FailedToFetch: "patch-index-error-fetch";
+			readonly FailedToParse: "patch-index-error-parse";
+			readonly FailedToValidate: "patch-index-error-validation";
+			readonly Success: "patch-index-success";
+		};
+		readonly PatchMetadata: {
+			readonly Reading: "patch-metadata-pending-reading";
+			readonly Fetching: "patch-metadata-pending-fetching";
+			readonly FailedToFetch: "patch-metadata-error-fetch";
+			readonly FailedToParse: "patch-metadata-error-parse";
+			readonly FailedToValidate: "patch-metadata-error-validation";
+			readonly Success: "patch-metadata-success";
+		};
+		readonly AssetIndex: {
+			readonly Reading: "asset-index-pending-reading";
+			readonly Fetching: "asset-index-pending-fetching";
+			readonly FailedToGet: "asset-index-error-get";
+			readonly FailedToFetch: "asset-index-error-fetch";
+			readonly FailedToParse: "asset-index-error-parse";
+			readonly FailedToValidate: "asset-index-error-validation";
+			readonly Success: "asset-index-success";
+		};
+		readonly AssetObjects: {
+			readonly Success: "asset-objects-success";
+		};
+		readonly Libraries: {
+			readonly FailedToValidate: "libraries-error-validation";
+			readonly Success: "libraries-success";
+		};
+		readonly Logging: {
+			readonly Checking: "logging-checking";
+			readonly FailedToParse: "logging-error-parse";
+			readonly Success: "logging-success";
+		};
+		readonly Client: {
+			readonly Checking: "client-checking";
+			readonly FailedToParse: "client-error-parse";
+			readonly Success: "client-success";
+		};
+		readonly Errors: {
+			readonly UnhandledError: "errors-unhandled-error";
+			readonly IncompatiblePlatform: "errors-incompatible-platform";
+			readonly IncompatibleArch: "errors-incompatible-arch";
+		};
+	};
+	readonly APIEndpoints: {
+		readonly KaedeCache: {
+			readonly Base: "https://raw.githubusercontent.com/kaede-basement/cache/main/";
+			readonly Paths: {
+				readonly OptiFine: {
+					readonly Id: "optifine.OptiFine";
+					readonly Base: "optifine.OptiFine/";
+				};
+			};
+		};
+		readonly Meta: {
+			readonly Base: "https://meta.prismlauncher.org/v1/";
+			readonly Paths: {
+				readonly Minecraft: {
+					readonly Id: "net.minecraft";
+					readonly Base: "net.minecraft/";
+				};
+			};
+		};
+		readonly Libraries: {
+			readonly Base: "https://libraries.minecraft.net/";
+		};
+		readonly Resources: {
+			readonly Base: "https://resources.download.minecraft.net/";
+		};
+	};
+	readonly GeneralSettings: {
+		readonly ConcurrentDownloads: {
+			readonly Assets: 64;
+			readonly Libraries: 8;
+		};
+		readonly Logs: {
+			readonly LineLimit: 65536;
+		};
+	};
+};
+export type KaedeConstantsType = {
+	/**
+	 * Application constants
+	 */
+	"Application": typeof _default$3;
+	/**
+	 * Includes a default ASCII art generator
+	 */
+	"ASCIIArt": typeof _default$4;
+	/**
+	 * Constants related to the 'Browser' lib in 'libs' (non-application)
+	 */
+	"Browser": typeof _default$5;
+	/**
+	 * Event listeners for the sandboxed plugins
+	 */
+	"EventListeners": typeof _default$6;
+	/**
+	 * Launcher file structure
+	 */
+	"FileStructure": typeof _default$7;
+	/**
+	 * Useful objects for the extension system hooks
+	 */
+	"Hooks": typeof _default$8;
+	/**
+	 * Minecraft launch related constants
+	 */
+	"Launcher": typeof _default$9;
+	/**
+	 * Launcher meta related constants
+	 */
+	"Meta": typeof _default$1;
+	/**
+	 * Useful objects for the sandboxed permission system
+	 */
+	"Permissions": typeof _default;
+	/**
+	 * Constants related to the application pages
+	 */
+	"Routes": typeof _default$2;
+};
+export type ExtensionResponseStatusType = typeof HookResponseStatus;
+export type ExtensionStatusType = ExtensionResponseStatusType[keyof ExtensionResponseStatusType];
+export type ExtensionHookResponseType<ResponseType> = ResponseType extends "nothing" ? void : {
+	"status": ExtensionStatusType;
+	"response": ResponseType | Promise<ResponseType>;
+};
+/**
+ * Used in '/src/declarations.ts'.
+ * All hooks are either async or sync, and they are stored in the array to allow multiple hooks
+ */
+export type HookReturnType<ArgumentsType, ResponseType, IsPromise extends ("promise" | "non-promise") = "promise"> = Array<(...arguments_: ArgumentsType[]) => (IsPromise extends "promise" ? Promise<ExtensionHookResponseType<ResponseType>> : ExtensionHookResponseType<ResponseType>)>;
+export type ConfigurationAndStateHooksType = {
+	/**
+	 * Executed on the config retrieve
+	 */
+	"onConfigFileGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before the config was read.
+		 *
+		 * @param input - a string that represents absolute pathname of the config file
+		 *                is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'ConfigType' type
+		 *                 in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<string, ConfigType>;
+		/**
+		 * Executes 'async' or 'sync' functions after the config was read, parsed, and validated.
+		 *
+		 * @param input - an object that has the 'ConfigType' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'ConfigType' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * it may add properties to the passed config argument or do nothing.
+		 */
+		"after": HookReturnType<ConfigType, ConfigType>;
+	};
+	/**
+	 * Executed on the default config retrieve
+	 */
+	"onDefaultConfigGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before the default config was returned.
+		 *
+		 * No arguments.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'ConfigType' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<unknown, ConfigType>;
+	};
+	/**
+	 * Executed on the translations replacement in global states
+	 */
+	"onTranslationsChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'translations' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'TranslationsType' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'TranslationsType' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<TranslationsType, TranslationsType, "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'translations' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'TranslationsType' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<TranslationsType, "nothing">;
+	};
+	/**
+	 * Executed on the 'layout' field replacement in global states
+	 */
+	"onLayoutChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'layout' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["layout"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["layout"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["layout"], GlobalStatesType["layout"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'layout' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["layout"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["layout"], "nothing">;
+	};
+	/**
+	 * Executed on the 'pages' field replacement in global states
+	 */
+	"onPagesChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'pages' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["pages"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["pages"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["pages"], GlobalStatesType["pages"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'pages' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["pages"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["pages"], "nothing">;
+	};
+	/**
+	 * Executed on the 'logs' field replacement in global states
+	 */
+	"onLogsChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'logs' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["logs"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["logs"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["logs"], GlobalStatesType["logs"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'logs' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["logs"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["logs"], "nothing">;
+	};
+	/**
+	 * Executed on the 'sidebarItems' field replacement in global states
+	 */
+	"onSidebarItemsChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'sidebarItems' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["sidebarItems"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["sidebarItems"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["sidebarItems"], GlobalStatesType["sidebarItems"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'sidebarItems' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["sidebarItems"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["sidebarItems"], "nothing">;
+	};
+	/**
+	 * Executed on the 'contextMenuItems' field replacement in global states
+	 */
+	"onContextMenuItemsChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'contextMenuItems' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["contextMenuItems"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["contextMenuItems"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["contextMenuItems"], GlobalStatesType["contextMenuItems"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'contextMenuItems' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["contextMenuItems"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["contextMenuItems"], "nothing">;
+	};
+	/**
+	 * Executed on the 'development' field replacement in global states
+	 */
+	"onDevelopmentChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'development' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["development"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["development"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["development"], GlobalStatesType["development"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'development' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["development"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["development"], "nothing">;
+	};
+	/**
+	 * Executed on the 'misc' field replacement in global states
+	 */
+	"onMiscChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'misc' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["misc"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["misc"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["misc"], GlobalStatesType["misc"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'misc' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["misc"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["misc"], "nothing">;
+	};
+	/**
+	 * Executed on the 'minecraft' field replacement in global states
+	 */
+	"onMinecraftChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'minecraft' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["minecraft"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["minecraft"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["minecraft"], GlobalStatesType["minecraft"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'minecraft' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["minecraft"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["minecraft"], "nothing">;
+	};
+	/**
+	 * Executed on the 'extensions' field replacement in global states
+	 */
+	"onExtensionsChange": {
+		/**
+		 * Executes 'sync'-only functions before the 'extensions' property
+		 * in the global states will change.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["extensions"]' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'GlobalStatesType["extensions"]' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<GlobalStatesType["extensions"], GlobalStatesType["extensions"], "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the 'extensions' property in the global states has changed.
+		 *
+		 * @param input - an object that has the 'GlobalStatesType["extensions"]' type
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<GlobalStatesType["extensions"], "nothing">;
+	};
+	/**
+	 * Executed on the field addition/overwrite/deletion in instance states
+	 */
+	"onInstanceChange": {
+		/**
+		 * Executes 'sync'-only functions before the provided field
+		 * in the instance states will change.
+		 *
+		 * @param input - an object that has the 'key' and 'value' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'key' and 'value' fields
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"key": string;
+			"value": InstanceStateType;
+		}, {
+			"key": string;
+			"value": InstanceStateType;
+		}, "non-promise">;
+		/**
+		 * Executes 'async' or 'sync' functions on the next Vue tick,
+		 * after the provided field in the instance states has changed.
+		 *
+		 * @param input - an object that has the 'key' and 'value' fields
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<{
+			"key": string;
+			"value": InstanceStateType;
+		}, "nothing">;
+	};
+};
+export type MappedArtifactType = {
+	"id": string;
+	"path": string;
+	"file": string;
+	"directory": string;
+	"url": string;
+	"hash": string;
+	/**
+	 * 'library' should be both downloaded and included in the classpath
+	 * 'mavenFile' should be just downloaded
+	 * 'native' should be downloaded and extracted but not included in the classpath
+	 * 'empty' should be just included in the classpath
+	 */
+	"status"?: "library" | "mavenFile" | "native" | "empty";
+	"first"?: boolean;
+};
+export type ArgumentReplacementsType = {
+	"assets_index_name": string;
+	"assets_root": string;
+	"classpath": string;
+	"clientid": string;
+	"game_assets": string;
+	"game_directory": string;
+	"launcher_name": string;
+	"launcher_version": string;
+	"natives_directory": string;
+	"quickPlayMultiplayer": string;
+	"quickPlayPath": string;
+	"quickPlayRealms": string;
+	"quickPlaySingleplayer": string;
+	"resolution_height": string;
+	"resolution_width": string;
+	"user_properties": string;
+	"user_type": string;
+	"version_name": string;
+	"version_type": string;
+	"libraries_directory": string;
+	"main_jar_path": string;
+};
+export type ArgumentAuthReplacementsType = {
+	"auth_access_token": string;
+	"auth_player_name": string;
+	"auth_session": string;
+	"auth_uuid": string;
+	"auth_xuid": string;
+};
+export type LaunchStatusObjectType = typeof LaunchStatus;
+export type LaunchKeyType = keyof LaunchStatusObjectType;
+export type LaunchStatusType = {
+	[Key in LaunchKeyType]: LaunchStatusObjectType[Key][keyof LaunchStatusObjectType[Key]];
+}[LaunchKeyType];
+export type LauncherStatusesDownloadsType = {
+	"current": import("vue").Raw<Map<string, [
+		number,
+		number
+	]>>;
+	"success": number;
+	"failed": number;
+	"total": number;
+	"cancellable": boolean;
+};
+export type LauncherStatusesType = {
+	"launching": 0 | 1 | 2;
+	"current": LaunchStatusType | undefined;
+	"downloads": LauncherStatusesDownloadsType;
+};
+export type PreLaunchInformationType = {
+	"logPrefix": string;
+	"statuses": LauncherStatusesType;
+	"platform": "windows" | "macos" | "linux";
+	"arch": "x64" | "x86" | "arm64" | "arm32";
+	"instance": InstanceStateType;
+	"cancelId": string;
+	"user": {
+		"javaBinary": string;
+		"javaMajor": number;
+		"versions": InstanceStateType["patchVersions"];
+	};
+	"directories": {
+		"base": string;
+		"instance": string;
+		"assets": string;
+		"logging": string;
+		"libraries": string;
+		"natives": string;
+		"assetIndexes": string;
+		"assetObjects": string;
+	};
+};
+export type SpecificPatchRuntimeChecksumType = {
+	"hash": string;
+	"type": string;
+};
+export type SpecificPatchRuntimeVersionType = {
+	"major": number;
+	"minor": number;
+	"security": number;
+	"build"?: number;
+	"name"?: string;
+};
+export type SpecificPatchRuntimeDownloadType = "archive" | "manifest";
+export type SpecificPatchRuntimePackageType = "jre";
+export type SpecificPatchClassifierOSType = "windows-aarch_64" | "windows-x86_64" | "linux-aarch_64" | "linux-x86_64" | "osx-aarch_64" | "osx-x86_64";
+export type SpecificPatchRuntimeOSType = "linux-arm64" | "linux-x64" | "windows-arm64" | "windows-x64" | "mac-os-arm64" | "mac-os-x64";
+export type SpecificPatchLibraryOSNameType = "linux" | "linux-arm32" | "linux-arm64" | "windows" | "windows-arm32" | "windows-arm64" | "osx-arm64" | "osx" | "linux-riscv64";
+export type SpecificPatchRuntimeVendorType = "azul" | "eclipse";
+export type SpecificPatchRuntimeType = {
+	"checksum": SpecificPatchRuntimeChecksumType;
+	"downloadType": SpecificPatchRuntimeDownloadType;
+	"name": string;
+	"packageType": SpecificPatchRuntimePackageType;
+	"releaseTime": string;
+	"runtimeOS": SpecificPatchRuntimeOSType;
+	"url": string;
+	"vendor": SpecificPatchRuntimeVendorType;
+	"version": SpecificPatchRuntimeVersionType;
+};
+export type SpecificPatchArtifactType = {
+	"sha1": string;
+	"size": number;
+	"url": string;
+	"id"?: string;
+	"path"?: string;
+};
+export type SpecificPatchClassifierKeyType = "natives-linux" | "natives-linux-${arch}" | "natives-linux-arm32" | "natives-linux-arm64" | "natives-osx" | "natives-osx-${arch}" | "natives-osx-arm64" | "natives-windows" | "natives-windows-${arch}" | "natives-macos" | "natives-macos-${arch}" | "natives-macos-arm64" | "natives-windows-32" | "natives-windows-64" | "natives-windows-arm32" | "natives-windows-arm64" | "natives-windows-x64" | "natives-windows-x86" | "natives-windows-x86_64" | "natives-linux-32" | "natives-linux-64" | "natives-linux-x64" | "natives-linux-x86" | "natives-linux-x86_64" | "natives-osx-32" | "natives-osx-64" | "natives-osx-x64" | "natives-osx-x86" | "natives-osx-x86_64" | "natives-macos-32" | "natives-macos-64" | "natives-macos-x64" | "natives-macos-x86" | "natives-macos-x86_64";
+export type SpecificPatchClassifiersType = Record<SpecificPatchClassifierKeyType, SpecificPatchArtifactType>;
+export type SpecificPatchLibraryDownloadsType = {
+	"artifact"?: SpecificPatchArtifactType;
+	"classifiers"?: SpecificPatchClassifiersType;
+};
+export type SpecificPatchLibraryActionType = "allow" | "disallow";
+export type SpecificPatchLibraryOSType = {
+	"name": SpecificPatchLibraryOSNameType;
+};
+export type SpecificPatchLibraryRuleType = {
+	"action": SpecificPatchLibraryActionType;
+	"os"?: SpecificPatchLibraryOSType;
+};
+export type SpecificPatchLibraryExtractType = {
+	"exclude": Array<string>;
+};
+export type SpecificPatchLibraryNativesType = Partial<Record<SpecificPatchLibraryOSNameType, string | undefined>>;
+export type SpecificPatchLibraryType = {
+	"name": string;
+	"downloads"?: SpecificPatchLibraryDownloadsType;
+	"extract"?: SpecificPatchLibraryExtractType;
+	"natives"?: SpecificPatchLibraryNativesType;
+	"rules"?: Array<SpecificPatchLibraryRuleType>;
+	"url"?: string;
+	"MMC-hint"?: string;
+};
+export type SpecificPatchAssetIndexType = {
+	"id": string;
+	"sha1": string;
+	"size": number;
+	"url": string;
+	"totalSize"?: number;
+};
+export type SpecificPatchLoggingType = {
+	"argument": string;
+	"file": SpecificPatchAssetIndexType;
+	"type": string;
+};
+export type SpecificPatchMainJarType = {
+	"downloads": {
+		"artifact": {
+			"sha1": string;
+			"size": number;
+			"url": string;
+		};
+	};
+	"name": string;
+};
+export type SpecificPatchMetaType = {
+	"formatVersion": number;
+	"name": string;
+	"releaseTime"?: string;
+	"uid": PatchUIDType;
+	"version": string;
+	"+agents"?: Array<Partial<{
+		"argument": string;
+	}>>;
+	"+libraries"?: Array<SpecificPatchLibraryType>;
+	"+traits"?: Array<string>;
+	"+tweakers"?: Array<string>;
+	"+jvmArgs"?: Array<string>;
+	"assetIndex"?: SpecificPatchAssetIndexType;
+	"compatibleJavaMajors"?: Array<number>;
+	"compatibleJavaName"?: string;
+	"conflicts"?: Array<PatchDependencyType>;
+	"libraries"?: Array<SpecificPatchLibraryType>;
+	"logging"?: SpecificPatchLoggingType;
+	"mainClass"?: string;
+	"mainJar"?: SpecificPatchMainJarType;
+	"mavenFiles"?: Array<SpecificPatchLibraryType>;
+	"minecraftArguments"?: string;
+	"order"?: number;
+	"requires"?: Array<PatchDependencyType>;
+	"runtimes"?: Array<SpecificPatchRuntimeType>;
+	"type"?: PatchVariantType;
+	"volatile"?: boolean;
+};
+export type LaunchArgumentHooksType = {
+	/**
+	 * Executed on a shell command name get
+	 */
+	"onJavaBinaryGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'instanceId', 'necessaries',
+		 * 'versionMeta', and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents the shell command name
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+		}, string>;
+	};
+	/**
+	 * Executed on JVM arguments get
+	 */
+	"onJVMArgumentsGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'instanceId', 'necessaries',
+		 * 'versionMeta', 'jvmArguments', and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents the JVM arguments
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"jvmArguments": Array<string>;
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+		}, string>;
+		/**
+		 * Executes 'async' or 'sync' functions after the JVM arguments were collected.
+		 *
+		 * @param input - an object that has the 'instanceId', 'necessaries',
+		 * 'versionMeta', and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents the JVM arguments
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<{
+			"jvmArguments": Array<string>;
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+		}, string>;
+	};
+	/**
+	 * Executed on classpaths get
+	 */
+	"onClassPathsGet": {
+		/**
+		 * Executes 'async' or 'sync' functions right after
+		 * acquiring merged library, native, and main jar paths.
+		 *
+		 * @param input - an object that has the 'instanceId', 'necessaries',
+		 * 'versionMeta', 'mergedPaths', and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the argument string and classpaths string
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"mergedPaths": Array<string>;
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+		}, {
+			"argument": string;
+			"classPaths": string;
+		}>;
+	};
+	/**
+	 * Executed on game arguments get
+	 */
+	"onGameArgumentsGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'instanceId', 'necessaries',
+		 * 'versionMeta', and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents the game arguments
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+		}, string>;
+		/**
+		 * Executes 'async' or 'sync' functions after the MultiMC tweakers were added.
+		 *
+		 * @param input - an object that has the 'argumentsWithTweakers', 'instanceId',
+		 * 'necessaries', 'versionMeta', and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents the game arguments
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<{
+			"argumentsWithTweakers": Array<string>;
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+		}, string>;
+	};
+	/**
+	 * Executed on additional start arguments get.
+	 * For example, '/C javaw' for the 'cmd' command
+	 */
+	"onAdditionalStartArgumentsGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'instanceId', 'necessaries',
+		 * 'versionMeta', 'javaBinary', and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents additional commands before JVM arguments
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"jvmArguments": Array<string>;
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+		}, string>;
+	};
+	/**
+	 * Executed on argument placeholders replace in the launch command
+	 */
+	"onLaunchArgumentsReplace": {
+		/**
+		 * Executes 'sync'-only functions before making a regex replacements (no auth)
+		 *
+		 * @param input - an object that has the 'auth', 'replacements', 'builtLaunchArguments',
+		 * 'instanceId', 'necessaries', 'versionMeta', 'parsed', and 'javaBinary' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents the final launch command
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"auth": {
+				"username": string;
+				/**
+				 * Scary!
+				 */
+				"token": string;
+				"uuid": string;
+				"type": string;
+			};
+			"replacements": ArgumentReplacementsType;
+			"builtLaunchArguments": {
+				"toReplace": string;
+				"classPaths": string;
+			};
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+			"javaBinary": string;
+		}, string, "non-promise">;
+		/**
+		 * Executes 'sync'-only functions before making an auth regex replacements,
+		 * but after the non-auth regex replacements
+		 *
+		 * @param input - an object that has the 'auth', 'authReplacements',
+		 * 'replacements', 'builtLaunchArguments', 'instanceId',
+		 * 'necessaries', 'versionMeta', 'parsed', and 'javaBinary' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a string that represents the final launch command
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<{
+			"auth": {
+				"username": string;
+				/**
+				 * Scary!
+				 */
+				"token": string;
+				"uuid": string;
+				"type": string;
+			};
+			"replacements": ArgumentReplacementsType;
+			"authReplacements": ArgumentAuthReplacementsType;
+			"builtLaunchArguments": {
+				"toReplace": string;
+				"classPaths": string;
+			};
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+			"javaBinary": string;
+		}, string, "non-promise">;
+	};
+};
+export type LaunchProcessHooksType = {
+	/**
+	 * Executed on minecraft instance launch
+	 */
+	"onMinecraftLaunch": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'command', 'auth',
+		 * 'builtLaunchArguments', 'instanceId', 'necessaries',
+		 * 'parsed', 'versionMeta', and 'javaBinary' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a 'void'
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"command": [
+				string,
+				string
+			];
+			"auth": {
+				"username": string;
+				/**
+				 * Scary!
+				 */
+				"token": string;
+				"uuid": string;
+				"type": string;
+			};
+			"builtLaunchArguments": {
+				"toReplace": string;
+				"classPaths": string;
+			};
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+			"javaBinary": string;
+		}, void>;
+		/**
+		 * Executes 'async' or 'sync' functions after the minecraft instance was launched.
+		 *
+		 * @param input - an object that has the 'process', 'command', 'auth',
+		 * 'builtLaunchArguments', 'instanceId', 'necessaries',
+		 * 'parsed', 'versionMeta', and 'javaBinary' fields
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<{
+			"process": BrokerProcess;
+			"command": [
+				string,
+				string
+			];
+			"auth": {
+				"username": string;
+				/**
+				 * Scary!
+				 */
+				"token": string;
+				"uuid": string;
+				"type": string;
+			};
+			"builtLaunchArguments": {
+				"toReplace": string;
+				"classPaths": string;
+			};
+			"instanceId": string;
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+			"parsed": Array<MappedArtifactType>;
+			"javaBinary": string;
+		}, "nothing">;
+	};
+	/**
+	 * Executed on minecraft instance kill
+	 */
+	"onMinecraftKill": {
+		/**
+		 * Executes 'async' or 'sync' functions before the instance was killed.
+		 *
+		 * @param input - an object that has the 'pid' and 'kill' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a 'void'
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<BrokerProcess, void>;
+		/**
+		 * Executes 'async' or 'sync' functions after the instance was killed.
+		 *
+		 * @param input - an instance process id number
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<number, "nothing">;
+	};
+	"onMinecraftPatchResolve": {
+		"before": [
+		];
+		"after": [
+		];
+	};
+};
+export type MinecraftPreparationHooksType = {
+	/**
+	 * Executed in the very beginning of the instance launch
+	 */
+	"onPreLaunchInformation": {
+		/**
+		 * Executes 'sync'-only functions before any information reads.
+		 *
+		 * @param input - an object that has the 'statuses' and 'instanceId' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'PreLaunchInformationType | false' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"statuses": LauncherStatusesType;
+			"instanceId": string;
+		}, PreLaunchInformationType | false, "non-promise">;
+		/**
+		 * Executes 'sync'-only functions after all necessary information
+		 * was read and validated. If the validation fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'PreLaunchInformationType | false' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'PreLaunchInformationType | false' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<PreLaunchInformationType | false, PreLaunchInformationType | false, "non-promise">;
+	};
+	/**
+	 * Executed on libraries and natives parsing
+	 */
+	"onLibrariesParsing": {
+		/**
+		 * Executes 'sync'-only functions before any actions.
+		 *
+		 * @param input - an object that has the 'necessaries' and 'libraries' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'LibraryArtifactsType' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"libraries": Array<SpecificPatchLibraryType>;
+		}, Array<MappedArtifactType>, "non-promise">;
+		/**
+		 * Executes 'sync'-only functions after all libraries and natives are parsed.
+		 *
+		 * @param input - an object that has the 'necessaries', 'unparsed',
+		 * and 'parsed' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'LibraryArtifactsType' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"unparsed": Array<SpecificPatchLibraryType>;
+			"parsed": Array<MappedArtifactType>;
+		}, Array<MappedArtifactType>, "non-promise">;
+	};
+	/**
+	 * Executed on version meta get
+	 */
+	"onVersionMeta": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'PreLaunchInformationType' type
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'SpecificPatchMetaType | false' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<PreLaunchInformationType, SpecificPatchMetaType | false>;
+		/**
+		 * Executes 'async' or 'sync' functions after the minecraft version meta
+		 * was read and validated. If the validation fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'necessaries' and 'minecraftVersionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'SpecificPatchMetaType | false' type
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"minecraftVersionMeta": SpecificPatchMetaType | false;
+		}, SpecificPatchMetaType | false>;
+	};
+	/**
+	 * Executed on minecraft assets downloading/verifying
+	 */
+	"onMinecraftAssetsGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'necessaries' and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a boolean (where 'true' is success and 'false' is fail)
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+		}, boolean>;
+		/**
+		 * Executes 'async' or 'sync' functions after the minecraft version meta
+		 * was read and validated. If the validation fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'necessaries' and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a boolean (where 'true' is success and 'false' is fail)
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+		}, boolean>;
+	};
+	/**
+	 * Executed on prism launcher patches downloading/verifying
+	 */
+	"onMinecraftPatchesGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'necessaries' and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'LibraryArtifactsType' type
+		 * or 'false' in case of a fail
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"versionMeta": SpecificPatchMetaType;
+		}, Array<MappedArtifactType> | false>;
+		/**
+		 * Executes 'async' or 'sync' functions after the prism launcher patches
+		 * were handled. If the handling fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'necessaries', 'results',
+		 * and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - an object that has the 'LibraryArtifactsType' type
+		 * or 'false' in case of a fail
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"results": Array<MappedArtifactType>;
+			"versionMeta": SpecificPatchMetaType;
+		}, Array<MappedArtifactType> | false>;
+	};
+	/**
+	 * Executed on minecraft main jar downloading/verifying
+	 */
+	"onMinecraftClientGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'necessaries', 'client',
+		 * and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a 'void'
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"client": MappedArtifactType;
+			"versionMeta": SpecificPatchMetaType;
+		}, void>;
+		/**
+		 * Executes 'async' or 'sync' functions after the minecraft main jar
+		 * was downloaded/validated. If the download/validation fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'necessaries', 'client',
+		 * and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"client": MappedArtifactType;
+			"versionMeta": SpecificPatchMetaType;
+		}, "nothing">;
+	};
+	/**
+	 * Executed on minecraft logging downloading/verifying
+	 */
+	"onMinecraftLoggingGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'necessaries', 'logging',
+		 * and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a 'void'
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"logging": MappedArtifactType & {
+				"argument": string;
+			};
+			"versionMeta": SpecificPatchMetaType;
+		}, void>;
+		/**
+		 * Executes 'async' or 'sync' functions after the minecraft logging config
+		 * was downloaded/verified. If the download/verification fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'necessaries', 'logging',
+		 * and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"logging": MappedArtifactType & {
+				"argument": string;
+			};
+			"versionMeta": SpecificPatchMetaType;
+		}, "nothing">;
+	};
+	/**
+	 * Executed on minecraft libraries downloading/verifying
+	 */
+	"onMinecraftLibrariesGet": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'necessaries', 'libraries',
+		 * 'natives', and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a 'void'
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"libraries": Array<MappedArtifactType>;
+			"natives": Array<MappedArtifactType>;
+			"versionMeta": SpecificPatchMetaType;
+		}, void>;
+		/**
+		 * Executes 'async' or 'sync' functions after the minecraft libraries were
+		 * downloaded/verified. If the download/verification fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'necessaries', 'libraries',
+		 * 'natives', and 'versionMeta' fields
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"libraries": Array<MappedArtifactType>;
+			"natives": Array<MappedArtifactType>;
+			"versionMeta": SpecificPatchMetaType;
+		}, "nothing">;
+	};
+	/**
+	 * Executed on minecraft natives extraction
+	 */
+	"onNativesExtract": {
+		/**
+		 * Executes 'async' or 'sync' functions before any actions.
+		 *
+		 * @param input - an object that has the 'necessaries' and 'paths' fields
+		 * is passed as the argument.
+		 *
+		 * If the hook returns a 'stop' status,
+		 * it should also return:
+		 * @param output - a 'void'
+		 * in the 'response' field.
+		 *
+		 * If the hook returns a 'continue' status,
+		 * code execution will continue as if that hook did not exist.
+		 */
+		"before": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"paths": Array<string>;
+		}, void>;
+		/**
+		 * Executes 'async' or 'sync' functions after the minecraft libraries were
+		 * downloaded/verified. If the download/verification fails, these hooks will not fire.
+		 *
+		 * @param input - an object that has the 'necessaries' and 'paths' fields
+		 * is passed as the argument.
+		 *
+		 * Hook should not return anything since the response will not be read.
+		 */
+		"after": HookReturnType<{
+			"necessaries": PreLaunchInformationType;
+			"paths": Array<string>;
+		}, "nothing">;
+	};
+};
+export type KaedeHooksType = ConfigurationAndStateHooksType & MinecraftPreparationHooksType & LaunchArgumentHooksType & LaunchProcessHooksType;
+declare const Browser: {
+	readonly detectIsBrowser: () => boolean;
+	readonly handleLogsFlush: () => void;
+	readonly readStoragePath: (path: string) => Promise<string>;
+	readonly writeToStoragePath: (path: string, value: string | Uint8Array) => Promise<void>;
+};
 declare function getAccounts(properties?: Partial<{
 	"baseDirectory": string;
 	"parsedFile": ParsedFile;
 }>): Promise<Array<AccountType>>;
-export type ConfigType = Pick<GlobalStatesType, "development" | "extensions" | "layout" | "logs" | "minecraft" | "misc">;
 declare function getCachedInitial(): ConfigType;
 declare function getConfigFile(properties?: Partial<{
 	"baseDirectory": string;
@@ -1575,17 +3019,6 @@ declare function catchSyncVoidHooks({ scope, toPass, timing, }: {
 	"toPass": unknown;
 	"timing": "before" | "after";
 }): void;
-export type ExtensionResponseStatusType = typeof HookResponseStatus;
-export type ExtensionStatusType = ExtensionResponseStatusType[keyof ExtensionResponseStatusType];
-export type ExtensionHookResponseType<ResponseType> = ResponseType extends "nothing" ? void : {
-	"status": ExtensionStatusType;
-	"response": ResponseType | Promise<ResponseType>;
-};
-/**
- * Used in '/src/declarations.ts'.
- * All hooks are either async or sync, and they are stored in the array to allow multiple hooks
- */
-export type HookReturnType<ArgumentsType, ResponseType, IsPromise extends ("promise" | "non-promise") = "promise"> = Array<(...arguments_: ArgumentsType[]) => (IsPromise extends "promise" ? Promise<ExtensionHookResponseType<ResponseType>> : ExtensionHookResponseType<ResponseType>)>;
 declare function handleHookResponse<T>({ scope, status, response, timing, index, times, }: {
 	"scope": keyof KaedeNamespaceType["hooks"];
 	"status": ExtensionStatusType;
@@ -1642,26 +3075,6 @@ declare const _default$13: {
 declare function cachedJoin(...paths: Array<string>): string;
 declare function capitalize(input: string): string;
 declare function checkDaysDifference(from: Date, to: Date): number;
-export type LaunchStatusObjectType = typeof LaunchStatus;
-export type LaunchKeyType = keyof LaunchStatusObjectType;
-export type LaunchStatusType = {
-	[Key in LaunchKeyType]: LaunchStatusObjectType[Key][keyof LaunchStatusObjectType[Key]];
-}[LaunchKeyType];
-export type LauncherStatusesDownloadsType = {
-	"current": import("vue").Raw<Map<string, [
-		number,
-		number
-	]>>;
-	"success": number;
-	"failed": number;
-	"total": number;
-	"cancellable": boolean;
-};
-export type LauncherStatusesType = {
-	"launching": 0 | 1 | 2;
-	"current": LaunchStatusType | undefined;
-	"downloads": LauncherStatusesDownloadsType;
-};
 declare function concurrentlyDownload({ concurrency, entries, statuses, label, cancelId, }: {
 	"concurrency": number;
 	"entries": ReadonlyArray<Readonly<{
@@ -1677,10 +3090,6 @@ export type FinalizeInitializationInput = Readonly<{
 	"baseDirectory": string;
 }>;
 declare function gcd(a: number, b: number): number;
-export type AtAGlanceType = {
-	"title": string;
-	"subtitle": string;
-};
 declare function getAtAGlance(currentTitle?: string): AtAGlanceType;
 declare function getBaseDirectory(): string;
 declare function getCachedBaseDirectory(): string;
@@ -1829,158 +3238,6 @@ declare const _default$15: {
 	readonly extractSavedFromPages: typeof extractSavedFromPages;
 	readonly getMinecraftDirectory: typeof getMinecraftDirectory;
 	readonly findCurrent: typeof findCurrent;
-};
-export type PreLaunchInformationType = {
-	"logPrefix": string;
-	"statuses": LauncherStatusesType;
-	"platform": "windows" | "macos" | "linux";
-	"arch": "x64" | "x86" | "arm64" | "arm32";
-	"instance": InstanceStateType;
-	"cancelId": string;
-	"user": {
-		"javaBinary": string;
-		"javaMajor": number;
-		"versions": InstanceStateType["patchVersions"];
-	};
-	"directories": {
-		"base": string;
-		"instance": string;
-		"assets": string;
-		"logging": string;
-		"libraries": string;
-		"natives": string;
-		"assetIndexes": string;
-		"assetObjects": string;
-	};
-};
-export type MappedArtifactType = {
-	"id": string;
-	"path": string;
-	"file": string;
-	"directory": string;
-	"url": string;
-	"hash": string | "ignore";
-	/**
-	 * 'library' should be both downloaded and included in the classpath
-	 * 'mavenFile' should be just downloaded
-	 * 'native' should be downloaded and extracted but not included in the classpath
-	 * 'empty' should be just included in the classpath
-	 */
-	"status"?: "library" | "mavenFile" | "native" | "empty";
-	"first"?: boolean;
-};
-export type SpecificPatchRuntimeChecksumType = {
-	"hash": string;
-	"type": string;
-};
-export type SpecificPatchRuntimeVersionType = {
-	"major": number;
-	"minor": number;
-	"security": number;
-	"build"?: number;
-	"name"?: string;
-};
-export type SpecificPatchRuntimeDownloadType = "archive" | "manifest";
-export type SpecificPatchRuntimePackageType = "jre";
-export type SpecificPatchClassifierOSType = "windows-aarch_64" | "windows-x86_64" | "linux-aarch_64" | "linux-x86_64" | "osx-aarch_64" | "osx-x86_64";
-export type SpecificPatchRuntimeOSType = "linux-arm64" | "linux-x64" | "windows-arm64" | "windows-x64" | "mac-os-arm64" | "mac-os-x64";
-export type SpecificPatchLibraryOSNameType = "linux" | "linux-arm32" | "linux-arm64" | "windows" | "windows-arm32" | "windows-arm64" | "osx-arm64" | "osx" | "linux-riscv64";
-export type SpecificPatchRuntimeVendorType = "azul" | "eclipse";
-export type SpecificPatchRuntimeType = {
-	"checksum": SpecificPatchRuntimeChecksumType;
-	"downloadType": SpecificPatchRuntimeDownloadType;
-	"name": string;
-	"packageType": SpecificPatchRuntimePackageType;
-	"releaseTime": string;
-	"runtimeOS": SpecificPatchRuntimeOSType;
-	"url": string;
-	"vendor": SpecificPatchRuntimeVendorType;
-	"version": SpecificPatchRuntimeVersionType;
-};
-export type SpecificPatchArtifactType = {
-	"sha1": string;
-	"size": number;
-	"url": string;
-	"id"?: string;
-	"path"?: string;
-};
-export type SpecificPatchClassifierKeyType = "natives-linux" | "natives-linux-${arch}" | "natives-linux-arm32" | "natives-linux-arm64" | "natives-osx" | "natives-osx-${arch}" | "natives-osx-arm64" | "natives-windows" | "natives-windows-${arch}" | "natives-macos" | "natives-macos-${arch}" | "natives-macos-arm64" | "natives-windows-32" | "natives-windows-64" | "natives-windows-arm32" | "natives-windows-arm64" | "natives-windows-x64" | "natives-windows-x86" | "natives-windows-x86_64" | "natives-linux-32" | "natives-linux-64" | "natives-linux-x64" | "natives-linux-x86" | "natives-linux-x86_64" | "natives-osx-32" | "natives-osx-64" | "natives-osx-x64" | "natives-osx-x86" | "natives-osx-x86_64" | "natives-macos-32" | "natives-macos-64" | "natives-macos-x64" | "natives-macos-x86" | "natives-macos-x86_64";
-export type SpecificPatchClassifiersType = Record<SpecificPatchClassifierKeyType, SpecificPatchArtifactType>;
-export type SpecificPatchLibraryDownloadsType = {
-	"artifact"?: SpecificPatchArtifactType;
-	"classifiers"?: SpecificPatchClassifiersType;
-};
-export type SpecificPatchLibraryActionType = "allow" | "disallow";
-export type SpecificPatchLibraryOSType = {
-	"name": SpecificPatchLibraryOSNameType;
-};
-export type SpecificPatchLibraryRuleType = {
-	"action": SpecificPatchLibraryActionType;
-	"os"?: SpecificPatchLibraryOSType;
-};
-export type SpecificPatchLibraryExtractType = {
-	"exclude": Array<string>;
-};
-export type SpecificPatchLibraryNativesType = Partial<Record<SpecificPatchLibraryOSNameType, string | undefined>>;
-export type SpecificPatchLibraryType = {
-	"name": string;
-	"downloads"?: SpecificPatchLibraryDownloadsType;
-	"extract"?: SpecificPatchLibraryExtractType;
-	"natives"?: SpecificPatchLibraryNativesType;
-	"rules"?: Array<SpecificPatchLibraryRuleType>;
-	"url"?: string;
-	"MMC-hint"?: string;
-};
-export type SpecificPatchAssetIndexType = {
-	"id": string;
-	"sha1": string;
-	"size": number;
-	"url": string;
-	"totalSize"?: number;
-};
-export type SpecificPatchLoggingType = {
-	"argument": string;
-	"file": SpecificPatchAssetIndexType;
-	"type": string;
-};
-export type SpecificPatchMainJarType = {
-	"downloads": {
-		"artifact": {
-			"sha1": string;
-			"size": number;
-			"url": string;
-		};
-	};
-	"name": string;
-};
-export type SpecificPatchMetaType = {
-	"formatVersion": number;
-	"name": string;
-	"releaseTime"?: string;
-	"uid": PatchUIDType;
-	"version": string;
-	"+agents"?: Array<Partial<{
-		"argument": string;
-	}>>;
-	"+libraries"?: Array<SpecificPatchLibraryType>;
-	"+traits"?: Array<string>;
-	"+tweakers"?: Array<string>;
-	"+jvmArgs"?: Array<string>;
-	"assetIndex"?: SpecificPatchAssetIndexType;
-	"compatibleJavaMajors"?: Array<number>;
-	"compatibleJavaName"?: string;
-	"conflicts"?: Array<PatchDependencyType>;
-	"libraries"?: Array<SpecificPatchLibraryType>;
-	"logging"?: SpecificPatchLoggingType;
-	"mainClass"?: string;
-	"mainJar"?: SpecificPatchMainJarType;
-	"mavenFiles"?: Array<SpecificPatchLibraryType>;
-	"minecraftArguments"?: string;
-	"order"?: number;
-	"requires"?: Array<PatchDependencyType>;
-	"runtimes"?: Array<SpecificPatchRuntimeType>;
-	"type"?: PatchVariantType;
-	"volatile"?: boolean;
 };
 export type FinalizedPatchType = {
 	"+jvmArgs": Array<string>;
@@ -2395,8 +3652,8 @@ declare const _default$17: {
 		}>;
 	}>, {
 		profile: {
-			name: string;
 			type: "msa" | "offline";
+			name: string;
 			uuid: string;
 		};
 		msa: {
@@ -2411,8 +3668,8 @@ declare const _default$17: {
 		};
 	}, {
 		profile: {
-			name: string;
 			type: "msa" | "offline";
+			name: string;
 			uuid: string;
 		};
 		msa: {
@@ -2536,29 +3793,19 @@ declare const _default$17: {
 			autoConfigSync: import("typebox").TBoolean;
 		}>;
 	}>, {
-		extensions: {
-			enabled: boolean;
-		};
 		minecraft: {
-			windowHeight: number;
-			windowWidth: number;
-			icon: string;
-			javaBinary: string;
-			add: {
-				jvmArguments?: string[] | undefined;
-				gameArguments?: string[] | undefined;
-			};
 			remove: {
 				jvmArguments?: string[] | undefined;
 				gameArguments?: string[] | undefined;
 			};
-		};
-		logs: {
-			mode: string;
-			show: boolean;
-			lineBreaks: boolean;
-			virtualized: boolean;
-			filtering: string;
+			add: {
+				jvmArguments?: string[] | undefined;
+				gameArguments?: string[] | undefined;
+			};
+			icon: string;
+			javaBinary: string;
+			windowHeight: number;
+			windowWidth: number;
 		};
 		development: {
 			loadErudaDevTools: boolean;
@@ -2569,6 +3816,9 @@ declare const _default$17: {
 			enableNativeContextMenu: boolean;
 			enableNativeReloadKeyBinds: boolean;
 		};
+		extensions: {
+			enabled: boolean;
+		};
 		layout: {
 			sidebar: {
 				color: string | null;
@@ -2577,7 +3827,6 @@ declare const _default$17: {
 				ripple: string | null;
 				sparkles: string | null;
 			};
-			stats: "playtime" | "last-launch";
 			background: {
 				url: string | null;
 				color: string | null;
@@ -2585,6 +3834,7 @@ declare const _default$17: {
 				blur: number | null;
 				isVideo: boolean;
 			};
+			stats: "playtime" | "last-launch";
 			locale: string;
 			currentInstance: string | null;
 			enableMaterialYouRipple: boolean;
@@ -2593,35 +3843,32 @@ declare const _default$17: {
 				title: string | null;
 				subtitle: string | null;
 			};
+		};
+		logs: {
+			mode: string;
+			show: boolean;
+			lineBreaks: boolean;
+			virtualized: boolean;
+			filtering: string;
 		};
 		misc: {
 			showAfterExtensionsInitialization: boolean;
 			autoConfigSync: boolean;
 		};
 	}, {
-		extensions: {
-			enabled: boolean;
-		};
 		minecraft: {
-			windowHeight: number;
-			windowWidth: number;
-			icon: string;
-			javaBinary: string;
-			add: {
-				jvmArguments?: string[] | undefined;
-				gameArguments?: string[] | undefined;
-			};
 			remove: {
 				jvmArguments?: string[] | undefined;
 				gameArguments?: string[] | undefined;
 			};
-		};
-		logs: {
-			mode: string;
-			show: boolean;
-			lineBreaks: boolean;
-			virtualized: boolean;
-			filtering: string;
+			add: {
+				jvmArguments?: string[] | undefined;
+				gameArguments?: string[] | undefined;
+			};
+			icon: string;
+			javaBinary: string;
+			windowHeight: number;
+			windowWidth: number;
 		};
 		development: {
 			loadErudaDevTools: boolean;
@@ -2632,6 +3879,9 @@ declare const _default$17: {
 			enableNativeContextMenu: boolean;
 			enableNativeReloadKeyBinds: boolean;
 		};
+		extensions: {
+			enabled: boolean;
+		};
 		layout: {
 			sidebar: {
 				color: string | null;
@@ -2640,7 +3890,6 @@ declare const _default$17: {
 				ripple: string | null;
 				sparkles: string | null;
 			};
-			stats: "playtime" | "last-launch";
 			background: {
 				url: string | null;
 				color: string | null;
@@ -2648,6 +3897,7 @@ declare const _default$17: {
 				blur: number | null;
 				isVideo: boolean;
 			};
+			stats: "playtime" | "last-launch";
 			locale: string;
 			currentInstance: string | null;
 			enableMaterialYouRipple: boolean;
@@ -2656,6 +3906,13 @@ declare const _default$17: {
 				title: string | null;
 				subtitle: string | null;
 			};
+		};
+		logs: {
+			mode: string;
+			show: boolean;
+			lineBreaks: boolean;
+			virtualized: boolean;
+			filtering: string;
 		};
 		misc: {
 			showAfterExtensionsInitialization: boolean;
@@ -2693,51 +3950,51 @@ declare const _default$17: {
 			]>;
 		}>
 	]>, {
-		windowHeight: number;
-		windowWidth: number;
-		icon: string;
-		javaBinary: string;
-		add: {
-			jvmArguments?: string[] | undefined;
-			gameArguments?: string[] | undefined;
-		};
 		remove: {
 			jvmArguments?: string[] | undefined;
 			gameArguments?: string[] | undefined;
 		};
+		add: {
+			jvmArguments?: string[] | undefined;
+			gameArguments?: string[] | undefined;
+		};
+		icon: string;
+		javaBinary: string;
+		windowHeight: number;
+		windowWidth: number;
 	} & {
+		name: string;
+		entry: string;
 		patchVersions: {
 			"net.minecraft": string;
 		} & object;
-		name: string;
 		checksum: boolean;
 		playTime: number;
 		lastLaunch: number;
-		entry: string;
 		pinned: boolean;
 		groups: string[];
 	}, {
-		windowHeight: number;
-		windowWidth: number;
-		icon: string;
-		javaBinary: string;
-		add: {
-			jvmArguments?: string[] | undefined;
-			gameArguments?: string[] | undefined;
-		};
 		remove: {
 			jvmArguments?: string[] | undefined;
 			gameArguments?: string[] | undefined;
 		};
+		add: {
+			jvmArguments?: string[] | undefined;
+			gameArguments?: string[] | undefined;
+		};
+		icon: string;
+		javaBinary: string;
+		windowHeight: number;
+		windowWidth: number;
 	} & {
+		name: string;
+		entry: string;
 		patchVersions: {
 			"net.minecraft": string;
 		} & object;
-		name: string;
 		checksum: boolean;
 		playTime: number;
 		lastLaunch: number;
-		entry: string;
 		pinned: boolean;
 		groups: string[];
 	}>;
@@ -2810,9 +4067,9 @@ declare const _default$17: {
 			enabled: import("typebox").TOptional<import("typebox").TBoolean>;
 		}>
 	]>, {
-		name: string;
 		version: string;
 		type: "sandbox" | "unrestricted";
+		name: string;
 		source: string;
 		id: string;
 		logo: string;
@@ -2848,9 +4105,9 @@ declare const _default$17: {
 			};
 		})[] | undefined;
 	}, {
-		name: string;
 		version: string;
 		type: "sandbox" | "unrestricted";
+		name: string;
 		source: string;
 		id: string;
 		logo: string;
@@ -2895,13 +4152,13 @@ declare const _default$17: {
 		}>,
 		import("typebox").TObject<{}>
 	]>, {
-		name: string;
 		version: string;
+		name: string;
 		uid: string;
 		formatVersion: number;
 	} & object, {
-		name: string;
 		version: string;
+		name: string;
 		uid: string;
 		formatVersion: number;
 	} & object>;
@@ -2930,35 +4187,139 @@ declare class Txiki implements TrustedPluginServerBuilder {
 	defineGlobal(name: string, value: unknown): Txiki;
 	listen(requestedPort?: number): Promise<BrokerServerProcess | undefined>;
 }
-export type ArgumentReplacementsType = {
-	"assets_index_name": string;
-	"assets_root": string;
-	"classpath": string;
-	"clientid": string;
-	"game_assets": string;
-	"game_directory": string;
-	"launcher_name": string;
-	"launcher_version": string;
-	"natives_directory": string;
-	"quickPlayMultiplayer": string;
-	"quickPlayPath": string;
-	"quickPlayRealms": string;
-	"quickPlaySingleplayer": string;
-	"resolution_height": string;
-	"resolution_width": string;
-	"user_properties": string;
-	"user_type": string;
-	"version_name": string;
-	"version_type": string;
-	"libraries_directory": string;
-	"main_jar_path": string;
+export type KaedeLibrariesType = {
+	/**
+	 * A support for the Browser environment (non-application)
+	 */
+	"Browser": typeof Browser;
+	/**
+	 * Launcher configuration-related collection of utilities
+	 */
+	"Configs": typeof _default$10;
+	/**
+	 * Launcher development mode related collection of utilities
+	 */
+	"DevelopmentModeHelpers": typeof _default$11;
+	/**
+	 * Launcher errors-related collection of utilities
+	 */
+	"Errors": typeof _default$12;
+	/**
+	 * Launcher extension system related collection of utilities
+	 */
+	"ExtensionsManager": typeof _default$13;
+	/**
+	 * Launcher general-purpose collection of utilities
+	 */
+	"General": typeof General;
+	/**
+	 * Launcher global states related collection of utilities
+	 */
+	"GlobalStateHelpers": typeof _default$14;
+	/**
+	 * Launcher 'window' object related collection of utilities
+	 */
+	"Globals": typeof Globals;
+	/**
+	 * Launcher Minecraft instances related collection of utilities
+	 */
+	"Instances": typeof _default$15;
+	/**
+	 * Launcher Minecraft-related collection of utilities
+	 */
+	"Launcher": typeof Launcher;
+	/**
+	 * Launcher logging-related collection of utilities
+	 */
+	"Logging": typeof _default$16;
+	/**
+	 * Launcher collection of typebox validation schemas
+	 */
+	"Schemas": typeof _default$17;
+	/**
+	 * Launcher utils for extensions to conveniently run txiki.js servers
+	 */
+	"Txiki": typeof Txiki;
+	/**
+	 * Launcher context menu related collection of utilities
+	 */
+	"ContextMenu": {
+		"show": (event: MouseEvent) => void;
+		"close": () => void;
+	};
+	/**
+	 * Launcher pages-related collection of utilities
+	 */
+	"Pages": {
+		"mount": (page: Exclude<RouteType, "none">, id: string) => void;
+		"unmount": (page: Exclude<RouteType, "none">) => void;
+	};
 };
-export type ArgumentAuthReplacementsType = {
-	"auth_access_token": string;
-	"auth_player_name": string;
-	"auth_session": string;
-	"auth_uuid": string;
-	"auth_xuid": string;
+export type KaedeVariablesType = {
+	"rippleColor": string;
+	"sparklesColorRGB": string;
+	"logs": {
+		"targetCollapse": boolean;
+		"collapsedTargetLength": number;
+	};
+};
+export type KaedeNamespaceSurfaceType = {
+	/**
+	 * Exposed packages.
+	 *
+	 * Used for externalizing plugin dependencies.
+	 * Contains only Vue 3 as of now.
+	 */
+	"packages": Record<string, unknown>;
+	/**
+	 * Global constants.
+	 *
+	 * Changing any field of the listed objects
+	 * will alter behaviour of that field for everyone.
+	 *
+	 * Example:
+	 *
+	 * ```ts
+	 * // Inside a trusted plugin.
+	 * // This assignment changes the config filename for everyone,
+	 * // meaning that now the config file will be stored
+	 * // under 'config.json5' instead of 'config.json'
+	 * scopedThis.Kaede.constants.FileStructure.Files.Config = "config.json5";
+	 * ```
+	 */
+	"constants": KaedeConstantsType;
+	/**
+	 * Global utilities.
+	 *
+	 * Changing any field of the listed objects
+	 * will alter behaviour of that field for everyone.
+	 *
+	 * Example:
+	 *
+	 * ```ts
+	 * // Somewhere in a plugin
+	 * const arrayInADifferentScope: Array<unknown> = [];
+	 *
+	 * function customDebugFunction(...input: Array<unknown>): void {
+	 *   arrayInADifferentScope.push(input);
+	 * };
+	 *
+	 * // This assignment overwrites the 'debug' field in the 'log' object
+	 * // with a reference to the 'customDebugFunction' function,
+	 * // so all upcoming 'log#debug' calls will use the 'customDebugFunction' function
+	 * // even if calls were not made through the explicit trusted context
+	 * scopedThis.Kaede.libs.Logging.log.debug = customDebugFunction;
+	 * ```
+	 */
+	"libs": KaedeLibrariesType;
+	/**
+	 * Global variables that are allowed to be changed by plugins
+	 */
+	"variables": KaedeVariablesType;
+	/**
+	 * Application hooks
+	 */
+	"hooks": KaedeHooksType;
 };
 declare global {
 	const __PRE_BUNDLED_FILENAME__: string;
@@ -2968,1362 +4329,14 @@ declare global {
 		 *
 		 * This alias is absent after extension isolation and is never a sandbox API.
 		 */
-		"__KAEDE_INTERNALS__"?: {
-			"getGlobalStates": () => GlobalStatesType;
-			"changeGlobalStates": GlobalStatesChangerType;
-			"getInstanceStates": () => InstanceStatesType;
-			"changeInstanceStates": InstanceStatesChangerType;
-			"syncConfig": () => Promise<void>;
-			"joinDelimiter": string;
-			"launcherVersion": string;
-			"initialConfig": ConfigType;
-			"temporaryAccounts": Array<AccountType>;
-			"initialTranslations": TranslationsType;
-			"initialInstances": InstanceStatesType;
-			"portable": boolean;
-			"baseDirectory": string;
-			"launchCount": number;
-			"atAGlance"?: AtAGlanceType;
-			"javaMajor"?: number;
-			"appInstance"?: App<Element>;
-			"logsInBrowser": Array<string>;
-			"indexedDB"?: IDBDatabase;
-			"serverProcesses": Array<{
-				"name": string;
-				"port": number;
-				"value": BrokerServerProcess;
-			}>;
-		};
+		"__KAEDE_INTERNALS__"?: KaedeInternalsSurfaceType<App<Element>>;
 		/**
 		 * Bootstrap-only application namespace alias.
 		 *
 		 * Trusted extensions receive the namespace explicitly as `scopedThis.Kaede`.
 		 * Sandboxed extensions cannot access this optional window alias.
 		 */
-		"__KAEDE__"?: {
-			/**
-			 * Exposed packages.
-			 *
-			 * Used for externalizing plugin dependencies.
-			 * Contains only Vue 3 as of now.
-			 */
-			"packages": Record<string, unknown>;
-			/**
-			 * Global constants.
-			 *
-			 * Changing any field of the listed objects
-			 * will alter behaviour of that field for everyone.
-			 *
-			 * Example:
-			 *
-			 * ```ts
-			 * // Inside a trusted plugin.
-			 * // This assignment changes the config filename for everyone,
-			 * // meaning that now the config file will be stored
-			 * // under 'config.json5' instead of 'config.json'
-			 * scopedThis.Kaede.constants.FileStructure.Files.Config = "config.json5";
-			 * ```
-			 */
-			"constants": {
-				/**
-				 * Application constants
-				 */
-				"Application": typeof _default$2;
-				/**
-				 * Includes a default ASCII art generator
-				 */
-				"ASCIIArt": typeof _default$3;
-				/**
-				 * Constants related to the 'Browser' lib in 'libs' (non-application)
-				 */
-				"Browser": typeof _default$4;
-				/**
-				 * Event listeners for the sandboxed plugins
-				 */
-				"EventListeners": typeof _default$5;
-				/**
-				 * Launcher file structure
-				 */
-				"FileStructure": typeof _default$6;
-				/**
-				 * Useful objects for the extension system hooks
-				 */
-				"Hooks": typeof _default$7;
-				/**
-				 * Minecraft launch related constants
-				 */
-				"Launcher": typeof _default$8;
-				/**
-				 * Launcher meta related constants
-				 */
-				"Meta": typeof _default;
-				/**
-				 * Useful objects for the sandboxed permission system
-				 */
-				"Permissions": typeof _default$9;
-				/**
-				 * Constants related to the application pages
-				 */
-				"Routes": typeof _default$1;
-			};
-			/**
-			 * Global utilities.
-			 *
-			 * Changing any field of the listed objects
-			 * will alter behaviour of that field for everyone.
-			 *
-			 * Example:
-			 *
-			 * ```ts
-			 * // Somewhere in a plugin
-			 * const arrayInADifferentScope: Array<unknown> = [];
-			 *
-			 * function customDebugFunction(...input: Array<unknown>): void {
-			 *   arrayInADifferentScope.push(input);
-			 * };
-			 *
-			 * // This assignment overwrites the 'debug' field in the 'log' object
-			 * // with a reference to the 'customDebugFunction' function,
-			 * // so all upcoming 'log#debug' calls will use the 'customDebugFunction' function
-			 * // even if calls were not made through the explicit trusted context
-			 * scopedThis.Kaede.libs.Logging.log.debug = customDebugFunction;
-			 * ```
-			 */
-			"libs": {
-				/**
-				 * A support for the Browser environment (non-application)
-				 */
-				"Browser": typeof Browser;
-				/**
-				 * Launcher configuration-related collection of utilities
-				 */
-				"Configs": typeof _default$10;
-				/**
-				 * Launcher development mode related collection of utilities
-				 */
-				"DevelopmentModeHelpers": typeof _default$11;
-				/**
-				 * Launcher errors-related collection of utilities
-				 */
-				"Errors": typeof _default$12;
-				/**
-				 * Launcher extension system related collection of utilities
-				 */
-				"ExtensionsManager": typeof _default$13;
-				/**
-				 * Launcher general-purpose collection of utilities
-				 */
-				"General": typeof General;
-				/**
-				 * Launcher global states related collection of utilities
-				 */
-				"GlobalStateHelpers": typeof _default$14;
-				/**
-				 * Launcher 'window' object related collection of utilities
-				 */
-				"Globals": typeof Globals;
-				/**
-				 * Launcher Minecraft instances related collection of utilities
-				 */
-				"Instances": typeof _default$15;
-				/**
-				 * Launcher Minecraft-related collection of utilities
-				 */
-				"Launcher": typeof Launcher;
-				/**
-				 * Launcher logging-related collection of utilities
-				 */
-				"Logging": typeof _default$16;
-				/**
-				 * Launcher collection of typebox validation schemas
-				 */
-				"Schemas": typeof _default$17;
-				/**
-				 * Launcher utils for extensions to conveniently run txiki.js servers
-				 */
-				"Txiki": typeof Txiki;
-				/**
-				 * Launcher context menu related collection of utilities
-				 */
-				"ContextMenu": {
-					"show": (event: MouseEvent) => void;
-					"close": () => void;
-				};
-				/**
-				 * Launcher pages-related collection of utilities
-				 */
-				"Pages": {
-					"mount": (page: Exclude<RouteType, "none">, id: string) => void;
-					"unmount": (page: Exclude<RouteType, "none">) => void;
-				};
-			};
-			/**
-			 * Global variables that are allowed to be changed by plugins
-			 */
-			"variables": {
-				"rippleColor": string;
-				"sparklesColorRGB": string;
-				"logs": {
-					"targetCollapse": boolean;
-					"collapsedTargetLength": number;
-				};
-			};
-			/**
-			 * Application hooks
-			 */
-			"hooks": {
-				/**
-				 * Executed on the config retrieve
-				 */
-				"onConfigFileGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before the config was read.
-					 *
-					 * @param input - a string that represents absolute pathname of the config file
-					 *                is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'ConfigType' type
-					 *                 in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<string, ConfigType>;
-					/**
-					 * Executes 'async' or 'sync' functions after the config was read, parsed, and validated.
-					 *
-					 * @param input - an object that has the 'ConfigType' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'ConfigType' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * it may add properties to the passed config argument or do nothing.
-					 */
-					"after": HookReturnType<ConfigType, ConfigType>;
-				};
-				/**
-				 * Executed on the default config retrieve
-				 */
-				"onDefaultConfigGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before the default config was returned.
-					 *
-					 * No arguments.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'ConfigType' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<unknown, ConfigType>;
-				};
-				/**
-				 * Executed on the translations replacement in global states
-				 */
-				"onTranslationsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'translations' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'TranslationsType' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'TranslationsType' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<TranslationsType, TranslationsType, "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'translations' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'TranslationsType' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<TranslationsType, "nothing">;
-				};
-				/**
-				 * Executed on the 'layout' field replacement in global states
-				 */
-				"onLayoutChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'layout' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["layout"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["layout"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["layout"], GlobalStatesType["layout"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'layout' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["layout"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["layout"], "nothing">;
-				};
-				/**
-				 * Executed on the 'pages' field replacement in global states
-				 */
-				"onPagesChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'pages' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["pages"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["pages"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["pages"], GlobalStatesType["pages"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'pages' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["pages"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["pages"], "nothing">;
-				};
-				/**
-				 * Executed on the 'logs' field replacement in global states
-				 */
-				"onLogsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'logs' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["logs"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["logs"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["logs"], GlobalStatesType["logs"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'logs' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["logs"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["logs"], "nothing">;
-				};
-				/**
-				 * Executed on the 'sidebarItems' field replacement in global states
-				 */
-				"onSidebarItemsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'sidebarItems' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["sidebarItems"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["sidebarItems"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["sidebarItems"], GlobalStatesType["sidebarItems"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'sidebarItems' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["sidebarItems"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["sidebarItems"], "nothing">;
-				};
-				/**
-				 * Executed on the 'contextMenuItems' field replacement in global states
-				 */
-				"onContextMenuItemsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'contextMenuItems' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["contextMenuItems"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["contextMenuItems"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["contextMenuItems"], GlobalStatesType["contextMenuItems"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'contextMenuItems' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["contextMenuItems"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["contextMenuItems"], "nothing">;
-				};
-				/**
-				 * Executed on the 'development' field replacement in global states
-				 */
-				"onDevelopmentChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'development' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["development"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["development"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["development"], GlobalStatesType["development"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'development' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["development"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["development"], "nothing">;
-				};
-				/**
-				 * Executed on the 'misc' field replacement in global states
-				 */
-				"onMiscChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'misc' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["misc"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["misc"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["misc"], GlobalStatesType["misc"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'misc' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["misc"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["misc"], "nothing">;
-				};
-				/**
-				 * Executed on the 'minecraft' field replacement in global states
-				 */
-				"onMinecraftChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'minecraft' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["minecraft"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["minecraft"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["minecraft"], GlobalStatesType["minecraft"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'minecraft' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["minecraft"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["minecraft"], "nothing">;
-				};
-				/**
-				 * Executed on the 'extensions' field replacement in global states
-				 */
-				"onExtensionsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'extensions' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["extensions"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["extensions"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["extensions"], GlobalStatesType["extensions"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'extensions' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["extensions"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["extensions"], "nothing">;
-				};
-				/**
-				 * Executed on the field addition/overwrite/deletion in instance states
-				 */
-				"onInstanceChange": {
-					/**
-					 * Executes 'sync'-only functions before the provided field
-					 * in the instance states will change.
-					 *
-					 * @param input - an object that has the 'key' and 'value' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'key' and 'value' fields
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"key": string;
-						"value": InstanceStateType;
-					}, {
-						"key": string;
-						"value": InstanceStateType;
-					}, "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the provided field in the instance states has changed.
-					 *
-					 * @param input - an object that has the 'key' and 'value' fields
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<{
-						"key": string;
-						"value": InstanceStateType;
-					}, "nothing">;
-				};
-				/**
-				 * Executed in the very beginning of the instance launch
-				 */
-				"onPreLaunchInformation": {
-					/**
-					 * Executes 'sync'-only functions before any information reads.
-					 *
-					 * @param input - an object that has the 'statuses' and 'instanceId' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'PreLaunchInformationType | false' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"statuses": LauncherStatusesType;
-						"instanceId": string;
-					}, PreLaunchInformationType | false, "non-promise">;
-					/**
-					 * Executes 'sync'-only functions after all necessary information
-					 * was read and validated. If the validation fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'PreLaunchInformationType | false' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'PreLaunchInformationType | false' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<PreLaunchInformationType | false, PreLaunchInformationType | false, "non-promise">;
-				};
-				/**
-				 * Executed on libraries and natives parsing
-				 */
-				"onLibrariesParsing": {
-					/**
-					 * Executes 'sync'-only functions before any actions.
-					 *
-					 * @param input - an object that has the 'necessaries' and 'libraries' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'LibraryArtifactsType' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"libraries": Array<SpecificPatchLibraryType>;
-					}, Array<MappedArtifactType>, "non-promise">;
-					/**
-					 * Executes 'sync'-only functions after all libraries and natives are parsed.
-					 *
-					 * @param input - an object that has the 'necessaries', 'unparsed',
-					 * and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'LibraryArtifactsType' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"unparsed": Array<SpecificPatchLibraryType>;
-						"parsed": Array<MappedArtifactType>;
-					}, Array<MappedArtifactType>, "non-promise">;
-				};
-				/**
-				 * Executed on version meta get
-				 */
-				"onVersionMeta": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'PreLaunchInformationType' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'SpecificPatchMetaType | false' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<PreLaunchInformationType, SpecificPatchMetaType | false>;
-					/**
-					 * Executes 'async' or 'sync' functions after the minecraft version meta
-					 * was read and validated. If the validation fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'necessaries' and 'minecraftVersionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'SpecificPatchMetaType | false' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"minecraftVersionMeta": SpecificPatchMetaType | false;
-					}, SpecificPatchMetaType | false>;
-				};
-				/**
-				 * Executed on minecraft assets downloading/verifying
-				 */
-				"onMinecraftAssetsGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'necessaries' and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a boolean (where 'true' is success and 'false' is fail)
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-					}, boolean>;
-					/**
-					 * Executes 'async' or 'sync' functions after the minecraft version meta
-					 * was read and validated. If the validation fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'necessaries' and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a boolean (where 'true' is success and 'false' is fail)
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-					}, boolean>;
-				};
-				/**
-				 * Executed on prism launcher patches downloading/verifying
-				 */
-				"onMinecraftPatchesGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'necessaries' and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'LibraryArtifactsType' type
-					 * or 'false' in case of a fail
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-					}, Array<MappedArtifactType> | false>;
-					/**
-					 * Executes 'async' or 'sync' functions after the prism launcher patches
-					 * were handled. If the handling fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'necessaries', 'results',
-					 * and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'LibraryArtifactsType' type
-					 * or 'false' in case of a fail
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"results": Array<MappedArtifactType>;
-						"versionMeta": SpecificPatchMetaType;
-					}, Array<MappedArtifactType> | false>;
-				};
-				/**
-				 * Executed on minecraft main jar downloading/verifying
-				 */
-				"onMinecraftClientGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'necessaries', 'client',
-					 * and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a 'void'
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"client": MappedArtifactType;
-						"versionMeta": SpecificPatchMetaType;
-					}, void>;
-					/**
-					 * Executes 'async' or 'sync' functions after the minecraft main jar
-					 * was downloaded/validated. If the download/validation fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'necessaries', 'client',
-					 * and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"client": MappedArtifactType;
-						"versionMeta": SpecificPatchMetaType;
-					}, "nothing">;
-				};
-				/**
-				 * Executed on minecraft logging downloading/verifying
-				 */
-				"onMinecraftLoggingGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'necessaries', 'logging',
-					 * and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a 'void'
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"logging": MappedArtifactType & {
-							"argument": string;
-						};
-						"versionMeta": SpecificPatchMetaType;
-					}, void>;
-					/**
-					 * Executes 'async' or 'sync' functions after the minecraft logging config
-					 * was downloaded/verified. If the download/verification fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'necessaries', 'logging',
-					 * and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"logging": MappedArtifactType & {
-							"argument": string;
-						};
-						"versionMeta": SpecificPatchMetaType;
-					}, "nothing">;
-				};
-				/**
-				 * Executed on minecraft libraries downloading/verifying
-				 */
-				"onMinecraftLibrariesGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'necessaries', 'libraries',
-					 * 'natives', and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a 'void'
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"libraries": Array<MappedArtifactType>;
-						"natives": Array<MappedArtifactType>;
-						"versionMeta": SpecificPatchMetaType;
-					}, void>;
-					/**
-					 * Executes 'async' or 'sync' functions after the minecraft libraries were
-					 * downloaded/verified. If the download/verification fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'necessaries', 'libraries',
-					 * 'natives', and 'versionMeta' fields
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"libraries": Array<MappedArtifactType>;
-						"natives": Array<MappedArtifactType>;
-						"versionMeta": SpecificPatchMetaType;
-					}, "nothing">;
-				};
-				/**
-				 * Executed on minecraft natives extraction
-				 */
-				"onNativesExtract": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'necessaries' and 'paths' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a 'void'
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"paths": Array<string>;
-					}, void>;
-					/**
-					 * Executes 'async' or 'sync' functions after the minecraft libraries were
-					 * downloaded/verified. If the download/verification fails, these hooks will not fire.
-					 *
-					 * @param input - an object that has the 'necessaries' and 'paths' fields
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"paths": Array<string>;
-					}, "nothing">;
-				};
-				/**
-				 * Executed on a shell command name get
-				 */
-				"onJavaBinaryGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'instanceId', 'necessaries',
-					 * 'versionMeta', and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents the shell command name
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-					}, string>;
-				};
-				/**
-				 * Executed on JVM arguments get
-				 */
-				"onJVMArgumentsGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'instanceId', 'necessaries',
-					 * 'versionMeta', 'jvmArguments', and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents the JVM arguments
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"jvmArguments": Array<string>;
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-					}, string>;
-					/**
-					 * Executes 'async' or 'sync' functions after the JVM arguments were collected.
-					 *
-					 * @param input - an object that has the 'instanceId', 'necessaries',
-					 * 'versionMeta', and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents the JVM arguments
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<{
-						"jvmArguments": Array<string>;
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-					}, string>;
-				};
-				/**
-				 * Executed on classpaths get
-				 */
-				"onClassPathsGet": {
-					/**
-					 * Executes 'async' or 'sync' functions right after
-					 * acquiring merged library, native, and main jar paths.
-					 *
-					 * @param input - an object that has the 'instanceId', 'necessaries',
-					 * 'versionMeta', 'mergedPaths', and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the argument string and classpaths string
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"mergedPaths": Array<string>;
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-					}, {
-						"argument": string;
-						"classPaths": string;
-					}>;
-				};
-				/**
-				 * Executed on game arguments get
-				 */
-				"onGameArgumentsGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'instanceId', 'necessaries',
-					 * 'versionMeta', and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents the game arguments
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-					}, string>;
-					/**
-					 * Executes 'async' or 'sync' functions after the MultiMC tweakers were added.
-					 *
-					 * @param input - an object that has the 'argumentsWithTweakers', 'instanceId',
-					 * 'necessaries', 'versionMeta', and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents the game arguments
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<{
-						"argumentsWithTweakers": Array<string>;
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-					}, string>;
-				};
-				/**
-				 * Executed on additional start arguments get.
-				 * For example, '/C javaw' for the 'cmd' command
-				 */
-				"onAdditionalStartArgumentsGet": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'instanceId', 'necessaries',
-					 * 'versionMeta', 'javaBinary', and 'parsed' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents additional commands before JVM arguments
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"jvmArguments": Array<string>;
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-					}, string>;
-				};
-				/**
-				 * Executed on argument placeholders replace in the launch command
-				 */
-				"onLaunchArgumentsReplace": {
-					/**
-					 * Executes 'sync'-only functions before making a regex replacements (no auth)
-					 *
-					 * @param input - an object that has the 'auth', 'replacements', 'builtLaunchArguments',
-					 * 'instanceId', 'necessaries', 'versionMeta', 'parsed', and 'javaBinary' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents the final launch command
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"auth": {
-							"username": string;
-							/**
-							 * Scary!
-							 */
-							"token": string;
-							"uuid": string;
-							"type": string;
-						};
-						"replacements": ArgumentReplacementsType;
-						"builtLaunchArguments": {
-							"toReplace": string;
-							"classPaths": string;
-						};
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-						"javaBinary": string;
-					}, string, "non-promise">;
-					/**
-					 * Executes 'sync'-only functions before making an auth regex replacements,
-					 * but after the non-auth regex replacements
-					 *
-					 * @param input - an object that has the 'auth', 'authReplacements',
-					 * 'replacements', 'builtLaunchArguments', 'instanceId',
-					 * 'necessaries', 'versionMeta', 'parsed', and 'javaBinary' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a string that represents the final launch command
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"after": HookReturnType<{
-						"auth": {
-							"username": string;
-							/**
-							 * Scary!
-							 */
-							"token": string;
-							"uuid": string;
-							"type": string;
-						};
-						"replacements": ArgumentReplacementsType;
-						"authReplacements": ArgumentAuthReplacementsType;
-						"builtLaunchArguments": {
-							"toReplace": string;
-							"classPaths": string;
-						};
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-						"javaBinary": string;
-					}, string, "non-promise">;
-				};
-				/**
-				 * Executed on minecraft instance launch
-				 */
-				"onMinecraftLaunch": {
-					/**
-					 * Executes 'async' or 'sync' functions before any actions.
-					 *
-					 * @param input - an object that has the 'command', 'auth',
-					 * 'builtLaunchArguments', 'instanceId', 'necessaries',
-					 * 'parsed', 'versionMeta', and 'javaBinary' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a 'void'
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"command": [
-							string,
-							string
-						];
-						"auth": {
-							"username": string;
-							/**
-							 * Scary!
-							 */
-							"token": string;
-							"uuid": string;
-							"type": string;
-						};
-						"builtLaunchArguments": {
-							"toReplace": string;
-							"classPaths": string;
-						};
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-						"javaBinary": string;
-					}, void>;
-					/**
-					 * Executes 'async' or 'sync' functions after the minecraft instance was launched.
-					 *
-					 * @param input - an object that has the 'process', 'command', 'auth',
-					 * 'builtLaunchArguments', 'instanceId', 'necessaries',
-					 * 'parsed', 'versionMeta', and 'javaBinary' fields
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<{
-						"process": BrokerProcess;
-						"command": [
-							string,
-							string
-						];
-						"auth": {
-							"username": string;
-							/**
-							 * Scary!
-							 */
-							"token": string;
-							"uuid": string;
-							"type": string;
-						};
-						"builtLaunchArguments": {
-							"toReplace": string;
-							"classPaths": string;
-						};
-						"instanceId": string;
-						"necessaries": PreLaunchInformationType;
-						"versionMeta": SpecificPatchMetaType;
-						"parsed": Array<MappedArtifactType>;
-						"javaBinary": string;
-					}, "nothing">;
-				};
-				/**
-				 * Executed on minecraft instance kill
-				 */
-				"onMinecraftKill": {
-					/**
-					 * Executes 'async' or 'sync' functions before the instance was killed.
-					 *
-					 * @param input - an object that has the 'pid' and 'kill' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - a 'void'
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<BrokerProcess, void>;
-					/**
-					 * Executes 'async' or 'sync' functions after the instance was killed.
-					 *
-					 * @param input - an instance process id number
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<number, "nothing">;
-				};
-				"onMinecraftPatchResolve": {
-					"before": [
-					];
-					"after": [
-					];
-				};
-			};
-		};
+		"__KAEDE__"?: KaedeNamespaceSurfaceType;
 	}
 }
 export type KaedeNamespaceType = NonNullable<Window["__KAEDE__"]>;

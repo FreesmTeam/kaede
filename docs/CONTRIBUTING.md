@@ -66,14 +66,16 @@ bun run check:types
 bun run lint
 bun run analyze:fallow
 bun run test
-bun run build:frontend
+bun x vite build
 cargo audit --file src-tauri/Cargo.lock
 cargo test --manifest-path src-tauri/Cargo.toml --locked
 cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
 cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
 cargo hawk check --manifest-path src-tauri/Cargo.toml --target-dir src-tauri/target --color always -D warnings
-bun run test:tauri-acl
 ```
+
+The full Rust test command includes the Tauri ACL smoke. Use
+`bun run test:tauri-acl` only when rerunning that exact smoke in isolation.
 
 Please also follow the project's conventions for the frontend:
 

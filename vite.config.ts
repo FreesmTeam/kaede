@@ -137,8 +137,12 @@ export default defineConfig(({ mode }) => {
       "strictPort": true,
     },
     "build": {
-      // Modern builds stay on ESNext; the isolated Win7 gate targets its final WebView2 (Chromium 109).
-      "target": process.env.VITE_BUILD_TARGET ?? "esnext",
+
+      /*
+       * Modern builds stay on ESNext. The Win7 gate targets its final WebView2,
+       * which is based on Chromium 109.
+       */
+      "target"         : process.env.VITE_BUILD_TARGET ?? "esnext",
       "rolldownOptions": {
         "output": {
 

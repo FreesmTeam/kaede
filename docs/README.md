@@ -154,6 +154,7 @@ broker. These files will help in contributing:
 - [README for TypeScript-related code](../src/README.md) (the most important one)
 - [README for Rust-related code](../src-tauri/README.md)
 - [Contributing Guidelines](./CONTRIBUTING.md)
+- [Portable Build Contract](./PORTABLE-BUILD-CONTRACT.md)
 - [MultiMC Patch System](./MULTIMC.md)
 - [Building from Source](#building-from-source)
 

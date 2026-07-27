@@ -4,9 +4,6 @@ import { fileURLToPath } from "node:url";
 type TauriBuildConfig = {
   "productName": string;
   "version"    : string;
-  "app"        : {
-    "windows": Array<{ "title": string }>;
-  };
 };
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -37,14 +34,7 @@ if (artifactReference === "") {
 }
 
 const config = await Bun.file(configPath).json() as TauriBuildConfig;
-const primaryWindow = config.app.windows[0];
 
-if (primaryWindow === undefined) {
-  throw new Error("Tauri configuration does not contain a primary window");
-}
-if (process.env.BUILD_TYPE === "portable") {
-  primaryWindow.title = "Kaede Portable";
-}
 config.version = appVersion;
 await Bun.write(configPath, `${JSON.stringify(config, null, 2)}\n`);
 

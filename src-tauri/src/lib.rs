@@ -36,6 +36,10 @@ pub fn run() {
         .setup(|app| {
             let runtime_paths =
                 launcher::select_runtime_paths(app.handle()).map_err(std::io::Error::other)?;
+            let main_window = app.get_webview_window("main").ok_or_else(|| {
+                std::io::Error::other("main window is not available during setup")
+            })?;
+            main_window.set_title(launcher::window_title(&runtime_paths))?;
             let path = runtime_paths.base_directory.join("logs");
             app.manage(plugin_broker::BrokerState::new_for_runtime(runtime_paths)?);
 

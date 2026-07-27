@@ -8,6 +8,9 @@ use serde_json::Value;
 use sha1::{Digest, Sha1};
 use tauri::Manager;
 
+const INSTALLED_WINDOW_TITLE: &str = "Kaede";
+const PORTABLE_WINDOW_TITLE: &str = "Kaede Portable";
+
 #[derive(Debug, Serialize)]
 #[serde(tag = "status", rename_all = "camelCase")]
 pub enum ParsedFile {
@@ -71,6 +74,14 @@ pub struct RuntimePaths {
 impl RuntimePaths {
     pub fn capability_decisions_path(&self) -> PathBuf {
         self.base_directory.join("capability-decisions.json")
+    }
+}
+
+pub(crate) fn window_title(runtime_paths: &RuntimePaths) -> &'static str {
+    if runtime_paths.portable {
+        PORTABLE_WINDOW_TITLE
+    } else {
+        INSTALLED_WINDOW_TITLE
     }
 }
 
@@ -298,4 +309,40 @@ fn verify_file_hash(path: &Path, expected_hash: &str) -> io::Result<bool> {
     let actual_hash = crate::hashes::lowercase_hex(&hasher.finalize());
 
     Ok(actual_hash == expected_hash)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{select_runtime_paths_from, window_title};
+
+    #[test]
+    fn portable_marker_controls_runtime_window_title() {
+        let nonce = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .expect("test clock should follow the Unix epoch")
+            .as_nanos();
+        let fixture_root = std::env::temp_dir().join(format!(
+            "kaede-portable-title-{}-{}",
+            std::process::id(),
+            nonce
+        ));
+        let executable_directory = fixture_root.join("app");
+        let app_data_directory = fixture_root.join("app-data");
+        std::fs::create_dir_all(&executable_directory).expect("executable directory should exist");
+
+        let installed =
+            select_runtime_paths_from(executable_directory.clone(), app_data_directory.clone())
+                .expect("installed runtime paths should resolve");
+        assert!(!installed.portable);
+        assert_eq!(window_title(&installed), "Kaede");
+
+        std::fs::write(executable_directory.join("portable.txt"), b"")
+            .expect("portable marker should exist");
+        let portable = select_runtime_paths_from(executable_directory, app_data_directory)
+            .expect("portable runtime paths should resolve");
+        assert!(portable.portable);
+        assert_eq!(window_title(&portable), "Kaede Portable");
+
+        std::fs::remove_dir_all(fixture_root).expect("test fixture should be removable");
+    }
 }

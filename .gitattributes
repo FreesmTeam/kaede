@@ -1,0 +1,6 @@
+src/lib/schemas/generated/validators.js text eol=lf
+src/lib/schemas/generated/validators.d.ts text eol=lf
+types/ark-of-atrahasis-1.0.d.ts text eol=lf
+types/kaede-lib.d.ts text eol=lf
+types/kaede-sandbox.d.ts text eol=lf
+types/kaede-trusted.d.ts text eol=lf

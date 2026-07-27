@@ -49,7 +49,7 @@ Oxlint 1.75 can execute natively. Regenerate it only together with an Oxlint
 upgrade, using the matching migrator version:
 
 ```bash
-bunx @oxlint/migrate@1.75.0 eslint.config.js \
+bun x @oxlint/migrate@1.75.0 eslint.config.js \
   --output-file oxlint.eslint-coverage.json \
   --type-aware --js-plugins=false --details
 ```

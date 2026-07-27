@@ -21,7 +21,6 @@ import { downloadAssets } from "@/lib/launcher/scopes/fetching/download-assets.t
 import { downloadClient } from "@/lib/launcher/scopes/fetching/download-client.ts";
 import { downloadLibraries } from "@/lib/launcher/scopes/fetching/download-libraries.ts";
 import { downloadLogging } from "@/lib/launcher/scopes/fetching/download-logging.ts";
-import { downloadWithProgress } from "@/lib/launcher/scopes/fetching/download-with-progress.ts";
 import { fetchAllVersions } from "@/lib/launcher/scopes/fetching/fetch-all-versions.ts";
 import { fetchMetadata } from "@/lib/launcher/scopes/fetching/fetch-metadata.ts";
 
@@ -31,7 +30,6 @@ export default {
   downloadClient,
   downloadLibraries,
   downloadLogging,
-  downloadWithProgress,
   fetchAllVersions,
   fetchMetadata,
 } as const;

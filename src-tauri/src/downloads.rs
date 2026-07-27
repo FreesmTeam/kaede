@@ -113,6 +113,7 @@ pub async fn concurrently_download(
     label: String,
     cancel_id: String,
     on_progress: Channel<DownloadSnapshot>,
+    debug: bool,
 ) -> Result<DownloadReport, String> {
     let concurrency = concurrency.max(1);
 
@@ -205,10 +206,14 @@ pub async fn concurrently_download(
                 match result {
                     Ok(()) => {
                         success.fetch_add(1, Ordering::Relaxed);
-                        log::debug!("{label}: downloaded '{}'", entry.url);
+                        if debug {
+                            log::debug!("{label}: downloaded '{}'", entry.url);
+                        }
                     }
                     Err(DownloadError::Cancelled) => {
-                        log::debug!("{label}: cancelled '{}'", entry.url);
+                        if debug {
+                            log::debug!("{label}: cancelled '{}'", entry.url);
+                        }
                         break;
                     }
                     Err(DownloadError::Other(error)) => {

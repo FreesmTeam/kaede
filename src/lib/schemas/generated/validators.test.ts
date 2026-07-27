@@ -34,11 +34,6 @@ import { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
 import { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
 import { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
 
-/*
- * The generated validators must behave exactly like the live
- * 'typebox/compile' ones. If any of these tests fail, the generated
- * file is stale: run 'bun generate:validators' and commit the result
- */
 const Targets: Array<{
   "name"  : string;
   "check" : (value: unknown) => boolean;

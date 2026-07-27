@@ -26,8 +26,9 @@ import type {
 /*
  * The checks are pre-compiled by 'typebox/compile' at build time
  * ('bun generate:validators'), so neither the typebox compiler
- * nor its 'new Function' evaluation run at startup. Detailed errors
- * for failed validations are produced by the typebox value engine
+ * nor its 'new Function' evaluation run at startup.
+ *
+ * Detailed errors for failed validations are produced by the typebox value engine
  */
 const AccountValidator: CompiledValidatorType = {
   "Check" : CheckAccount,
@@ -55,7 +56,7 @@ export default {
 
   /*
    * If there is additional unknown properties in object, validation will still pass,
-   * which is actually good since extensions can use the same config file as the app
+   * which is actually good since extensions can use the same config files as the app
    */
   "validate": {
     "account": (data: ValidationArgumentsType) => validate<AccountType>({

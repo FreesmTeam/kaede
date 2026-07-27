@@ -1,4 +1,5 @@
-import { getValidationErrors } from "@/lib/schemas/errors.ts";
+import { Errors } from "typebox/value";
+
 import {
   CheckAccount,
   CheckConfig,
@@ -6,6 +7,11 @@ import {
   CheckInstanceMetadata,
   CheckPatchMeta,
 } from "@/lib/schemas/generated/validators.ts";
+import { AccountSchema } from "@/lib/schemas/scopes/accounts";
+import { ConfigSchema } from "@/lib/schemas/scopes/config";
+import { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
+import { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
+import { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
 import { validate } from "@/lib/schemas/validate.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
@@ -19,30 +25,30 @@ import type {
 
 /*
  * The checks are pre-compiled by 'typebox/compile' at build time
- * ('bun generate:validators'), so the typebox runtime does not ship
- * in the application bundle. Detailed validation errors are still
- * produced on failures by a lazily loaded typebox runtime
+ * ('bun generate:validators'), so neither the typebox compiler
+ * nor its 'new Function' evaluation run at startup. Detailed errors
+ * for failed validations are produced by the typebox value engine
  */
 const AccountValidator: CompiledValidatorType = {
   "Check" : CheckAccount,
-  "Errors": (value: unknown) => getValidationErrors("account", value),
+  "Errors": (value: unknown) => Errors(AccountSchema, value),
 };
 const ConfigValidator: CompiledValidatorType = {
   "Check" : CheckConfig,
-  "Errors": (value: unknown) => getValidationErrors("config", value),
+  "Errors": (value: unknown) => Errors(ConfigSchema, value),
 };
 const InstanceMetadataValidator: CompiledValidatorType = {
   "Check" : CheckInstanceMetadata,
-  "Errors": (value: unknown) => getValidationErrors("instanceMetadata", value),
+  "Errors": (value: unknown) => Errors(InstanceMetadataSchema, value),
 };
 const ExtensionMetadataValidator: CompiledValidatorType = {
   "Check" : CheckExtensionMetadata,
-  "Errors": (value: unknown) => getValidationErrors("extensionMetadata", value),
+  "Errors": (value: unknown) => Errors(ExtensionMetadataSchema, value),
 };
 
 const PatchMetaValidator: CompiledValidatorType = {
   "Check" : CheckPatchMeta,
-  "Errors": (value: unknown) => getValidationErrors("patchMeta", value),
+  "Errors": (value: unknown) => Errors(PatchMetaSchema, value),
 };
 
 export default {

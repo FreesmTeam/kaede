@@ -279,13 +279,9 @@ fn principal_history_key(principal: &Principal) -> String {
         hasher.update(length.to_be_bytes());
         hasher.update(field.as_bytes());
     }
-    let digest = hasher.finalize();
     format!(
         "{PRINCIPAL_HISTORY_KEY_PREFIX}{}",
-        digest
-            .iter()
-            .map(|byte| format!("{byte:02x}"))
-            .collect::<String>()
+        crate::hashes::lowercase_hex(&hasher.finalize())
     )
 }
 
@@ -352,7 +348,7 @@ pub(crate) fn replace_file(temp_path: &Path, path: &Path) -> io::Result<()> {
 pub(crate) fn replace_file(temp_path: &Path, path: &Path) -> io::Result<()> {
     use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::Storage::FileSystem::{
-        MoveFileExW, MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH,
+        MOVEFILE_REPLACE_EXISTING, MOVEFILE_WRITE_THROUGH, MoveFileExW,
     };
 
     let temp_wide = temp_path

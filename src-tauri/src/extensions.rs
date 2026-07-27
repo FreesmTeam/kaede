@@ -1,5 +1,4 @@
 use serde::Serialize;
-use sha2::{Digest, Sha256};
 use std::io::{Cursor, Read, Seek};
 use std::path::{Path, PathBuf};
 use zip::ZipArchive;
@@ -90,7 +89,7 @@ fn read_archive(path: &Path) -> Result<(serde_json::Value, String, String), Stri
     // digest with different metadata or code.
     let bytes = std::fs::read(path)
         .map_err(|error| format!("Failed to read {}: {error}", path.display()))?;
-    let artifact_sha256 = format!("{:x}", Sha256::digest(&bytes));
+    let artifact_sha256 = crate::hashes::sha256_hex(&bytes);
     let mut archive = ZipArchive::new(Cursor::new(bytes))
         .map_err(|error| format!("Failed to read {} as a zip: {error}", path.display()))?;
 
@@ -152,15 +151,14 @@ pub fn read_extensions(extensions_dir: &Path) -> Result<ExtensionsReadResult, St
 #[cfg(test)]
 mod tests {
     use super::{
-        read_archive, read_extensions, read_limited_utf8, CODE_ENTRY, MAX_CODE_SIZE,
-        MAX_METADATA_SIZE,
+        CODE_ENTRY, MAX_CODE_SIZE, MAX_METADATA_SIZE, read_archive, read_extensions,
+        read_limited_utf8,
     };
-    use sha2::{Digest, Sha256};
     use std::fs::File;
     use std::io::{Cursor, Write};
     use std::path::{Path, PathBuf};
-    use zip::write::SimpleFileOptions;
     use zip::ZipWriter;
+    use zip::write::SimpleFileOptions;
 
     fn fixture_root(name: &str) -> PathBuf {
         let mut random = [0_u8; 8];
@@ -214,10 +212,7 @@ mod tests {
         );
         let (_, second_code, second_digest) =
             read_archive(&archive_path).expect("second archive should parse");
-        let expected_digest = format!(
-            "{:x}",
-            Sha256::digest(std::fs::read(&archive_path).unwrap())
-        );
+        let expected_digest = crate::hashes::sha256_hex(&std::fs::read(&archive_path).unwrap());
 
         assert_eq!(first_code, second_code);
         assert_ne!(first_digest, second_digest);

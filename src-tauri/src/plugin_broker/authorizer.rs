@@ -530,10 +530,10 @@ impl Authorizer {
     /// This is crate-visible for the Tauri `on_page_load` hook and is intentionally not exposed as
     /// an IPC command. Session and token history remains intact across page loads.
     pub(crate) fn reset_for_page_load(&mut self) -> Vec<ResourceHandle> {
-        if let Some(active_host) = self.active_host.as_ref() {
-            if let Some(host) = self.host_sessions.get_mut(active_host) {
-                host.revoked = true;
-            }
+        if let Some(active_host) = self.active_host.as_ref()
+            && let Some(host) = self.host_sessions.get_mut(active_host)
+        {
+            host.revoked = true;
         }
         for plugin in self.plugin_sessions.values_mut() {
             plugin.revoked = true;
@@ -1334,20 +1334,24 @@ mod tests {
     #[test]
     fn principal_requires_a_canonical_safe_repository_origin() {
         assert!(principal(SHA_A).is_valid());
-        assert!(Principal::new(
-            "https://plugins.example.test/owner/my%20plugin",
-            "example.plugin",
-            "1.0.0",
-            SHA_A,
-        )
-        .is_valid());
-        assert!(Principal::new(
-            "https://plugins.example.test/owner/caf%C3%A9-plugin",
-            "example.plugin",
-            "1.0.0",
-            SHA_A,
-        )
-        .is_valid());
+        assert!(
+            Principal::new(
+                "https://plugins.example.test/owner/my%20plugin",
+                "example.plugin",
+                "1.0.0",
+                SHA_A,
+            )
+            .is_valid()
+        );
+        assert!(
+            Principal::new(
+                "https://plugins.example.test/owner/caf%C3%A9-plugin",
+                "example.plugin",
+                "1.0.0",
+                SHA_A,
+            )
+            .is_valid()
+        );
         for repository_origin in [
             "HTTPS://plugins.example.test/owner/example-plugin",
             "https://Plugins.example.test/owner/example-plugin",
@@ -1376,13 +1380,15 @@ mod tests {
     #[test]
     fn principal_rejects_unsafe_ids_versions_and_hashes() {
         let maximum_id = format!("a{}b", ".".repeat(126));
-        assert!(Principal::new(
-            "https://plugins.example.test/owner/example-plugin",
-            maximum_id,
-            "1.0.0",
-            SHA_A,
-        )
-        .is_valid());
+        assert!(
+            Principal::new(
+                "https://plugins.example.test/owner/example-plugin",
+                maximum_id,
+                "1.0.0",
+                SHA_A,
+            )
+            .is_valid()
+        );
 
         for plugin_id in [
             "Prototype",
@@ -1404,37 +1410,45 @@ mod tests {
             );
         }
         let oversized_id = format!("a{}b", ".".repeat(127));
-        assert!(!Principal::new(
-            "https://plugins.example.test/owner/example-plugin",
-            oversized_id,
-            "1.0.0",
-            SHA_A,
-        )
-        .is_valid());
-
-        for invalid_version in ["", " 1.0.0", "1.0.0\n"] {
-            assert!(!Principal::new(
+        assert!(
+            !Principal::new(
                 "https://plugins.example.test/owner/example-plugin",
-                "example.plugin",
-                invalid_version,
+                oversized_id,
+                "1.0.0",
                 SHA_A,
             )
-            .is_valid());
+            .is_valid()
+        );
+
+        for invalid_version in ["", " 1.0.0", "1.0.0\n"] {
+            assert!(
+                !Principal::new(
+                    "https://plugins.example.test/owner/example-plugin",
+                    "example.plugin",
+                    invalid_version,
+                    SHA_A,
+                )
+                .is_valid()
+            );
         }
-        assert!(!Principal::new(
-            "https://plugins.example.test/owner/example-plugin",
-            "example.plugin",
-            "v".repeat(MAX_PLUGIN_VERSION_LENGTH + 1),
-            SHA_A,
-        )
-        .is_valid());
-        assert!(!Principal::new(
-            "https://plugins.example.test/owner/example-plugin",
-            "example.plugin",
-            "1.0.0",
-            SHA_A.to_ascii_uppercase(),
-        )
-        .is_valid());
+        assert!(
+            !Principal::new(
+                "https://plugins.example.test/owner/example-plugin",
+                "example.plugin",
+                "v".repeat(MAX_PLUGIN_VERSION_LENGTH + 1),
+                SHA_A,
+            )
+            .is_valid()
+        );
+        assert!(
+            !Principal::new(
+                "https://plugins.example.test/owner/example-plugin",
+                "example.plugin",
+                "1.0.0",
+                SHA_A.to_ascii_uppercase(),
+            )
+            .is_valid()
+        );
     }
 
     #[test]
@@ -1907,10 +1921,12 @@ mod tests {
             .bind_resource(&plugin_a, handle("stream:1"))
             .expect("resource binding should succeed");
 
-        assert!(authorizer
-            .list_resource_handles(&plugin_b)
-            .expect("second plugin should query its own resources")
-            .is_empty());
+        assert!(
+            authorizer
+                .list_resource_handles(&plugin_b)
+                .expect("second plugin should query its own resources")
+                .is_empty()
+        );
         assert_eq!(
             authorizer
                 .list_resource_handles(&plugin_a)

@@ -1,5 +1,5 @@
 use log::error;
-use tauri::{webview::PageLoadEvent, Manager};
+use tauri::{Manager, webview::PageLoadEvent};
 
 mod downloads;
 mod extensions;

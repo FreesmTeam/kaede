@@ -5,8 +5,8 @@ description = "An extensible Tauri-based Minecraft launcher written in Vue and R
 authors = ["windstone", "kaeeraa"]
 license = "GPL-3.0"
 repository = "https://github.com/kaede-basement/kaede"
-edition = "2021"
-rust-version = "1.88"
+edition = "2024"
+rust-version = "1.97"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -25,16 +25,16 @@ tauri = { version = "=2.11.5", features = ["macos-private-api", "image-ico", "im
 tauri-plugin-log = "2"
 
 time = "0.3"
-cap-std = { version = "=3.4.5", default-features = false }
-cap-fs-ext = { version = "=3.4.5", default-features = false, features = ["std"] }
-sha1 = "0.10.6"
-md-5 = "0.10.6"
-sha2 = { version = "=0.10.9", default-features = false }
-sysinfo = "=0.38.4"
-rayon = "1.11.0"
-zip = { version = "3.0", default-features = false, features = ["deflate"] }
+cap-std = { version = "=4.0.2", default-features = false }
+cap-fs-ext = { version = "=4.0.2", default-features = false, features = ["std"] }
+sha1 = "0.11.0"
+md-5 = "0.11.0"
+sha2 = { version = "=0.11.0", default-features = false }
+sysinfo = "=0.39.6"
+rayon = "1.12.0"
+zip = { version = "8.6.0", default-features = false, features = ["deflate"] }
 tokio = { version = "1", features = ["fs", "io-util", "macros", "net", "rt", "rt-multi-thread", "sync", "time"] }
-getrandom = { version = "0.3", features = ["std"] }
+getrandom = { version = "0.4", features = ["std"] }
 os_pipe = "1.2.3"
 shared_child = "1.1.1"
 

@@ -1,13 +1,13 @@
 use super::authorizer::ResourceHandle;
 use serde::Serialize;
-use std::collections::btree_map::Entry;
 use std::collections::BTreeMap;
+use std::collections::btree_map::Entry;
 use std::fs::File;
 use std::io::{BufReader, Read};
 use std::path::PathBuf;
 use std::process::{Command as StdCommand, Stdio};
 use std::sync::{Arc, Mutex, RwLock};
-use tauri::async_runtime::{block_on, channel, Receiver, Sender};
+use tauri::async_runtime::{Receiver, Sender, block_on, channel};
 use tauri::ipc::Channel;
 use tauri_plugin_shellx::process::{Command, CommandEvent, TerminatedPayload};
 
@@ -171,14 +171,14 @@ impl ProcessArtifacts {
 impl Drop for ProcessArtifacts {
     fn drop(&mut self) {
         for path in &self.owned_files {
-            if let Err(error) = std::fs::remove_file(path) {
-                if error.kind() != std::io::ErrorKind::NotFound {
-                    log::error!(
-                        target: "capability_broker",
-                        "could not remove owned process artifact {}: {error}",
-                        path.display()
-                    );
-                }
+            if let Err(error) = std::fs::remove_file(path)
+                && error.kind() != std::io::ErrorKind::NotFound
+            {
+                log::error!(
+                    target: "capability_broker",
+                    "could not remove owned process artifact {}: {error}",
+                    path.display()
+                );
             }
         }
     }
@@ -343,7 +343,8 @@ impl ProcessStore {
         for handle in handles {
             let mut last_error = None;
             for _ in 0..ATTEMPTS {
-                match self.kill_for_cleanup(handle) {
+                let cleanup_result = self.kill_for_cleanup(handle);
+                match cleanup_result {
                     Ok(terminal_failure) => {
                         summary.killed.push(handle.clone());
                         if let Some(terminal_failure) = terminal_failure {
@@ -520,8 +521,8 @@ pub fn forward_events(
     handle: ResourceHandle,
     channel: Option<Channel<BrokerEvent>>,
     on_finished: impl FnOnce(ProcessStreamEnd, Option<Channel<BrokerEvent>>) -> Result<(), String>
-        + Send
-        + 'static,
+    + Send
+    + 'static,
 ) {
     tauri::async_runtime::spawn(forward_events_until_terminated(
         receiver,
@@ -839,13 +840,15 @@ mod tests {
             if event["kind"] == "failed" {
                 assert!(!terminal_state.processes.contains(&terminal_handle));
                 assert!(!terminal_script.exists());
-                assert!(terminal_state
-                    .authorizer
-                    .lock()
-                    .expect("authorizer should lock")
-                    .list_resource_handles(&terminal_plugin)
-                    .expect("plugin should remain active")
-                    .is_empty());
+                assert!(
+                    terminal_state
+                        .authorizer
+                        .lock()
+                        .expect("authorizer should lock")
+                        .list_resource_handles(&terminal_plugin)
+                        .expect("plugin should remain active")
+                        .is_empty()
+                );
             }
             captured_events
                 .lock()
@@ -921,13 +924,15 @@ mod tests {
         assert!(waited.load(Ordering::Relaxed));
         assert!(!state.processes.contains(&handle));
         assert!(!script.exists());
-        assert!(state
-            .authorizer
-            .lock()
-            .expect("authorizer should lock")
-            .list_resource_handles(&plugin)
-            .expect("plugin should remain active")
-            .is_empty());
+        assert!(
+            state
+                .authorizer
+                .lock()
+                .expect("authorizer should lock")
+                .list_resource_handles(&plugin)
+                .expect("plugin should remain active")
+                .is_empty()
+        );
         assert_eq!(
             emitted_events
                 .lock()
@@ -977,13 +982,15 @@ mod tests {
             let event = serde_json::from_str::<serde_json::Value>(&json)?;
             if event["kind"] == "failed" {
                 assert!(!observed_state.processes.contains(&observed_handle));
-                assert!(observed_state
-                    .authorizer
-                    .lock()
-                    .expect("authorizer should lock")
-                    .list_resource_handles(&observed_plugin)
-                    .expect("plugin should remain active")
-                    .is_empty());
+                assert!(
+                    observed_state
+                        .authorizer
+                        .lock()
+                        .expect("authorizer should lock")
+                        .list_resource_handles(&observed_plugin)
+                        .expect("plugin should remain active")
+                        .is_empty()
+                );
             }
             captured_events
                 .lock()
@@ -995,19 +1002,23 @@ mod tests {
             .process_finalization
             .lock()
             .expect("process finalization should lock");
-        assert!(state
-            .processes
-            .kill(&handle)
-            .expect("process removal should succeed")
-            .is_none());
+        assert!(
+            state
+                .processes
+                .kill(&handle)
+                .expect("process removal should succeed")
+                .is_none()
+        );
         assert!(!state.processes.contains(&handle));
-        assert!(state
-            .authorizer
-            .lock()
-            .expect("authorizer should lock")
-            .list_resource_handles(&plugin)
-            .expect("plugin should remain active")
-            .contains(&handle));
+        assert!(
+            state
+                .authorizer
+                .lock()
+                .expect("authorizer should lock")
+                .list_resource_handles(&plugin)
+                .expect("plugin should remain active")
+                .contains(&handle)
+        );
         let finalizer_started = Arc::new(Barrier::new(2));
         let finalizer_finished = Arc::new(AtomicBool::new(false));
         let finalizer_state = Arc::clone(&state);
@@ -1030,10 +1041,12 @@ mod tests {
 
         finalizer_started.wait();
         assert!(!finalizer_finished.load(Ordering::Relaxed));
-        assert!(emitted_events
-            .lock()
-            .expect("emitted events should lock")
-            .is_empty());
+        assert!(
+            emitted_events
+                .lock()
+                .expect("emitted events should lock")
+                .is_empty()
+        );
         state
             .authorizer
             .lock()
@@ -1106,15 +1119,17 @@ mod tests {
         let finalizer_state = Arc::clone(&state);
         let finalizer_handle = handle.clone();
         let finalizer = std::thread::spawn(move || {
-            assert!(super::super::commands::finish_process_resource(
-                &finalizer_state,
-                &finalizer_handle,
-                ProcessStreamEnd::ClosedWithoutTermination {
-                    message: "wait failed".to_owned(),
-                },
-                Some(event_channel),
-            )
-            .is_err());
+            assert!(
+                super::super::commands::finish_process_resource(
+                    &finalizer_state,
+                    &finalizer_handle,
+                    ProcessStreamEnd::ClosedWithoutTermination {
+                        message: "wait failed".to_owned(),
+                    },
+                    Some(event_channel),
+                )
+                .is_err()
+            );
         });
 
         diagnostic_started.wait();
@@ -1150,13 +1165,15 @@ mod tests {
         assert!(retry_finished.load(Ordering::Relaxed));
         assert!(!state.processes.contains(&handle));
         assert!(!script.exists());
-        assert!(state
-            .authorizer
-            .lock()
-            .expect("authorizer should lock")
-            .list_resource_handles(&plugin)
-            .expect("plugin should remain active")
-            .is_empty());
+        assert!(
+            state
+                .authorizer
+                .lock()
+                .expect("authorizer should lock")
+                .list_resource_handles(&plugin)
+                .expect("plugin should remain active")
+                .is_empty()
+        );
         assert_eq!(
             emitted_events
                 .lock()
@@ -1246,11 +1263,13 @@ mod tests {
         }
 
         assert!(killed.load(Ordering::Relaxed));
-        assert!(authorizer
-            .revoke_plugin(&host, &plugin)
-            .expect("cleanup state should remain queryable")
-            .cleanup_handles
-            .is_empty());
+        assert!(
+            authorizer
+                .revoke_plugin(&host, &plugin)
+                .expect("cleanup state should remain queryable")
+                .cleanup_handles
+                .is_empty()
+        );
     }
 
     #[test]
@@ -1414,14 +1433,16 @@ mod tests {
         assert!(killed.load(Ordering::Relaxed));
         assert!(!state.processes.contains(&handle));
         assert!(!script.exists());
-        assert!(state
-            .authorizer
-            .lock()
-            .expect("authorizer should lock")
-            .revoke_plugin(&host, &plugin)
-            .expect("repeat revoke should succeed")
-            .cleanup_handles
-            .is_empty());
+        assert!(
+            state
+                .authorizer
+                .lock()
+                .expect("authorizer should lock")
+                .revoke_plugin(&host, &plugin)
+                .expect("repeat revoke should succeed")
+                .cleanup_handles
+                .is_empty()
+        );
     }
 
     #[tokio::test]
@@ -1458,14 +1479,16 @@ mod tests {
         assert!(killed.load(Ordering::Relaxed));
         assert!(!state.processes.contains(&handle));
         assert!(!script.exists());
-        assert!(state
-            .authorizer
-            .lock()
-            .expect("authorizer should lock")
-            .revoke_plugin(&host, &plugin)
-            .expect("final revoke should observe completed cleanup")
-            .cleanup_handles
-            .is_empty());
+        assert!(
+            state
+                .authorizer
+                .lock()
+                .expect("authorizer should lock")
+                .revoke_plugin(&host, &plugin)
+                .expect("final revoke should observe completed cleanup")
+                .cleanup_handles
+                .is_empty()
+        );
     }
 
     #[test]
@@ -1487,11 +1510,13 @@ mod tests {
         assert!(killed.load(Ordering::Relaxed));
         assert!(!state.processes.contains(&handle));
         assert!(!script.exists());
-        assert!(state
-            .authorizer
-            .lock()
-            .expect("authorizer should lock")
-            .release_resource(&handle)
-            .is_none());
+        assert!(
+            state
+                .authorizer
+                .lock()
+                .expect("authorizer should lock")
+                .release_resource(&handle)
+                .is_none()
+        );
     }
 }

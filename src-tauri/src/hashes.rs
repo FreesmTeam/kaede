@@ -3,10 +3,10 @@ use std::fmt::Write;
 use md5::Md5;
 use sha2::{Digest, Sha256};
 
-fn to_hex(digest: &[u8]) -> String {
-    let mut hex = String::with_capacity(digest.len() * 2);
+pub(crate) fn lowercase_hex(bytes: &[u8]) -> String {
+    let mut hex = String::with_capacity(bytes.len() * 2);
 
-    for byte in digest {
+    for byte in bytes {
         let _ = write!(hex, "{:02x}", byte);
     }
 
@@ -14,11 +14,11 @@ fn to_hex(digest: &[u8]) -> String {
 }
 
 pub fn md5_hex(bytes: &[u8]) -> String {
-    to_hex(&Md5::digest(bytes))
+    lowercase_hex(&Md5::digest(bytes))
 }
 
 pub fn sha256_hex(bytes: &[u8]) -> String {
-    to_hex(&Sha256::digest(bytes))
+    lowercase_hex(&Sha256::digest(bytes))
 }
 
 #[cfg(test)]

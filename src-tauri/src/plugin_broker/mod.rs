@@ -7,8 +7,8 @@ use authorizer::{Authorizer, PermissionId, ResourceHandle, SessionToken};
 use cap_fs_ext::MetadataExt;
 use cap_std::ambient_authority;
 use cap_std::fs::Dir;
-pub(crate) use decisions::replace_file;
 use decisions::DecisionStore;
+pub(crate) use decisions::replace_file;
 use processes::ProcessStore;
 use std::collections::BTreeMap;
 use std::io;
@@ -82,7 +82,8 @@ fn register_process_resource<T>(
     authorizer
         .bind_resource(owner, handle.clone())
         .map_err(ProcessRegistrationError::Authorization)?;
-    match register() {
+    let registration = register();
+    match registration {
         Ok(registered) => Ok(registered),
         Err(message) => {
             authorizer.release_resource(handle);
@@ -342,7 +343,7 @@ impl FileIdentity {
     pub(super) fn from_file(file: &std::fs::File) -> io::Result<Self> {
         use std::os::windows::io::AsRawHandle;
         use windows_sys::Win32::Storage::FileSystem::{
-            GetFileInformationByHandle, BY_HANDLE_FILE_INFORMATION,
+            BY_HANDLE_FILE_INFORMATION, GetFileInformationByHandle,
         };
 
         let mut information = BY_HANDLE_FILE_INFORMATION::default();
@@ -657,12 +658,14 @@ mod tests {
         reset_state_for_page_load(&state);
 
         assert_eq!(state.page_generation.load(Ordering::SeqCst), 1);
-        assert!(state
-            .authorizer
-            .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .active_host_session()
-            .is_none());
+        assert!(
+            state
+                .authorizer
+                .lock()
+                .unwrap_or_else(std::sync::PoisonError::into_inner)
+                .active_host_session()
+                .is_none()
+        );
     }
 
     #[test]

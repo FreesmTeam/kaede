@@ -6,12 +6,12 @@ use super::authorizer::{
 };
 use super::decisions::{DecisionKey, DecisionKind};
 use super::processes::{
-    forward_events, send_broker_event, BrokerEvent, ProcessArtifacts, ProcessCommand,
-    ProcessStreamEnd,
+    BrokerEvent, ProcessArtifacts, ProcessCommand, ProcessStreamEnd, forward_events,
+    send_broker_event,
 };
 use super::{
-    register_process_resource, terminate_processes, BrokerState, FileIdentity,
-    ProcessRegistrationError,
+    BrokerState, FileIdentity, ProcessRegistrationError, register_process_resource,
+    terminate_processes,
 };
 use crate::downloads::{
     DestinationLease, DownloadCancellation, DownloadEntry, DownloadReport, FailedDownload,
@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs::File;
-use std::future::{poll_fn, Future};
+use std::future::{Future, poll_fn};
 use std::io::{Read, Write};
 #[cfg(any(target_os = "linux", windows))]
 use std::io::{Seek, SeekFrom};
@@ -42,8 +42,8 @@ use tauri::{AppHandle, Manager, Runtime, State, Webview};
 use tauri_plugin_dialog::{DialogExt, MessageDialogButtons, MessageDialogKind};
 use tauri_plugin_http::reqwest;
 use tauri_plugin_opener::OpenerExt;
-use tauri_plugin_shellx::process::CommandEvent;
 use tauri_plugin_shellx::ShellExt;
+use tauri_plugin_shellx::process::{Command as ShellCommand, CommandEvent};
 
 const MAIN_WEBVIEW_LABEL: &str = "main";
 static SYSTEM_CPU: Mutex<Option<System>> = Mutex::new(None);
@@ -1725,11 +1725,7 @@ fn hash_executable_contents(
     source
         .seek(SeekFrom::Start(0))
         .map_err(|error| operation_error(operation, error))?;
-    let digest = hasher
-        .finalize()
-        .iter()
-        .map(|byte| format!("{byte:02x}"))
-        .collect();
+    let digest = crate::hashes::lowercase_hex(&hasher.finalize());
     Ok((digest, header, header_length))
 }
 
@@ -1738,7 +1734,7 @@ fn snapshot_linux_executable(
     source: &mut File,
     operation: &'static str,
 ) -> Result<(File, String), CommandError> {
-    use rustix::fs::{fcntl_add_seals, memfd_create, MemfdFlags, SealFlags};
+    use rustix::fs::{MemfdFlags, SealFlags, fcntl_add_seals, memfd_create};
     use std::os::unix::fs::PermissionsExt;
 
     let base_flags = MemfdFlags::CLOEXEC | MemfdFlags::ALLOW_SEALING;
@@ -1836,7 +1832,7 @@ fn identity_bound_execution_path(
 ) -> Result<PathBuf, CommandError> {
     #[cfg(target_os = "linux")]
     {
-        use rustix::fs::{fcntl_get_seals, SealFlags};
+        use rustix::fs::{SealFlags, fcntl_get_seals};
         use std::os::fd::AsRawFd;
 
         let descriptor_path = PathBuf::from(format!("/proc/self/fd/{}", executable.as_raw_fd()));
@@ -3006,6 +3002,22 @@ fn prepare_process_command<R: Runtime>(
     session: &SessionToken,
     process: ProcessSpec,
 ) -> Result<ProcessCommand, CommandError> {
+    prepare_process_command_with_inherited_environment(
+        app,
+        state,
+        session,
+        process,
+        BTreeMap::new(),
+    )
+}
+
+fn prepare_process_command_with_inherited_environment<R: Runtime>(
+    app: &AppHandle<R>,
+    state: &BrokerState,
+    session: &SessionToken,
+    process: ProcessSpec,
+    inherited_environment: BTreeMap<String, String>,
+) -> Result<ProcessCommand, CommandError> {
     let ProcessSpec {
         executable,
         arguments,
@@ -3054,18 +3066,12 @@ fn prepare_process_command<R: Runtime>(
         };
 
     let mut command = app.shell().command(execution_path).args(arguments);
-    if clear_environment {
-        command = command.env_clear();
+    if !inherited_environment.is_empty() {
+        command = command.envs(inherited_environment);
     }
-    if let Some(cwd) = cwd {
-        command = command.current_dir(cwd);
-    }
-    if !environment.is_empty() {
-        command = command.envs(environment);
-    }
-    let command = command.set_raw_out(true);
+    let command = configure_process_command(command, clear_environment, cwd, environment);
 
-    Ok(match (executable_guard, original_program) {
+    let process_command = match (executable_guard, original_program) {
         (Some(executable_guard), Some(original_program)) => {
             ProcessCommand::identity_bound(command, executable_guard, original_program)
         }
@@ -3075,7 +3081,26 @@ fn prepare_process_command<R: Runtime>(
                 message: "process executable identity binding was incomplete".to_owned(),
             });
         }
-    })
+    };
+    Ok(process_command)
+}
+
+fn configure_process_command(
+    mut command: ShellCommand,
+    clear_environment: bool,
+    cwd: Option<PathBuf>,
+    environment: BTreeMap<String, String>,
+) -> ShellCommand {
+    if clear_environment {
+        command = command.env_clear();
+    }
+    if let Some(cwd) = cwd {
+        command = command.current_dir(cwd);
+    }
+    if !environment.is_empty() {
+        command = command.envs(environment);
+    }
+    command.set_raw_out(true)
 }
 
 fn prepare_plugin_process_cwd(
@@ -3637,7 +3662,7 @@ async fn download_http(
         .try_lease_destination(destination.clone())
         .map_err(|error| operation_error("http_download_destination", error))?;
     let pending = send_http(state, session, request).await?;
-    write_http_download(state, session, pending, destination, events).await
+    return write_http_download(state, session, pending, destination, events).await;
 }
 
 struct PreparedBatchDownload {
@@ -3786,11 +3811,12 @@ async fn download_batch(
         })
         .await;
         drop(active.swap_remove(completed_index));
-        execution
+        let mut progress = execution
             .progress
             .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner)
-            .remove(&completed.entry.path);
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        progress.remove(&completed.entry.path);
+        drop(progress);
         match completed.result {
             Ok(()) => {
                 execution.success.fetch_add(1, Ordering::Relaxed);
@@ -3822,7 +3848,8 @@ async fn download_batch(
         );
 
         if !execution.cancellation.is_cancelled() {
-            if let Some(download) = remaining.next() {
+            let next_download = remaining.next();
+            if let Some(download) = next_download {
                 active.push(Box::pin(download_batch_entry(
                     state, session, download, &execution,
                 )));
@@ -4168,10 +4195,15 @@ async fn stream_http_download(
     }
     let mut writer = create_partial_writer(state, &destination, cancellation).await?;
     on_progress(0, total);
-    while let Some(chunk) = await_unless_cancelled(cancellation, response.chunk())
-        .await?
-        .map_err(|error| DownloadTransferError::Command(operation_error("http_download", error)))?
-    {
+    loop {
+        let chunk = await_unless_cancelled(cancellation, response.chunk())
+            .await?
+            .map_err(|error| {
+                DownloadTransferError::Command(operation_error("http_download", error))
+            })?;
+        let Some(chunk) = chunk else {
+            break;
+        };
         reauthorize_http(state, session, &url, &method, plugin)
             .map_err(DownloadTransferError::Command)?;
         await_unless_cancelled(cancellation, writer.file_mut().write_all(&chunk))
@@ -4481,12 +4513,14 @@ mod tests {
                 ..
             } if cancel_id == "launch-1"
         ));
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "kind": "host_cancel_downloads",
-            "cancelId": "launch-1",
-            "rawCommand": "cancel_downloads"
-        }))
-        .is_err());
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "host_cancel_downloads",
+                "cancelId": "launch-1",
+                "rawCommand": "cancel_downloads"
+            }))
+            .is_err()
+        );
 
         let response = BrokerResponse::DownloadReport {
             success: 2,
@@ -4900,41 +4934,49 @@ mod tests {
                 for protected_target in
                     [&fixture_root, &private_root, &private_child, &history_path]
                 {
-                    assert!(resolve_plugin_storage_target(
+                    assert!(
+                        resolve_plugin_storage_target(
+                            &state,
+                            &plugin,
+                            protected_target,
+                            StorageAccess::Read,
+                            true,
+                        )
+                        .is_err()
+                    );
+                }
+                assert!(
+                    resolve_plugin_storage_target(
                         &state,
                         &plugin,
-                        protected_target,
+                        &legacy_decoy,
+                        StorageAccess::Write,
+                        true,
+                    )
+                    .is_err()
+                );
+                assert!(
+                    resolve_storage_path(
+                        &state,
+                        &plugin,
+                        &history_path,
+                        None,
                         StorageAccess::Read,
                         true,
                     )
-                    .is_err());
-                }
-                assert!(resolve_plugin_storage_target(
-                    &state,
-                    &plugin,
-                    &legacy_decoy,
-                    StorageAccess::Write,
-                    true,
-                )
-                .is_err());
-                assert!(resolve_storage_path(
-                    &state,
-                    &plugin,
-                    &history_path,
-                    None,
-                    StorageAccess::Read,
-                    true,
-                )
-                .is_err());
-                assert!(resolve_storage_path(
-                    &state,
-                    &plugin,
-                    &history_path,
-                    None,
-                    StorageAccess::Write,
-                    true,
-                )
-                .is_err());
+                    .is_err()
+                );
+                assert!(
+                    resolve_storage_path(
+                        &state,
+                        &plugin,
+                        &history_path,
+                        None,
+                        StorageAccess::Write,
+                        true,
+                    )
+                    .is_err()
+                );
 
                 let valid_empty_history = br#"{"version":1,"principals":[]}"#;
                 assert!(
@@ -4943,13 +4985,10 @@ mod tests {
                 );
                 assert!(plugin_fs_remove(&state, &plugin, &history_path).is_err());
                 let atomic_sibling = private_root.join(".principal-history.attacker.tmp");
-                assert!(plugin_fs_write_bytes(
-                    &state,
-                    &plugin,
-                    &atomic_sibling,
-                    valid_empty_history,
-                )
-                .is_err());
+                assert!(
+                    plugin_fs_write_bytes(&state, &plugin, &atomic_sibling, valid_empty_history,)
+                        .is_err()
+                );
                 assert_eq!(
                     std::fs::read(&history_path)
                         .expect("denied private operations must preserve history"),
@@ -5038,10 +5077,12 @@ mod tests {
             symlink(&history_path, &history_link)
                 .expect("symlink from safe storage into private history should be created");
             assert!(plugin_fs_remove(&state, &plugin, &history_link).is_err());
-            assert!(std::fs::symlink_metadata(&history_link)
-                .expect("denied remove must preserve the symlink")
-                .file_type()
-                .is_symlink());
+            assert!(
+                std::fs::symlink_metadata(&history_link)
+                    .expect("denied remove must preserve the symlink")
+                    .file_type()
+                    .is_symlink()
+            );
         }
 
         let _ = std::fs::remove_dir_all(fixture_root);
@@ -5134,7 +5175,7 @@ mod tests {
     #[cfg(target_os = "linux")]
     #[tokio::test]
     async fn external_remove_handles_write_only_files_and_fifos_without_blocking_quiescence() {
-        use rustix::fs::{mkfifoat, Mode, CWD};
+        use rustix::fs::{CWD, Mode, mkfifoat};
         use std::os::unix::fs::PermissionsExt;
         use std::sync::{Arc, Barrier};
         use std::time::Duration;
@@ -5211,7 +5252,7 @@ mod tests {
     #[cfg(target_os = "linux")]
     #[tokio::test]
     async fn internal_fifo_read_does_not_block_revoke_quiescence() {
-        use rustix::fs::{mkfifoat, Mode, CWD};
+        use rustix::fs::{CWD, Mode, mkfifoat};
         use std::sync::{Arc, Barrier};
         use std::time::Duration;
 
@@ -5272,8 +5313,8 @@ mod tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn external_regular_to_fifo_write_race_does_not_block_page_reset() {
-        use rustix::fs::{mkfifoat, Mode, CWD};
-        use std::sync::{mpsc, Arc, Barrier};
+        use rustix::fs::{CWD, Mode, mkfifoat};
+        use std::sync::{Arc, Barrier, mpsc};
         use std::time::Duration;
 
         let mut random = [0_u8; 8];
@@ -5606,12 +5647,14 @@ mod tests {
             }
         });
         assert!(serde_json::from_value::<BrokerRequest>(prepared_grant.clone()).is_ok());
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "kind": "grant_plugin",
-            "pluginSession": "plugin-session",
-            "descriptor": "logging/write"
-        }))
-        .is_err());
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "grant_plugin",
+                "pluginSession": "plugin-session",
+                "descriptor": "logging/write"
+            }))
+            .is_err()
+        );
         let mut browser_identity = prepared_grant;
         browser_identity["prepared"]["targetIdentities"][0]["identityProvider"] =
             serde_json::json!("browser-preview-logical-v1");
@@ -5650,23 +5693,29 @@ mod tests {
             serde_json::json!("desktop-filesystem-v1");
         assert!(serde_json::from_value::<BrokerRequest>(legacy_process_identity).is_err());
 
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "command": "plugin:fs|read_text_file",
-            "args": { "path": "/tmp/file" }
-        }))
-        .is_err());
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "kind": "plugin:fs|read_text_file",
-            "path": "/tmp/file"
-        }))
-        .is_err());
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "kind": "plugin_fs_read_text",
-            "path": "/tmp/file",
-            "baseDirectory": null,
-            "command": "plugin:shellx|execute"
-        }))
-        .is_err());
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "command": "plugin:fs|read_text_file",
+                "args": { "path": "/tmp/file" }
+            }))
+            .is_err()
+        );
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "plugin:fs|read_text_file",
+                "path": "/tmp/file"
+            }))
+            .is_err()
+        );
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "plugin_fs_read_text",
+                "path": "/tmp/file",
+                "baseDirectory": null,
+                "command": "plugin:shellx|execute"
+            }))
+            .is_err()
+        );
     }
 
     #[test]
@@ -5773,11 +5822,13 @@ mod tests {
         .expect("extension read request should deserialize");
         assert!(matches!(request, BrokerRequest::HostReadExtensions {}));
 
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "kind": "host_read_extensions",
-            "path": "/tmp/attacker-controlled"
-        }))
-        .is_err());
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "host_read_extensions",
+                "path": "/tmp/attacker-controlled"
+            }))
+            .is_err()
+        );
 
         let response = BrokerResponse::ExtensionsRead {
             result: extensions::ExtensionsReadResult {
@@ -5841,11 +5892,13 @@ mod tests {
             BrokerRequest::HostHashSha256 { bytes }
                 if bytes == vec![0, 127, 128, 255]
         ));
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "kind": "host_hash_md5",
-            "bytes": [256]
-        }))
-        .is_err());
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "host_hash_md5",
+                "bytes": [256]
+            }))
+            .is_err()
+        );
         assert!(matches!(
             serde_json::from_value::<BrokerRequest>(serde_json::json!({
                 "kind": "host_fs_metadata",
@@ -5856,13 +5909,15 @@ mod tests {
             BrokerRequest::HostFsMetadata { path, base_directory }
                 if path == Path::new("/tmp/cache.json") && base_directory.is_none()
         ));
-        assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
-            "kind": "host_fs_metadata",
-            "path": "/tmp/cache.json",
-            "baseDirectory": null,
-            "command": "get_system_memory"
-        }))
-        .is_err());
+        assert!(
+            serde_json::from_value::<BrokerRequest>(serde_json::json!({
+                "kind": "host_fs_metadata",
+                "path": "/tmp/cache.json",
+                "baseDirectory": null,
+                "command": "get_system_memory"
+            }))
+            .is_err()
+        );
 
         assert_eq!(
             serde_json::to_value(BrokerResponse::SystemMemory {
@@ -6444,15 +6499,17 @@ mod tests {
             .collect::<Result<Vec<_>, _>>()
             .expect("valid absolute missing paths should resolve for existence probes");
         assert_eq!(absolute_exists, vec![false, false]);
-        assert!(resolve_storage_path(
-            &state,
-            &host,
-            Path::new("../escape"),
-            Some(&base),
-            StorageAccess::Read,
-            false,
-        )
-        .is_err());
+        assert!(
+            resolve_storage_path(
+                &state,
+                &host,
+                Path::new("../escape"),
+                Some(&base),
+                StorageAccess::Read,
+                false,
+            )
+            .is_err()
+        );
 
         let _ = std::fs::remove_dir_all(temp_root);
     }
@@ -6855,10 +6912,12 @@ mod tests {
             std::fs::read(&destination).expect("existing destination should remain readable"),
             b"existing artifact"
         );
-        assert!(std::fs::read_dir(&download_directory)
-            .expect("download directory should remain readable")
-            .filter_map(Result::ok)
-            .all(|entry| !entry.file_name().to_string_lossy().ends_with(".part")));
+        assert!(
+            std::fs::read_dir(&download_directory)
+                .expect("download directory should remain readable")
+                .filter_map(Result::ok)
+                .all(|entry| !entry.file_name().to_string_lossy().ends_with(".part"))
+        );
         let events = emitted.lock().expect("captured progress should lock");
         let terminal = events.last().expect("terminal progress should be emitted");
         assert_eq!(terminal["kind"], "download_batch_progress");
@@ -6913,15 +6972,18 @@ mod tests {
             let mut requested_targets = Vec::new();
             for request_index in 0..2 {
                 let accepted = if request_index == 0 {
-                    Some(
-                        listener
-                            .accept()
-                            .await
-                            .expect("initial HTTP request should connect"),
-                    )
-                } else {
-                    tokio::time::timeout(std::time::Duration::from_millis(250), listener.accept())
+                    let connection = listener
+                        .accept()
                         .await
+                        .expect("initial HTTP request should connect");
+                    Some(connection)
+                } else {
+                    let connection = tokio::time::timeout(
+                        std::time::Duration::from_millis(250),
+                        listener.accept(),
+                    )
+                    .await;
+                    connection
                         .ok()
                         .map(|result| result.expect("follow-up HTTP request should connect"))
                 };
@@ -7126,7 +7188,7 @@ mod tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn executable_symlink_preparation_is_stable_until_the_target_changes() {
-        use std::os::unix::fs::{symlink, PermissionsExt};
+        use std::os::unix::fs::{PermissionsExt, symlink};
 
         let (state, _host, _plugin, temp_root, _principal_root) =
             storage_test_context("process-grant-identity", false);
@@ -7309,15 +7371,11 @@ mod tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn plugin_process_uses_principal_cwd_and_clears_parent_environment() {
-        struct ParentSentinels {
-            environment_key: String,
-            file_path: PathBuf,
-        }
+        struct ParentSentinelFile(PathBuf);
 
-        impl Drop for ParentSentinels {
+        impl Drop for ParentSentinelFile {
             fn drop(&mut self) {
-                std::env::remove_var(&self.environment_key);
-                let _ = std::fs::remove_file(&self.file_path);
+                let _ = std::fs::remove_file(&self.0);
             }
         }
 
@@ -7340,11 +7398,7 @@ mod tests {
             .expect("parent cwd should be available")
             .join(&file_name);
         std::fs::write(&file_path, b"parent-only").expect("parent cwd sentinel should be created");
-        std::env::set_var(&environment_key, "parent-secret");
-        let _parent_sentinels = ParentSentinels {
-            environment_key: environment_key.clone(),
-            file_path,
-        };
+        let _parent_sentinel = ParentSentinelFile(file_path);
 
         let executable = std::fs::canonicalize("/bin/sh")
             .expect("the platform shell executable should be available");
@@ -7389,7 +7443,7 @@ mod tests {
             .plugin(tauri_plugin_shellx::init(false))
             .build(tauri::generate_context!())
             .expect("mock Tauri application should build");
-        let plugin_command = prepare_process_command(
+        let plugin_command = prepare_process_command_with_inherited_environment(
             app.handle(),
             &state,
             &plugin,
@@ -7399,6 +7453,7 @@ mod tests {
                 cwd: None,
                 environment: BTreeMap::new(),
             },
+            BTreeMap::from([(environment_key.clone(), "parent-secret".to_owned())]),
         )
         .expect("authorized plugin process should prepare");
         assert!(
@@ -7428,7 +7483,7 @@ mod tests {
             "if [ \"{host_environment_probe}\" != 'parent-secret' ]; then exit 30; fi; \
              if [ ! -e \"$1\" ]; then exit 31; fi; printf 'host-inheritance-preserved\\n'"
         );
-        let host_command = prepare_process_command(
+        let host_command = prepare_process_command_with_inherited_environment(
             app.handle(),
             &state,
             &host,
@@ -7443,6 +7498,7 @@ mod tests {
                 cwd: None,
                 environment: BTreeMap::new(),
             },
+            BTreeMap::from([(environment_key, "parent-secret".to_owned())]),
         )
         .expect("host process should prepare with its existing inheritance behavior");
         let host_output = host_command
@@ -7579,17 +7635,21 @@ mod tests {
     #[test]
     fn plugin_http_rejects_virtual_host_overrides() {
         for name in ["Host", "host", ":authority"] {
-            assert!(validate_plugin_http_headers(&[HttpHeader {
-                name: name.to_owned(),
-                value: "other.example".to_owned(),
-            }])
-            .is_err());
+            assert!(
+                validate_plugin_http_headers(&[HttpHeader {
+                    name: name.to_owned(),
+                    value: "other.example".to_owned(),
+                }])
+                .is_err()
+            );
         }
-        assert!(validate_plugin_http_headers(&[HttpHeader {
-            name: "Accept".to_owned(),
-            value: "application/json".to_owned(),
-        }])
-        .is_ok());
+        assert!(
+            validate_plugin_http_headers(&[HttpHeader {
+                name: "Accept".to_owned(),
+                value: "application/json".to_owned(),
+            }])
+            .is_ok()
+        );
     }
 
     #[test]

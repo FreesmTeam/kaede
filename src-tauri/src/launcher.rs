@@ -295,7 +295,7 @@ fn verify_file_hash(path: &Path, expected_hash: &str) -> io::Result<bool> {
         hasher.update(&buffer[..bytes_read]);
     }
 
-    let actual_hash = format!("{:x}", hasher.finalize());
+    let actual_hash = crate::hashes::lowercase_hex(&hasher.finalize());
 
     Ok(actual_hash == expected_hash)
 }

@@ -111,8 +111,8 @@ fn destination_directory_is_case_sensitive(destination: &Path) -> Option<bool> {
     use std::os::windows::ffi::OsStrExt;
     use windows_sys::Win32::Foundation::{CloseHandle, INVALID_HANDLE_VALUE};
     use windows_sys::Win32::Storage::FileSystem::{
-        CreateFileW, FileCaseSensitiveInfo, GetFileInformationByHandleEx, FILE_CASE_SENSITIVE_INFO,
-        FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE, FILE_SHARE_READ, FILE_SHARE_WRITE,
+        CreateFileW, FILE_CASE_SENSITIVE_INFO, FILE_FLAG_BACKUP_SEMANTICS, FILE_SHARE_DELETE,
+        FILE_SHARE_READ, FILE_SHARE_WRITE, FileCaseSensitiveInfo, GetFileInformationByHandleEx,
         OPEN_EXISTING,
     };
 
@@ -502,9 +502,11 @@ mod tests {
         assert!(registry.try_lease_destination(destination.clone()).is_err());
         #[cfg(any(windows, target_os = "macos"))]
         if !destination_directory_is_case_sensitive(&destination).unwrap_or(false) {
-            assert!(registry
-                .try_lease_destination(destination.with_file_name("KAEDE-COLLISION-TEST.BIN"))
-                .is_err());
+            assert!(
+                registry
+                    .try_lease_destination(destination.with_file_name("KAEDE-COLLISION-TEST.BIN"))
+                    .is_err()
+            );
         }
         drop(first);
         assert!(registry.try_lease_destination(destination).is_ok());

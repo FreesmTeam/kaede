@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { expect, test } from "bun:test";
 import type { TSchema } from "typebox";
 import { Compile } from "typebox/compile";
 import { Create } from "typebox/value";
+import { expect, test } from "vitest";
 
 import {
   CheckAccount,
@@ -27,7 +27,7 @@ import {
   CheckExtensionMetadata,
   CheckInstanceMetadata,
   CheckPatchMeta,
-} from "@/lib/schemas/generated/validators.ts";
+} from "@/lib/schemas/generated/validators.js";
 import { AccountSchema } from "@/lib/schemas/scopes/accounts";
 import { ConfigSchema } from "@/lib/schemas/scopes/config";
 import { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
@@ -35,15 +35,37 @@ import { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
 import { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
 
 const Targets: Array<{
-  "name"  : string;
-  "check" : (value: unknown) => boolean;
-  "schema": TSchema;
+  "name"   : string;
+  "check"  : (value: unknown) => boolean;
+  "sample"?: () => unknown;
+  "schema" : TSchema;
 }> = [
   { "name": "account", "check": CheckAccount, "schema": AccountSchema },
   { "name": "config", "check": CheckConfig, "schema": ConfigSchema },
   {
     "name"  : "extensionMetadata",
     "check" : CheckExtensionMetadata,
+    "sample": (): unknown => ({
+      "id"         : "example.plugin",
+      "logo"       : "",
+      "name"       : "Example",
+      "type"       : "sandbox",
+      "source"     : "https://github.com/example/plugin",
+      "version"    : "1.0.0",
+      "authors"    : [],
+      "languages"  : ["en"],
+      "categories" : [],
+      "permissions": [
+        "ui/basic",
+        {
+          "id"   : "network/http",
+          "scope": {
+            "origins": ["https://example.com"],
+            "methods": ["GET"],
+          },
+        },
+      ],
+    }),
     "schema": ExtensionMetadataSchema,
   },
   { "name": "instanceMetadata", "check": CheckInstanceMetadata, "schema": InstanceMetadataSchema },
@@ -64,14 +86,14 @@ const Probes: Array<unknown> = [
   { "unexpected": true },
 ];
 
-for (const { name, check, schema } of Targets) {
+for (const { name, check, sample = (): unknown => Create(schema), schema } of Targets) {
   const reference = Compile(schema);
 
   test(`generated '${name}' validator accepts a valid sample`, () => {
-    const sample: unknown = Create(schema);
+    const validSample = sample();
 
-    expect(check(sample)).toBe(true);
-    expect(reference.Check(sample)).toBe(true);
+    expect(check(validSample)).toBe(true);
+    expect(reference.Check(validSample)).toBe(true);
   });
 
   test(`generated '${name}' validator matches the compiled one on probes`, () => {
@@ -81,22 +103,80 @@ for (const { name, check, schema } of Targets) {
   });
 
   test(`generated '${name}' validator matches the compiled one on mutated samples`, () => {
-    const sample: unknown = Create(schema);
+    const validSample = sample();
 
-    if (typeof sample !== "object" || sample === null) {
+    if (typeof validSample !== "object" || validSample === null) {
       return;
     }
 
-    for (const key of Object.keys(sample)) {
-      const missingKey = structuredClone(sample) as Record<string, unknown>;
+    for (const key of Object.keys(validSample)) {
+      const missingKey = structuredClone(validSample) as Record<string, unknown>;
 
       delete missingKey[key];
       expect(check(missingKey)).toBe(reference.Check(missingKey));
 
-      const wrongType = structuredClone(sample) as Record<string, unknown>;
+      const wrongType = structuredClone(validSample) as Record<string, unknown>;
 
       wrongType[key] = Symbol.for("bogus").toString() + 12_345;
       expect(check(wrongType)).toBe(reference.Check(wrongType));
     }
   });
 }
+
+const BaseExtensionMetadata = {
+  "id"        : "example.plugin",
+  "logo"      : "",
+  "name"      : "Example",
+  "type"      : "sandbox",
+  "source"    : "https://github.com/example/plugin",
+  "version"   : "1.0.0",
+  "authors"   : [],
+  "languages" : ["en"],
+  "categories": [],
+} as const;
+
+const RefinementProbes: ReadonlyArray<unknown> = [
+  { ...BaseExtensionMetadata, "id": "_invalid-leading-character" },
+  { ...BaseExtensionMetadata, "id": "constructor" },
+  { ...BaseExtensionMetadata, "source": "https://GitHub.com/example/plugin" },
+  { ...BaseExtensionMetadata, "version": " 1.0.0" },
+  { ...BaseExtensionMetadata, "permissions": ["ui/basic", "ui/basic"] },
+  { ...BaseExtensionMetadata, "permissions": ["ui-basic"] },
+  {
+    ...BaseExtensionMetadata,
+    "permissions": [{
+      "id"   : "network/http",
+      "scope": { "origins": ["https://example.com/path"], "methods": ["GET"] },
+    }],
+  },
+  {
+    ...BaseExtensionMetadata,
+    "permissions": [{
+      "id"   : "storage/external/read",
+      "scope": { "roots": ["relative/path"] },
+    }],
+  },
+  {
+    ...BaseExtensionMetadata,
+    "permissions": [{
+      "id"   : "system/process/spawn",
+      "scope": { "executables": [{ "path": "relative/tool", "arguments": [] }] },
+    }],
+  },
+  {
+    ...BaseExtensionMetadata,
+    "permissions": [{
+      "id"   : "system/process/spawn",
+      "scope": { "executables": [{ "path": "/bin/tool", "arguments": ["bad\u{0}arg"] }] },
+    }],
+  },
+];
+
+test("generated extension validator preserves all host refinement checks", () => {
+  const reference = Compile(ExtensionMetadataSchema);
+
+  for (const probe of RefinementProbes) {
+    expect(CheckExtensionMetadata(probe)).toBe(reference.Check(probe));
+    expect(CheckExtensionMetadata(probe)).toBe(false);
+  }
+});

@@ -51,6 +51,10 @@ make the `vue` and `typebox` versions listed in Kaede's root `package.json`
 available to TypeScript. The standalone sandbox entrypoint has no such
 dependency.
 
+Generated schema checks remain synchronous, while detailed TypeBox errors are
+loaded only for failed validation. Trusted consumers must therefore `await`
+`Kaede.libs.Schemas.*Validator.Errors(value)`.
+
 `kaede-lib.d.ts` is post-processed so it has no repository-private path aliases.
 Its Ark references resolve to the sibling `ark-of-atrahasis-1.0.d.ts` snapshot,
 which preserves the complete `SafeDocument` contract for consumers even though

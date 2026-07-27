@@ -19,6 +19,29 @@
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { FullValidationArgumentsType } from "@/types/schemas/validation-arguments.type.ts";
 
+async function logValidationErrors(
+  label: string,
+  entryInfo: string,
+  value: unknown,
+  schema: FullValidationArgumentsType["schema"],
+): Promise<void> {
+  try {
+    const errors = await schema.Errors(value);
+
+    log.warn(
+      __PRE_BUNDLED_FILENAME__,
+      `The provided ${label} (${entryInfo}) is not valid:`,
+      "\n" + JSON.stringify(errors, null, 2),
+    );
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      `Failed to produce validation errors for ${label} (${entryInfo}):`,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+}
+
 export function validate<T>({
   label,
   info,
@@ -33,17 +56,7 @@ export function validate<T>({
   const isValid: boolean = schema.Check(value);
 
   if (!isValid) {
-    const errors: string = JSON.stringify(
-      schema.Errors(value),
-      null,
-      2,
-    );
-
-    log.warn(
-      __PRE_BUNDLED_FILENAME__,
-      `The provided ${label} (${entryInfo}) is not valid:`,
-      "\n" + errors,
-    );
+    void logValidationErrors(label, entryInfo, value, schema);
 
     return false;
   }

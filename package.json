@@ -8,7 +8,7 @@
     "build": "tauri build",
     "build:debug": "tauri build --debug",
     "dev:frontend": "vite",
-    "build:frontend": "vue-tsc -b && vite build",
+    "build:frontend": "bun run check:validators && vue-tsc -b && vite build",
     "preview:frontend": "vite preview",
     "test": "vitest run ./src",
     "test:tauri-acl": "cargo test --manifest-path src-tauri/Cargo.toml --locked ipc_acl_smoke::obtained_main_window_is_confined_to_broker_acl -- --exact --nocapture",
@@ -18,6 +18,7 @@
     "analyze:fallow": "fallow dead-code",
     "typecheck": "vue-tsc -b",
     "generate:validators": "bun scripts/generate-validators.ts",
+    "check:validators": "bun run generate:validators --check",
     "check:dependency-compatibility": "bun ./scripts/check-dependency-compatibility.ts",
     "generate:types": "bun ./scripts/generate-types.ts",
     "check:types": "bun run generate:types --check && bun ./scripts/check-type-consumers.ts"

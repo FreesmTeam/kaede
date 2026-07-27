@@ -27,6 +27,16 @@
           "exports": [
             "default"
           ]
+        },
+        {
+          "pattern": "src/lib/schemas/generated/validators.d.ts",
+          "exports": [
+            "CheckAccount",
+            "CheckConfig",
+            "CheckExtensionMetadata",
+            "CheckInstanceMetadata",
+            "CheckPatchMeta"
+          ]
         }
       ]
     },

@@ -15,6 +15,10 @@
     "harden": "readonly",
     "lockdown": "readonly"
   },
+  "ignorePatterns": [
+    "src/lib/schemas/generated/validators.d.ts",
+    "src/lib/schemas/generated/validators.js"
+  ],
   "options": {
     "typeAware": true
   },

@@ -53,6 +53,9 @@ const eslintConfig = defineConfigWithVueTs(
     "./src/vite-env.d.ts",
     // Ignore the generated type definitions
     "./types/",
+    // Generated validators are verified byte-for-byte and against live TypeBox checks.
+    "./src/lib/schemas/generated/validators.d.ts",
+    "./src/lib/schemas/generated/validators.js",
   ]),
   vueTsConfigs.recommended,
   pluginVue.configs["flat/essential"],

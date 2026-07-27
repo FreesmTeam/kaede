@@ -102,10 +102,11 @@ and rerun the gate before committing.
 
 Rust visibility is checked separately with
 [Hawk](https://github.com/astral-sh/hawk), using the production targets declared
-in `src-tauri/hawk.toml`:
+in `src-tauri/hawk.toml`. Run it inside the checked-in Nix shell: Hawk 0.1.10 is
+compiler-bound and the shell supplies the matching Rust 1.97.1 toolchain.
 
 ```bash
-cargo hawk check \
+nix develop --command cargo hawk check \
   --manifest-path src-tauri/Cargo.toml \
   --target-dir src-tauri/target \
   --color always \
@@ -118,6 +119,7 @@ The complete local validation set used by CI is:
 bun install --frozen-lockfile
 bun audit --audit-level=low
 bun run check:dependency-compatibility
+bun run check:validators
 bun run typecheck
 bun run check:types
 bun run lint
@@ -130,6 +132,41 @@ cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
 cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
 cargo hawk check --manifest-path src-tauri/Cargo.toml --target-dir src-tauri/target --color always -D warnings
 ```
+
+Run the Rust commands in that list from `nix develop`. The JavaScript commands
+use the Bun version pinned by `packageManager`, the Nix shell, and CI.
+
+### Rust dependency audit status
+
+Verified 2026-07-27: `cargo audit` reports no vulnerability and leaves 17
+upstream warnings visible; the repository has no RustSec ignore list. Ten
+unmaintained GTK3 binding warnings, the `glib 0.18.5` soundness warning, and
+the `proc-macro-error 1.0.4` maintenance warning come through Tauri 2.11.5's
+Linux GTK3/WebKitGTK stack. Five unmaintained UNIC warnings come through
+`urlpattern 0.3.0`, used by `tauri-utils 2.9.3` and
+`tauri-plugin-http 2.5.9`. Recheck these edges with `cargo tree --invert`
+whenever Tauri or its plugins are updated; do not convert them into an
+allowlist merely to make the report empty.
+
+The compatible `event-listener 5.4.2` lockfile update is applied. Four older
+transitive versions cannot be updated independently: `crypto-common 0.1.7`
+requires `generic-array =0.14.7`, while `proc-macro-crate 2.0.2` requires
+`toml_datetime =0.6.3` and `toml_edit =0.20.2`. That exact datetime pin also
+prevents `system-deps 6.2.2` from selecting `toml 0.8.23`, which requires
+`toml_datetime ^0.6.11`. Update the parent crates when their Tauri dependency
+chain permits it; do not override these incompatible requirements locally.
+
+`src/lib/schemas/generated/validators.js` and its declaration file are generated
+artifacts, so the style linters exclude those exact paths instead of accepting
+blanket disable comments in generated source. `bun run check:validators`
+regenerates both files in memory and fails on any byte-level drift. The Vitest
+suite also compares their behavior with live TypeBox validators, including
+Kaede's host-only permission refinements.
+
+Detailed TypeBox errors are loaded only after a generated check fails. The
+public validator `Errors(value)` contract therefore returns a `Promise`; trusted
+extension code must `await` it. This keeps TypeBox schemas and the value engine
+out of the normal startup chunk while preserving synchronous `Check(value)`.
 
 The full Rust test command includes the Tauri ACL smoke. Use
 `bun run test:tauri-acl` only when rerunning that exact smoke in isolation.

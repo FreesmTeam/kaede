@@ -1,17 +1,11 @@
-import { Errors } from "typebox/value";
-
+import { getValidationErrors } from "@/lib/schemas/errors.ts";
 import {
   CheckAccount,
   CheckConfig,
   CheckExtensionMetadata,
   CheckInstanceMetadata,
   CheckPatchMeta,
-} from "@/lib/schemas/generated/validators.ts";
-import { AccountSchema } from "@/lib/schemas/scopes/accounts";
-import { ConfigSchema } from "@/lib/schemas/scopes/config";
-import { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
-import { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
-import { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
+} from "@/lib/schemas/generated/validators.js";
 import { validate } from "@/lib/schemas/validate.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
@@ -32,24 +26,24 @@ import type {
  */
 const AccountValidator: CompiledValidatorType = {
   "Check" : CheckAccount,
-  "Errors": (value: unknown) => Errors(AccountSchema, value),
+  "Errors": (value: unknown) => getValidationErrors("account", value),
 };
 const ConfigValidator: CompiledValidatorType = {
   "Check" : CheckConfig,
-  "Errors": (value: unknown) => Errors(ConfigSchema, value),
+  "Errors": (value: unknown) => getValidationErrors("config", value),
 };
 const InstanceMetadataValidator: CompiledValidatorType = {
   "Check" : CheckInstanceMetadata,
-  "Errors": (value: unknown) => Errors(InstanceMetadataSchema, value),
+  "Errors": (value: unknown) => getValidationErrors("instanceMetadata", value),
 };
 const ExtensionMetadataValidator: CompiledValidatorType = {
   "Check" : CheckExtensionMetadata,
-  "Errors": (value: unknown) => Errors(ExtensionMetadataSchema, value),
+  "Errors": (value: unknown) => getValidationErrors("extensionMetadata", value),
 };
 
 const PatchMetaValidator: CompiledValidatorType = {
   "Check" : CheckPatchMeta,
-  "Errors": (value: unknown) => Errors(PatchMetaSchema, value),
+  "Errors": (value: unknown) => getValidationErrors("patchMeta", value),
 };
 
 export default {

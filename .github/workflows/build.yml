@@ -54,6 +54,9 @@ jobs:
       - name: Verify patched dependency compatibility
         run: bun run check:dependency-compatibility
 
+      - name: Verify generated validators
+        run: bun run check:validators
+
       - name: Run TypeScript checks
         run: bun run typecheck
 

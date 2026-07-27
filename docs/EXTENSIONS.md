@@ -274,6 +274,15 @@ const { Host, DirectHost, Kaede } = scopedThis;
 - `Kaede` is the mutable launcher namespace used by trusted hooks and UI
   extensions.
 
+`Kaede.libs.Schemas.*Validator.Check(value)` is synchronous. Detailed errors
+are intentionally failure-only chunks, so `Errors(value)` returns a promise:
+
+```ts
+const errors = await Kaede.libs.Schemas.ConfigValidator.Errors(candidate);
+```
+
+Do not read `.length` or iterate the return value before awaiting it.
+
 `Host.downloads.batch()` groups concurrent launcher downloads behind the Rust
 broker and `Host.downloads.cancel()` cancels only batches with the same
 session-, page-generation-, and caller-supplied cancellation ID. Destination

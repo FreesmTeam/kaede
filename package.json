@@ -13,6 +13,7 @@
     "lint": "eslint .",
     "typecheck": "vue-tsc -b",
     "generate:validators": "bun scripts/generate-validators.ts",
+    "generate:bundle-analysis": "bunx vite build --sourcemap && bunx source-map-explorer 'dist/assets/*.js' --html bundle-analysis.html --no-border-checks",
     "generate:types": "dts-bundle-generator ./src/declarations.ts -o ./types/kaede-lib.d.ts --project tsconfig.types.json --inline-declare-global"
   },
   "dependencies": {

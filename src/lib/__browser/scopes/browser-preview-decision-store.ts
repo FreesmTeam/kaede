@@ -10,6 +10,7 @@ import type {
   BrokerDecisionStore,
   PermissionDecisionStoreKey,
 } from "@/lib/capability-broker/types.ts";
+import { copyAndSort } from "@/lib/collections/copy-array.ts";
 
 const DECISION_RECORD_VERSION = 1;
 const MAX_OPAQUE_KEY_BYTES = 4096;
@@ -90,7 +91,7 @@ function parseDecisionRecord(
   }
 
   const recordKeys = typeof parsed === "object" && parsed !== null
-    ? Object.keys(parsed).sort()
+    ? copyAndSort(Object.keys(parsed))
     : [];
 
   if (

@@ -161,6 +161,11 @@ impl ProcessArtifacts {
             owned_files: vec![path],
         }
     }
+
+    pub(super) fn and_owning_file(mut self, path: PathBuf) -> Self {
+        self.owned_files.push(path);
+        self
+    }
 }
 
 impl Drop for ProcessArtifacts {
@@ -254,7 +259,7 @@ impl ProcessStore {
         self.terminate_and_remove(handle, false)
     }
 
-    pub(super) fn kill_for_cleanup(
+    fn kill_for_cleanup(
         &self,
         handle: &ResourceHandle,
     ) -> Result<Option<RetainedTerminalFailure>, String> {

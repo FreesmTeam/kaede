@@ -21,45 +21,24 @@ export type {
   BrokerDecisionStore,
   BrokerProcess,
   BrokerServerProcess,
-  CapabilityBrokerRuntime,
   DirectoryEntry,
   DirectHostFacade,
-  DownloadBatchEntry,
-  DownloadBatchInput,
   DownloadBatchSnapshot,
-  DownloadFailure,
-  DownloadProgress,
   DownloadReport,
-  FileMetadata,
   HostFacade,
-  HostDownloads,
-  HostHttpRequestInit,
-  InstalledExtensionArchive,
-  InstalledExtensionFailure,
   InstalledExtensionsReadResult,
-  PermissionDecisionStoreKey,
   PermissionTargetIdentity,
   PermissionTargetKind,
-  PickedIcon,
   PreparedPermissionRequest,
-  PluginCapabilityFactories,
   PluginCapabilitySession,
   PluginEventCapabilityFactory,
   ProcessEvent,
   ProcessHandle,
   RuntimeSnapshot,
-  SystemMemory,
 } from "@/lib/capability-broker/types.ts";
 export type {
-  InitializationFinalizationInput,
   InitializationFinalizationReport,
 } from "@/types/application/initial-state.type.ts";
-export {
-  CapabilityBrokerNotInitializedError,
-  UnexpectedBrokerResponseError,
-  UnsupportedBrokerOperationError,
-  UnsupportedInBrowserPreviewError,
-} from "@/lib/capability-broker/errors.ts";
 
 let activeRuntime: CapabilityBrokerRuntime | undefined;
 let eventCapabilityFactory: PluginEventCapabilityFactory | undefined;
@@ -94,10 +73,6 @@ export function configurePluginEventCapabilityFactory(
   factory: PluginEventCapabilityFactory,
 ): void {
   eventCapabilityFactory = factory;
-}
-
-export function isCapabilityBrokerInitialized(): boolean {
-  return activeRuntime !== undefined;
 }
 
 export const Host: HostFacade = Object.freeze({

@@ -2,7 +2,6 @@ import { hashStringCrypto } from "@/lib/general/scopes/hash-string-crypto.ts";
 
 const PLUGIN_ID_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9])?$/u;
 const SHA_256_PATTERN = /^[a-f0-9]{64}$/u;
-const ASCII_PATTERN = /^[\u0000-\u007F]*$/u;
 const RAW_REPOSITORY_PATH_CHARACTER_PATTERN = /^[A-Za-z0-9._~!$&'()*+,;=:@-]$/u;
 const UNICODE_CONTROL_OR_SURROGATE_PATTERN = /[\p{Cc}\p{Cs}]/u;
 const MAX_PLUGIN_VERSION_LENGTH = 128;
@@ -37,6 +36,18 @@ export type PluginPrincipalKey = string;
 
 function invalidValue(label: string, value: string): TypeError {
   return new TypeError(`Invalid ${label}: ${JSON.stringify(value)}`);
+}
+
+function isAscii(value: string): boolean {
+  for (const character of value) {
+    const codePoint = character.codePointAt(0);
+
+    if (codePoint === undefined || codePoint > 0x7F) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 export function isSafePluginId(pluginId: string): boolean {
@@ -88,7 +99,7 @@ function isCanonicalRepositoryPath(repositoryPath: string): boolean {
     !repositoryPath.startsWith("/") ||
     repositoryPath.endsWith("/") ||
     repositoryPath.includes("//") ||
-    !ASCII_PATTERN.test(repositoryPath) ||
+    !isAscii(repositoryPath) ||
     repositoryPath.toLowerCase().endsWith(".git") ||
     repositoryPath.split("/").slice(1)
       .some(segment => {
@@ -145,7 +156,7 @@ function isBackendCompatibleHost(hostname: string): boolean {
     ? hostname.slice(1, -1)
     : hostname;
 
-  if (unbracketed.length === 0 || !ASCII_PATTERN.test(unbracketed)) {
+  if (unbracketed.length === 0 || !isAscii(unbracketed)) {
     return false;
   }
 

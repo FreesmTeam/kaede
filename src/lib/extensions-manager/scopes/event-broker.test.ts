@@ -34,18 +34,25 @@ describe("EventBroker", () => {
     source.instance.id = "mutated";
     source.routes.push("unsafe");
 
-    expect(first[0]).toEqual({
+    const firstSnapshot = first[0];
+
+    expect(firstSnapshot).toBeDefined();
+    if (firstSnapshot === undefined) {
+      throw new Error("Expected the first subscriber to receive an event snapshot");
+    }
+
+    expect(firstSnapshot).toEqual({
       "type" : "instance",
       "value": {
         "instance": { "id": "alpha" },
         "routes"  : ["home", "settings"],
       },
     });
-    expect(second[0]).toBe(first[0]);
-    expect(Object.isFrozen(first[0])).toBe(true);
-    expect(Object.isFrozen((first[0]?.value as Record<string, unknown>).instance)).toBe(true);
+    expect(second[0]).toBe(firstSnapshot);
+    expect(Object.isFrozen(firstSnapshot)).toBe(true);
+    expect(Object.isFrozen((firstSnapshot.value as Record<string, unknown>).instance)).toBe(true);
     expect(() => {
-      const snapshot = first[0]?.value as { "instance": { "id": string } };
+      const snapshot = firstSnapshot.value as { "instance": { "id": string } };
 
       snapshot.instance.id = "guest mutation";
     }).toThrow(TypeError);

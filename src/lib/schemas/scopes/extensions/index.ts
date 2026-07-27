@@ -2,6 +2,8 @@ import { Type } from "typebox";
 
 import {
   isCanonicalAbsolutePath,
+} from "@/lib/extensions-manager/scopes/canonical-absolute-path.ts";
+import {
   isExactHttpOrigin,
 } from "@/lib/extensions-manager/scopes/permission-contract.ts";
 import {
@@ -24,7 +26,11 @@ const NetworkPermissionRequestSchema = Type.Object({
   "id"   : Type.Literal("network/http"),
   "scope": Type.Object({
     "origins": Type.Array(
-      Type.Refine(Type.String(), isExactHttpOrigin, "Expected an exact HTTP(S) origin"),
+      Type.Refine(
+        Type.String(),
+        isExactHttpOrigin,
+        () => "Expected an exact HTTP(S) origin",
+      ),
       { "minItems": 1, "uniqueItems": true },
     ),
     "methods": Type.Array(HttpMethodSchema, { "minItems": 1, "uniqueItems": true }),
@@ -44,7 +50,7 @@ const InternalStoragePermissionRequestSchema = Type.Object({
 const CanonicalAbsolutePathSchema = Type.Refine(
   Type.String(),
   isCanonicalAbsolutePath,
-  "Expected a canonical absolute filesystem path",
+  () => "Expected a canonical absolute filesystem path",
 );
 
 const ExternalStoragePermissionRequestSchema = Type.Object({
@@ -68,7 +74,7 @@ const ProcessPermissionRequestSchema = Type.Object({
       "arguments": Type.Array(Type.Refine(
         Type.String(),
         argument => !argument.includes("\u0000"),
-        "Process arguments cannot contain NUL",
+        () => "Process arguments cannot contain NUL",
       )),
     }, { "additionalProperties": false }), {
       "minItems"   : 1,
@@ -77,7 +83,7 @@ const ProcessPermissionRequestSchema = Type.Object({
   }, { "additionalProperties": false }),
 }, { "additionalProperties": false });
 
-export const PermissionRequestSchema = Type.Union([
+const PermissionRequestSchema = Type.Union([
   Type.Literal("ui/basic"),
   Type.Literal("ui/forms/non-credential"),
   Type.Literal("system/shell"),
@@ -98,7 +104,7 @@ const PermissionsSchema = Type.Refine(
 
     return new Set(permissionIds).size === permissionIds.length;
   },
-  "Permission IDs must be unique",
+  () => "Permission IDs must be unique",
 );
 
 const PluginIdSchema = Type.Refine(
@@ -108,19 +114,19 @@ const PluginIdSchema = Type.Refine(
     "pattern"  : "^[A-Za-z0-9](?:[A-Za-z0-9._-]{0,126}[A-Za-z0-9])?$",
   }),
   isSafePluginId,
-  "Plugin ID is unsafe or reserved",
+  () => "Plugin ID is unsafe or reserved",
 );
 
 const RepositoryOriginSchema = Type.Refine(
   Type.String(),
   isCanonicalRepositoryOrigin,
-  "Repository origin must use the canonical plugin principal form",
+  () => "Repository origin must use the canonical plugin principal form",
 );
 
 const PluginVersionSchema = Type.Refine(
   Type.String({ "minLength": 1 }),
   isValidPluginVersion,
-  "Plugin version must contain at most 128 Unicode scalar values and no controls",
+  () => "Plugin version must contain at most 128 Unicode scalar values and no controls",
 );
 
 export const ExtensionMetadataSchema = Type.Intersect([

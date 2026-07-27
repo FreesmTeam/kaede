@@ -1,4 +1,4 @@
-import { ApplicationName } from "@/constants/application.ts";
+import { ApplicationName } from "@/constants/application-primitives.ts";
 import { Patches } from "@/constants/meta.ts";
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";

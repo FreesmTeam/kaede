@@ -1,4 +1,4 @@
-import { AsyncFunction } from "@/constants/application.ts";
+import { AsyncFunction } from "@/constants/application-primitives.ts";
 import type { KaedeNamespaceType } from "@/declarations.ts";
 import type {
   DirectHostFacade,

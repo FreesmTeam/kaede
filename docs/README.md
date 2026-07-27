@@ -176,9 +176,16 @@ In case if you want to run this launcher with [Wails](https://wails.io/) (or any
 
 ### Preparations
 
-See [Tauri v2 Prerequisites](https://v2.tauri.app/start/prerequisites/) and
-install [Bun](https://bun.sh/) 1.3.14, the version pinned by `packageManager`
-and CI.
+The reproducible development shell pins Bun 1.3.14, Node.js 26.5.0, and Rust
+1.97.1 together with the platform build dependencies:
+
+```bash
+nix develop
+```
+
+Without Nix, install the same runtime versions and follow the
+[Tauri v2 Prerequisites](https://v2.tauri.app/start/prerequisites/). Bun's
+version is also enforced by `packageManager` and CI.
 
 Once you are ready, clone this repository:
 

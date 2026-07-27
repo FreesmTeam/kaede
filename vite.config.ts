@@ -19,22 +19,55 @@
 import path from "node:path";
 
 import vue from "@vitejs/plugin-vue";
+import MagicString from "magic-string";
 import unocss from "unocss/vite";
+import type { Plugin } from "vite";
 import eslint from "vite-plugin-eslint2";
 import { defineConfig } from "vitest/config";
 
 import kaedeExtraConfiguration from "./kaede-extra.json";
 
-function handleSourceFileNames(): {
-  "name"     : string;
-  "enforce"  : "pre";
-  "transform": (source: string, id: string) => { "code": string; "map": null };
-} {
+type SourceFileTransformResult = null | Readonly<{
+  "code": string;
+  "map" : ReturnType<MagicString["generateMap"]>;
+}>;
+
+const frameworkVendorFragments: readonly string[] = [
+  "/node_modules/@tanstack/vue-query/",
+  "/node_modules/@vue/",
+  "/node_modules/@vueuse/",
+  "/node_modules/pinia/",
+  "/node_modules/vue/",
+  "/node_modules/vue-router/",
+];
+
+const sandboxVendorFragments: readonly string[] = [
+  "/node_modules/@endo/",
+  "/node_modules/ark-of-atrahasis/",
+  "/node_modules/ses/",
+  "/node_modules/typebox/",
+];
+
+function includesVendorFragment(moduleId: string, fragments: readonly string[]): boolean {
+  const normalizedModuleId: string = moduleId.replaceAll("\\", "/");
+
+  return fragments.some(fragment => normalizedModuleId.includes(fragment));
+}
+
+function isFrameworkVendor(moduleId: string): boolean {
+  return includesVendorFragment(moduleId, frameworkVendorFragments);
+}
+
+function isSandboxVendor(moduleId: string): boolean {
+  return includesVendorFragment(moduleId, sandboxVendorFragments);
+}
+
+function handleSourceFileNames(): Plugin {
   return {
     "name"     : "handle-source-file-names",
     // Ensure that the sources we get are untouched by 'esbuild' and others
     "enforce"  : "pre",
-    "transform": (source: string, id: string): { "code": string; "map": null } => {
+    "transform": (source: string, id: string): SourceFileTransformResult => {
       /*
        * Replacing is not an option since 'process.cwd'
        * returns 'letter:\path\...' when 'id' is 'letter:/path/...'
@@ -42,23 +75,44 @@ function handleSourceFileNames(): {
       const relativePath: string = id.slice(process.cwd().length);
 
       // Avoid having 'const "/src/declarations.ts:90": string;' in the 'declarations.ts'
-      if (relativePath === "/src/declarations.ts") {
-        return { "code": source, "map": null };
+      if (
+        relativePath === "/src/declarations.ts"
+        || !source.includes("__PRE_BUNDLED_FILENAME__")
+      ) {
+        return null;
+      }
+
+      const placeholder = "__PRE_BUNDLED_FILENAME__";
+      const transformedSource = new MagicString(source);
+      let lineNumber = 1;
+      let scannedIndex = 0;
+      let placeholderIndex = source.indexOf(placeholder);
+
+      while (placeholderIndex !== -1) {
+        while (scannedIndex < placeholderIndex) {
+          if (source.codePointAt(scannedIndex) === 0x0A) {
+            lineNumber += 1;
+          }
+
+          scannedIndex += 1;
+        }
+
+        transformedSource.overwrite(
+          placeholderIndex,
+          placeholderIndex + placeholder.length,
+          JSON.stringify(`${relativePath}:${lineNumber}`),
+        );
+        scannedIndex = placeholderIndex + placeholder.length;
+        placeholderIndex = source.indexOf(placeholder, scannedIndex);
       }
 
       return {
-        "code": source
-          .split("\n")
-          .map((line, index) => {
-            const lineNumber: number = index + 1;
-
-            return line.replaceAll(
-              "__PRE_BUNDLED_FILENAME__",
-              `"${relativePath}:${lineNumber}"`,
-            );
-          })
-          .join("\n"),
-        "map": null,
+        "code": transformedSource.toString(),
+        "map" : transformedSource.generateMap({
+          "hires"         : true,
+          "includeContent": true,
+          "source"        : id,
+        }),
       };
     },
   };
@@ -81,6 +135,42 @@ export default defineConfig(({ mode }) => {
     "server"     : {
       // Tauri requires a consistent port
       "strictPort": true,
+    },
+    "build": {
+      "rolldownOptions": {
+        "output": {
+
+          /*
+           * Keep third-party code out of the application entry chunk while
+           * preserving source evaluation order for side-effectful packages.
+           */
+          "strictExecutionOrder": true,
+          "codeSplitting"       : {
+            "groups": [
+              {
+                "name"    : "vendor-framework",
+                "test"    : isFrameworkVendor,
+                "priority": 40,
+              },
+              {
+                "name"    : "vendor-editor",
+                "test"    : /node_modules[\\/]prism-code-editor[\\/]/,
+                "priority": 30,
+              },
+              {
+                "name"    : "vendor-sandbox",
+                "test"    : isSandboxVendor,
+                "priority": 20,
+              },
+              {
+                "name"    : "vendor",
+                "test"    : /node_modules[\\/]/,
+                "priority": 10,
+              },
+            ],
+          },
+        },
+      },
     },
     // Handle '@/...' imports
     "resolve": {

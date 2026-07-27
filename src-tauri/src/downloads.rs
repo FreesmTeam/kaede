@@ -329,7 +329,7 @@ pub(crate) struct DownloadCancellation {
 }
 
 impl DownloadCancellation {
-    pub(crate) fn cancel(&self) {
+    fn cancel(&self) {
         let _commit_gate = self
             .commit_gate
             .lock()

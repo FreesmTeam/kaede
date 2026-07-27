@@ -23,9 +23,57 @@ Information about extensions can be found [here](./EXTENSIONS.md).
 
 See [Code of Conduct](./CODE_OF_CONDUCT.md)
 
-## Code Formatting
+## Static Analysis and Formatting
 
-All TypeScript files are formatted with [ESLint](https://eslint.org/) using the configuration in `eslint.config.js`. Ensure linting is run on changed files before committing them!
+All TypeScript files are checked with [ESLint](https://eslint.org/) using
+`eslint.config.js`. [Oxlint](https://oxc.rs/docs/guide/usage/linter.html) provides
+a second, fast correctness pass through `.oxlintrc.json`; it supplements rather
+than replaces the repository-specific ESLint contract. Run both before
+committing:
+
+```bash
+bun run lint
+```
+
+[Fallow](https://github.com/fallow-rs/fallow) checks the full import graph for
+dead code and circular dependencies in report mode. Its findings remain visible
+for review and are not hidden by a baseline:
+
+```bash
+bun run analyze:fallow
+```
+
+Rust visibility is checked separately with
+[Hawk](https://github.com/astral-sh/hawk), using the production targets declared
+in `src-tauri/hawk.toml`:
+
+```bash
+cargo hawk check \
+  --manifest-path src-tauri/Cargo.toml \
+  --target-dir src-tauri/target \
+  --color always \
+  -D warnings
+```
+
+The complete local validation set used by CI is:
+
+```bash
+bun install --frozen-lockfile
+bun audit --audit-level=low
+bun run check:dependency-compatibility
+bun run typecheck
+bun run check:types
+bun run lint
+bun run analyze:fallow
+bun run test
+bun run build:frontend
+cargo audit --file src-tauri/Cargo.lock
+cargo test --manifest-path src-tauri/Cargo.toml --locked
+cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
+cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
+cargo hawk check --manifest-path src-tauri/Cargo.toml --target-dir src-tauri/target --color always -D warnings
+bun run test:tauri-acl
+```
 
 Please also follow the project's conventions for the frontend:
 

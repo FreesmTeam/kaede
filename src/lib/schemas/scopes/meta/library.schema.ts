@@ -1,10 +1,10 @@
 import { Type } from "typebox";
 
 export const ArtifactSchema = Type.Object({});
-export const LibraryDownloadsSchema = Type.Object({});
-export const LibraryExtractSchema = Type.Object({});
-export const LibraryNativesSchema = Type.Object({});
-export const LibraryRuleSchema = Type.Object({
+const LibraryDownloadsSchema = Type.Object({});
+const LibraryExtractSchema = Type.Object({});
+const LibraryNativesSchema = Type.Object({});
+const LibraryRuleSchema = Type.Object({
   "action": Type.String(),
   "os"    : Type.Object({
     "name": Type.String(),

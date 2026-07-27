@@ -128,14 +128,14 @@ struct StorageRootKey {
     canonical_root: PathBuf,
 }
 
-pub(super) struct PreparedStorageRoot {
+struct PreparedStorageRoot {
     permission: PermissionId,
     canonical_root: PathBuf,
     identity: FileIdentity,
     directory: Arc<Dir>,
 }
 
-pub(super) struct StorageTarget {
+struct StorageTarget {
     directory: Arc<Dir>,
     relative_path: PathBuf,
     permission: PermissionId,
@@ -331,7 +331,7 @@ pub(super) struct FileIdentity {
 }
 
 impl FileIdentity {
-    pub(super) fn from_metadata(metadata: &impl MetadataExt) -> Self {
+    fn from_metadata(metadata: &impl MetadataExt) -> Self {
         Self {
             device: metadata.dev(),
             inode: metadata.ino(),
@@ -361,15 +361,15 @@ impl FileIdentity {
         })
     }
 
-    pub(super) fn device_string(self) -> String {
+    fn device_string(self) -> String {
         self.device.to_string()
     }
 
-    pub(super) fn inode_string(self) -> String {
+    fn inode_string(self) -> String {
         self.inode.to_string()
     }
 
-    pub(super) fn matches_strings(self, device: &str, inode: &str) -> bool {
+    fn matches_strings(self, device: &str, inode: &str) -> bool {
         device == self.device.to_string() && inode == self.inode.to_string()
     }
 }

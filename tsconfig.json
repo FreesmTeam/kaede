@@ -10,7 +10,6 @@
      * only reads the nearest 'tsconfig.json' and does not follow references,
      * so the paths are duplicated here for the Bun runtime
      */
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "ark-of-atrahasis": ["./node_modules/ark-of-atrahasis/src/index.ts"]

@@ -74,9 +74,13 @@ test("browser session revocation drains a started storage write and denies new w
 
   void firstRevoke.then(() => {
     firstRevokeSettled = true;
+
+    return firstRevokeSettled;
   });
   void repeatedRevoke.then(() => {
     repeatedRevokeSettled = true;
+
+    return repeatedRevokeSettled;
   });
   await Promise.resolve();
 
@@ -151,6 +155,8 @@ test("browser session revocation withholds a response while its body is being re
 
   void revoke.then(() => {
     revokeSettled = true;
+
+    return revokeSettled;
   });
   await Promise.resolve();
 

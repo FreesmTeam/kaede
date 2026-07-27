@@ -2776,11 +2776,14 @@ async fn spawn_txiki_server<R: Runtime>(
     artifacts: ProcessArtifacts,
     mut events: Option<Channel<BrokerEvent>>,
 ) -> Result<BrokerResponse, CommandError> {
+    let readiness_nonce = random_opaque_value()?;
+    let wrapper_path = create_txiki_server_wrapper(app, &file_path, &readiness_nonce)?;
+    let artifacts = artifacts.and_owning_file(wrapper_path.clone());
     let command = app
         .shell()
         .sidecar("txiki-server")
         .map_err(|error| operation_error("txiki_sidecar", error))?
-        .args(txiki_server_arguments(&file_path))
+        .args(txiki_server_arguments(&wrapper_path))
         .set_raw_out(true);
     let (mut receiver, handle, pid) = register_process(
         state,
@@ -2802,7 +2805,8 @@ async fn spawn_txiki_server<R: Runtime>(
                             bytes,
                         },
                     );
-                    if let Some(port) = parse_txiki_ready_port(&readiness_output) {
+                    if let Some(port) = parse_txiki_ready_port(&readiness_output, &readiness_nonce)
+                    {
                         return Ok(port);
                     }
                 }
@@ -2903,21 +2907,65 @@ async fn spawn_txiki_server<R: Runtime>(
     Ok(BrokerResponse::ServerSpawned { handle, pid, port })
 }
 
-fn txiki_server_arguments(file_path: &Path) -> [String; 4] {
+fn create_txiki_server_wrapper<R: Runtime>(
+    app: &AppHandle<R>,
+    target_path: &Path,
+    readiness_nonce: &str,
+) -> Result<PathBuf, CommandError> {
+    let directory = app
+        .path()
+        .app_data_dir()
+        .map_err(|error| operation_error("txiki_wrapper", error))?
+        .join("capability-broker")
+        .join("txiki");
+    std::fs::create_dir_all(&directory).map_err(|error| operation_error("txiki_wrapper", error))?;
+    let wrapper_path = directory.join(format!("{}.wrapper.js", random_opaque_value()?));
+    let wrapper = txiki_server_wrapper(target_path, readiness_nonce)?;
+    if let Err(error) = std::fs::write(&wrapper_path, wrapper) {
+        let _ = std::fs::remove_file(&wrapper_path);
+        return Err(operation_error("txiki_wrapper", error));
+    }
+    Ok(wrapper_path)
+}
+
+fn txiki_server_wrapper(target_path: &Path, readiness_nonce: &str) -> Result<String, CommandError> {
+    let target_specifier = serde_json::to_string(&target_path.to_string_lossy())
+        .map_err(|error| operation_error("txiki_wrapper", error))?;
+    let readiness_marker = serde_json::to_string(&txiki_readiness_marker(readiness_nonce))
+        .map_err(|error| operation_error("txiki_wrapper", error))?;
+    Ok(format!(
+        "const announce = console.log.bind(console);\n\
+         const serve = tjs.serve.bind(tjs);\n\
+         const module = await import({target_specifier});\n\
+         const handler = module.default?.fetch;\n\
+         if (typeof handler !== 'function') {{\n\
+           throw new TypeError('Module must default export an object with a fetch method');\n\
+         }}\n\
+         const server = serve({{\n\
+           fetch: handler,\n\
+           port: 0,\n\
+           websocket: module.default.websocket,\n\
+         }});\n\
+         announce({readiness_marker} + server.port);\n"
+    ))
+}
+
+fn txiki_server_arguments(wrapper_path: &Path) -> [String; 2] {
     [
-        "serve".to_owned(),
-        "--port".to_owned(),
-        "0".to_owned(),
-        file_path.to_string_lossy().into_owned(),
+        "run".to_owned(),
+        wrapper_path.to_string_lossy().into_owned(),
     ]
 }
 
-fn parse_txiki_ready_port(output: &[u8]) -> Option<u16> {
-    const PREFIX: &str = "Listening on http://localhost:";
+fn txiki_readiness_marker(readiness_nonce: &str) -> String {
+    format!("KAEDE_TXIKI_READY_{readiness_nonce}:")
+}
+
+fn parse_txiki_ready_port(output: &[u8], readiness_nonce: &str) -> Option<u16> {
+    let marker = txiki_readiness_marker(readiness_nonce);
 
     String::from_utf8_lossy(output).lines().find_map(|line| {
-        line.strip_prefix(PREFIX)
-            .and_then(|value| value.strip_suffix('/'))
+        line.strip_prefix(&marker)
             .and_then(|value| value.parse::<u16>().ok())
             .filter(|port| *port != 0)
     })
@@ -4359,23 +4407,37 @@ mod tests {
     }
 
     #[test]
-    fn txiki_sidecar_selects_its_port_and_reports_readiness() {
+    fn txiki_sidecar_uses_nonce_bound_readiness_after_binding() {
+        let nonce = "trusted-readiness-nonce";
         assert_eq!(
-            txiki_server_arguments(Path::new("/trusted/server.js")),
-            ["serve", "--port", "0", "/trusted/server.js"]
+            txiki_server_arguments(Path::new("/trusted/wrapper.js")),
+            ["run", "/trusted/wrapper.js"]
         );
 
         let mut output = vec![b'x'; 8 * 1024];
-        append_txiki_readiness_output(&mut output, b"\nListening on http://localhost:42069/\n");
-        assert_eq!(parse_txiki_ready_port(&output), Some(42_069));
+        append_txiki_readiness_output(
+            &mut output,
+            b"\nListening on http://localhost:31337/\nKAEDE_TXIKI_READY_trusted-readiness-nonce:42069\n",
+        );
+        assert_eq!(parse_txiki_ready_port(&output, nonce), Some(42_069));
         assert_eq!(
-            parse_txiki_ready_port(b"Listening on http://localhost:0/\n"),
+            parse_txiki_ready_port(b"KAEDE_TXIKI_READY_attacker:31337\n", nonce),
             None
         );
         assert_eq!(
-            parse_txiki_ready_port(b"Listening on http://attacker.test:42069/\n"),
+            parse_txiki_ready_port(b"KAEDE_TXIKI_READY_trusted-readiness-nonce:0\n", nonce,),
             None
         );
+
+        let wrapper = txiki_server_wrapper(Path::new("/trusted/server.js"), nonce)
+            .expect("wrapper source should serialize");
+        let bind_position = wrapper
+            .find("const server = serve(")
+            .expect("wrapper should bind the server");
+        let readiness_position = wrapper
+            .find("KAEDE_TXIKI_READY_trusted-readiness-nonce:")
+            .expect("wrapper should contain the nonce-bound marker");
+        assert!(bind_position < readiness_position);
     }
 
     #[test]
@@ -5479,7 +5541,7 @@ mod tests {
         assert!(matches!(
             request,
             BrokerRequest::PluginFsWriteBytes { path, bytes }
-                if path == PathBuf::from("payload.bin") && bytes == vec![0, 127, 255]
+                if path == Path::new("payload.bin") && bytes == [0, 127, 255]
         ));
 
         let request: BrokerRequest = serde_json::from_value(serde_json::json!({
@@ -5489,7 +5551,7 @@ mod tests {
         .expect("remove DTO should deserialize");
         assert!(matches!(
             request,
-            BrokerRequest::PluginFsRemove { path } if path == PathBuf::from("payload.bin")
+            BrokerRequest::PluginFsRemove { path } if path == Path::new("payload.bin")
         ));
 
         let request: BrokerRequest = serde_json::from_value(serde_json::json!({
@@ -5758,7 +5820,7 @@ mod tests {
             }))
             .expect("file-metadata request should deserialize"),
             BrokerRequest::HostFsMetadata { path, base_directory }
-                if path == PathBuf::from("/tmp/cache.json") && base_directory.is_none()
+                if path == Path::new("/tmp/cache.json") && base_directory.is_none()
         ));
         assert!(serde_json::from_value::<BrokerRequest>(serde_json::json!({
             "kind": "host_fs_metadata",

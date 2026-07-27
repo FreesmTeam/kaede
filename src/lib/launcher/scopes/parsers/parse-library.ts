@@ -1,6 +1,6 @@
 import { APIEndpoints } from "@/constants/launcher.ts";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import General from "@/lib/general";
-import Parsers from "@/lib/launcher/scopes/parsers/index.ts";
 import { normalizeArtifactPath } from "@/lib/launcher/scopes/parsers/normalize-artifact-path.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { MappedArtifactType } from "@/types/launcher/artifacts/mapped-artifact.type.ts";
@@ -53,7 +53,7 @@ export function parseLibrary({
       APIEndpoints.Libraries.Base,
     );
 
-    const builtUrl: string | false = Parsers.buildUrlFromBase({
+    const builtUrl: string | false = GlobalObject.libs.Launcher.Parsers.buildUrlFromBase({
       "baseUrl": APIEndpoints.Libraries.Base,
       name,
       file,
@@ -86,7 +86,7 @@ export function parseLibrary({
 
   // The 'net.fabricmc.fabric-loader' patch libraries only have the 'name' and 'url' fields
   if (baseUrl !== undefined) {
-    const builtUrl: string | false = Parsers.buildUrlFromBase({
+    const builtUrl: string | false = GlobalObject.libs.Launcher.Parsers.buildUrlFromBase({
       baseUrl,
       name,
       file,

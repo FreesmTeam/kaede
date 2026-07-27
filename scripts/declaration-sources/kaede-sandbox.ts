@@ -4,8 +4,8 @@ import type {
   PluginCapabilities,
 } from "../../src/types/extensions/permission.type.ts";
 
-export type SandboxPluginContext = Readonly<Partial<PluginCapabilities>>;
-export type RequestPermissions = (
+type SandboxPluginContext = Readonly<Partial<PluginCapabilities>>;
+type RequestPermissions = (
   permissions: ReadonlyArray<PermissionRequest>,
 ) => Promise<PermissionGrant>;
 

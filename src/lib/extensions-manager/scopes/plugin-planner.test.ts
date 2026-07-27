@@ -45,6 +45,31 @@ function metadata(
 }
 
 describe("planPlugins", () => {
+  it("plans startup without ES2023 change-by-copy array methods", () => {
+    const toSorted = Object.getOwnPropertyDescriptor(Array.prototype, "toSorted");
+    const toReversed = Object.getOwnPropertyDescriptor(Array.prototype, "toReversed");
+
+    Reflect.deleteProperty(Array.prototype, "toSorted");
+    Reflect.deleteProperty(Array.prototype, "toReversed");
+
+    try {
+      const plan = planPlugins({
+        "extensions": [artifact("plugin")],
+        "metadata"  : [metadata("plugin")],
+      });
+
+      expect(plan.sandboxed).toHaveLength(1);
+    } finally {
+      if (toSorted !== undefined) {
+        Object.defineProperty(Array.prototype, "toSorted", toSorted);
+      }
+
+      if (toReversed !== undefined) {
+        Object.defineProperty(Array.prototype, "toReversed", toReversed);
+      }
+    }
+  });
+
   it("joins exact artifacts in deterministic metadata order", () => {
     const plan = planPlugins({
       "extensions": [artifact("second"), artifact("first")],

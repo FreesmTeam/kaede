@@ -1,3 +1,4 @@
+import { copyAndSort } from "@/lib/collections/copy-array.ts";
 import {
   normalizePermissionRequests,
 } from "@/lib/extensions-manager/scopes/permission-contract.ts";
@@ -135,12 +136,14 @@ export function planPlugins({
 }: PluginPlannerOptions): PluginExecutionPlan {
   const extensionsById = assertUniqueSafeIds(extensions, "artifact");
   const metadataById = assertUniqueSafeIds(metadata, "metadata");
-  const unknownArtifacts = [...extensionsById.keys()]
-    .filter(pluginId => !metadataById.has(pluginId))
-    .sort(compareStrings);
-  const missingArtifacts = [...metadataById.keys()]
-    .filter(pluginId => !extensionsById.has(pluginId))
-    .sort(compareStrings);
+  const unknownArtifacts = copyAndSort(
+    [...extensionsById.keys()].filter(pluginId => !metadataById.has(pluginId)),
+    compareStrings,
+  );
+  const missingArtifacts = copyAndSort(
+    [...metadataById.keys()].filter(pluginId => !extensionsById.has(pluginId)),
+    compareStrings,
+  );
 
   if (unknownArtifacts.length > 0) {
     throw mismatchError("Artifacts without metadata", unknownArtifacts);

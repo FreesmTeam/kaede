@@ -57,17 +57,20 @@ function linesUsing(source: string, name: string): Array<string> {
 
 test("playground draft state has only editor and state-module consumers", async () => {
   const consumers: Array<string> = [];
+  const sourceFiles = await listProductionSourceFiles(sourceRoot);
+  const sources = await Promise.all(sourceFiles.map(async filePath => ({
+    filePath,
+    "source": await readFile(filePath, "utf8"),
+  })));
 
-  for (const filePath of await listProductionSourceFiles(sourceRoot)) {
-    const source = await readFile(filePath, "utf8");
-
+  for (const { filePath, source } of sources) {
     if (source.includes("codeToEvaluate")) {
       consumers.push(path.relative(process.cwd(), filePath));
       expectNoDynamicCodeSink(source);
     }
   }
 
-  expect(consumers.sort()).toEqual([
+  expect(consumers.toSorted()).toEqual([
     "src/components/settings/tabs/PluginPlayground.vue",
     "src/states/plugin-playground.ts",
   ]);

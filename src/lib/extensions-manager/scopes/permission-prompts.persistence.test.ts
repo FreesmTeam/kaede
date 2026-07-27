@@ -85,6 +85,8 @@ test("static completion waits for its durable decision save", async () => {
 
   void request.then(() => {
     completed = true;
+
+    return completed;
   });
   await waitForPrompt(controller);
   controller.resolveStatic(true);
@@ -117,6 +119,8 @@ test("remembered dynamic completion waits for every durable decision save", asyn
 
   void request.then(() => {
     completed = true;
+
+    return completed;
   });
   await waitForPrompt(controller);
   controller.resolveDynamic([true], true);

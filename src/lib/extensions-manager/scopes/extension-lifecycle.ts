@@ -15,7 +15,6 @@ export {
   type ExtensionCatalog,
   type ExtensionLifecycleDependencies,
   type ExtensionLifecycleInitializeOptions,
-  type LifecycleCapabilityFactories,
   type LifecyclePluginSession,
 } from "@/lib/extensions-manager/scopes/extension-lifecycle-contract.ts";
 

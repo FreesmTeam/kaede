@@ -53,7 +53,7 @@ function preparePromptRequests(
   );
 }
 
-export function completeCancelledPrompt(item: QueueItem): void {
+function completeCancelledPrompt(item: QueueItem): void {
   if (item.kind === "static") {
     item.complete(false);
   } else {

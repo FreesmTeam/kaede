@@ -37,13 +37,10 @@ import type {
 } from "@/types/extensions/permission.type.ts";
 
 export type {
-  SandboxHostBoundary,
   SandboxMaxBounds,
-  SandboxRuntimeDependencies,
   SandboxRuntimeHandle,
   SandboxRuntimeOptions,
   StaticCapabilityFactories,
-  StaticCapabilityFactory,
 } from "@/lib/extensions-manager/scopes/sandbox-runtime-types.ts";
 
 function createNonDOMCapability<Id extends NonDOMPermissionId>(

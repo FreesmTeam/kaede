@@ -1,7 +1,6 @@
 import type { PERMISSION_CATALOG } from "@/constants/permissions.ts";
 import type {
   ExtensionEventListener,
-  ExtensionEventSnapshot,
 } from "@/lib/extensions-manager/scopes/event-broker.ts";
 
 export type PermissionId = keyof typeof PERMISSION_CATALOG;
@@ -143,8 +142,6 @@ export interface ShellCapability {
   readonly "execute": (request: ShellExecuteRequest) => Promise<ProcessResult>;
 }
 
-export type BrokerEvent = ExtensionEventSnapshot;
-
 export interface EventSubscribeCapability {
   readonly "subscribe": (listener: ExtensionEventListener) => () => void;
 }
@@ -178,6 +175,3 @@ export type PermissionGrant = Readonly<{
   "denied"      : ReadonlyArray<PermissionId>;
   "capabilities": Readonly<Partial<PluginCapabilities>>;
 }>;
-
-/** @deprecated Use PermissionRequest. */
-export type PermissionType = PermissionRequest;

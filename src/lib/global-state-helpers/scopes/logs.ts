@@ -1,11 +1,11 @@
-import GlobalStateHelpers from "@/lib/global-state-helpers";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 function toggle<Key extends keyof GlobalStatesType["logs"]>(
   key: Key,
   state?: boolean,
 ): void {
-  const logs = GlobalStateHelpers.get().logs;
+  const logs = GlobalObject.libs.GlobalStateHelpers.get().logs;
 
   if (typeof logs[key] !== "boolean") {
     return;
@@ -16,20 +16,20 @@ function toggle<Key extends keyof GlobalStatesType["logs"]>(
     [key]: state ?? !logs[key],
   };
 
-  GlobalStateHelpers.change("logs", newLogs);
+  GlobalObject.libs.GlobalStateHelpers.change("logs", newLogs);
 }
 function filterBy(newValue: string): void {
-  const logs = GlobalStateHelpers.get().logs;
+  const logs = GlobalObject.libs.GlobalStateHelpers.get().logs;
 
-  GlobalStateHelpers.change("logs", {
+  GlobalObject.libs.GlobalStateHelpers.change("logs", {
     ...logs,
     "filtering": newValue,
   });
 }
 function selectMode(newValue: string): void {
-  const logs = GlobalStateHelpers.get().logs;
+  const logs = GlobalObject.libs.GlobalStateHelpers.get().logs;
 
-  GlobalStateHelpers.change("logs", {
+  GlobalObject.libs.GlobalStateHelpers.change("logs", {
     ...logs,
     "mode": newValue,
   });

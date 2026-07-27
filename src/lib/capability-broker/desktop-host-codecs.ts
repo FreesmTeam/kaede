@@ -8,6 +8,7 @@ import type {
   InstalledExtensionsReadResult,
   SystemMemory,
 } from "@/lib/capability-broker/host-types.ts";
+import { copyAndSort } from "@/lib/collections/copy-array.ts";
 
 const SHA_256_PATTERN = /^[a-f0-9]{64}$/u;
 
@@ -67,8 +68,8 @@ function exactRecord(
   }
 
   const record = value as Record<string, unknown>;
-  const actualKeys = Object.keys(record).sort();
-  const expectedKeys = [...keys].sort();
+  const actualKeys = copyAndSort(Object.keys(record));
+  const expectedKeys = copyAndSort(keys);
 
   if (
     actualKeys.length !== expectedKeys.length ||

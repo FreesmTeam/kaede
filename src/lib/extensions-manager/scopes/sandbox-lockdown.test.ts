@@ -32,14 +32,14 @@ describe("lockdownEnvironment", () => {
     const originalDescriptor = Object.getOwnPropertyDescriptor(globalThis, "Compartment");
     let poisonedConstructorCalled = false;
 
+    function PoisonedCompartment(): void {
+      poisonedConstructorCalled = true;
+    }
+
     Object.defineProperty(globalThis, "Compartment", {
       "configurable": true,
-      "value"       : class PoisonedCompartment {
-        constructor() {
-          poisonedConstructorCalled = true;
-        }
-      },
-      "writable": true,
+      "value"       : PoisonedCompartment,
+      "writable"    : true,
     });
 
     try {

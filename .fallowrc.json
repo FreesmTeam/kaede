@@ -1,0 +1,33 @@
+{
+  "$schema": "./node_modules/fallow/schema.json",
+  "entry": [
+    "src/main.ts",
+    "src/lib/__browser/index.ts",
+    "src/__mocks__/**/*.cjs",
+    "eslint.config.js",
+    "vite.config.ts"
+  ],
+  "ignorePatterns": [
+    "types/**"
+  ],
+  "framework": [
+    {
+      "name": "kaede-development-tooling",
+      "enablers": [
+        "dts-bundle-generator"
+      ],
+      "entryPoints": [
+        "scripts/**/*.ts"
+      ],
+      "entryPointRole": "test",
+      "toolingDependencies": [
+        "dts-bundle-generator"
+      ]
+    }
+  ],
+  "rules": {
+    "unused-exports": "warn",
+    "unused-class-members": "warn"
+  },
+  "includeEntryExports": true
+}

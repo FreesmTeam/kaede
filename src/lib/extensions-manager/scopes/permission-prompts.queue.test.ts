@@ -84,6 +84,8 @@ test("cancelAll does not wait for a stalled decision adapter", async () => {
 
   void pending.then(decision => {
     result = decision;
+
+    return result;
   });
   await Promise.resolve();
   controller.cancelAll();

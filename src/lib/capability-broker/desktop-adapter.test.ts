@@ -207,7 +207,13 @@ describe("desktop capability broker", () => {
     const fetchCall = calls.find(({ args }) => {
       return (args as Partial<InvokeArguments>)?.request?.kind === "host_http_fetch";
     });
-    const request = (fetchCall?.args as InvokeArguments).request;
+
+    expect(fetchCall).toBeDefined();
+    if (fetchCall === undefined) {
+      throw new Error("Expected a host_http_fetch broker call");
+    }
+
+    const request = (fetchCall.args as InvokeArguments).request;
 
     expect(request).toMatchObject({
       "kind"   : "host_http_fetch",

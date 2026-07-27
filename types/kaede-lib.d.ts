@@ -1546,6 +1546,7 @@ declare class ExtensionLifecycleController {
 	constructor(dependencies: ExtensionLifecycleDependencies);
 	initialize({ trustedContainer, maxBounds, onCatalog, }: ExtensionLifecycleInitializeOptions): Promise<ExtensionCatalog>;
 	dispose(): Promise<void>;
+	disposeUntilClean(retryDelayMilliseconds?: number): Promise<void>;
 }
 declare function handleCssTheme(styles: string): HTMLStyleElement;
 export type EventListenersType = keyof typeof AllEventListeners;
@@ -1667,10 +1668,10 @@ declare function concurrentlyDownload({ concurrency, entries, statuses, label, c
 	"label": string;
 	"cancelId"?: string;
 }): Promise<DownloadReport>;
-declare function finalizeInitialization({ config, baseDirectory, }: {
+export type FinalizeInitializationInput = Readonly<{
 	"config": ConfigType;
 	"baseDirectory": string;
-}): Promise<void>;
+}>;
 declare function gcd(a: number, b: number): number;
 export type AtAGlanceType = {
 	"title": string;
@@ -1720,13 +1721,13 @@ declare function unzip({ from, to, }: {
 	"from": string;
 	"to": string;
 }): Promise<boolean>;
-declare const _default$14: {
+declare const General: {
 	readonly nextTick: () => Promise<void>;
 	readonly cachedJoin: typeof cachedJoin;
 	readonly capitalize: typeof capitalize;
 	readonly checkDaysDifference: typeof checkDaysDifference;
 	readonly concurrentlyDownload: typeof concurrentlyDownload;
-	readonly finalizeInitialization: typeof finalizeInitialization;
+	readonly finalizeInitialization: (input: FinalizeInitializationInput) => Promise<void>;
 	readonly gcd: typeof gcd;
 	readonly getAtAGlance: typeof getAtAGlance;
 	readonly getBaseDirectory: typeof getBaseDirectory;
@@ -1751,7 +1752,7 @@ declare function changeGlobalState<Key extends keyof GlobalStatesType>(key: Key,
 declare function getConfigGlobalStates(): GlobalStatesType;
 declare function getDefaultGlobalStates(): GlobalStatesType;
 declare function showContextMenu(event: MouseEvent): void;
-declare const _default$15: {
+declare const _default$14: {
 	readonly get: () => GlobalStatesType;
 	readonly change: typeof changeGlobalState;
 	readonly getFromConfig: typeof getConfigGlobalStates;
@@ -1778,11 +1779,11 @@ declare const _default$15: {
 };
 declare function cacheLauncherVersion(): Promise<void>;
 declare function cachePathJoin(): Promise<void>;
-declare function declareGlobals(): void;
-declare function revokeExtensionGlobals(): void;
 declare function getLaunchCount(): Promise<number>;
 declare function registerComponent(name: string, component: import("vue").Component): void;
-declare const _default$16: {
+declare function revokeExtensionGlobals(): void;
+declare function declareGlobals(): void;
+declare const Globals: {
 	readonly cacheLauncherVersion: typeof cacheLauncherVersion;
 	readonly cachePathJoin: typeof cachePathJoin;
 	readonly declareGlobals: typeof declareGlobals;
@@ -1813,7 +1814,7 @@ declare function readStoredInstances(properties?: Partial<{
 	"parsedFile": ParsedFile;
 }>): Promise<InstanceStatesType>;
 declare function saveInstanceStatesToFile(instances: InstanceStatesType): Promise<void>;
-declare const _default$17: {
+declare const _default$15: {
 	readonly get: () => InstanceStatesType;
 	readonly change: typeof changeInstanceState;
 	readonly add: typeof addInstanceWithSync;
@@ -2002,14 +2003,6 @@ export type LaunchResponseType = {
 	"success": boolean;
 	"process": BrokerProcess | undefined;
 };
-declare function handleLaunch({ instanceId, instance, statuses, userPreferences, onClose, onInput, }: {
-	"instanceId": string;
-	"instance": InstanceStateType;
-	"statuses": LauncherStatusesType;
-	"userPreferences": PreLaunchInformationType["user"];
-	"onClose": (instanceId: string) => void;
-	"onInput": (line: string) => void;
-}): Promise<LaunchResponseType>;
 declare function spawnMinecraft({ command, instanceId, necessaries, onClose, onInput, }: {
 	"command": {
 		"java": string;
@@ -2206,7 +2199,15 @@ declare function verifyArtifacts({ paths, checksum, }: {
 	}>;
 	"checksum": boolean;
 }): Promise<Array<string>>;
-declare const _default$18: {
+export type HandleLaunchInput = Readonly<{
+	"instanceId": string;
+	"instance": InstanceStateType;
+	"statuses": LauncherStatusesType;
+	"userPreferences": PreLaunchInformationType["user"];
+	"onClose": (instanceId: string) => void;
+	"onInput": (line: string) => void;
+}>;
+declare const Launcher: {
 	readonly Arguments: {
 		readonly getAdditionalStartArguments: typeof getAdditionalStartArguments;
 		readonly getClassPaths: typeof getClassPaths;
@@ -2262,7 +2263,7 @@ declare const _default$18: {
 		readonly verifyArtifacts: typeof verifyArtifacts;
 	};
 	readonly createCommand: typeof createCommand;
-	readonly handleLaunch: typeof handleLaunch;
+	readonly handleLaunch: (input: HandleLaunchInput) => Promise<LaunchResponseType>;
 	readonly spawnMinecraft: typeof spawnMinecraft;
 };
 declare function closeViewer(): void;
@@ -2312,7 +2313,7 @@ declare function toggleVirtualization({ virtualized, length, }: {
 	"length": number;
 }): Promise<void>;
 export type LogMethodType = (...input: string[]) => void;
-declare const _default$19: {
+declare const _default$16: {
 	readonly closeViewer: typeof closeViewer;
 	readonly getLogEntryInformation: typeof getLogEntryInformation;
 	readonly getLogFieldText: typeof getLogFieldText;
@@ -2355,7 +2356,7 @@ export interface ValidationArgumentsType {
 	};
 	"value": unknown;
 }
-declare const _default$20: {
+declare const _default$17: {
 	readonly validate: {
 		readonly account: (data: ValidationArgumentsType) => false | AccountType;
 		readonly config: (data: ValidationArgumentsType) => false | ConfigType;
@@ -2388,7 +2389,39 @@ declare const _default$20: {
 				import("typebox").TLiteral<"slim">
 			]>;
 		}>;
-	}>>;
+	}>, {
+		profile: {
+			name: string;
+			type: "msa" | "offline";
+			uuid: string;
+		};
+		msa: {
+			token: string;
+			refreshToken: string;
+		} | null;
+		skin: {
+			url: string;
+			id: string;
+			data: string;
+			variant: "classic" | "slim";
+		};
+	}, {
+		profile: {
+			name: string;
+			type: "msa" | "offline";
+			uuid: string;
+		};
+		msa: {
+			token: string;
+			refreshToken: string;
+		} | null;
+		skin: {
+			url: string;
+			id: string;
+			data: string;
+			variant: "classic" | "slim";
+		};
+	}>;
 	readonly ConfigValidator: import("typebox/compile").Validator<{}, import("typebox").TObject<{
 		development: import("typebox").TObject<{
 			loadErudaDevTools: import("typebox").TBoolean;
@@ -2498,7 +2531,133 @@ declare const _default$20: {
 			showAfterExtensionsInitialization: import("typebox").TBoolean;
 			autoConfigSync: import("typebox").TBoolean;
 		}>;
-	}>>;
+	}>, {
+		extensions: {
+			enabled: boolean;
+		};
+		minecraft: {
+			windowHeight: number;
+			windowWidth: number;
+			icon: string;
+			javaBinary: string;
+			add: {
+				jvmArguments?: string[] | undefined;
+				gameArguments?: string[] | undefined;
+			};
+			remove: {
+				jvmArguments?: string[] | undefined;
+				gameArguments?: string[] | undefined;
+			};
+		};
+		logs: {
+			mode: string;
+			show: boolean;
+			lineBreaks: boolean;
+			virtualized: boolean;
+			filtering: string;
+		};
+		development: {
+			loadErudaDevTools: boolean;
+			showFPS: boolean;
+			showCPUUsage: boolean;
+			showMemoryUsage: boolean;
+			enableDebugMode: boolean;
+			enableNativeContextMenu: boolean;
+			enableNativeReloadKeyBinds: boolean;
+		};
+		layout: {
+			sidebar: {
+				color: string | null;
+				blur: number | null;
+				background: string | null;
+				ripple: string | null;
+				sparkles: string | null;
+			};
+			stats: "playtime" | "last-launch";
+			background: {
+				url: string | null;
+				color: string | null;
+				key: string | number | null;
+				blur: number | null;
+				isVideo: boolean;
+			};
+			locale: string;
+			currentInstance: string | null;
+			enableMaterialYouRipple: boolean;
+			custom: boolean | ("sidebar" | "contextMenu")[];
+			atAGlance: {
+				title: string | null;
+				subtitle: string | null;
+			};
+		};
+		misc: {
+			showAfterExtensionsInitialization: boolean;
+			autoConfigSync: boolean;
+		};
+	}, {
+		extensions: {
+			enabled: boolean;
+		};
+		minecraft: {
+			windowHeight: number;
+			windowWidth: number;
+			icon: string;
+			javaBinary: string;
+			add: {
+				jvmArguments?: string[] | undefined;
+				gameArguments?: string[] | undefined;
+			};
+			remove: {
+				jvmArguments?: string[] | undefined;
+				gameArguments?: string[] | undefined;
+			};
+		};
+		logs: {
+			mode: string;
+			show: boolean;
+			lineBreaks: boolean;
+			virtualized: boolean;
+			filtering: string;
+		};
+		development: {
+			loadErudaDevTools: boolean;
+			showFPS: boolean;
+			showCPUUsage: boolean;
+			showMemoryUsage: boolean;
+			enableDebugMode: boolean;
+			enableNativeContextMenu: boolean;
+			enableNativeReloadKeyBinds: boolean;
+		};
+		layout: {
+			sidebar: {
+				color: string | null;
+				blur: number | null;
+				background: string | null;
+				ripple: string | null;
+				sparkles: string | null;
+			};
+			stats: "playtime" | "last-launch";
+			background: {
+				url: string | null;
+				color: string | null;
+				key: string | number | null;
+				blur: number | null;
+				isVideo: boolean;
+			};
+			locale: string;
+			currentInstance: string | null;
+			enableMaterialYouRipple: boolean;
+			custom: boolean | ("sidebar" | "contextMenu")[];
+			atAGlance: {
+				title: string | null;
+				subtitle: string | null;
+			};
+		};
+		misc: {
+			showAfterExtensionsInitialization: boolean;
+			autoConfigSync: boolean;
+		};
+	}>;
 	readonly InstanceMetadataValidator: import("typebox/compile").Validator<{}, import("typebox").TIntersect<[
 		import("typebox").TObject<{
 			windowHeight: import("typebox").TNumber;
@@ -2529,7 +2688,55 @@ declare const _default$20: {
 				import("typebox").TObject<{}>
 			]>;
 		}>
-	]>>;
+	]>, {
+		windowHeight: number;
+		windowWidth: number;
+		icon: string;
+		javaBinary: string;
+		add: {
+			jvmArguments?: string[] | undefined;
+			gameArguments?: string[] | undefined;
+		};
+		remove: {
+			jvmArguments?: string[] | undefined;
+			gameArguments?: string[] | undefined;
+		};
+	} & {
+		patchVersions: {
+			"net.minecraft": string;
+		} & object;
+		name: string;
+		checksum: boolean;
+		playTime: number;
+		lastLaunch: number;
+		entry: string;
+		pinned: boolean;
+		groups: string[];
+	}, {
+		windowHeight: number;
+		windowWidth: number;
+		icon: string;
+		javaBinary: string;
+		add: {
+			jvmArguments?: string[] | undefined;
+			gameArguments?: string[] | undefined;
+		};
+		remove: {
+			jvmArguments?: string[] | undefined;
+			gameArguments?: string[] | undefined;
+		};
+	} & {
+		patchVersions: {
+			"net.minecraft": string;
+		} & object;
+		name: string;
+		checksum: boolean;
+		playTime: number;
+		lastLaunch: number;
+		entry: string;
+		pinned: boolean;
+		groups: string[];
+	}>;
 	readonly ExtensionMetadataValidator: import("typebox/compile").Validator<{}, import("typebox").TIntersect<[
 		import("typebox").TObject<{
 			id: import("typebox").TRefine<import("typebox").TString>;
@@ -2547,7 +2754,7 @@ declare const _default$20: {
 		}>,
 		import("typebox").TObject<{
 			description: import("typebox").TOptional<import("typebox").TString>;
-			permissions: import("typebox").TOptional<import("typebox").TArray<import("typebox").TUnion<[
+			permissions: import("typebox").TOptional<import("typebox").TRefine<import("typebox").TArray<import("typebox").TUnion<[
 				import("typebox").TLiteral<"ui/basic">,
 				import("typebox").TLiteral<"ui/forms/non-credential">,
 				import("typebox").TLiteral<"system/shell">,
@@ -2595,10 +2802,86 @@ declare const _default$20: {
 						}>>;
 					}>;
 				}>
-			]>>>;
+			]>>>>;
 			enabled: import("typebox").TOptional<import("typebox").TBoolean>;
 		}>
-	]>>;
+	]>, {
+		name: string;
+		version: string;
+		type: "sandbox" | "unrestricted";
+		source: string;
+		id: string;
+		logo: string;
+		authors: string[];
+		languages: string[];
+		categories: string[];
+	} & {
+		description?: string | undefined;
+		enabled?: boolean | undefined;
+		permissions?: ("ui/basic" | "ui/forms/non-credential" | "system/shell" | "events/subscribe" | "logging/write" | {
+			id: "network/http";
+			scope: {
+				origins: string[];
+				methods: ("DELETE" | "GET" | "HEAD" | "OPTIONS" | "PATCH" | "POST" | "PUT")[];
+			};
+		} | {
+			id: "storage/internal/read" | "storage/internal/write";
+			scope: {
+				directory: "principal";
+			};
+		} | {
+			id: "storage/external/read" | "storage/external/write";
+			scope: {
+				roots: string[];
+			};
+		} | {
+			id: "system/process/spawn";
+			scope: {
+				executables: {
+					path: string;
+					arguments: string[];
+				}[];
+			};
+		})[] | undefined;
+	}, {
+		name: string;
+		version: string;
+		type: "sandbox" | "unrestricted";
+		source: string;
+		id: string;
+		logo: string;
+		authors: string[];
+		languages: string[];
+		categories: string[];
+	} & {
+		description?: string | undefined;
+		enabled?: boolean | undefined;
+		permissions?: ("ui/basic" | "ui/forms/non-credential" | "system/shell" | "events/subscribe" | "logging/write" | {
+			id: "network/http";
+			scope: {
+				origins: string[];
+				methods: ("DELETE" | "GET" | "HEAD" | "OPTIONS" | "PATCH" | "POST" | "PUT")[];
+			};
+		} | {
+			id: "storage/internal/read" | "storage/internal/write";
+			scope: {
+				directory: "principal";
+			};
+		} | {
+			id: "storage/external/read" | "storage/external/write";
+			scope: {
+				roots: string[];
+			};
+		} | {
+			id: "system/process/spawn";
+			scope: {
+				executables: {
+					path: string;
+					arguments: string[];
+				}[];
+			};
+		})[] | undefined;
+	}>;
 	readonly PatchMetaValidator: import("typebox/compile").Validator<{}, import("typebox").TIntersect<[
 		import("typebox").TObject<{
 			formatVersion: import("typebox").TNumber;
@@ -2607,7 +2890,17 @@ declare const _default$20: {
 			version: import("typebox").TString;
 		}>,
 		import("typebox").TObject<{}>
-	]>>;
+	]>, {
+		name: string;
+		version: string;
+		uid: string;
+		formatVersion: number;
+	} & object, {
+		name: string;
+		version: string;
+		uid: string;
+		formatVersion: number;
+	} & object>;
 };
 export type LightResponse<T> = Promise<T> | T;
 export type GetCallback = (request: {
@@ -2811,31 +3104,31 @@ declare global {
 				/**
 				 * Launcher general-purpose collection of utilities
 				 */
-				"General": typeof _default$14;
+				"General": typeof General;
 				/**
 				 * Launcher global states related collection of utilities
 				 */
-				"GlobalStateHelpers": typeof _default$15;
+				"GlobalStateHelpers": typeof _default$14;
 				/**
 				 * Launcher 'window' object related collection of utilities
 				 */
-				"Globals": typeof _default$16;
+				"Globals": typeof Globals;
 				/**
 				 * Launcher Minecraft instances related collection of utilities
 				 */
-				"Instances": typeof _default$17;
+				"Instances": typeof _default$15;
 				/**
 				 * Launcher Minecraft-related collection of utilities
 				 */
-				"Launcher": typeof _default$18;
+				"Launcher": typeof Launcher;
 				/**
 				 * Launcher logging-related collection of utilities
 				 */
-				"Logging": typeof _default$19;
+				"Logging": typeof _default$16;
 				/**
 				 * Launcher collection of typebox validation schemas
 				 */
-				"Schemas": typeof _default$20;
+				"Schemas": typeof _default$17;
 				/**
 				 * Launcher utils for extensions to conveniently run txiki.js servers
 				 */

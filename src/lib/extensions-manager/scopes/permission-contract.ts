@@ -1,3 +1,7 @@
+import { copyAndSort } from "@/lib/collections/copy-array.ts";
+import {
+  isCanonicalAbsolutePath,
+} from "@/lib/extensions-manager/scopes/canonical-absolute-path.ts";
 import {
   assertPermissionGrantFamilyCompatibility,
 } from "@/lib/extensions-manager/scopes/permission-grant-families.ts";
@@ -67,51 +71,6 @@ export function isExactHttpOrigin(origin: string): boolean {
   } catch {
     return false;
   }
-}
-
-function isCanonicalPosixAbsolutePath(filePath: string): boolean {
-  if (!filePath.startsWith("/") || filePath.includes("\\")) {
-    return false;
-  }
-
-  if (filePath === "/") {
-    return true;
-  }
-
-  if (filePath.endsWith("/") || filePath.includes("//")) {
-    return false;
-  }
-
-  return filePath
-    .slice(1)
-    .split("/")
-    .every(segment => segment !== "" && segment !== "." && segment !== "..");
-}
-
-function isCanonicalWindowsAbsolutePath(filePath: string): boolean {
-  if (!(/^[A-Z]:\\/u).test(filePath) || filePath.includes("/")) {
-    return false;
-  }
-
-  if (filePath.length === 3) {
-    return true;
-  }
-
-  const pathWithoutDrive = filePath.slice(3);
-
-  if (pathWithoutDrive.endsWith("\\") || pathWithoutDrive.includes("\\\\")) {
-    return false;
-  }
-
-  return pathWithoutDrive
-    .split("\\")
-    .every(segment => segment !== "" && segment !== "." && segment !== "..");
-}
-
-export function isCanonicalAbsolutePath(filePath: string): boolean {
-  return filePath.length > 0 &&
-    !(/[\u0000-\u001F\u007F]/u).test(filePath) &&
-    (isCanonicalPosixAbsolutePath(filePath) || isCanonicalWindowsAbsolutePath(filePath));
 }
 
 function validateCanonicalAbsolutePath(filePath: string, label: string): string {
@@ -253,8 +212,8 @@ export function normalizePermissionRequests(
     const networkRequest: NetworkPermissionRequest = Object.freeze({
       "id"   : "network/http",
       "scope": Object.freeze({
-        "origins": Object.freeze([...networkOrigins].sort(compareStrings)),
-        "methods": Object.freeze([...networkMethods].sort(compareStrings)),
+        "origins": Object.freeze(copyAndSort([...networkOrigins], compareStrings)),
+        "methods": Object.freeze(copyAndSort([...networkMethods], compareStrings)),
       }),
     });
 
@@ -275,7 +234,7 @@ export function normalizePermissionRequests(
       normalized.push(Object.freeze({
         "id"   : permissionId,
         "scope": Object.freeze({
-          "roots": Object.freeze([...roots].sort(compareStrings)),
+          "roots": Object.freeze(copyAndSort([...roots], compareStrings)),
         }),
       }));
     }
@@ -286,7 +245,7 @@ export function normalizePermissionRequests(
       "id"   : "system/process/spawn",
       "scope": Object.freeze({
         "executables": Object.freeze(
-          [...processExecutables.values()].sort((left, right) => {
+          copyAndSort([...processExecutables.values()], (left, right) => {
             return compareStrings(executableKey(left), executableKey(right));
           }),
         ),

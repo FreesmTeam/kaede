@@ -1,4 +1,5 @@
 import type {
+  PermissionDecisionStoreKey,
   PreparedPermissionRequest,
 } from "@/lib/capability-broker/types.ts";
 import type {
@@ -10,12 +11,6 @@ export type MaybePromise<Value> = Promise<Value> | Value;
 export const PERMISSION_PROMPT_CANCELLED = Symbol("permission-prompt-cancelled");
 
 export type PermissionDecisionKind = "dynamic" | "static";
-
-export type PermissionDecisionStoreKey = Readonly<{
-  "kind"              : PermissionDecisionKind;
-  "principalKey"      : PluginPrincipalKey;
-  "requestFingerprint": string;
-}>;
 
 export interface PermissionDecisionStore {
   load(key: PermissionDecisionStoreKey): MaybePromise<boolean | undefined>;

@@ -44,6 +44,10 @@ function credentiallessRequestInit(init: HostHttpRequestInit | undefined): Reque
   return Object.freeze(requestInit);
 }
 
+function missing(): Readonly<{ "status": "missing" }> {
+  return Object.freeze({ "status": "missing" });
+}
+
 export function createBrowserHostFacade(
   storage: BrowserStorage,
   runtimeSnapshot: RuntimeSnapshot,
@@ -65,9 +69,6 @@ export function createBrowserHostFacade(
         const placeholder = "buh";
         const joined = await directHost.path.join(placeholder, placeholder);
         const separator = joined.slice(placeholder.length, -1 * placeholder.length);
-        const missing = (): Readonly<{ "status": "missing" }> => {
-          return Object.freeze({ "status": "missing" });
-        };
 
         return Object.freeze({
           "basic": Object.freeze({

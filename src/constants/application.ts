@@ -1,13 +1,14 @@
 /* eslint-disable max-lines */
+import {
+  ApplicationName as _ApplicationName,
+  AsyncFunction as _AsyncFunction,
+  DefaultLocale,
+} from "@/constants/application-primitives.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
-import Instances from "@/lib/instances";
-import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/scopes/log.ts";
 import ATLauncherIcon from "@/resources/ATLauncherIcon.svg";
 import CraftingTableIcon from "@/resources/CraftingTableIcon.webp";
@@ -17,10 +18,8 @@ import ModrinthIcon from "@/resources/ModrinthIcon.webp";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { TabSectionType } from "@/types/application/tab-section.type.ts";
 
-export const ApplicationName = "Kaede";
 export const ApplicationRootID = "#app";
-
-export const DefaultLocale = "en";
+export { ApplicationName, AsyncFunction } from "@/constants/application-primitives.ts";
 
 export const TranslationsContextKey = Symbol();
 export const AuthStatesContextKey = Symbol();
@@ -28,12 +27,6 @@ export const LaunchStatesContextKey = Symbol();
 export const InstanceLogsContextKey = Symbol();
 export const LaunchInstanceContextKey = Symbol();
 export const CloseInstanceContextKey = Symbol();
-
-/*
- * JavaScript allows 'AsyncFunction' constructors.
- * see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
- */
-export const AsyncFunction = async function (): Promise<void> {}.constructor as FunctionConstructor;
 
 export const CSSThemeExtensions = {
   "Enabled" : ".css",
@@ -62,9 +55,10 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"]["states"]
               return;
             }
 
-            const jvmArguments: Array<string> = Launcher.Arguments.splitArguments(value);
+            const jvmArguments: Array<string> =
+              GlobalObject.libs.Launcher.Arguments.splitArguments(value);
 
-            GlobalStateHelpers.Pages.addToState("add-instance", {
+            GlobalObject.libs.GlobalStateHelpers.Pages.addToState("add-instance", {
               "instance": {
                 ...currentInstance,
                 "add": {
@@ -77,13 +71,18 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"]["states"]
           "placeholder"  : "JVM arguments",
           "iconClassName": "i-lucide-braces",
           "defaultValue" : (): string | undefined => {
-            const currentInstance = GlobalStateHelpers.Pages?.getState("add-instance")?.instance;
+            const currentInstance =
+              GlobalObject.libs.GlobalStateHelpers.Pages.getState("add-instance")?.instance;
 
             if (!currentInstance) {
-              return Launcher.Arguments.joinArguments(DefaultInstanceSettings.add?.jvmArguments);
+              return GlobalObject.libs.Launcher.Arguments.joinArguments(
+                DefaultInstanceSettings.add?.jvmArguments,
+              );
             }
 
-            return Launcher.Arguments.joinArguments(currentInstance.add.jvmArguments);
+            return GlobalObject.libs.Launcher.Arguments.joinArguments(
+              currentInstance.add.jvmArguments,
+            );
           },
           "debounceTime": 300,
           "tooltip"     : "Specify your JVM arguments here",
@@ -100,9 +99,10 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"]["states"]
               return;
             }
 
-            const gameArguments: Array<string> = Launcher.Arguments.splitArguments(value);
+            const gameArguments: Array<string> =
+              GlobalObject.libs.Launcher.Arguments.splitArguments(value);
 
-            GlobalStateHelpers.Pages.addToState("add-instance", {
+            GlobalObject.libs.GlobalStateHelpers.Pages.addToState("add-instance", {
               "instance": {
                 ...currentInstance,
                 "add": {
@@ -115,13 +115,18 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"]["states"]
           "placeholder"  : "Game arguments",
           "iconClassName": "i-lucide-gamepad-2",
           "defaultValue" : (): string | undefined => {
-            const currentInstance = GlobalStateHelpers.Pages?.getState("add-instance")?.instance;
+            const currentInstance =
+              GlobalObject.libs.GlobalStateHelpers.Pages.getState("add-instance")?.instance;
 
             if (!currentInstance) {
-              return Launcher.Arguments.joinArguments(DefaultInstanceSettings.add?.gameArguments);
+              return GlobalObject.libs.Launcher.Arguments.joinArguments(
+                DefaultInstanceSettings.add?.gameArguments,
+              );
             }
 
-            return Launcher.Arguments.joinArguments(currentInstance.add.gameArguments);
+            return GlobalObject.libs.Launcher.Arguments.joinArguments(
+              currentInstance.add.gameArguments,
+            );
           },
           "debounceTime": 300,
           "tooltip"     : "Specify your game arguments here",
@@ -201,7 +206,7 @@ export const ContextMenuItems = [
     "name"  : "Show Logs",
     "icon"  : "i-lucide-bug",
     "action": (): void => {
-      GlobalStateHelpers.Logs.toggle("show", true);
+      GlobalObject.libs.GlobalStateHelpers.Logs.toggle("show", true);
       GlobalObject.libs.ContextMenu.close();
     },
   },
@@ -209,11 +214,11 @@ export const ContextMenuItems = [
     "name"  : "Open Root Folder",
     "icon"  : "i-lucide-folder",
     "action": (): void => {
-      const baseDirectory: string = General.getCachedBaseDirectory();
+      const baseDirectory: string = GlobalObject.libs.General.getCachedBaseDirectory();
 
       GlobalObject.libs.ContextMenu.close();
       Host.opener.revealItem(
-        General.cachedJoin(
+        GlobalObject.libs.General.cachedJoin(
           baseDirectory,
           FileStructure.Files.Config,
         ),
@@ -225,12 +230,12 @@ export const ContextMenuItems = [
         );
 
         Host.opener.revealItem(
-          General.cachedJoin(baseDirectory),
-        ).catch((error: unknown) => {
+          GlobalObject.libs.General.cachedJoin(baseDirectory),
+        ).catch((revealError: unknown) => {
           log.error(
             __PRE_BUNDLED_FILENAME__,
             "Failed to reveal the root directory in the explorer:",
-            Errors.prettify(error),
+            Errors.prettify(revealError),
           );
         });
       });
@@ -240,15 +245,16 @@ export const ContextMenuItems = [
     "name"  : "Open Instance Folder",
     "icon"  : "i-lucide-box",
     "action": (): void => {
-      const currentInstanceId: string | null = GlobalStateHelpers.get().layout.currentInstance;
-      const baseDirectory: string = General.getCachedBaseDirectory();
+      const currentInstanceId: string | null =
+        GlobalObject.libs.GlobalStateHelpers.get().layout.currentInstance;
+      const baseDirectory: string = GlobalObject.libs.General.getCachedBaseDirectory();
 
       GlobalObject.libs.ContextMenu.close();
 
       if (!currentInstanceId) {
         log.warn("No instance selected; revealing the root directory in explorer");
         Host.opener.revealItem(
-          General.cachedJoin(
+          GlobalObject.libs.General.cachedJoin(
             baseDirectory,
             FileStructure.Folders.Instances.Path,
           ),
@@ -263,13 +269,13 @@ export const ContextMenuItems = [
         return;
       }
 
-      const minecraftDirectory: string = Instances.getMinecraftDirectory({
+      const minecraftDirectory: string = GlobalObject.libs.Instances.getMinecraftDirectory({
         "baseDirectory": baseDirectory,
         "instanceId"   : currentInstanceId,
       });
 
       Host.opener.revealItem(
-        General.cachedJoin(minecraftDirectory),
+        GlobalObject.libs.General.cachedJoin(minecraftDirectory),
       ).catch((error: unknown) => {
         log.error(
           __PRE_BUNDLED_FILENAME__,
@@ -282,8 +288,8 @@ export const ContextMenuItems = [
 ] as const;
 
 export default {
-  AsyncFunction,
-  ApplicationName,
+  "AsyncFunction"  : _AsyncFunction,
+  "ApplicationName": _ApplicationName,
   ApplicationRootID,
   DefaultLocale,
   TranslationsContextKey,

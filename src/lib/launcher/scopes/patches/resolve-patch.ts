@@ -19,11 +19,11 @@
 import FileStructure from "@/constants/file-structure.ts";
 import { APIEndpoints, LaunchStatus } from "@/constants/launcher.ts";
 import { CustomPatches } from "@/constants/meta.ts";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
 import FileManager from "@/lib/file-manager";
 import Fetching from "@/lib/launcher/scopes/fetching";
-import Patches from "@/lib/launcher/scopes/patches/index.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import Schemas from "@/lib/schemas";
 import type { LaunchStatusType } from "@/types/launcher/launch/launch-status.type.ts";
@@ -54,7 +54,8 @@ export async function resolvePatch({
   }
 
   const { directories, statuses, logPrefix } = necessaries;
-  const version: string | false = await Patches.resolvePatchVersion({ necessaries, metadata });
+  const version: string | false = await GlobalObject.libs.Launcher.Patches
+    .resolvePatchVersion({ necessaries, metadata });
   const fileName: string = version + ".json";
   const descriptiveLogPrefix: string = metadata.uid + ":" + fileName + ":" + logPrefix;
   let parsedPatch: unknown;

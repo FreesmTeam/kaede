@@ -25,8 +25,6 @@ import type {
 
 export type {
   DirectoryEntry,
-  DownloadBatchEntry,
-  DownloadBatchInput,
   DownloadBatchSnapshot,
   DownloadFailure,
   DownloadProgress,
@@ -34,11 +32,8 @@ export type {
   FileMetadata,
   HostDownloads,
   HostHttpRequestInit,
-  InstalledExtensionArchive,
-  InstalledExtensionFailure,
   InstalledExtensionsReadResult,
   PickedIcon,
-  RuntimeKind,
   RuntimeSnapshot,
   SystemMemory,
 } from "@/lib/capability-broker/host-types.ts";

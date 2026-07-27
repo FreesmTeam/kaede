@@ -21,9 +21,13 @@ test("keeps plugin process wait pending after an error until termination", async
   void process.wait().then(
     () => {
       settled = true;
+
+      return settled;
     },
     () => {
       settled = true;
+
+      return settled;
     },
   );
 

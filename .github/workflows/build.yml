@@ -33,13 +33,29 @@ jobs:
         with:
           bun-version: 1.3.14
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@4305c38b25d97ef35a8ad1f985ccf2d2242004f2
+      - name: Install Rust 1.97.1
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
+        with:
+          toolchain: 1.97.1
 
       - name: Install RustSec audit tool
-        uses: taiki-e/install-action@7572810d7dd469b651bb7793945692cf78da5dd7
+        uses: taiki-e/install-action@41049aa56687c35e0afa74eed4f09cec4f9afabf # v2.85.2
         with:
           tool: cargo-audit@0.22.2
+
+      - name: Install Hawk 0.1.10
+        env:
+          CARGO_HAWK_NO_MODIFY_PATH: "1"
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf \
+            https://github.com/astral-sh/hawk/releases/download/0.1.10/cargo-hawk-installer.sh \
+            -o "$RUNNER_TEMP/cargo-hawk-installer.sh"
+          printf '%s  %s\n' \
+            '60572e69bac6886565fa18cfc51941907e04982160af09f96b380d897e4d4a42' \
+            "$RUNNER_TEMP/cargo-hawk-installer.sh" \
+            | sha256sum --check
+          sh "$RUNNER_TEMP/cargo-hawk-installer.sh"
+          cargo hawk --version
 
       - name: Install system dependencies
         run: |
@@ -64,14 +80,32 @@ jobs:
       - name: Verify public declarations
         run: bun run check:types
 
-      - name: Run ESLint
+      - name: Run frontend linters
         run: bun run lint
+
+      - name: Run Fallow analysis report
+        run: bun run analyze:fallow
 
       - name: Run Vitest
         run: bun run test
 
       - name: Run Rust tests
         run: cargo test --manifest-path src-tauri/Cargo.toml --locked
+
+      - name: Run Rust formatting and Clippy
+        run: |
+          cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check
+          cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings
+
+      - name: Run Hawk visibility analysis
+        env:
+          CARGO_INCREMENTAL: "0"
+        run: |
+          cargo hawk check \
+            --manifest-path src-tauri/Cargo.toml \
+            --target-dir src-tauri/target \
+            --color always \
+            -D warnings
 
       - name: Run Tauri ACL smoke
         run: bun run test:tauri-acl
@@ -135,9 +169,10 @@ jobs:
         with:
           bun-version: 1.3.14
 
-      - name: Install Rust stable
-        uses: dtolnay/rust-toolchain@4305c38b25d97ef35a8ad1f985ccf2d2242004f2
+      - name: Install Rust 1.97.1
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
         with:
+          toolchain: 1.97.1
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Install dependencies (Ubuntu only)
@@ -278,7 +313,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-windows-nsis-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/release/bundle/nsis/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64-setup.exe"
 
@@ -286,7 +321,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-windows-msi-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/release/bundle/msi/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64_en-US.msi"
 
@@ -294,7 +329,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'linux' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-linux-deb-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/release/bundle/deb/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_amd64.deb"
 
@@ -302,7 +337,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'linux' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-linux-rpm-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/release/bundle/rpm/${{ steps.json_properties.outputs.productName }}-${{steps.json_properties.outputs.version}}-1.x86_64.rpm"
 
@@ -310,7 +345,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'linux' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-linux-app-image-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/release/bundle/appimage/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_amd64.AppImage"
 
@@ -318,7 +353,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-x86' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-dmg-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64.dmg"
 
@@ -326,7 +361,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-x86' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-tarball-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"
 
@@ -334,7 +369,7 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-arm' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-dmg-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_aarch64.dmg"
 
@@ -342,6 +377,6 @@ jobs:
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-arm' && matrix.type == 'non-portable'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          if-no-files-found: "warn"
+          if-no-files-found: "error"
           name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-tarball-${{steps.json_properties.outputs.version}}-${{ matrix.type }}-${{ steps.json_properties.outputs.artifactRef }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"

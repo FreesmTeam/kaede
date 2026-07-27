@@ -1,4 +1,7 @@
 import type {
+  PermissionDecisionStoreKey,
+} from "@/lib/capability-broker/types.ts";
+import type {
   PermissionDecisionRepository,
 } from "@/lib/extensions-manager/scopes/permission-decision-repository.ts";
 import {
@@ -10,7 +13,6 @@ import {
   type DynamicQueueItem,
   PERMISSION_PROMPT_CANCELLED,
   type PermissionDecisionKind,
-  type PermissionDecisionStoreKey,
   type PermissionPromptSessionOperations,
   type PromptResponse,
   type QueueItem,

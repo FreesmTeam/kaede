@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { GlobalObject } from "@/extendable/global-object.ts";
 import { Host } from "@/lib/capability-broker";
-import Validators from "@/lib/launcher/scopes/validators/index.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
   PreLaunchInformationType,
@@ -44,7 +44,7 @@ export async function initializeAssetsDirectories(
     );
     await Host.files.ensureDirectories([directories.assetIndexes, directories.assetObjects]);
 
-    return Validators.initializeShortHashDirectories(necessaries);
+    return GlobalObject.libs.Launcher.Validators.initializeShortHashDirectories(necessaries);
   }
 
   if (!indexesExists) {
@@ -54,14 +54,14 @@ export async function initializeAssetsDirectories(
     );
     await Host.files.ensureDirectories([directories.assetIndexes]);
 
-    return Validators.initializeShortHashDirectories(necessaries);
+    return GlobalObject.libs.Launcher.Validators.initializeShortHashDirectories(necessaries);
   }
 
   if (!objectsExists) {
     log.debug(logPrefix, "Initializing the '/assets/objects/' directory");
     await Host.files.ensureDirectories([directories.assetObjects]);
 
-    return Validators.initializeShortHashDirectories(necessaries);
+    return GlobalObject.libs.Launcher.Validators.initializeShortHashDirectories(necessaries);
   }
 
   log.info(
@@ -69,5 +69,5 @@ export async function initializeAssetsDirectories(
     "The '/assets/indexes/' and '/assets/objects/' directories exist",
   );
 
-  return Validators.initializeShortHashDirectories(necessaries);
+  return GlobalObject.libs.Launcher.Validators.initializeShortHashDirectories(necessaries);
 }

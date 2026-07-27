@@ -1,4 +1,4 @@
-import Configs from "@/lib/configs";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { ParsedFile } from "@/types/application/initial-state.type.ts";
@@ -12,7 +12,7 @@ export async function getSafeConfigFile(properties?: Partial<{
     log.debug(__PRE_BUNDLED_FILENAME__, "Getting a config file");
 
     // Await here to catch errors
-    return await Configs.get(properties);
+    return await GlobalObject.libs.Configs.get(properties);
   } catch (error: unknown) {
     log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -21,6 +21,6 @@ export async function getSafeConfigFile(properties?: Partial<{
     );
     log.debug(__PRE_BUNDLED_FILENAME__, "Getting a default config");
 
-    return Configs.getDefault();
+    return GlobalObject.libs.Configs.getDefault();
   }
 }

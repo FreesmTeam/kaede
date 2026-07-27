@@ -4,18 +4,17 @@ import {
   snapshotPreparedPermissionRequest,
 } from "@/lib/capability-broker/permission-preparation.ts";
 import type {
+  PermissionDecisionStoreKey,
   PreparedPermissionRequest,
 } from "@/lib/capability-broker/types.ts";
-import type {
-  PermissionDecisionStoreKey,
-} from "@/lib/extensions-manager/scopes/permission-prompt-types.ts";
+import { copyAndSort } from "@/lib/collections/copy-array.ts";
 import { hashStringCrypto } from "@/lib/general/scopes/hash-string-crypto.ts";
 import type {
   PermissionId,
   PermissionRequest,
 } from "@/types/extensions/permission.type.ts";
 
-export function canonicalPermissionFingerprint(value: unknown): string {
+function canonicalPermissionFingerprint(value: unknown): string {
   if (value === null) {
     return "null";
   }
@@ -25,8 +24,7 @@ export function canonicalPermissionFingerprint(value: unknown): string {
   }
 
   if (typeof value === "object") {
-    return `{${Object.keys(value)
-      .sort()
+    return `{${copyAndSort(Object.keys(value))
       .map(key => {
         return `${JSON.stringify(key)}:${canonicalPermissionFingerprint(Reflect.get(value, key))}`;
       })
@@ -94,9 +92,9 @@ export function getStaticPermissionSetFingerprint(
   const preparedRequests = allPrepared(requests)
     ? requests.map(request => snapshotPreparedPermissionRequest(request))
     : prepareIdentityFreePermissionRequests(requests, true);
-  const normalizedRequests = preparedRequests
-    .map(request => getPermissionRequestFingerprint(request))
-    .sort();
+  const normalizedRequests = copyAndSort(
+    preparedRequests.map(request => getPermissionRequestFingerprint(request)),
+  );
 
   return `static-permission-set-v2:sha256:${hashStringCrypto(
     canonicalPermissionFingerprint(normalizedRequests),

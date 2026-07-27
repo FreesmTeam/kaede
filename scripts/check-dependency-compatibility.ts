@@ -54,19 +54,23 @@ const collectFromNodeModules = async (directory: string): Promise<void> => {
   if (visitedNodeModules.has(canonicalDirectory)) return;
   visitedNodeModules.add(canonicalDirectory);
 
-  for (const entry of await readdir(directory, { "withFileTypes": true })) {
-    if (entry.name === ".bin") continue;
+  const entries = await readdir(directory, { "withFileTypes": true });
 
+  await Promise.all(entries.filter(entry => entry.name !== ".bin").map(async entry => {
     const entryPath = path.join(directory, entry.name);
 
     if (entry.name.startsWith("@")) {
-      for (const scopedEntry of await readdir(entryPath, { "withFileTypes": true })) {
+      const scopedEntries = await readdir(entryPath, { "withFileTypes": true });
+
+      await Promise.all(scopedEntries.map(async scopedEntry => {
         await inspectPackage(path.join(entryPath, scopedEntry.name));
-      }
-    } else {
-      await inspectPackage(entryPath);
+      }));
+
+      return;
     }
-  }
+
+    await inspectPackage(entryPath);
+  }));
 };
 
 const expectMatch = (
@@ -90,7 +94,7 @@ if (minimatchPackages.length === 0) {
 
 const installedMajors = (new Set<number>);
 
-for (const { directory, manifest } of minimatchPackages) {
+await Promise.all(minimatchPackages.map(async ({ directory, manifest }) => {
   if (!manifest.version) throw new Error(`Missing minimatch version in ${directory}`);
 
   const major = Number.parseInt(manifest.version, 10);
@@ -117,10 +121,10 @@ for (const { directory, manifest } of minimatchPackages) {
     if (!imported.minimatch) throw new Error(`${label}: ESM minimatch export is missing`);
     expectMatch(`${label} ESM`, imported.minimatch);
   }
-}
+}));
 
 process.stdout.write(
   `Verified ${minimatchPackages.length} minimatch installs across majors ${[...installedMajors]
-    .sort((a, b) => a - b)
+    .toSorted((a, b) => a - b)
     .join(", ")}\n`,
 );

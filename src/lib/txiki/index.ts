@@ -30,7 +30,8 @@ type PostCallback = (request: {
   "params": Record<string, string>;
 }) => LightResponse<unknown>;
 
-const identifierPattern = /^[$_\p{ID_Start}][$\u200C\u200D_\p{ID_Continue}]*$/u;
+const identifierStartPattern = /^[$_\p{ID_Start}]$/u;
+const identifierContinuePattern = /^[$_\p{ID_Continue}]$/u;
 const reservedGlobalNames = new Set(`
   arguments await break case catch class const continue
   debugger default delete do else enum eval export extends
@@ -42,7 +43,16 @@ const reservedGlobalNames = new Set(`
 let nextServerId = 0;
 
 function assertValidGlobalName(name: string): void {
-  if (!identifierPattern.test(name) || reservedGlobalNames.has(name)) {
+  const [firstCharacter, ...remainingCharacters] = [...name];
+  const hasValidIdentifierCharacters = firstCharacter !== undefined &&
+    identifierStartPattern.test(firstCharacter) &&
+    remainingCharacters.every(character => {
+      return character === "\u200C" ||
+        character === "\u200D" ||
+        identifierContinuePattern.test(character);
+    });
+
+  if (!hasValidIdentifierCharacters || reservedGlobalNames.has(name)) {
     throw new TypeError(`Invalid Txiki global identifier: ${JSON.stringify(name)}`);
   }
 }

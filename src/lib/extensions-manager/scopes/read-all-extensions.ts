@@ -4,6 +4,7 @@ import {
   Host,
   type InstalledExtensionsReadResult,
 } from "@/lib/capability-broker";
+import { copyAndSort } from "@/lib/collections/copy-array.ts";
 import Errors from "@/lib/errors";
 import { computeArtifactSha256 } from "@/lib/extensions-manager/scopes/principal.ts";
 import General from "@/lib/general";
@@ -103,11 +104,14 @@ function assertUniqueExtensionIds(candidates: ReadonlyArray<ExtensionCandidate>)
     }
   }
 
-  const duplicates = [...sourcesById]
-    .filter(([, sources]) => sources.length > 1)
-    .sort(([left], [right]) => compareStrings(left, right))
+  const duplicateEntries = [...sourcesById]
+    .filter(([, sources]) => sources.length > 1);
+  const duplicates = copyAndSort(
+    duplicateEntries,
+    ([left], [right]) => compareStrings(left, right),
+  )
     .map(([id, sources]) => {
-      const sortedSources = [...sources].sort(compareStrings)
+      const sortedSources = copyAndSort(sources, compareStrings)
         .map(source => JSON.stringify(source));
 
       return `${JSON.stringify(id)} (${sortedSources.join(", ")})`;

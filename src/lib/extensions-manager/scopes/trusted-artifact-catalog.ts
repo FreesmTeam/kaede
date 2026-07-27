@@ -1,7 +1,7 @@
 export const TRUSTED_EXTENSIONS_REPOSITORY =
   "https://github.com/kaede-basement/trusted-extensions";
 
-export const TRUSTED_EXTENSIONS_REPOSITORY_COMMIT =
+const TRUSTED_EXTENSIONS_REPOSITORY_COMMIT =
   "9eca45438539a75a6dd8c90071590abef8128d71";
 
 export type TrustedArtifactCatalogEntry = Readonly<{

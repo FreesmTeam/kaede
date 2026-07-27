@@ -62,7 +62,9 @@ function allocateImageObjectUrl(path: string, bytes: Uint8Array): string {
     URL.revokeObjectURL(previous);
   }
 
-  const url = URL.createObjectURL(new Blob([bytes], { "type": imageMimeType(path) }));
+  // BlobPart requires ArrayBuffer-backed bytes; callers may provide a SharedArrayBuffer view.
+  const blobBytes = new Uint8Array(bytes);
+  const url = URL.createObjectURL(new Blob([blobBytes], { "type": imageMimeType(path) }));
 
   imageObjectUrls.set(path, url);
 

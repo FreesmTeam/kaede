@@ -18,10 +18,10 @@
 
 import { Patches, PrettyPatchLabels } from "@/constants/meta.ts";
 import { Routes } from "@/constants/routes.ts";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import { Host } from "@/lib/capability-broker";
 import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
-import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
@@ -70,7 +70,7 @@ export async function createInstance(
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Creating an instance with the entry patch:", uid);
 
-  await Instances.add(id, {
+  await GlobalObject.libs.Instances.add(id, {
     ...currentInstance,
     "entry": uid,
   });

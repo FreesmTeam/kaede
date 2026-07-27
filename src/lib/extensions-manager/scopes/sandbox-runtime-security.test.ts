@@ -48,7 +48,7 @@ describe("createSandboxRuntime security failures", () => {
       { "get": () => 100 },
     ) as SandboxMaxBounds;
 
-    for (const maxBounds of [missing, extra, accessor]) {
+    await Promise.all([missing, extra, accessor].map(async maxBounds => {
       await expect(createSandboxRuntime({
         "trustedContainer"  : Object.create(null) as HTMLElement,
         maxBounds,
@@ -59,7 +59,7 @@ describe("createSandboxRuntime security failures", () => {
           "capabilities": {},
         }),
       })).rejects.toThrow(/max bounds|own-data/u);
-    }
+    }));
   });
 
   it("fails closed when a granted non-DOM capability factory is missing", async () => {

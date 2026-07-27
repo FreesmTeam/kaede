@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { copyAndReverse } from "@/lib/collections/copy-array.ts";
 import { parseLibraries } from "@/lib/launcher/scopes/parsers/parse-libraries.ts";
 import { parseLogging } from "@/lib/launcher/scopes/parsers/parse-logging.ts";
 import { parseMainJar } from "@/lib/launcher/scopes/parsers/parse-main-jar.ts";
@@ -106,7 +107,7 @@ export function finalizePatches({
    * Initially, patches are sorted from parents to dependencies.
    * However, we need to go from dependencies to parents
    */
-  const reversed: Array<SpecificPatchMetaType> = patches.reverse();
+  const reversed: Array<SpecificPatchMetaType> = copyAndReverse(patches);
 
   /*
    * Previously, maven files and libraries shared the same unique artifacts map...

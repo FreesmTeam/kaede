@@ -149,7 +149,7 @@ describe("createSandboxRuntime", () => {
     expect(receivedDocumentOptions?.urlPolicy?.sinks["image.src"]?.allowedOrigins).toEqual([
       "https://static.example.test",
     ]);
-    expect(Reflect.ownKeys(runtime.capabilities).sort()).toEqual([
+    expect(Reflect.ownKeys(runtime.capabilities).toSorted()).toEqual([
       "logging/write",
       "network/http",
       "system/shell",

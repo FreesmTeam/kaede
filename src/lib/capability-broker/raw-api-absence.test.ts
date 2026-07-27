@@ -23,21 +23,28 @@ async function listSourceFiles(directory: string): Promise<Array<string>> {
   return files.flat();
 }
 
+async function readSources(
+  filePaths: ReadonlyArray<string>,
+): Promise<ReadonlyArray<Readonly<{ "filePath": string; "source": string }>>> {
+  return await Promise.all(filePaths.map(async filePath => ({
+    filePath,
+    "source": await readFile(filePath, "utf8"),
+  })));
+}
+
 test("raw Tauri and community APIs stay confined to broker adapters", async () => {
   const violations: Array<string> = [];
-
-  for (const filePath of await listSourceFiles(sourceRoot)) {
+  const sourceFiles = await listSourceFiles(sourceRoot);
+  const filePaths = sourceFiles.filter(filePath => {
     const relativePath = filePath.slice(sourceRoot.length);
 
-    if (
-      relativePath.endsWith(".test.ts") ||
-      relativePath.endsWith("/capability-broker/desktop-adapter.ts") ||
-      relativePath.endsWith("/capability-broker/direct-desktop.ts")
-    ) {
-      continue;
-    }
+    return !relativePath.endsWith(".test.ts") &&
+      !relativePath.endsWith("/capability-broker/desktop-adapter.ts") &&
+      !relativePath.endsWith("/capability-broker/direct-desktop.ts");
+  });
 
-    const source = await readFile(filePath, "utf8");
+  for (const { filePath, source } of await readSources(filePaths)) {
+    const relativePath = filePath.slice(sourceRoot.length);
 
     if (
       source.includes("@tauri-apps/") ||
@@ -61,9 +68,7 @@ test("legacy broad global permission requests stay removed", async () => {
   ];
   const violations: Array<string> = [];
 
-  for (const filePath of files) {
-    const source = await readFile(filePath, "utf8");
-
+  for (const { filePath, source } of await readSources(files)) {
     if ((/requestPermissions[\s\S]{0,180}Promise<Array<boolean>>/u).test(source)) {
       violations.push(path.relative(workspaceRoot, filePath));
     }
@@ -78,9 +83,7 @@ test("revoked extension window globals stay optional", async () => {
     path.resolve(workspaceRoot, "types/kaede-lib.d.ts"),
   ];
 
-  for (const filePath of files) {
-    const source = await readFile(filePath, "utf8");
-
+  for (const { source } of await readSources(files)) {
     expect(source).toMatch(/"__KAEDE__"\?:/u);
     expect(source).toMatch(/"__KAEDE_INTERNALS__"\?:/u);
   }

@@ -18,16 +18,19 @@ import {
   createPluginPrincipalKey,
 } from "@/lib/extensions-manager/scopes/principal.ts";
 
-test("large principal and network scope keys survive desktop DTO save and reload", async () => {
-  const calls: Array<BrokerRequest> = [];
-  const decisions = new Map<string, boolean>;
-  const decisionKey = (
-    request: Extract<BrokerRequest, { "kind": "decision_load" | "decision_save" }>,
-  ): string => JSON.stringify({
+function decisionKey(
+  request: Extract<BrokerRequest, { "kind": "decision_load" | "decision_save" }>,
+): string {
+  return JSON.stringify({
     "kind"              : request.decisionKind,
     "principalKey"      : request.principalKey,
     "requestFingerprint": request.requestFingerprint,
   });
+}
+
+test("large principal and network scope keys survive desktop DTO save and reload", async () => {
+  const calls: Array<BrokerRequest> = [];
+  const decisions = new Map<string, boolean>;
   const call: BrokerCall = async request => {
     calls.push(request);
 

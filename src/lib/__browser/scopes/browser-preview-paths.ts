@@ -3,6 +3,7 @@ import type {
   BrowserStorageValue,
 } from "@/lib/browser/scopes/browser-storage.ts";
 import type { DirectoryEntry } from "@/lib/capability-broker/types.ts";
+import { copyAndSort } from "@/lib/collections/copy-array.ts";
 import type { ExternalStorageTarget } from "@/types/extensions/permission.type.ts";
 
 export function normalizeBrowserPath(filePath: string): string {
@@ -93,7 +94,7 @@ export async function readBrowserDirectory(
     }));
   }
 
-  return Object.freeze([...entries.values()].sort((left, right) => {
+  return Object.freeze(copyAndSort([...entries.values()], (left, right) => {
     return left.name.localeCompare(right.name);
   }));
 }

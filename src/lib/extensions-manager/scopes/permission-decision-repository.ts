@@ -1,9 +1,11 @@
+import type {
+  PermissionDecisionStoreKey,
+} from "@/lib/capability-broker/types.ts";
 import {
   getPermissionDecisionMemoryKey,
 } from "@/lib/extensions-manager/scopes/permission-prompt-fingerprints.ts";
 import type {
   PermissionDecisionStore,
-  PermissionDecisionStoreKey,
 } from "@/lib/extensions-manager/scopes/permission-prompt-types.ts";
 
 export class InMemoryPermissionDecisionStore implements PermissionDecisionStore {

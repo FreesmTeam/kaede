@@ -1,6 +1,8 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { generateDtsBundle } from "dts-bundle-generator";
+
 const ARK_DECLARATION_SHA256 = "79f17ec644dc0e8b23ffe246b71637083e3f6c2172acc8ba7966ef519b31e4db";
 const ARK_SOURCE_COMMIT = "928f1f361abaa4d7204de0bb53dd7b916b04d45b";
 const ARK_PACKAGE_REFERENCE = "import(\"ark-of-atrahasis\")";
@@ -18,11 +20,6 @@ const project = path.resolve(repositoryRoot, "tsconfig.app.json");
 const generatedDeclaration = path.resolve(repositoryRoot, "types/kaede-lib.d.ts");
 const generatedSandboxDeclaration = path.resolve(repositoryRoot, "types/kaede-sandbox.d.ts");
 const generatedTrustedDeclaration = path.resolve(repositoryRoot, "types/kaede-trusted.d.ts");
-const temporaryDeclaration = path.resolve(repositoryRoot, "types/.kaede-lib.generated.d.ts");
-const temporarySandboxDeclaration = path.resolve(
-  repositoryRoot,
-  "types/.kaede-sandbox.generated.d.ts",
-);
 const arkDeclaration = path.resolve(repositoryRoot, "types/ark-of-atrahasis-1.0.d.ts");
 const checkOnly = process.argv.includes("--check");
 
@@ -46,33 +43,17 @@ async function sha256(filePath: string): Promise<string> {
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
 }
 
-async function generateDeclaration(
-  entryPoint: string,
-  temporaryOutput: string,
-): Promise<string> {
-  const generator = Bun.spawn([
-    "bun",
-    "x",
-    "dts-bundle-generator",
-    entryPoint,
-    "-o",
-    temporaryOutput,
-    "--project",
-    project,
-    "--inline-declare-global",
-  ], {
-    "cwd"   : repositoryRoot,
-    "stdout": "inherit",
-    "stderr": "inherit",
-  });
-  const exitCode = await generator.exited;
+function generateDeclaration(entryPoint: string): string {
+  const [generated] = generateDtsBundle([{
+    "filePath": entryPoint,
+    "output"  : { "inlineDeclareGlobals": true },
+  }], { "preferredConfigPath": project });
 
-  if (exitCode !== 0) {
-    throw new Error(`dts-bundle-generator exited with code ${exitCode}`);
+  if (generated === undefined) {
+    throw new Error(`dts-bundle-generator did not return output for ${entryPoint}`);
   }
 
-  const temporaryContents = await Bun.file(temporaryOutput).text();
-  const bundled = temporaryContents.replaceAll("\r\n", "\n");
+  const bundled = generated.replaceAll("\r\n", "\n");
   const arkReferenceCount = bundled.split(ARK_PACKAGE_REFERENCE).length - 1;
 
   if (arkReferenceCount === 0) {
@@ -129,27 +110,16 @@ if (arkHash !== ARK_DECLARATION_SHA256) {
   );
 }
 
-try {
-  const declaration = await generateDeclaration(declarationsEntry, temporaryDeclaration);
-  const sandboxDeclaration = await generateDeclaration(
-    sandboxDeclarationsEntry,
-    temporarySandboxDeclaration,
-  );
-  const generatedHash = await writeOrCheck(generatedDeclaration, declaration);
-  const sandboxHash = await writeOrCheck(generatedSandboxDeclaration, sandboxDeclaration);
-  const trustedHash = await writeOrCheck(generatedTrustedDeclaration, TRUSTED_DECLARATION);
+const declaration = generateDeclaration(declarationsEntry);
+const sandboxDeclaration = generateDeclaration(sandboxDeclarationsEntry);
+const generatedHash = await writeOrCheck(generatedDeclaration, declaration);
+const sandboxHash = await writeOrCheck(generatedSandboxDeclaration, sandboxDeclaration);
+const trustedHash = await writeOrCheck(generatedTrustedDeclaration, TRUSTED_DECLARATION);
 
-  await Bun.write(
-    Bun.stdout,
-    `Verified Ark ${arkHash}\n`
-    + `${checkOnly ? "Checked" : "Generated"} Kaede core ${generatedHash}\n`
-    + `${checkOnly ? "Checked" : "Generated"} Kaede sandbox ${sandboxHash}\n`
-    + `${checkOnly ? "Checked" : "Generated"} Kaede trusted ${trustedHash}\n`,
-  );
-} finally {
-  for (const temporaryOutput of [temporaryDeclaration, temporarySandboxDeclaration]) {
-    if (await Bun.file(temporaryOutput).exists()) {
-      await Bun.file(temporaryOutput).delete();
-    }
-  }
-}
+await Bun.write(
+  Bun.stdout,
+  `Verified Ark ${arkHash}\n`
+  + `${checkOnly ? "Checked" : "Generated"} Kaede core ${generatedHash}\n`
+  + `${checkOnly ? "Checked" : "Generated"} Kaede sandbox ${sandboxHash}\n`
+  + `${checkOnly ? "Checked" : "Generated"} Kaede trusted ${trustedHash}\n`,
+);

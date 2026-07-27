@@ -1,9 +1,7 @@
 export {
-  getDynamicPermissionBatchFingerprint,
   getDynamicBatchDecisions,
   getPermissionRequestFingerprint,
   getPermissionRequestId,
-  getStaticPermissionSetFingerprint,
   reconcileDynamicDraftDecisions,
 } from "@/lib/extensions-manager/scopes/permission-prompt-fingerprints.ts";
 export {
@@ -13,13 +11,8 @@ export {
   PermissionPromptController,
 } from "@/lib/extensions-manager/scopes/permission-prompt-controller.ts";
 export type {
-  DynamicPermissionPrompt,
-  PermissionDecisionKind,
   PermissionDecisionStore,
-  PermissionDecisionStoreKey,
   PermissionPrompt,
-  PermissionPromptListener,
-  StaticPermissionPrompt,
 } from "@/lib/extensions-manager/scopes/permission-prompt-types.ts";
 
 import {

@@ -18,8 +18,13 @@
 
 import { type Reactive, reactive } from "vue";
 
-import GlobalStateHelpers from "@/lib/global-state-helpers";
+import { ContextMenuItems, DefaultGlobalStatesPagesStates } from "@/constants/application.ts";
+import { Routes, SidebarRouteGroupItems } from "@/constants/routes.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
+import Configs from "@/lib/configs";
+import Router from "@/lib/router";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
+import type { ConfigType } from "@/types/configs/config.type.ts";
 
 /**
  * Contains all global application states.
@@ -39,5 +44,34 @@ export function getGlobalStates(): GlobalStatesType {
  * This function is called in 'main.ts'
  */
 export function declareGlobalStates(): void {
-  globalStates = reactive<GlobalStatesType>(GlobalStateHelpers.getFromConfig());
+  const configFile: ConfigType = Configs.getCachedInitial();
+
+  globalStates = reactive<GlobalStatesType>({
+    ...configFile,
+    "contextMenuItems": ContextMenuItems,
+    "currentPage"     : Router.getInitialPage(),
+    "translations"    : GlobalInternals.initialTranslations,
+    "pages"           : DefaultGlobalStatesPagesStates,
+    "sidebarItems"    : [
+      ...SidebarRouteGroupItems.map(item => {
+        return {
+          "path"  : item.Path,
+          "icon"  : item.Icon,
+          "name"  : item.Path,
+          "action": (): void => {
+            globalStates.currentPage = item.Path;
+          },
+        };
+      }),
+      "divider",
+      {
+        "path"  : Routes.AddInstance,
+        "icon"  : "i-lucide-plus",
+        "name"  : Routes.AddInstance,
+        "action": (): void => {
+          globalStates.currentPage = Routes.AddInstance;
+        },
+      },
+    ],
+  });
 }

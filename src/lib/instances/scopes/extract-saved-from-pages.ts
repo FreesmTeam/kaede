@@ -21,8 +21,8 @@ import type { GlobalStatesType } from "@/types/application/global-states.type.ts
 
 export function extractSavedFromPages(
   globalStates: GlobalStatesType | undefined,
-): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] {
-  const storedInstance = globalStates?.pages?.states?.["add-instance"]?.instance;
+): GlobalStatesType["pages"]["add-instance"]["instance"] {
+  const storedInstance = globalStates?.pages?.["add-instance"]?.instance;
 
   if (!storedInstance) {
     return {
@@ -35,8 +35,8 @@ export function extractSavedFromPages(
       "windowWidth"  : DefaultInstanceSettings.windowWidth,
       "patchVersions": { "net.minecraft": "1.16.5" },
       "add"          : {
-        "jvmArguments" : DefaultInstanceSettings.add?.jvmArguments ?? [],
-        "gameArguments": DefaultInstanceSettings.add?.gameArguments ?? [],
+        "jvmArguments" : [...(DefaultInstanceSettings.add?.jvmArguments ?? [])],
+        "gameArguments": [...(DefaultInstanceSettings.add?.gameArguments ?? [])],
       },
     };
   }

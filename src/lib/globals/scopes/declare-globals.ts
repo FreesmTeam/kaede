@@ -6,7 +6,6 @@ import _ASCIIArt from "@/constants/ascii-art.ts";
 import _Browser from "@/constants/browser.ts";
 import _EventListeners from "@/constants/event-listeners.ts";
 import _FileStructure from "@/constants/file-structure.ts";
-import _Hooks from "@/constants/hooks.ts";
 import _Launcher from "@/constants/launcher.ts";
 import _Meta from "@/constants/meta.ts";
 import _Permissions from "@/constants/permissions.ts";
@@ -18,7 +17,6 @@ import DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Globals from "@/lib/globals";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
@@ -43,7 +41,6 @@ export function declareGlobals(): void {
     "Browser"       : _Browser,
     "EventListeners": _EventListeners,
     "FileStructure" : _FileStructure,
-    "Hooks"         : _Hooks,
     "Launcher"      : _Launcher,
     "Meta"          : _Meta,
     "Permissions"   : _Permissions,
@@ -56,7 +53,6 @@ export function declareGlobals(): void {
     Errors,
     ExtensionsManager,
     General,
-    GlobalStateHelpers,
     Globals,
     Instances,
     Launcher,

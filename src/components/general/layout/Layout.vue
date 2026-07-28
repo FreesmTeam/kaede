@@ -5,6 +5,7 @@ import { ref } from "vue";
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import PageError from "@/components/general/errors/PageError.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
+import { ContextMenu } from "@/constants/application.ts";
 import { getComponents } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import { globalStates } from "@/states/global.ts";
@@ -46,8 +47,10 @@ function showContextMenu(event: MouseEvent): void {
   contextMenu.value.y = event.clientY;
 }
 
-GlobalObject.libs.ContextMenu.show = showContextMenu;
-GlobalObject.libs.ContextMenu.close = closeContextMenu;
+ContextMenu.show = showContextMenu;
+ContextMenu.close = closeContextMenu;
+
+GlobalObject.libs.ContextMenu = ContextMenu;
 
 useEventListener(window, "pointerdown", (event: PointerEvent) => {
   const target = event.target as HTMLElement;

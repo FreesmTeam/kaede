@@ -5,8 +5,8 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import AllowButton from "@/components/general/extensions/permissions/AllowButton.vue";
 import { IgnoredExtensionPermissions } from "@/constants/permissions.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import { __requestPermissions } from "@/lib/extensions-manager/scopes/request-permissions.ts";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
 const requestedPermissionState = ref<{
@@ -69,7 +69,7 @@ GlobalInternals.requestPermissions = requestPermissions;
       v-if="requestedPermissionState"
       id="__extensions-loader__permission-request-wrapper"
       @contextmenu.prevent
-      @contextmenu="GlobalStateHelpers.showContextMenu"
+      @contextmenu="ContextMenu.show"
       class="absolute bottom-0 left-0 right-0 top-0 z-8000 grid place-items-center bg-[theme(colors.black/.5)]"
     >
       <div

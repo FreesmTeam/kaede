@@ -3,10 +3,8 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import FileStructure from "@/constants/file-structure.ts";
 import { DefaultInstanceSettings } from "@/constants/launcher.ts";
-import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -15,6 +13,7 @@ import CraftingTableIcon from "@/resources/CraftingTableIcon.webp";
 import CurseForgeIcon from "@/resources/CurseForgeIcon.webp";
 import FTBIcon from "@/resources/FTBIcon.svg";
 import ModrinthIcon from "@/resources/ModrinthIcon.webp";
+import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { TabSectionType } from "@/types/application/tab-section.type.ts";
 
@@ -42,6 +41,14 @@ export const CSSThemeExtensions = {
   "Disabled": ".css.disabled",
 } as const;
 
+export const ContextMenu: {
+  "show" : (event: MouseEvent) => void;
+  "close": () => void;
+} = {
+  "show" : () => {},
+  "close": () => {},
+};
+
 export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
   "home"        : {},
   "library"     : {},
@@ -56,30 +63,19 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
     "customSettings": [
       {
         "input": {
-          "onInput": (
-            value: string,
-            currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
-          ): void => {
+          "onInput": (value: string): void => {
+            const currentInstance = globalStates.pages["add-instance"].instance;
+
             if (!currentInstance) {
               return;
             }
 
-            const jvmArguments: Array<string> = Launcher.Arguments.splitArguments(value);
-
-            GlobalStateHelpers.Pages.addToState("add-instance", {
-              "instance": {
-                ...currentInstance,
-                "add": {
-                  ...currentInstance.add,
-                  "jvmArguments": jvmArguments,
-                },
-              },
-            });
+            currentInstance.add.jvmArguments = Launcher.Arguments.splitArguments(value);
           },
           "placeholder"  : "JVM arguments",
           "iconClassName": "i-lucide-braces",
           "defaultValue" : (): string | undefined => {
-            const currentInstance = GlobalStateHelpers.Pages?.getState("add-instance")?.instance;
+            const currentInstance = globalStates.pages["add-instance"].instance;
 
             if (!currentInstance) {
               return Launcher.Arguments.joinArguments(DefaultInstanceSettings.add?.jvmArguments);
@@ -94,30 +90,19 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
       },
       {
         "input": {
-          "onInput": (
-            value: string,
-            currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
-          ): void => {
+          "onInput": (value: string): void => {
+            const currentInstance = globalStates.pages["add-instance"].instance;
+
             if (!currentInstance) {
               return;
             }
 
-            const gameArguments: Array<string> = Launcher.Arguments.splitArguments(value);
-
-            GlobalStateHelpers.Pages.addToState("add-instance", {
-              "instance": {
-                ...currentInstance,
-                "add": {
-                  ...currentInstance.add,
-                  "gameArguments": gameArguments,
-                },
-              },
-            });
+            currentInstance.add.gameArguments = Launcher.Arguments.splitArguments(value);
           },
           "placeholder"  : "Game arguments",
           "iconClassName": "i-lucide-gamepad-2",
           "defaultValue" : (): string | undefined => {
-            const currentInstance = GlobalStateHelpers.Pages?.getState("add-instance")?.instance;
+            const currentInstance = globalStates.pages["add-instance"].instance;
 
             if (!currentInstance) {
               return Launcher.Arguments.joinArguments(DefaultInstanceSettings.add?.gameArguments);
@@ -193,7 +178,7 @@ export const InstanceCreationSections: Array<TabSectionType> = [
     "image": ATLauncherIcon,
   },
 ];
-export const ContextMenuItems = [
+export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
   {
     "name"  : "Restart UI",
     "icon"  : "i-lucide-rotate-ccw",
@@ -203,8 +188,9 @@ export const ContextMenuItems = [
     "name"  : "Show Logs",
     "icon"  : "i-lucide-bug",
     "action": (): void => {
-      GlobalStateHelpers.Logs.toggle("show", true);
-      GlobalObject.libs.ContextMenu.close();
+      globalStates.logs.show = true;
+
+      ContextMenu.close();
     },
   },
   {
@@ -213,7 +199,7 @@ export const ContextMenuItems = [
     "action": (): void => {
       const baseDirectory: string = General.getCachedBaseDirectory();
 
-      GlobalObject.libs.ContextMenu.close();
+      ContextMenu.close();
       revealItemInDir(
         General.cachedJoin(
           baseDirectory,
@@ -242,10 +228,10 @@ export const ContextMenuItems = [
     "name"  : "Open Instance Folder",
     "icon"  : "i-lucide-box",
     "action": (): void => {
-      const currentInstanceId: string | null = GlobalStateHelpers.get().selected.currentInstance;
+      const currentInstanceId: string | null = globalStates.selected.currentInstance;
       const baseDirectory: string = General.getCachedBaseDirectory();
 
-      GlobalObject.libs.ContextMenu.close();
+      ContextMenu.close();
 
       if (!currentInstanceId) {
         log.warn("No instance selected; revealing the root directory in explorer");
@@ -281,7 +267,7 @@ export const ContextMenuItems = [
       });
     },
   },
-] as const;
+];
 
 export const HookResponseStatus = {
   "Stop"    : "stop",
@@ -309,4 +295,5 @@ export default {
   ContextMenuItems,
   HookResponseStatus,
   ExtraHookResponseStatus,
+  ContextMenu,
 } as const;

@@ -1,25 +1,40 @@
+/*
+ * Kaede, a Minecraft Launcher
+ * Copyright (C) 2026  windstone <notwindstone@gmail.com> and contributors
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import { AsyncFunction } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
+import ExtensionAPI from "@/lib/extension-api";
 import { log } from "@/lib/logging/scopes/log.ts";
 
-export async function runInUnrestricted(id: string, code: string): Promise<void> {
+export async function runInUnrestricted(id: string, code: string): Promise<ExtensionAPI | void> {
   const startTime = performance.now();
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${id}' extension code`);
 
   const compiled = new AsyncFunction("scopedThis", code);
+  const scopedThis = new ExtensionAPI(id);
 
   log.debug(
     __PRE_BUNDLED_FILENAME__,
     `Executing the '${id}' extension code in the unrestricted environment`,
   );
   try {
-    await compiled({
-      "huuh": false,
-      "fn"  : () => {
-        console.log("Hi from " + id);
-      },
-    });
+    await compiled(scopedThis);
   } catch (error: unknown) {
     return log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -35,4 +50,6 @@ export async function runInUnrestricted(id: string, code: string): Promise<void>
     __PRE_BUNDLED_FILENAME__,
     `The '${id}' plugin was successfully executed in ${timeDifference} ms`,
   );
+
+  return scopedThis;
 }

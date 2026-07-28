@@ -24,7 +24,6 @@ import type { KaedeNamespaceType } from "@/declarations.ts";
  * The launcher heavily relies on this object in all kind of code places
  */
 export const GlobalObject: KaedeNamespaceType = {
-  "packages" : {},
   "variables": {
     "rippleColor"     : "#ffffff15",
     "sparklesColorRGB": "255 255 255",
@@ -33,6 +32,7 @@ export const GlobalObject: KaedeNamespaceType = {
       "collapsedTargetLength": 17,
     },
   },
+  "packages" : {},
   "constants": {} as KaedeNamespaceType["constants"],
   "libs"     : {} as KaedeNamespaceType["libs"],
   "hooks"    : {

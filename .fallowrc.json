@@ -1,0 +1,124 @@
+{
+  "$schema": "./node_modules/fallow/schema.json",
+  "entry": [
+    "src/main.ts",
+    "eslint.config.js",
+    "vite.config.ts"
+  ],
+  "ignorePatterns": [
+    "types/**"
+  ],
+  "framework": [
+    {
+      "name": "kaede-development-tooling",
+      "enablers": [
+        "dts-bundle-generator"
+      ],
+      "entryPoints": [
+        "scripts/**/*.ts"
+      ],
+      "entryPointRole": "support",
+      "toolingDependencies": [
+        "dts-bundle-generator"
+      ],
+      "usedExports": [
+        {
+          "pattern": "scripts/declaration-sources/vue-shim.d.ts",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "pattern": "src/lib/schemas/generated/validators.d.ts",
+          "exports": [
+            "CheckAccount",
+            "CheckConfig",
+            "CheckExtensionMetadata",
+            "CheckInstanceMetadata",
+            "CheckPatchMeta"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-test-tooling",
+      "enablers": [
+        "vitest"
+      ],
+      "entryPoints": [
+        "vitest.setup.ts",
+        "src/__mocks__/**/*.cjs"
+      ],
+      "entryPointRole": "test",
+      "usedExports": [
+        {
+          "pattern": "src/__mocks__/log.cjs",
+          "exports": [
+            "log"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-browser-adapter",
+      "enablers": [
+        "vite"
+      ],
+      "entryPoints": [
+        "src/lib/__browser/index.ts"
+      ],
+      "entryPointRole": "runtime",
+      "usedExports": [
+        {
+          "pattern": "src/lib/__browser/index.ts",
+          "exports": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-unocss-tooling",
+      "enablers": [
+        "unocss"
+      ],
+      "configPatterns": [
+        "uno.config.ts"
+      ],
+      "toolingDependencies": [
+        "@iconify-json/lucide"
+      ],
+      "usedExports": [
+        {
+          "pattern": "uno.config.ts",
+          "exports": [
+            "default"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "kaede-trusted-plugin-api",
+      "detection": {
+        "type": "fileExists",
+        "pattern": "src/lib/txiki/index.ts"
+      },
+      "usedClassMembers": [
+        {
+          "implements": "TrustedPluginServerBuilder",
+          "members": [
+            "get",
+            "post",
+            "defineGlobal"
+          ]
+        }
+      ]
+    }
+  ],
+  "rules": {
+    "unused-exports": "error",
+    "unused-class-members": "error",
+    "dev-dependencies-in-production": "error"
+  },
+  "includeEntryExports": true
+}

@@ -1,8 +1,8 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
 
     /* Linting */
     "strict": true,
@@ -15,13 +15,14 @@
 
     /* Handle '@/...' imports */
     "paths": {
-      "@/*": ["./src/*"]
+      "@/lib/browser": ["./src/lib/browser/index.ts"],
+      "@/lib/browser/*": ["./src/lib/__browser/*"],
+      "@/*": ["./src/*"],
+      "ark-of-atrahasis": ["./node_modules/ark-of-atrahasis/src/index.ts"]
     },
 
     /* Fixes TS2307: Cannot find module '@/resources/ATLauncherIcon.svg' or its corresponding type declarations. */
-    /* 'bun' provides the 'bun:test' module types for '*.test.ts' files */
-    "types": ["vite/client", "bun"]
+    "types": ["vite/client", "node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
-  "exclude": ["src/lib/__browser/**/*.ts"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
 }

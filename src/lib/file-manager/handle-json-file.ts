@@ -16,14 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-  exists,
-  type FileInfo,
-  readTextFile,
-  stat,
-  writeTextFile,
-} from "@tauri-apps/plugin-fs";
-
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
 import { cachedJoin } from "@/lib/general/scopes/cached-join.ts";
@@ -47,7 +40,7 @@ export async function handleJsonFile({
 }): Promise<unknown> {
   const filePath: string = cachedJoin(baseDirectory, ...path);
   const overwrite: (toWrite: unknown) => Promise<unknown> = async toWrite => {
-    await writeTextFile(
+    await Host.files.writeText(
       filePath,
       // 'toWrite' might be undefined, and JSON does not support undefined
       JSON.stringify(toWrite ?? null, null, 2),
@@ -58,9 +51,15 @@ export async function handleJsonFile({
 
   try {
     log.debug(__PRE_BUNDLED_FILENAME__, `Checking if the '${label}' file exists`);
-    const fileExists: boolean = await exists(filePath).catch(() => false);
+    let isFilePresent = false;
 
-    if (!fileExists) {
+    try {
+      isFilePresent = await Host.files.exists(filePath);
+    } catch {
+      // An inaccessible path is handled like a missing file so the default can be initialized.
+    }
+
+    if (!isFilePresent) {
       log.warn(__PRE_BUNDLED_FILENAME__, `The '${label}' file does not exist`);
       log.debug(__PRE_BUNDLED_FILENAME__, `Getting the default value for '${label}'`);
       const defaultValue = await getDefaultValue();
@@ -72,19 +71,21 @@ export async function handleJsonFile({
 
     if (invalidation !== undefined) {
       log.debug(__PRE_BUNDLED_FILENAME__, `Checking if '${label}' needs cache invalidation`);
-      const fileInfo: FileInfo = await stat(filePath);
-      const lastModified: Date | null = fileInfo.mtime;
+      const { modifiedTimeMilliseconds } = await Host.files.getMetadata(filePath);
       // No last modified time = invalid
-      let invalid: boolean = lastModified === null;
+      let isInvalid = modifiedTimeMilliseconds === null;
 
-      if (lastModified) {
-        const difference: number = General.checkDaysDifference(lastModified, (new Date));
+      if (modifiedTimeMilliseconds !== null) {
+        const difference = General.checkDaysDifference(
+          new Date(modifiedTimeMilliseconds),
+          new Date,
+        );
 
         // Stale = invalid
-        invalid = difference > invalidation.days;
+        isInvalid = difference > invalidation.days;
       }
 
-      if (invalid) {
+      if (isInvalid) {
         const newValue = await invalidation.getNewValue();
 
         return await overwrite(newValue);
@@ -92,7 +93,7 @@ export async function handleJsonFile({
     }
 
     log.debug(__PRE_BUNDLED_FILENAME__, `Reading the '${label}' file`);
-    const storedFileData: string = await readTextFile(filePath);
+    const storedFileData: string = await Host.files.readText(filePath);
     let parsed: unknown;
 
     try {

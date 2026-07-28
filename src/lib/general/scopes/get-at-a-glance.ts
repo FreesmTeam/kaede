@@ -24,9 +24,11 @@ function transformAtAGlanceMessages(message: AtAGlanceType): AtAGlanceType {
     .toDateString()
     .split(" ");
 
-  message.title = message.title.replace("%date%", (
+  const formattedDate = (
     currentDate[0] + ", " + currentDate[1] + " " + currentDate[2]
-  ));
+  );
+
+  message.title = message.title.replace("%date%", () => formattedDate);
 
   return message;
 }

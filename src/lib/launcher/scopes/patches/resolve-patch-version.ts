@@ -64,7 +64,7 @@ export async function resolvePatchVersion({
         "No cache; fetching the index manifest",
       );
       statuses.current = LaunchStatus.PatchIndex.Fetching;
-      const fetched: { "data": unknown } | LaunchStatusType = await Fetching.fetchMetadata({
+      const fetched: LaunchStatusType | { "data": unknown } = await Fetching.fetchMetadata({
         "url"   : APIEndpoints.Meta.Base + metadata.uid,
         "label" : "index manifest",
         "scope" : "PatchIndex",
@@ -120,7 +120,7 @@ export async function resolvePatchVersion({
     // Ensure the 'versions' field is a non-empty array
     !("versions" in parsedPatchIndex) ||
     !Array.isArray(parsedPatchIndex.versions) ||
-    parsedPatchIndex.versions.length <= 0 ||
+    parsedPatchIndex.versions.length === 0 ||
     // Ensure the provided 'versions' entry has a string typed 'version' field
     typeof parsedPatchIndex.versions[0] !== "object" ||
     parsedPatchIndex.versions[0] === null ||

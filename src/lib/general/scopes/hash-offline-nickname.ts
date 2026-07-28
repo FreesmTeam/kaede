@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker/index.ts";
 
 /*
  * Source - https://stackoverflow.com/a/51732778
@@ -25,7 +25,7 @@ import { invoke } from "@tauri-apps/api/core";
  */
 export async function hashOfflineNickname(input: string): Promise<string> {
   const encoded: Uint8Array = (new TextEncoder).encode(`OfflinePlayer:${input}`);
-  const hashed: string = await invoke<string>("hash_md5", encoded);
+  const hashed: string = await Host.hashes.md5(encoded);
   const bytes: Array<number> = [];
 
   for (let index = 0; index < hashed.length; index += 2) {
@@ -38,13 +38,13 @@ export async function hashOfflineNickname(input: string): Promise<string> {
   }
 
   // Clear version
-  bytes[6] = bytes[6] & 0x0F;
+  bytes[6] &= 0x0F;
   // Set to version 3
-  bytes[6] = bytes[6] | 0x30;
+  bytes[6] |= 0x30;
   // Clear variant
-  bytes[8] = bytes[8] & 0x3F;
+  bytes[8] &= 0x3F;
   // Set to IETF variant
-  bytes[8] = bytes[8] | 0x80;
+  bytes[8] |= 0x80;
 
   return bytes
     .map(byte => byte.toString(16).padStart(2, "0"))

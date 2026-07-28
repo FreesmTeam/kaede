@@ -1,4 +1,4 @@
-import { expect, test } from "bun:test";
+import { expect, test } from "vitest";
 
 import type { NativeErrorType } from "@/types/errors/error-handling.type.ts";
 

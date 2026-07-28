@@ -16,43 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
-
-import FileStructure from "@/constants/file-structure.ts";
+import { type BrokerServerProcess, Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
-import { serveFile } from "@/lib/txiki/serve-file.ts";
-import type { ServerProcessType } from "@/types/application/server-process.type.ts";
+import {
+  handleServerProcess,
+} from "@/lib/txiki/handle-server-process.ts";
 
 export async function serveCode(
   name: string,
   code: string,
-  port?: number,
-): Promise<ServerProcessType | undefined> {
-  const hash: string = await General.hashStringCrypto(code);
-  const shortHash: string = hash.slice(0, 7);
-  const filePath: string = General.cachedJoin(
-    General.getCachedBaseDirectory(),
-    FileStructure.Folders.Extensions.Path,
-    `tjs-${name}-${shortHash}.tjs`,
-  );
-  const alreadyExists: boolean = await exists(filePath);
-
-  if (!alreadyExists) {
-    try {
-      log.debug(__PRE_BUNDLED_FILENAME__, "Writing code contents to host txiki");
-      await writeTextFile(filePath, code);
-    } catch (error: unknown) {
-      log.error(
-        __PRE_BUNDLED_FILENAME__,
-        "Failed to create a code file to host txiki:",
-        Errors.prettify(error),
-      );
-
-      return;
-    }
+): Promise<BrokerServerProcess | undefined> {
+  try {
+    return await handleServerProcess(
+      name,
+      onEvent => Host.servers.serveCode({ name, code }, onEvent),
+    );
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Failed to serve code through txiki:",
+      Errors.prettify(error),
+    );
   }
-
-  return serveFile(name, filePath, port);
 }

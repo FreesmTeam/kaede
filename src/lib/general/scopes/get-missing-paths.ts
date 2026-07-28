@@ -1,11 +1,9 @@
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker";
 
 export async function getMissingPaths({
   paths,
 }: {
   "paths": Array<string>;
 }): Promise<Array<string>> {
-  return invoke("get_missing_files", {
-    paths,
-  });
+  return [...await Host.files.findMissing(paths)];
 }

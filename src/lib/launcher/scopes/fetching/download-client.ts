@@ -1,6 +1,5 @@
-import { mkdir } from "@tauri-apps/plugin-fs";
-
 import { LaunchStatus } from "@/constants/launcher.ts";
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
@@ -56,7 +55,7 @@ export async function downloadClient({
       `The main jar is not valid. SHA1 checks enabled: ${instance.checksum}`,
     );
     log.debug(logPrefix, "Making a directory for the main jar");
-    await mkdir(client.directory, { "recursive": true });
+    await Host.files.ensureDirectories([client.directory], { "recursive": true });
 
     log.debug(logPrefix, "Downloading the main jar");
     try {
@@ -68,7 +67,7 @@ export async function downloadClient({
         "label"      : "client",
       });
 
-      if (report.cancelled) {
+      if (report.cancelled || report.failed > 0) {
         return false;
       }
     } catch (error: unknown) {
@@ -77,7 +76,8 @@ export async function downloadClient({
         "Could not download the main jar:",
         Errors.prettify(error),
       );
-      statuses.downloads.failed++;
+
+      return false;
     }
   } else {
     log.info(

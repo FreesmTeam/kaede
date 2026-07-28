@@ -32,7 +32,7 @@ export async function readStoredInstances(properties?: Partial<{
   }
 
   const validInstances: InstanceStatesType = {};
-  let allValid: boolean = true;
+  let isAllValid: boolean = true;
 
   for (const [currentId, currentMetadata] of Object.entries(parsedMetadata)) {
     const instance: InstanceStateType | false = Schemas.validate.instance({
@@ -44,7 +44,7 @@ export async function readStoredInstances(properties?: Partial<{
     });
 
     if (instance === false) {
-      allValid = false;
+      isAllValid = false;
 
       continue;
     }
@@ -52,7 +52,7 @@ export async function readStoredInstances(properties?: Partial<{
     validInstances[currentId] = currentMetadata;
   }
 
-  if (allValid) {
+  if (isAllValid) {
     log.info(__PRE_BUNDLED_FILENAME__, "All specified metadata instances are valid");
   }
 

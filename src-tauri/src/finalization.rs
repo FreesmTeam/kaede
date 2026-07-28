@@ -5,7 +5,7 @@ use std::process::Command;
 
 use serde::Serialize;
 
-#[derive(Serialize)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LauncherInitReport {
     pub created_directories: Vec<String>,
@@ -16,7 +16,6 @@ pub struct LauncherInitReport {
     pub java_major_source: &'static str,
 }
 
-#[tauri::command]
 pub async fn finalize_initialization(
     base_directory: String,
     folders: Vec<String>,
@@ -31,7 +30,7 @@ pub async fn finalize_initialization(
 
     let created_directories = dirs
         .map_err(|e| e.to_string())?
-        .map_err(|e| format!("Failed to create launcher directories: {}", e))?;
+        .map_err(|e| format!("Failed to create launcher directories: {e}"))?;
     let (java_major, java_major_source) = java.map_err(|e| e.to_string())?;
 
     Ok(LauncherInitReport {
@@ -156,21 +155,6 @@ fn major_from_banner(banner: &str) -> Option<u32> {
     parse_java_major(quoted)
 }
 
-#[derive(Serialize)]
-#[serde(rename_all = "camelCase")]
-pub struct JavaMajorReport {
-    pub major: Option<u32>,
-    pub source: &'static str,
-}
-
-#[tauri::command]
-pub async fn get_java_major(java_binary: String) -> Result<JavaMajorReport, String> {
-    tokio::task::spawn_blocking(move || detect_java_major(&java_binary))
-        .await
-        .map(|(major, source)| JavaMajorReport { major, source })
-        .map_err(|e| e.to_string())
-}
-
 // "25.0.2" -> 25
 // "21" -> 21
 // "21.0.1+12" -> 21
@@ -185,4 +169,3 @@ fn parse_java_major(version: &str) -> Option<u32> {
         Some(first)
     }
 }
-

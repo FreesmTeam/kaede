@@ -4,7 +4,6 @@ import { ref } from "vue";
 
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import PageError from "@/components/general/errors/PageError.vue";
-import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import { getComponents } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
@@ -73,31 +72,29 @@ const C = getComponents();
 </script>
 
 <template>
-  <ContextProviders>
-    <div
-      id="__layout__wrapper"
-      @contextmenu="showContextMenu"
-      class="relative h-vh w-full flex flex-nowrap gap-0 overflow-hidden text-white"
-    >
-      <C.LaunchProgress />
-      <C.ContextMenu
-        v-if="toShowContextMenu"
-        :opened="contextMenu.opened"
-        :x="contextMenu.x"
-        :y="contextMenu.y"
-      />
-      <C.Sidebar v-if="toShowSidebar" />
-      <!-- Pages error boundary -->
-      <ErrorBoundary :reset-key="page">
-        <template #default>
-          <slot />
-        </template>
+  <div
+    id="__layout__wrapper"
+    @contextmenu="showContextMenu"
+    class="relative h-vh w-full flex flex-nowrap gap-0 overflow-hidden text-white"
+  >
+    <C.LaunchProgress />
+    <C.ContextMenu
+      v-if="toShowContextMenu"
+      :opened="contextMenu.opened"
+      :x="contextMenu.x"
+      :y="contextMenu.y"
+    />
+    <C.Sidebar v-if="toShowSidebar" />
+    <!-- Pages error boundary -->
+    <ErrorBoundary :reset-key="page">
+      <template #default>
+        <slot />
+      </template>
 
-        <!-- In case of an error, show this template -->
-        <template #error="{ currentError }">
-          <PageError :error="currentError" />
-        </template>
-      </ErrorBoundary>
-    </div>
-  </ContextProviders>
+      <!-- In case of an error, show this template -->
+      <template #error="{ currentError }">
+        <PageError :error="currentError" />
+      </template>
+    </ErrorBoundary>
+  </div>
 </template>

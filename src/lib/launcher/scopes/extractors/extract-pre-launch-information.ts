@@ -16,13 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Arch, arch, type Platform, platform } from "@tauri-apps/plugin-os";
-
 import FileStructure from "@/constants/file-structure.ts";
 import { LaunchStatus } from "@/constants/launcher.ts";
+import { Host } from "@/lib/capability-broker";
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
 import Instances from "@/lib/instances";
+import {
+  getDownloadCancelId,
+} from "@/lib/launcher/scopes/fetching/get-download-cancel-id.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";
@@ -54,10 +56,9 @@ export function extractPreLaunchInformation({
     return beforeHooksResult;
   }
 
-  const downloadTaskCancelId: string = `${instanceId}-download`;
-
-  const providedPlatform: Platform = platform();
-  const providedArch: Arch = arch();
+  const downloadTaskCancelId: string = getDownloadCancelId(instanceId);
+  const { "platform": providedPlatform, "arch": providedArch } =
+    Host.runtime.getCachedSnapshot().os;
 
   let compatiblePlatform: PreLaunchInformationType["platform"];
   let compatibleArch: PreLaunchInformationType["arch"];

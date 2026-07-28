@@ -31,9 +31,6 @@ const idRoot = "__settings-page__extensions";
 const enabled = computed((): boolean => (
   globalStates?.extensions?.enabled === true
 ));
-const allowUntrusted = computed((): boolean => (
-  globalStates?.extensions?.allowUnrestrictedUntrusted === true
-));
 const showAfterInitialization = computed((): boolean => (
   globalStates?.misc?.showAfterExtensionsInitialization === true
 ));
@@ -41,39 +38,38 @@ const autoConfigSync = computed((): boolean => (
   globalStates?.misc?.autoConfigSync === true
 ));
 
-function overrideExtensions(
+async function overrideExtensions(
   input: Partial<GlobalStatesType["extensions"]>,
-): void {
+): Promise<void> {
   GlobalStateHelpers.change("extensions", {
     ...GlobalStateHelpers.get().extensions,
     ...input,
   });
 
   // Global states have changed, persist them to the config file
-  nextTick().then(() => Configs.sync());
+  await nextTick();
+  await Configs.sync();
 }
-function overrideMisc(
+async function overrideMisc(
   input: Partial<GlobalStatesType["misc"]>,
-): void {
+): Promise<void> {
   GlobalStateHelpers.change("misc", {
     ...GlobalStateHelpers.get().misc,
     ...input,
   });
 
   // Global states have changed, persist them to the config file
-  nextTick().then(() => Configs.sync());
+  await nextTick();
+  await Configs.sync();
 }
-function handleEnabledToggle(value: boolean): void {
-  overrideExtensions({ "enabled": value });
+async function handleEnabledToggle(isEnabled: boolean): Promise<void> {
+  await overrideExtensions({ "enabled": isEnabled });
 }
-function handleAllowUntrustedToggle(value: boolean): void {
-  overrideExtensions({ "allowUnrestrictedUntrusted": value });
+async function handleShowAfterInitializationToggle(isEnabled: boolean): Promise<void> {
+  await overrideMisc({ "showAfterExtensionsInitialization": isEnabled });
 }
-function handleShowAfterInitializationToggle(value: boolean): void {
-  overrideMisc({ "showAfterExtensionsInitialization": value });
-}
-function handleAutoConfigSyncToggle(value: boolean): void {
-  overrideMisc({ "autoConfigSync": value });
+async function handleAutoConfigSyncToggle(isEnabled: boolean): Promise<void> {
+  await overrideMisc({ "autoConfigSync": isEnabled });
 }
 </script>
 
@@ -91,17 +87,6 @@ function handleAutoConfigSyncToggle(value: boolean): void {
         :id="`${idRoot}-enabled-toggle`"
         :model-value="enabled"
         :on-toggle="handleEnabledToggle"
-      />
-    </SettingsRow>
-    <SettingsRow
-      :id-root="`${idRoot}-allow-untrusted`"
-      title="Allow unrestricted untrusted extensions"
-      subtitle="Run untrusted extensions outside of the sandbox. Only enable this if you trust them"
-    >
-      <SettingsToggle
-        :id="`${idRoot}-allow-untrusted-toggle`"
-        :model-value="allowUntrusted"
-        :on-toggle="handleAllowUntrustedToggle"
       />
     </SettingsRow>
     <SettingsRow

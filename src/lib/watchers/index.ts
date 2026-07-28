@@ -17,11 +17,9 @@
  */
 
 import { watchErrors } from "@/lib/watchers/watch-errors.ts";
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
 import { watchDevelopmentStates, watchLayoutStates } from "@/lib/watchers/watch-states.ts";
 
 export default {
-  watchProcesses,
   watchDevelopmentStates,
   watchLayoutStates,
   watchErrors,

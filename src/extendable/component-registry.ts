@@ -16,16 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Component, defineAsyncComponent, shallowReactive } from "vue";
+import { type Component, shallowReactive } from "vue";
 
-// /*
 import AddInstance from "@/components/add-instance/AddInstance.vue";
 import CleanInstance from "@/components/add-instance/tabs/CleanInstance.vue";
 import ContextMenu from "@/components/general/layout/ContextMenu.vue";
 import GlobalBackground from "@/components/general/layout/GlobalBackground.vue";
 import LaunchProgress from "@/components/general/layout/LaunchProgress.vue";
+import PagesSelector from "@/components/general/layout/PagesSelector.vue";
 import Sidebar from "@/components/general/layout/Sidebar.vue";
-// */
+import { SettingsComponents } from "@/extendable/settings-component-registry.ts";
 
 interface ComponentRegistryType {
   [key: string]         : Component;
@@ -33,17 +33,12 @@ interface ComponentRegistryType {
   "ContextMenu"         : Component;
   "LaunchProgress"      : Component;
   "GlobalBackground"    : Component;
+  "PagesSelector"       : Component;
   "LazyPluginPlayground": Component;
 }
 
-/*
- * Extensions can use this registry to replace existing components with their own ones.
- * When generating types using 'dts-bundle-generator', make sure to remove any Vue components
- */
-// // @ts-expect-error The registry is missing required properties only for 'dts-bundle-generator'
-export const C: ComponentRegistryType = shallowReactive({
-  // /*
-
+// Extensions can use this registry to replace existing components with their own ones
+export const C = shallowReactive<ComponentRegistryType>({
   // 'add-instance/'
   AddInstance,
   CleanInstance,
@@ -53,11 +48,15 @@ export const C: ComponentRegistryType = shallowReactive({
   ContextMenu,
   LaunchProgress,
   GlobalBackground,
+  PagesSelector,
 
   // 'settings/'
-  "LazyPluginPlayground": defineAsyncComponent(() => (
-    import("@/components/settings/tabs/PluginPlayground.vue")
-  )),
+  get "LazyPluginPlayground"(): Component {
+    return SettingsComponents.LazyPluginPlayground;
+  },
+  set "LazyPluginPlayground"(component: Component) {
+    SettingsComponents.LazyPluginPlayground = component;
+  },
   // */
 });
 

@@ -1,8 +1,14 @@
-import { expect, test } from "bun:test";
+import { expect, test, vi } from "vitest";
 
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 import { getDefaultConfig } from "./get-default-config.ts";
+
+vi.mock("@/lib/extensions-manager", () => ({
+  "default": {
+    "catchAsyncResponseHooks": async (): Promise<"continue"> => "continue",
+  },
+}));
 
 const testName = "Default Config: No arguments";
 
@@ -18,8 +24,7 @@ test(testName, async () => {
       "enableNativeReloadKeyBinds": false,
     },
     "extensions": {
-      "enabled"                   : true,
-      "allowUnrestrictedUntrusted": true,
+      "enabled": true,
     },
     "layout": {
       "locale"                 : "en",

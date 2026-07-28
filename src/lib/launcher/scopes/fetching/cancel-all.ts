@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker";
 
 export function cancelAll(cancelId: string): Promise<boolean> {
-  return invoke<boolean>("cancel_downloads", { cancelId });
+  return Host.downloads.cancel(cancelId);
 }

@@ -1,6 +1,6 @@
-export default function IsKeyInObject<T extends object>(
+export default function isKeyInObject<T extends object>(
   key: PropertyKey,
   passedObject: T,
 ): key is keyof T {
-  return key in passedObject;
+  return Object.prototype.hasOwnProperty.call(passedObject, key);
 }

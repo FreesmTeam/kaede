@@ -1,8 +1,15 @@
-import type { TLocalizedValidationError } from "typebox/error";
+export type ValidationSchemaKey =
+  | "account"
+  | "config"
+  | "extensionMetadata"
+  | "instanceMetadata"
+  | "patchMeta";
 
 export interface CompiledValidatorType {
   "Check" : (value: unknown) => boolean;
-  "Errors": (value: unknown) => Promise<Array<TLocalizedValidationError>>;
+  "Errors": (
+    value: unknown,
+  ) => Promise<Array<import("typebox/error").TLocalizedValidationError>>;
 }
 
 export interface ValidationArgumentsType {

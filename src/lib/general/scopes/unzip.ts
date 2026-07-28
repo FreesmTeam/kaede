@@ -1,4 +1,4 @@
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker";
 
 export async function unzip({
   from,
@@ -7,10 +7,10 @@ export async function unzip({
   "from": string;
   "to"  : string;
 }): Promise<boolean> {
-  const result: string = await invoke("unzip_file", {
-    "archiveFilePath": from,
-    "targetDirPath"  : to,
+  await Host.archives.extractZip({
+    "archivePath"    : from,
+    "destinationPath": to,
   });
 
-  return result === "Successfully extracted the provided archive";
+  return true;
 }

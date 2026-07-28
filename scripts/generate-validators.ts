@@ -16,33 +16,42 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type { TSchema } from "typebox";
 import { Code } from "typebox/compile";
 
 import { AccountSchema } from "../src/lib/schemas/scopes/accounts";
 import { ConfigSchema } from "../src/lib/schemas/scopes/config";
-import { ExtensionMetadataSchema } from "../src/lib/schemas/scopes/extensions";
+import {
+  ExtensionMetadataCodegenSchema,
+} from "../src/lib/schemas/scopes/extensions";
 import { InstanceMetadataSchema } from "../src/lib/schemas/scopes/instances";
 import { PatchMetaSchema } from "../src/lib/schemas/scopes/meta";
 
-const OutputDirectory: string = path.join(
-  // @ts-expect-error It works
-  import.meta.dir,
-  "..",
-  "src",
-  "lib",
-  "schemas",
-  "generated",
-);
-const OutputFile: string = path.join(OutputDirectory, "validators.ts");
+type PostCheck = Readonly<{
+  "importName": string;
+  "specifier" : string;
+}>;
+
+type ValidatorTarget = Readonly<{
+  "exportName" : string;
+  "postCheck" ?: PostCheck;
+  "prefix"     : string;
+  "schema"     : TSchema;
+}>;
+
+const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const outputDirectory = path.join(repositoryRoot, "src", "lib", "schemas", "generated");
+const outputJavaScript = path.join(outputDirectory, "validators.js");
+const outputDeclarations = path.join(outputDirectory, "validators.d.ts");
+const checkOnly = process.argv.includes("--check");
 
 /*
- * The namespaces that 'Code()' may reference in the emitted checks.
- *
- * Only the ones that are actually used end up as imports in the generated file
+ * The namespaces that Code() may reference in emitted checks. Only the
+ * namespaces that survive post-processing are imported by the generated file.
  */
 const KnownRuntimeImports = {
   "Format" : "typebox/format",
@@ -50,11 +59,7 @@ const KnownRuntimeImports = {
   "Hashing": "typebox/system",
 } as const;
 
-const Targets: Array<{
-  "exportName": string;
-  "prefix"    : string;
-  "schema"    : TSchema;
-}> = [
+const Targets: ReadonlyArray<ValidatorTarget> = [
   {
     "exportName": "CheckAccount",
     "prefix"    : "account",
@@ -67,8 +72,12 @@ const Targets: Array<{
   },
   {
     "exportName": "CheckExtensionMetadata",
-    "prefix"    : "extensionMetadata",
-    "schema"    : ExtensionMetadataSchema,
+    "postCheck" : {
+      "importName": "hasValidExtensionMetadataRefinements",
+      "specifier" : "../scopes/extensions/refinements.ts",
+    },
+    "prefix": "extensionMetadata",
+    "schema": ExtensionMetadataCodegenSchema,
   },
   {
     "exportName": "CheckInstanceMetadata",
@@ -82,102 +91,134 @@ const Targets: Array<{
   },
 ];
 
-function generateCheckFunction({
-  exportName,
-  prefix,
-  schema,
-}: typeof Targets[number]): string {
-  const generated = Code(schema);
-
-  // Shouldn't happen but still
-  if (generated.External.variables.length > 0) {
-    throw new Error(
-      `Schema for '${exportName}' produced external variables, `
-      + "the generated code would not be self-contained",
-    );
-  }
-
+function stripTypeBoxModuleBoilerplate(code: string): string {
   const kept: Array<string> = [];
 
-  for (const line of generated.Code.split("\n")) {
-    const isBoilerplate: boolean = line.startsWith("import ")
-      || line.startsWith("let External")
-      || line.startsWith("export function SetExternal");
+  for (const line of code.split("\n")) {
+    const trimmed = line.trim();
+    const isBoilerplate = line.startsWith("import ") ||
+      trimmed === "// @ts-ignore" ||
+      (/^let External = \[\]$/u).test(trimmed) ||
+      trimmed.startsWith("export function SetExternal(");
 
-    if (isBoilerplate) {
-      // @ts-expect-error It works
-      if (kept.at(-1)?.trim() === "// @ts-ignore") {
-        kept.pop();
-      }
-
-      continue;
+    if (!isBoilerplate) {
+      kept.push(line);
     }
-
-    kept.push(line);
   }
 
-  const processed: string = kept
-    .join("\n")
-    .trim()
-    // @ts-expect-error It works
-    .replaceAll(/\bcheck_(?<index>\d+)\b/gu, `${prefix}_check_$<index>`)
-    .replace(
-      "export function Check(value)",
-      `export function ${exportName}(value: unknown): boolean`,
-    );
+  return kept.join("\n").trim();
+}
 
-  if (processed.includes("External")) {
+function generateCheckFunction(target: ValidatorTarget): string {
+  const generated = Code(target.schema);
+
+  if (generated.External.variables.length > 0) {
     throw new Error(
-      `Emitted code for '${exportName}' still references 'External' `
-      + "after processing, refusing to generate broken validators",
+      `Schema for '${target.exportName}' produced external variables; ` +
+      "move non-serializable refinements into its explicit post-check",
+    );
+  }
+
+  const renamed = stripTypeBoxModuleBoilerplate(generated.Code)
+    .replaceAll(/\bcheck_(\d+)\b/gu, (_match, index: string): string => {
+      return `${target.prefix}_check_${index}`;
+    });
+  const exportPattern = /^export function Check\(value\) \{(?<body>.*)\}$/mu;
+  const exportMatch = exportPattern.exec(renamed);
+
+  if (exportMatch?.groups?.body === undefined) {
+    throw new Error(`TypeBox emitted an unsupported export shape for '${target.exportName}'`);
+  }
+
+  const body = exportMatch.groups.body;
+  const exportedFunction = target.postCheck === undefined
+    ? `export function ${target.exportName}(value) {${body}}`
+    : [
+      `function ${target.exportName}Generated(value) {${body}}`,
+      "",
+      `export function ${target.exportName}(value) {`,
+      `  return ${target.exportName}Generated(value) && ${target.postCheck.importName}(value);`,
+      "}",
+    ].join("\n");
+  const processed = renamed.replace(exportPattern, (): string => exportedFunction);
+
+  if ((/\bExternal\b/u).test(processed)) {
+    throw new Error(
+      `Emitted code for '${target.exportName}' still references External`,
     );
   }
 
   return processed;
 }
 
-const checks: Array<string> = Targets.map(target => generateCheckFunction(target));
-const merged: string = checks.join("\n\n");
+function createRuntimeImports(generatedCode: string): Array<string> {
+  const typeBoxImports = Object.entries(KnownRuntimeImports)
+    .filter(([namespace]) => new RegExp(`\\b${namespace}\\.`, "u").test(generatedCode))
+    .map(([namespace, specifier]) => `import { ${namespace} } from "${specifier}";`);
+  const postCheckImports = Targets.flatMap(target => {
+    return target.postCheck === undefined
+      ? []
+      : [
+        `import { ${target.postCheck.importName} } from "${target.postCheck.specifier}";`,
+      ];
+  });
 
-const usedImports: Array<string> = Object
-  .entries(KnownRuntimeImports)
-  .filter(([namespace]) => new RegExp(`\\b${namespace}\\.`, "u").test(merged))
-  .map(([namespace, specifier]) => `import { ${namespace} } from "${specifier}";`);
+  return [...typeBoxImports, ...postCheckImports];
+}
 
-if (usedImports.length > 0) {
-  // eslint-disable-next-line no-console
-  console.warn(
-    "Note: the emitted checks reference typebox runtime helpers, "
-    + "these modules will be included in the bundle:",
-    usedImports,
+function createDeclarations(): string {
+  const functions = Targets.map(target => {
+    return `export declare function ${target.exportName}(value: unknown): boolean;`;
+  });
+
+  return "// Generated by scripts/generate-validators.ts; do not edit directly.\n\n" +
+    `${functions.join("\n")}\n`;
+}
+
+async function writeOrCheck(filePath: string, contents: string): Promise<void> {
+  if (checkOnly) {
+    const checkedIn = await readFile(filePath, "utf8");
+
+    if (checkedIn !== contents) {
+      throw new Error(
+        `${path.relative(repositoryRoot, filePath)} is stale; run bun run generate:validators`,
+      );
+    }
+
+    return;
+  }
+
+  await writeFile(filePath, contents);
+}
+
+const checks = Targets.map(target => generateCheckFunction(target));
+const merged = checks.join("\n\n");
+const runtimeImports = createRuntimeImports(merged);
+
+if (runtimeImports.some(statement => statement.includes("typebox/"))) {
+  process.stderr.write(
+    "Generated checks reference small TypeBox runtime helpers: " +
+    `${runtimeImports.filter(statement => statement.includes("typebox/")).join(", ")}\n`,
   );
 }
 
-const banner: string = `// eslint-disable unicorn/no-abusive-eslint-disable
-/* eslint-disable */
-// @ts-nocheck
-
-/*
- * GENERATED FILE
+const banner = `/*
+ * GENERATED FILE - DO NOT EDIT
  *
- * Standalone validators emitted by 'typebox/compile' at build time
- * to avoid shipping typebox runtime.
- *
- * - Sources    : 'src/lib/schemas/scopes/*'
- * - Regenerate : 'bun generate:validators'
+ * Standalone validators emitted by typebox/compile at build time.
+ * Regenerate with: bun run generate:validators
  */
 `;
-
-const contents: string = usedImports.length > 0
-  ? `${banner}\n${usedImports.join("\n")}\n\n${merged}\n`
+const javaScript = runtimeImports.length > 0
+  ? `${banner}\n${runtimeImports.join("\n")}\n\n${merged}\n`
   : `${banner}\n${merged}\n`;
 
-// @ts-expect-error Top-level await works
-await mkdir(OutputDirectory, { "recursive": true });
-// @ts-expect-error Top-level await works
-await writeFile(OutputFile, contents);
+await mkdir(outputDirectory, { "recursive": true });
+await Promise.all([
+  writeOrCheck(outputJavaScript, javaScript),
+  writeOrCheck(outputDeclarations, createDeclarations()),
+]);
 
-// eslint-disable-next-line no-console
-console.log(
-  `Generated ${Targets.length} validators into '${path.relative(process.cwd(), OutputFile)}'`
+process.stdout.write(
+  `${checkOnly ? "Checked" : "Generated"} ${Targets.length} validators\n`,
 );

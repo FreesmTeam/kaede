@@ -1,8 +1,8 @@
 import { nextTick } from "vue";
 
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import ExtensionsManager from "@/lib/extensions-manager";
 import { log } from "@/lib/logging/scopes/log.ts";
-import { instanceStates } from "@/states/instance.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 
 /**
@@ -17,6 +17,7 @@ export function changeInstanceState<Key extends keyof InstanceStatesType>(
   key: Key,
   value: InstanceStatesType[Key],
 ): void {
+  const instanceStates = GlobalInternals.getInstanceStates();
   const hooksResult: "continue" | InstanceStatesType[Key] | undefined =
     ExtensionsManager.catchSyncResponseHooks<InstanceStatesType[Key]>({
       "scope" : "onInstanceChange",
@@ -36,7 +37,8 @@ export function changeInstanceState<Key extends keyof InstanceStatesType>(
   ));
   instanceStates[key] = value;
 
-  nextTick().then(async () => {
+  void (async (): Promise<void> => {
+    await nextTick();
     await ExtensionsManager.catchAsyncVoidHooks({
       "scope" : "onInstanceChange",
       "toPass": value,
@@ -44,5 +46,5 @@ export function changeInstanceState<Key extends keyof InstanceStatesType>(
     });
 
     ExtensionsManager.onInstanceStateChange(key, value);
-  });
+  })();
 }

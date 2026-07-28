@@ -17,7 +17,7 @@
  */
 
 import { DefaultInstanceSettings } from "@/constants/launcher.ts";
-import Instances from "@/lib/instances";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 
 export function addInstanceWithSync(
@@ -26,12 +26,12 @@ export function addInstanceWithSync(
     "patchVersions": { "net.minecraft": string };
   } & Partial<InstanceStateType>,
 ): Promise<void> {
-  Instances.change(id, {
+  GlobalObject.libs.Instances.change(id, {
     ...DefaultInstanceSettings,
     ...content,
   });
 
-  return Instances.syncMetadata(
-    Instances.get(),
+  return GlobalObject.libs.Instances.syncMetadata(
+    GlobalObject.libs.Instances.get(),
   );
 }

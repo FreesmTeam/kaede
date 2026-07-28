@@ -1,3 +1,8 @@
+> [!WARNING]
+> This file is a historical implementation scratchpad and contains obsolete
+> `window.__TAURI__` experiments. The current extension and security contract is
+> documented in [`EXTENSIONS.md`](./EXTENSIONS.md).
+
 <details>
 
 let numberIcon = 1;
@@ -415,7 +420,7 @@ If there is no video, [click here](https://github.com/user-attachments/assets/a1
   }
 
   log.debug("Initializing launcher");
-  await initializeLauncher().catch((error: unknown) => {
+  await finalizeInitialization({ config, baseDirectory, startTime }).catch((error: unknown) => {
     log.error("Failed to initialize launcher:", JSON.stringify(error));
   });
 

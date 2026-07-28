@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { ask } from "@tauri-apps/plugin-dialog";
 import { useIntervalFn } from "@vueuse/core";
 import { computed, inject, ref, watchEffect } from "vue";
 
@@ -9,6 +8,7 @@ import {
   LaunchInstanceContextKey,
   LaunchStatesContextKey,
 } from "@/constants/application.ts";
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import Instances from "@/lib/instances";
 import Fetching from "@/lib/launcher/scopes/fetching";
@@ -25,6 +25,7 @@ import type {
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 
 const killing = ref<boolean>(false);
+const cancelling = ref<boolean>(false);
 
 const instanceStatuses = inject<WrappedInstanceLauncherStatusesType>(
   LaunchStatesContextKey,
@@ -52,13 +53,17 @@ const statuses = computed((): LauncherStatusesType | undefined => {
   return instanceStatuses[instanceId];
 });
 const isDownloading = computed((): boolean => {
+  return Fetching.isDownloadCancellationActive(statuses.value);
+});
+const closeDisabled = computed((): boolean => {
   return (
-    statuses.value?.launching === 1 &&
-    (statuses.value?.downloads?.total ?? 0) > 0
+    (!isDownloading.value && statuses.value?.launching !== 2) ||
+    killing.value ||
+    cancelling.value
   );
 });
 
-function handleLaunch(): void {
+async function handleLaunch(): Promise<void> {
   if (launchInstance === undefined) {
     log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -71,25 +76,40 @@ function handleLaunch(): void {
   const instanceId: string | undefined = currentInstance?.value?.id;
   const instanceContent: InstanceStateType | undefined = currentInstance?.value?.instance;
 
-  launchInstance(instanceId)
-    .then(() => {
-      if (!instanceId || !instanceContent) {
-        return log.error(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
-          "The instance ID or data is invalid. Provided contents",
-          { instanceId, instanceContent },
-        ));
-      }
+  await launchInstance(instanceId);
 
-      Instances.change(instanceId, {
-        ...instanceContent,
-        "lastLaunch": Date.now(),
-      });
-    });
+  if (!instanceId || !instanceContent) {
+    return log.error(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
+      "The instance ID or data is invalid. Provided contents",
+      { instanceId, instanceContent },
+    ));
+  }
+
+  Instances.change(instanceId, {
+    ...instanceContent,
+    "lastLaunch": Date.now(),
+  });
 }
 async function handleClose(): Promise<void> {
-  const toClose: boolean = await ask("Do you really want to cancel Minecraft launch?");
+  let shouldClose: boolean;
 
-  if (!toClose) {
+  try {
+    shouldClose = await Host.dialogs.ask({
+      "message": "Do you really want to cancel Minecraft launch?",
+      "title"  : "Cancel Minecraft launch",
+      "kind"   : "warning",
+    });
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Could not ask for Minecraft launch cancellation confirmation:",
+      Errors.prettify(error),
+    );
+
+    return;
+  }
+
+  if (!shouldClose) {
     return;
   }
 
@@ -100,7 +120,19 @@ async function handleClose(): Promise<void> {
   }
 
   if (isDownloading.value) {
-    await Fetching.cancelAll(`${instanceId}-download`);
+    try {
+      cancelling.value = true;
+
+      await Fetching.cancelAll(Fetching.getDownloadCancelId(instanceId));
+    } catch (error: unknown) {
+      log.error(
+        __PRE_BUNDLED_FILENAME__,
+        "Could not cancel the instance downloads:",
+        Errors.prettify(error),
+      );
+    } finally {
+      cancelling.value = false;
+    }
 
     return;
   }
@@ -122,16 +154,16 @@ async function handleClose(): Promise<void> {
       "Could not close the instance process:",
       Errors.prettify(error),
     );
+  } finally {
+    killing.value = false;
   }
-
-  killing.value = false;
 }
 
 watchEffect((): void => {
-  const launchingInstance: boolean = statuses.value?.launching === 1;
-  const killingInstance: boolean = killing.value;
+  const isLaunchingInstance: boolean = statuses.value?.launching === 1;
+  const isClosingInstance: boolean = killing.value || cancelling.value;
 
-  document.body.style.cursor = (launchingInstance || killingInstance)
+  document.body.style.cursor = (isLaunchingInstance || isClosingInstance)
     ? "progress"
     : "";
 });
@@ -139,30 +171,32 @@ watchEffect((): void => {
 const previousIntervalTime = ref<number>(Date.now());
 
 useIntervalFn((): void => {
-  if (statuses.value?.launching === 2) {
-    const currentId: string | undefined = currentInstance.value?.id;
-    const currentInstanceContent: InstanceStateType | undefined = currentInstance.value?.instance;
-    const currentPlayTime: number | undefined = currentInstanceContent?.playTime;
+  if (statuses.value?.launching !== 2) {
+    return;
+  }
 
-    // 'currentTime' might be zero
-    if (!currentId || !currentInstanceContent || currentPlayTime === undefined) {
-      return;
-    }
+  const currentId: string | undefined = currentInstance.value?.id;
+  const currentInstanceContent: InstanceStateType | undefined = currentInstance.value?.instance;
+  const currentPlayTime: number | undefined = currentInstanceContent?.playTime;
 
-    const currentAbsoluteTime: number = Date.now();
-    const previousAbsoluteTime: number = previousIntervalTime.value;
-    const timeToAdd: number = currentAbsoluteTime - previousAbsoluteTime;
+  // 'currentTime' might be zero
+  if (!currentId || !currentInstanceContent || currentPlayTime === undefined) {
+    return;
+  }
 
-    Instances.change(currentId, {
-      ...currentInstanceContent,
-      "playTime": currentPlayTime + timeToAdd,
-    });
+  const currentAbsoluteTime: number = Date.now();
+  const previousAbsoluteTime: number = previousIntervalTime.value;
+  const timeToAdd: number = currentAbsoluteTime - previousAbsoluteTime;
 
-    previousIntervalTime.value = currentAbsoluteTime;
+  Instances.change(currentId, {
+    ...currentInstanceContent,
+    "playTime": currentPlayTime + timeToAdd,
+  });
 
-    if (instanceStates) {
-      Instances.syncMetadata(instanceStates);
-    }
+  previousIntervalTime.value = currentAbsoluteTime;
+
+  if (instanceStates) {
+    Instances.syncMetadata(instanceStates);
   }
 }, 2000);
 </script>
@@ -188,7 +222,7 @@ useIntervalFn((): void => {
   <button
     @click="handleClose"
     id="__home-page__launch-abort-button"
-    :disabled="!isDownloading && statuses?.launching !== 2 || killing"
+    :disabled="closeDisabled"
     class="relative w-fit rounded-sm bg-white px-1 py-2 text-black transition-[opacity] disabled:opacity-70"
   >
     <span
@@ -197,7 +231,7 @@ useIntervalFn((): void => {
     ></span>
     <MaterialRipple
       :colors="{ ripple: '#00000010', sparkles: '0 0 0' }"
-      :disabled="!isDownloading && statuses?.launching !== 2 || killing"
+      :disabled="closeDisabled"
     />
   </button>
 </template>

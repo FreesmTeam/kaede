@@ -4,7 +4,10 @@ import { cachedJoin } from "@/lib/general/scopes/cached-join.ts";
 import { capitalize } from "@/lib/general/scopes/capitalize.ts";
 import { checkDaysDifference } from "@/lib/general/scopes/check-days-difference.ts";
 import { concurrentlyDownload } from "@/lib/general/scopes/concurrently-download.ts";
-import { finalizeInitialization } from "@/lib/general/scopes/finalize-initialization.ts";
+import {
+  type FinalizeInitializationInput,
+  finalizeInitializationWithDependencies,
+} from "@/lib/general/scopes/finalize-initialization-core.ts";
 import { gcd } from "@/lib/general/scopes/gcd.ts";
 import { getAtAGlance } from "@/lib/general/scopes/get-at-a-glance.ts";
 import { getBaseDirectory } from "@/lib/general/scopes/get-base-directory.ts";
@@ -25,7 +28,7 @@ import { hashString } from "@/lib/general/scopes/hash-string.ts";
 import { hashStringCrypto } from "@/lib/general/scopes/hash-string-crypto.ts";
 import { unzip } from "@/lib/general/scopes/unzip.ts";
 
-export default {
+const General = {
   "nextTick": (): Promise<void> => {
     return nextTick();
   },
@@ -33,7 +36,12 @@ export default {
   capitalize,
   checkDaysDifference,
   concurrentlyDownload,
-  finalizeInitialization,
+  "finalizeInitialization": (input: FinalizeInitializationInput): Promise<void> => {
+    return finalizeInitializationWithDependencies({
+      "cachedJoin"  : (...paths): string => General.cachedJoin(...paths),
+      "getJavaMajor": (): Promise<number> => General.getJavaMajor(),
+    }, input);
+  },
   gcd,
   getAtAGlance,
   getBaseDirectory,
@@ -54,3 +62,5 @@ export default {
   hashStringCrypto,
   unzip,
 } as const;
+
+export default General;

@@ -2,46 +2,41 @@ use std::{
     io::SeekFrom,
     path::PathBuf,
     sync::{
-        atomic::{AtomicBool, Ordering},
         Arc, Mutex,
+        atomic::{AtomicBool, Ordering},
     },
     time::Duration,
 };
 
-use serde::Serialize;
-use tauri::{ipc::Channel, State};
+use tauri::ipc::Channel;
 use tokio::io::{AsyncReadExt, AsyncSeekExt};
+
+use crate::plugin_broker::BrokerEvent;
 
 const TICK: Duration = Duration::from_millis(100);
 
-#[derive(Serialize, Clone)]
-#[serde(tag = "type", content = "data", rename_all = "camelCase")]
-pub enum LogStreamEvent {
-    /// First message: every complete line currently in the file
-    Snapshot(Vec<String>),
-    /// New complete lines, ~10x/sec while there is activity
-    Lines(Vec<String>),
-    /// The file shrank (cleared/rotated) — the viewer should reset
-    Truncated,
-}
-
-pub struct LogTail {
+pub(crate) struct LogTail {
     path: PathBuf,
     current: Mutex<Option<Arc<AtomicBool>>>,
 }
 
 impl LogTail {
-    pub fn new(path: PathBuf) -> Self {
-        Self { path, current: Mutex::new(None) }
+    pub(crate) fn new(path: PathBuf) -> Self {
+        Self {
+            path,
+            current: Mutex::new(None),
+        }
     }
 
-    /// Single viewer slot: starting a new stream stops the previous one,
-    /// so a stream orphaned by a webview reload replaces itself on remount.
+    /// There is one host log viewer. Starting a new stream revokes an orphaned prior stream.
     fn begin(&self) -> Arc<AtomicBool> {
-        let mut slot = self.current.lock().unwrap();
+        let mut slot = self
+            .current
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
 
         if let Some(previous) = slot.take() {
-            previous.store(true, Ordering::Relaxed);
+            previous.store(true, Ordering::Release);
         }
 
         let flag = Arc::new(AtomicBool::new(false));
@@ -50,105 +45,116 @@ impl LogTail {
         flag
     }
 
-    fn stop(&self) -> bool {
-        match self.current.lock().unwrap().take() {
-            Some(flag) => {
-                flag.store(true, Ordering::Relaxed);
-                true
-            }
-            None => false,
+    pub(crate) fn stop(&self) -> bool {
+        let current = self
+            .current
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .take();
+        if let Some(flag) = current {
+            flag.store(true, Ordering::Release);
+            true
+        } else {
+            false
         }
+    }
+
+    pub(crate) async fn stream(&self, on_event: Channel<BrokerEvent>) -> Result<(), String> {
+        let stopped = self.begin();
+        let contents = match tokio::fs::read(&self.path).await {
+            Ok(contents) => contents,
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => Vec::new(),
+            Err(error) => return Err(error.to_string()),
+        };
+        let (mut offset, snapshot) = complete_lines(&contents);
+
+        let _ = on_event.send(BrokerEvent::LogSnapshot { lines: snapshot });
+
+        let mut interval = tokio::time::interval(TICK);
+        interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+
+        loop {
+            interval.tick().await;
+
+            if stopped.load(Ordering::Acquire) {
+                break;
+            }
+
+            let length = match tokio::fs::metadata(&self.path).await {
+                Ok(metadata) => metadata.len(),
+                Err(_) => 0,
+            };
+
+            if length < offset {
+                offset = 0;
+                let _ = on_event.send(BrokerEvent::LogTruncated);
+                continue;
+            }
+
+            if length == offset {
+                continue;
+            }
+
+            let Ok(mut file) = tokio::fs::File::open(&self.path).await else {
+                continue;
+            };
+            if file.seek(SeekFrom::Start(offset)).await.is_err() {
+                continue;
+            }
+
+            let mut buffer = Vec::with_capacity((length - offset) as usize);
+            if file.read_to_end(&mut buffer).await.is_err() {
+                continue;
+            }
+
+            let (consumed, lines) = complete_lines(&buffer);
+            if consumed == 0 {
+                continue;
+            }
+
+            offset += consumed;
+            let _ = on_event.send(BrokerEvent::LogLines { lines });
+        }
+
+        Ok(())
     }
 }
 
-#[tauri::command]
-pub fn stop_log_stream(state: State<'_, LogTail>) -> bool {
-    state.stop()
-}
-
-#[tauri::command]
-pub async fn stream_logs(
-    state: State<'_, LogTail>,
-    on_event: Channel<LogStreamEvent>,
-) -> Result<(), String> {
-    let stopped = state.begin();
-    let path = state.path.clone();
-
-    // Snapshot: everything up to the last complete line
-    let contents = match tokio::fs::read(&path).await {
-        Ok(contents) => contents,
-        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Vec::new(),
-        Err(error) => return Err(error.to_string()),
+fn complete_lines(contents: &[u8]) -> (u64, Vec<String>) {
+    let Some(line_end) = contents.iter().rposition(|byte| *byte == b'\n') else {
+        return (0, Vec::new());
     };
-
-    let mut offset = contents
-        .iter()
-        .rposition(|&byte| byte == b'\n')
-        .map(|position| (position + 1) as u64)
-        .unwrap_or(0);
-
-    let snapshot = String::from_utf8_lossy(&contents[..offset as usize])
+    let consumed = line_end + 1;
+    let lines = String::from_utf8_lossy(&contents[..consumed])
         .lines()
         .map(str::to_owned)
         .collect();
 
-    let _ = on_event.send(LogStreamEvent::Snapshot(snapshot));
+    (consumed as u64, lines)
+}
 
-    let mut interval = tokio::time::interval(TICK);
-    interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-    loop {
-        interval.tick().await;
+    #[test]
+    fn complete_lines_retains_an_unterminated_tail_for_the_next_read() {
+        let (consumed, lines) = complete_lines(b"first\nsecond\npartial");
 
-        if stopped.load(Ordering::Relaxed) {
-            break;
-        }
-
-        let length = match tokio::fs::metadata(&path).await {
-            Ok(metadata) => metadata.len(),
-            Err(_) => 0,
-        };
-
-        if length < offset {
-            // Cleared or replaced — start over from the top
-            offset = 0;
-            let _ = on_event.send(LogStreamEvent::Truncated);
-
-            continue;
-        }
-
-        if length == offset {
-            continue; // nothing new; idle tick costs one metadata call
-        }
-
-        let Ok(mut file) = tokio::fs::File::open(&path).await else {
-            continue;
-        };
-
-        if file.seek(SeekFrom::Start(offset)).await.is_err() {
-            continue;
-        }
-
-        let mut buffer = Vec::with_capacity((length - offset) as usize);
-
-        if file.read_to_end(&mut buffer).await.is_err() {
-            continue;
-        }
-
-        // Forward only complete lines — a torn tail waits for the next tick
-        let Some(line_end) = buffer.iter().rposition(|&byte| byte == b'\n') else {
-            continue;
-        };
-
-        let lines = String::from_utf8_lossy(&buffer[..=line_end])
-            .lines()
-            .map(str::to_owned)
-            .collect();
-
-        offset += (line_end + 1) as u64;
-
-        let _ = on_event.send(LogStreamEvent::Lines(lines));
+        assert_eq!(consumed, 13);
+        assert_eq!(lines, ["first", "second"]);
     }
 
-    Ok(())
+    #[test]
+    fn replacing_and_stopping_a_stream_revokes_the_correct_flags() {
+        let tail = LogTail::new(PathBuf::from("latest.log"));
+        let first = tail.begin();
+        let second = tail.begin();
+
+        assert!(first.load(Ordering::Acquire));
+        assert!(!second.load(Ordering::Acquire));
+        assert!(tail.stop());
+        assert!(second.load(Ordering::Acquire));
+        assert!(!tail.stop());
+    }
 }

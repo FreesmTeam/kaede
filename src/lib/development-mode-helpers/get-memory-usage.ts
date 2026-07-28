@@ -16,14 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker";
 
 // This counts the current RAM usage of the whole device, not the process itself
 export async function getMemoryUsage(): Promise<{ "used": string; "total": string }> {
-  const [used, total]: [number, number] = await invoke("get_system_memory");
+  const { usedBytes, totalBytes } = await Host.diagnostics.getSystemMemory();
 
   return {
-    "used" : (used / (1024 * 1024 * 1024)).toFixed(2),
-    "total": (total / (1024 * 1024 * 1024)).toFixed(2),
+    "used" : (usedBytes / (1024 * 1024 * 1024)).toFixed(2),
+    "total": (totalBytes / (1024 * 1024 * 1024)).toFixed(2),
   };
 }

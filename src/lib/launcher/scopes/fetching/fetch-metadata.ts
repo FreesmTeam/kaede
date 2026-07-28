@@ -16,9 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { fetch } from "@tauri-apps/plugin-http";
-
 import { LaunchStatus } from "@/constants/launcher.ts";
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
@@ -36,14 +35,14 @@ export async function fetchMetadata({
   "label" : string;
   "scope" : Extract<LaunchKeyType, "PatchIndex" | "PatchMetadata" | "AssetIndex">;
   "prefix": string;
-}): Promise<{ "data": unknown } | LaunchStatusType> {
+}): Promise<LaunchStatusType | { "data": unknown }> {
   let response: Response;
   let data: unknown;
 
   try {
     log.debug(`${prefix}:${__PRE_BUNDLED_FILENAME__}`, `Fetching the ${label} from '${url}'`);
 
-    response = await fetch(url);
+    response = await Host.http.fetch(url);
   } catch (error: unknown) {
     log.error(
       `${prefix}:${__PRE_BUNDLED_FILENAME__}`,

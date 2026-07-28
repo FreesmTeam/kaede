@@ -1,0 +1,64 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": [
+    "./oxlint.eslint-coverage.json"
+  ],
+  "categories": {
+    "correctness": "error"
+  },
+  "env": {
+    "vue": true
+  },
+  "globals": {
+    "__PRE_BUNDLED_FILENAME__": "readonly",
+    "Compartment": "readonly",
+    "harden": "readonly",
+    "lockdown": "readonly"
+  },
+  "ignorePatterns": [
+    "src/lib/schemas/generated/validators.d.ts",
+    "src/lib/schemas/generated/validators.js"
+  ],
+  "options": {
+    "typeAware": true
+  },
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "oxc",
+    "import",
+    "promise",
+    "vue"
+  ],
+  "rules": {
+    "no-useless-concat": "error",
+    "promise/always-return": "error",
+    "unicorn/consistent-function-scoping": "error",
+    "unicorn/no-array-reverse": "error",
+    "unicorn/no-array-sort": "error",
+    "unicorn/prefer-number-properties": [
+      "error",
+      {
+        "checkInfinity": false,
+        "checkNaN": false
+      }
+    ]
+  },
+  "overrides": [
+    {
+      "files": [
+        "**/*.test.ts",
+        "scripts/**/*.ts",
+        "vite.config.ts",
+        "vitest.setup.ts"
+      ],
+      "env": {
+        "node": true,
+        "vitest": true
+      },
+      "globals": {
+        "Bun": "readonly"
+      }
+    }
+  ]
+}

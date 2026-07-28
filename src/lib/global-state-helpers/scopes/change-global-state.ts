@@ -1,9 +1,9 @@
 import { nextTick } from "vue";
 
 import { HookMappings } from "@/constants/hooks.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import ExtensionsManager from "@/lib/extensions-manager";
 import { log } from "@/lib/logging/scopes/log.ts";
-import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 /**
@@ -18,6 +18,7 @@ export function changeGlobalState<Key extends keyof GlobalStatesType>(
   key: Key,
   value: GlobalStatesType[Key],
 ): void {
+  const globalStates = GlobalInternals.getGlobalStates();
   const mappedKey = HookMappings[key];
   const hooksResult: "continue" | GlobalStatesType[Key] | undefined =
     ExtensionsManager.catchSyncResponseHooks<GlobalStatesType[Key]>({
@@ -38,7 +39,8 @@ export function changeGlobalState<Key extends keyof GlobalStatesType>(
   ));
   globalStates[key] = value;
 
-  nextTick().then(async () => {
+  void (async (): Promise<void> => {
+    await nextTick();
     await ExtensionsManager.catchAsyncVoidHooks({
       "scope" : mappedKey,
       "toPass": value,
@@ -46,5 +48,5 @@ export function changeGlobalState<Key extends keyof GlobalStatesType>(
     });
 
     ExtensionsManager.onGlobalStateChange(key, value);
-  });
+  })();
 }

@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker/index.ts";
 
 export function hashStringCrypto(input: string): Promise<string> {
   const bytes: Uint8Array = (new TextEncoder).encode(input);
 
-  return invoke<string>("hash_sha256", bytes);
+  return Host.hashes.sha256(bytes);
 }

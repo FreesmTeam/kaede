@@ -1,4 +1,4 @@
-import { DefaultLocale } from "@/constants/application.ts";
+import { DefaultLocale } from "@/constants/application-primitives.ts";
 import EnglishTranslations from "@/constants/english.json";
 import FileStructure from "@/constants/file-structure.ts";
 import General from "@/lib/general";

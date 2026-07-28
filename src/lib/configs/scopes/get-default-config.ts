@@ -24,8 +24,7 @@ export async function getDefaultConfig(): Promise<ConfigType> {
       "enableNativeReloadKeyBinds": false,
     },
     "extensions": {
-      "enabled"                   : true,
-      "allowUnrestrictedUntrusted": true,
+      "enabled": true,
     },
     "layout": {
       "locale"                 : "en",

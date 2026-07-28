@@ -1,0 +1,11 @@
+# Automatically generated - DO NOT EDIT!
+
+[[permission]]
+identifier = "allow-bootstrap-capability-broker"
+description = "Enables the bootstrap_capability_broker command without any pre-configured scope."
+commands.allow = ["bootstrap_capability_broker"]
+
+[[permission]]
+identifier = "deny-bootstrap-capability-broker"
+description = "Denies the bootstrap_capability_broker command without any pre-configured scope."
+commands.deny = ["bootstrap_capability_broker"]

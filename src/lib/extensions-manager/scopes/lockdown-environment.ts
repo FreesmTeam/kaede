@@ -1,20 +1,61 @@
 import "ses";
 
-export function lockdownEnvironment(): void {
-  /*
-   * Can throw an error, which is a desirable behavior
-   * since we do NOT want to execute sandboxed plugins without environment lockdown
-   */
-  lockdown({
+export type LockdownImplementation = (
+  options: Readonly<{ "evalTaming": "safe-eval" }>,
+) => void;
 
-    /*
-     * 'safeEval' adds some restrictions to 'eval' and the 'Function' constructor, e.g.:
-     * - anything that looks like HTML comments is rejected.
-     *
-     * 'noEval' completely disables 'eval' and the 'Function' constructor.
-     *
-     * 'unsafeEval' appears not to change the behavior of 'eval' and the 'Function' constructor.
-     */
-    "evalTaming": "unsafeEval",
-  });
+export type HardenImplementation = <Value>(value: Value) => Value;
+
+export type CapturedCompartment = Readonly<{
+  "evaluate": (code: string) => unknown;
+}>;
+
+type CompartmentImplementation = new (
+  globals?: Readonly<Record<PropertyKey, unknown>>,
+) => CapturedCompartment;
+
+/* Capture bootstrap authorities before any cooperative TCB plugin can execute. */
+const capturedLockdown: LockdownImplementation = lockdown;
+const CapturedCompartmentConstructor: CompartmentImplementation = Compartment;
+const lockdownState: {
+  "capturedHarden"?: HardenImplementation;
+  "isCompleted"    : boolean;
+} = { "isCompleted": false };
+
+export function lockdownEnvironment(
+  lockdownImplementation: LockdownImplementation = capturedLockdown,
+  hardenImplementation?: HardenImplementation,
+): void {
+  if (lockdownState.isCompleted) {
+    return;
+  }
+
+  /* A thrown lockdown error deliberately leaves the sandbox runtime unavailable. */
+  lockdownImplementation({ "evalTaming": "safe-eval" });
+  lockdownState.capturedHarden = hardenImplementation ?? harden;
+  lockdownState.isCompleted = true;
+}
+
+export function hardenWithCapturedAuthority<Value>(value: Value): Value {
+  if (lockdownState.capturedHarden === undefined) {
+    throw new TypeError("SES harden authority is unavailable before successful lockdown");
+  }
+
+  return lockdownState.capturedHarden(value);
+}
+
+export function createCompartmentWithCapturedAuthority(
+  globals: Readonly<Record<PropertyKey, unknown>>,
+): CapturedCompartment {
+  return new CapturedCompartmentConstructor(globals);
+}
+
+export function isEnvironmentLockdownCompleted(): boolean {
+  return lockdownState.isCompleted;
+}
+
+export function assertEnvironmentLockdownCompleted(): void {
+  if (!lockdownState.isCompleted) {
+    throw new TypeError("Sandbox runtime requires a successfully completed SES lockdown");
+  }
 }

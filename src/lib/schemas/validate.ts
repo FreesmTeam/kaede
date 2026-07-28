@@ -19,6 +19,29 @@
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { FullValidationArgumentsType } from "@/types/schemas/validation-arguments.type.ts";
 
+async function logValidationErrors(
+  label: string,
+  entryInfo: string,
+  value: unknown,
+  schema: FullValidationArgumentsType["schema"],
+): Promise<void> {
+  try {
+    const errors = await schema.Errors(value);
+
+    log.warn(
+      __PRE_BUNDLED_FILENAME__,
+      `The provided ${label} (${entryInfo}) is not valid:`,
+      "\n" + JSON.stringify(errors, null, 2),
+    );
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      `Failed to produce validation errors for ${label} (${entryInfo}):`,
+      error instanceof Error ? error.message : String(error),
+    );
+  }
+}
+
 export function validate<T>({
   label,
   info,
@@ -30,20 +53,10 @@ export function validate<T>({
     : `id: ${info?.id}; index: ${info.index}`;
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Checking if the provided ${label} (${entryInfo}) is valid`);
-  const validated: boolean = schema.Check(value);
+  const isValid: boolean = schema.Check(value);
 
-  if (!validated) {
-    schema
-      .Errors(value)
-      .then(error => {
-        const errors: string = JSON.stringify(error, null, 2);
-
-        log.error(
-          __PRE_BUNDLED_FILENAME__,
-          `The provided ${label} (${entryInfo}) is not valid:`,
-          "\n" + errors,
-        );
-      });
+  if (!isValid) {
+    void logValidationErrors(label, entryInfo, value, schema);
 
     return false;
   }

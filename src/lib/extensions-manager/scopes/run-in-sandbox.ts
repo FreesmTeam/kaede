@@ -1,57 +1,84 @@
-import { EventListeners } from "@/constants/event-listeners.ts";
-import { GrantedScopes } from "@/constants/permissions.ts";
-import ExtensionsManager from "@/lib/extensions-manager";
-import type { PermissionType } from "@/types/extensions/permission.type.ts";
+import {
+  createCompartmentWithCapturedAuthority,
+} from "@/lib/extensions-manager/scopes/lockdown-environment.ts";
+import type {
+  PermissionGrant,
+  PermissionRequest,
+  PluginCapabilities,
+} from "@/types/extensions/permission.type.ts";
 
-export function runInSandbox({
-  id,
-  code,
-}: {
-  "id"  : string;
-  "code": string;
-}): void {
-  /*
-   * Create a plugin-scoped handler for requesting permissions
-   * to prevent the 'ExtensionsManager#requestPermissions' tampering
-   */
-  const wrappedPermissionsRequest = async (
-    permissions: Array<PermissionType>,
-  ): Promise<Array<boolean>> => {
-    return await ExtensionsManager.requestPermissions(permissions, id);
-  };
+export type SandboxCompartment = Readonly<{
+  "evaluate": (code: string) => unknown;
+}>;
 
-  try {
-    const compartment = new Compartment({
-      "globals": {
-        "requestPermissions": wrappedPermissionsRequest,
+export type SandboxCompartmentFactory = (
+  globals: Readonly<{
+    "scopedThis"        : Readonly<Partial<PluginCapabilities>>;
+    "requestPermissions": (
+      permissions: ReadonlyArray<PermissionRequest>,
+    ) => Promise<PermissionGrant>;
+  }>,
+) => SandboxCompartment;
 
-        /*
-         * Provide a reference to the plugin-scoped 'GrantedScopes' object to make it
-         * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handlePermission'
-         */
-        "GrantedScopes": GrantedScopes[id],
+function createCompartment(
+  globals: Parameters<SandboxCompartmentFactory>[0],
+): SandboxCompartment {
+  return createCompartmentWithCapturedAuthority(globals);
+}
 
-        /*
-         * Provide a reference to the plugin-scoped 'EventListeners' object to make it
-         * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handleEvent'
-         */
-        "EventListeners": EventListeners[id],
-      },
-
-      /*
-       * Code execution does not work without this property,
-       * and the documentation does not explain what '__options__' exactly do
-       */
-      "__options__": true,
-    });
-
-    /*
-     * Compartments run using the same JavaScript interpreter as the WebView uses itself,
-     * so the performance of sandboxed plugins vs. unrestricted should equal
-     */
-    compartment.evaluate(code);
-  } catch (error: unknown) {
-    // eslint-disable-next-line
-    console.error("Compartment error:", error);
+function assertDeeplyHardened(
+  value: unknown,
+  label: string,
+  seen: WeakSet<object> = new WeakSet,
+): void {
+  if (
+    typeof value !== "function" &&
+    (value === null || typeof value !== "object")
+  ) {
+    return;
   }
+
+  if (seen.has(value)) {
+    return;
+  }
+
+  seen.add(value);
+
+  if (!Object.isFrozen(value)) {
+    throw new TypeError(`${label} must be deeply hardened before evaluation`);
+  }
+
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key);
+
+    if (descriptor === undefined || !("value" in descriptor)) {
+      throw new TypeError(`${label} must contain only hardened own-data properties`);
+    }
+
+    assertDeeplyHardened(descriptor.value, label, seen);
+  }
+}
+
+export function runInSandbox<Result = unknown>({
+  code,
+  scopedThis,
+  requestPermissions,
+  "createCompartment": compartmentFactory = createCompartment,
+}: {
+  "code"              : string;
+  "scopedThis"        : Readonly<Partial<PluginCapabilities>>;
+  "requestPermissions": (
+    permissions: ReadonlyArray<PermissionRequest>,
+  ) => Promise<PermissionGrant>;
+  "createCompartment"?: SandboxCompartmentFactory;
+}): Result {
+  assertDeeplyHardened(scopedThis, "Sandbox static capabilities");
+  assertDeeplyHardened(requestPermissions, "Sandbox permission request callback");
+
+  const compartment = compartmentFactory(Object.freeze({
+    scopedThis,
+    requestPermissions,
+  }));
+
+  return compartment.evaluate(code) as Result;
 }

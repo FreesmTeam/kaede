@@ -42,29 +42,29 @@ export function shouldIncludeLibrary({
 
   const { platform, arch } = necessaries;
   const rules: Array<SpecificPatchLibraryRuleType> = library.rules;
-  let toInclude: boolean = false;
+  let shouldInclude: boolean = false;
 
   for (const rule of rules) {
     const parsedOS: SpecificPatchLibraryOSNameType | undefined = rule?.os?.name;
 
     if (parsedOS === undefined) {
-      toInclude = rule?.action === "allow";
+      shouldInclude = rule?.action === "allow";
 
       continue;
     }
 
-    toInclude = handlePlatformRule({
+    shouldInclude = handlePlatformRule({
       "rule": {
         "action": rule?.action ?? "allow",
         "os"    : {
           "name": parsedOS,
         },
       },
-      "current": toInclude,
+      "current": shouldInclude,
       platform,
       arch,
     });
   }
 
-  return toInclude;
+  return shouldInclude;
 }

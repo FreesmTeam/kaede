@@ -17,30 +17,55 @@
   -->
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  type ShallowReactive,
+  useTemplateRef,
+  watch,
+} from "vue";
 
+import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import LogHeader from "@/components/logging/header/LogHeader.vue";
 import { useLogStream } from "@/composables/use-log-stream.ts";
+import { InstanceLogsContextKey } from "@/constants/application.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import GlobalStateHelpers from "@/lib/global-state-helpers";
+import Logging from "@/lib/logging";
+import { globalStates } from "@/states/global.ts";
 
-const { lines } = useLogStream();
+const { "lines": launcherLines } = useLogStream();
+const instanceLogs = inject<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey);
 
 // TODO
-const hideDetails = false;
+const shouldHideDetails = false;
+
+const selectedLines = computed((): Array<string> => {
+  const mode = globalStates.logs?.mode ?? "launcher";
+
+  return mode === "launcher"
+    ? launcherLines.value.list
+    : (instanceLogs?.[mode] ?? []);
+});
 
 const filtered = computed((): Array<string> => {
   const filtered: Array<string> = [];
 
-  for (const line of lines.value.list) {
-    const part: string = line.slice(0, 2).trim();
-    const areDetails = Number.isNaN(
-      Number(part === "" ? "no" : part),
-    );
-
-    if (!hideDetails) {
+  for (const line of selectedLines.value) {
+    if (!shouldHideDetails) {
       filtered.push(line);
 
       continue;
     }
+
+    const part: string = line.slice(0, 2).trim();
+    const areDetails = Number.isNaN(
+      Number(part === "" ? "no" : part),
+    );
 
     if (!areDetails) {
       filtered.push(line);
@@ -51,6 +76,9 @@ const filtered = computed((): Array<string> => {
 });
 
 const position = ref<number>(0);
+const visibleLineCount = computed((): number => {
+  return Math.max(0, Math.min(16, filtered.value.length - position.value));
+});
 
 const container = useTemplateRef("container");
 
@@ -65,8 +93,12 @@ function updateView(event: Event): void {
 }
 
 watch(
-  () => lines.value,
-  async () => {
+  () => [globalStates.logs?.mode, filtered.value.length] as const,
+  async ([mode], [previousMode]) => {
+    position.value = mode === previousMode
+      ? Math.min(position.value, Math.max(0, filtered.value.length - 16))
+      : 0;
+
     if (!container.value) {
       return;
     }
@@ -84,7 +116,17 @@ watch(
   },
 );
 
+function closeViewer(): void {
+  Logging.closeViewer();
+}
+
 onMounted(() => {
+  const mode = globalStates.logs?.mode;
+
+  if (mode !== undefined && mode !== "launcher" && instanceLogs?.[mode] === undefined) {
+    GlobalStateHelpers.Logs.selectMode("launcher");
+  }
+
   if (!container.value) {
     return;
   }
@@ -104,16 +146,28 @@ onUnmounted(() => {
   <div
     @contextmenu.prevent
     id="__log-viewer__wrapper"
-    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex items-start p-16 text-start text-sm bg-[theme(colors.black/.5)]"
-    v-show="lines.list.length > 0"
+    class="absolute bottom-0 left-0 right-0 top-0 z-6000 grid place-items-center p-16 text-start text-sm bg-[theme(colors.black/.5)]"
   >
     <div
       id="__log-viewer__inner"
-      class="w-full flex-1 select-text"
+      class="max-w-320 w-full flex flex-col gap-3 rounded-md bg-neutral-900 p-4 text-white drop-shadow-lg"
     >
+      <div id="__log-viewer__header" class="flex items-center justify-between gap-4">
+        <LogHeader />
+        <button
+          id="__log-viewer__close-logs-button"
+          aria-label="Close logs"
+          class="relative rounded-md p-2 hover:bg-neutral-800"
+          type="button"
+          @click="closeViewer"
+        >
+          <span id="__log-viewer__close-logs-icon" class="i-lucide-x block size-5"></span>
+          <MaterialRipple />
+        </button>
+      </div>
       <div
         id="__log-viewer__bound"
-        class="relative w-full select-text overflow-y-auto"
+        class="relative w-full select-text overflow-y-auto border border-neutral-300 bg-neutral-950"
         ref="container"
         :style="{ 'height': 16 * GlobalInternals.logLineHeight + 'px' }"
       >
@@ -121,13 +175,20 @@ onUnmounted(() => {
           id="__log-viewer__scroll-placeholder"
           class="font-mono"
           :style="{
-            'height': lines.list.length * GlobalInternals.logLineHeight + 'px',
+            'height': filtered.length * GlobalInternals.logLineHeight + 'px',
           }"
         >
+          <p
+            v-if="filtered.length === 0"
+            id="__log-viewer__empty-state"
+            class="p-2 text-neutral-400"
+          >
+            No logs are available for this source.
+          </p>
           <div
-            v-for="(_, index) in Array.from({ length: 16 })"
-            :key="index"
-            :id="`${index}-log-line`"
+            v-for="(_, index) in Array.from({ length: visibleLineCount })"
+            :key="position + index"
+            :id="`${position + index}-log-line`"
             class="__log-viewer__log-line"
             :style="{ 'top': index * GlobalInternals.logLineHeight + 'px' }"
           >

@@ -2,7 +2,7 @@ import type { KaedeNamespaceType } from "@/declarations.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { HookReturnType } from "@/types/extensions/hook-return.type.ts";
-import IsKeyInObject from "@/types/utils/is-key-in-object.ts";
+import isKeyInObject from "@/types/utils/is-key-in-object.ts";
 
 export function catchSyncVoidHooks({
   scope,
@@ -16,7 +16,7 @@ export function catchSyncVoidHooks({
   const timeMeasurementStartAfter = performance.now();
   const currentScopeHooks = GlobalObject.hooks[scope];
 
-  if (!IsKeyInObject(timing, currentScopeHooks)) {
+  if (!isKeyInObject(timing, currentScopeHooks)) {
     return;
   }
 

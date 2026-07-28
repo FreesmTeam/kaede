@@ -12,7 +12,7 @@ export async function getJavaBinary({
   "necessaries"   : PreLaunchInformationType;
   "finalizedPatch": FinalizedPatchType;
 }): Promise<string> {
-  const beforeHooksResult: "continue" | string | undefined =
+  const beforeHooksResult: string | undefined =
     await ExtensionsManager.catchAsyncResponseHooks<string>({
       "scope" : "onJavaBinaryGet",
       "toPass": { necessaries, finalizedPatch },

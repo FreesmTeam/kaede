@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker";
 
 // This counts the current CPU usage of the whole device, not the process itself
 export async function getCpuUsage(): Promise<string> {
-  const usage: number = await invoke("get_cpu_usage");
+  const usage = await Host.diagnostics.getGlobalCpuUsage();
 
   return usage.toFixed(2);
 }

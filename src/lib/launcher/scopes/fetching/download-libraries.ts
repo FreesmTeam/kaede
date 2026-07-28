@@ -1,6 +1,5 @@
-import { mkdir } from "@tauri-apps/plugin-fs";
-
 import { GeneralSettings, LaunchStatus } from "@/constants/launcher.ts";
+import { Host } from "@/lib/capability-broker";
 import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
 import { verifyArtifacts } from "@/lib/launcher/scopes/validators/verify-artifacts.ts";
@@ -62,11 +61,9 @@ export async function downloadLibraries({
     });
 
   log.debug(logPrefix, "Initializing missing library and native directories");
-  await Promise.all(
-    missingArtifacts.map(({ directory }) => mkdir(
-      directory,
-      { "recursive": true },
-    )),
+  await Host.files.ensureDirectories(
+    [...new Set(missingArtifacts.map(({ directory }) => directory))],
+    { "recursive": true },
   );
 
   const report = await General.concurrentlyDownload({
@@ -77,7 +74,7 @@ export async function downloadLibraries({
     "label"      : "libraries",
   });
 
-  if (report.cancelled) {
+  if (report.cancelled || report.failed > 0) {
     return false;
   }
 

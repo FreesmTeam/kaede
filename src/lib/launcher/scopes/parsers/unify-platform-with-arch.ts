@@ -167,7 +167,7 @@ export function unifyPlatformWithArch(
       return { "platform": "macos", "arch": "x64" };
     }
     default: {
-      throw new Error(`Unhandled platform format: ${name}`);
+      throw new Error(`Unhandled platform format: ${JSON.stringify(name)}`);
     }
   }
 }

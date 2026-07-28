@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker/index.ts";
 
 export function hashFileContents(image: Uint8Array): Promise<string> {
-  return invoke<string>("hash_sha256", image);
+  return Host.hashes.sha256(image);
 }

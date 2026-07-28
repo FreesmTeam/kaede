@@ -7,24 +7,32 @@
 
 # Frontend & backend code
 
-This folder contains frontend-specific and backend-specific code. The frontend uses Vue.js, and the backend uses Tauri API. Type checks are provided by TypeScript (build time) and [TypeBox](https://github.com/sinclairzx81/typebox) (runtime).
+This folder contains Vue UI and TypeScript launcher orchestration. Privileged
+host operations use the typed capability facade backed by Rust instead of raw
+Tauri plugin calls. Type checks are provided by TypeScript at build time and
+[TypeBox](https://github.com/sinclairzx81/typebox) at runtime.
 
 ## Top-level files
 
 - `App.vue` is the Vue entry point file.
   - HTML-wise, it contains an application layout with error boundaries.
-  - Code-wise, it contains two `shallowReactive` objects that store global states and Minecraft instance states.
+  - Code-wise, it contains a deeply `reactive` global-state object and a
+    `shallowReactive` Minecraft instance-state object.
 
 > [!IMPORTANT]
 > Gathering application states in one place is discouraged and considered to be amateurish. Not only this practice goes against all software developing principles, but it also introduces less manageable state structure in the whole application.
 >
-> **However**, this practice allows Kaede to have global states that are easily accessible and extensible by user plugins. For example, creating a new **reactive** field in the global `shallowReactive` object will (almost*) automatically implement all the needed field hooks, handle the configuration file syncing, and allow other plugins to use that field for their needs.
+> **However**, this practice allows Kaede to have global states that are easily accessible and extensible by trusted plugins. Nested fields in the global `reactive` object remain observable without replacing their parent object, while the field hooks and configuration synchronization continue to use the shared state contract.
 >
 > Moreover, this approach allows extension hooks to have a well-defined behaviour, since all global states are stored in `App.vue` and do not disappear with the component unmount. One can suggest `Pinia` to manage global stores, but according to [Pinia docs [1]](#references), "you cannot add a new state property if you don't define it in `state()`."
 > 
 > *The globally-accessible `HookMappings` object should be changed to contain a `key: value` mapping for the custom reactive field.
 
-- `declarations.ts` contain the `window` type definitions. Without those definitions, TypeScript does not know about the custom `window.__KAEDE__` namespace. Note: the second argument of the `HookReturnType` type accepts `"nothing"` and any other type (including `void`). However, `void` and `"nothing"` values serve different purposes:
+- `declarations.ts` is the public plugin declaration entry point. It describes
+  trusted context, launcher namespaces, permissions, and sandbox capabilities.
+  Note: the second argument of the `HookReturnType` type accepts `"nothing"`
+  and any other type (including `void`). However, `void` and `"nothing"` values
+  serve different purposes:
   - `void` means that the hook returns `{ "status": "stop" | "continue", "response": void }`. Hooks with this type can control whether to continue caller's code execution or not (caller is the function that executes these hooks).
   - `"nothing"` means that the hook returns `void` (or anything else, the caller will just not care about it). Hooks with this type cannot abort caller's code execution.
 - `globals.css` contain global CSS styles that are not possible or not convenient to write using the UnoCSS.
@@ -44,26 +52,29 @@ Every folder has its own `README` file for more detailed explanations.
 
 ## Bundle size
 
-Last updated: `a4357d5d8c4585e449ca4d877aaff36a46a550bb` (27.07.2026)
+Last measured from `bun run build:frontend` on 28.07.2026. Values are the
+minified JavaScript chunks before gzip; image and CSS assets are excluded.
 
-| Part                             | Minified |
-|----------------------------------|----------|
-| `src/`                           | 205.9 KB |
-| `typebox`                        | 115.2 KB |
-| `vue`                            | 110.5 KB |
-| `ses`                            | 76.2 KB  |
-| `@daidr/minecraft-skin-renderer` | 46.8 KB  |
-| `@tanstack/vue-query`            | 35.4 KB  |
-| `vue-virtualised`                | 34.4 KB  |
-| tauri-plugins                    | 26.7 KB  |
-| `prism-code-editor`              | 25.7 KB  |
-| `jshashes`                       | 22.3 KB  |
-| `ark-of-atrahasis`               | 17.0 KB  |
-| `m3ripple-vue`                   | 7.2 KB   |
-| `@vueuse/core`                   | 6.6 KB   |
-| `serialize-javascript`           | 3.3 KB   |
-| bundler code?                    | ~4.1 KB  |
-| Total                            | 737.3 KB |
+| Logical chunk | Minified |
+|---------------|----------|
+| sandbox dependencies | 304.0 kB |
+| application entry | 156.5 kB |
+| framework dependencies | 152.0 kB |
+| other dependencies | 85.3 kB |
+| server management | 100.8 kB |
+| editor dependencies | 29.6 kB |
+| desktop capability adapter | 18.5 kB |
+| permission preparation | 7.5 kB |
+| plugin playground | 4.4 kB |
+| remaining runtime chunks | 21.2 kB |
+| **Total JavaScript** | **879.7 kB** |
+
+`bun generate:bundle-analysis` writes the ignored `bundle-analysis.html`
+source-map report. The production report contains only the SHA-256 branch of
+`@noble/hashes` (about 4.4 KiB) for synchronous capability fingerprints; MD5 is
+tree-shaken from the desktop bundle and remains available only to browser
+preview. Desktop launcher MD5/SHA-256 work goes through host-only typed broker
+operations backed by Rust.
 
 # References
 

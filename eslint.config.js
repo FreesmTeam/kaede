@@ -22,20 +22,26 @@ import { includeIgnoreFile } from "@eslint/compat";
 import stylistic from "@stylistic/eslint-plugin";
 import unocss from "@unocss/eslint-config/flat";
 import { defineConfigWithVueTs, vueTsConfigs } from "@vue/eslint-config-typescript";
-import vueRequireID from "@vue-require-id/eslint-plugin";
 import { globalIgnores } from "eslint/config";
+import oxlint from "eslint-plugin-oxlint";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tsDoc from "eslint-plugin-tsdoc";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import pluginVue from "eslint-plugin-vue";
 import globals from "globals";
 
+import unicornPolicyRules from "./eslint-rules/unicorn-policy.js";
+import vueRequireID from "./eslint-rules/vue-require-id.js";
+
 // Get an absolute path of the '.gitignore' file
 const gitIgnorePath = fileURLToPath(
   new URL(".gitignore", import.meta.url),
 );
+const oxlintConfigPath = fileURLToPath(
+  new URL(".oxlintrc.json", import.meta.url),
+);
 
-export default defineConfigWithVueTs(
+const eslintConfig = defineConfigWithVueTs(
   // Ignore linting for every path that is specified in '.gitignore'
   includeIgnoreFile(gitIgnorePath),
   globalIgnores([
@@ -47,6 +53,9 @@ export default defineConfigWithVueTs(
     "./src/vite-env.d.ts",
     // Ignore the generated type definitions
     "./types/",
+    // Generated validators are verified byte-for-byte and against live TypeBox checks.
+    "./src/lib/schemas/generated/validators.d.ts",
+    "./src/lib/schemas/generated/validators.js",
   ]),
   vueTsConfigs.recommended,
   pluginVue.configs["flat/essential"],
@@ -73,29 +82,16 @@ export default defineConfigWithVueTs(
 
       /* Disabled rules */
       // Not all components need multi-word names, e.g. 'Layout.vue'
-      "vue/multi-word-component-names"   : ["off"],
+      "vue/multi-word-component-names": ["off"],
       // Not needed since Vue 3.x
-      "vue/no-multiple-template-root"    : ["off"],
-      // The second argument of 'JSON#stringify' does not accept 'undefined' to save formatting
-      "unicorn/no-null"                  : ["off"],
-      // Not needed for fully client-side applications with no Web Workers used
-      "unicorn/prefer-global-this"       : ["off"],
-      // Top level await appears to be broken
-      "unicorn/prefer-top-level-await"   : ["off"],
-      // 'document#getElementById' is faster and easier to use
-      "unicorn/prefer-query-selector"    : ["off"],
-      // Requires a different compiler lib version
-      "unicorn/prefer-at"                : ["off"],
-      // Requires a different compiler lib version
-      "unicorn/no-array-reverse"         : ["off"],
-      // Requires a different compiler lib version
-      "unicorn/prefer-string-replace-all": ["off"],
+      "vue/no-multiple-template-root" : ["off"],
+      ...unicornPolicyRules,
       // Conflicts with 'eslint@stylistic/key-spacing'
-      "@stylistic/no-multi-spaces"       : ["off"],
+      "@stylistic/no-multi-spaces"    : ["off"],
       // Conflicts with git
-      "@stylistic/linebreak-style"       : ["off"],
+      "@stylistic/linebreak-style"    : ["off"],
       // Conflicts with git
-      "@stylistic/eol-last"              : ["off"],
+      "@stylistic/eol-last"           : ["off"],
 
       /* Important */
       "@stylistic/semi"              : ["error", "always"],
@@ -171,8 +167,7 @@ export default defineConfigWithVueTs(
       }],
 
       /* TypeScript */
-      "@typescript-eslint/explicit-function-return-type": ["warn"],
-      "@typescript-eslint/no-unused-vars"               : ["warn"],
+      "@typescript-eslint/no-unused-vars": ["warn"],
 
       /* Vue */
       "vue/attribute-hyphenation": ["warn", "always", {
@@ -197,15 +192,6 @@ export default defineConfigWithVueTs(
         "ignoreHTMLTextContents"   : true,
         "ignoreUrls"               : true,
       }],
-
-      /* Unicorn */
-      "unicorn/filename-case": ["warn", {
-        "cases": {
-          "kebabCase" : true,
-          "pascalCase": true,
-        },
-      }],
-      "unicorn/prevent-abbreviations": ["warn"],
 
       /* Stylistic */
       "@stylistic/array-bracket-newline"         : ["warn", "consistent"],
@@ -314,4 +300,23 @@ export default defineConfigWithVueTs(
       "@stylistic/yield-star-spacing"      : ["warn", { "before": false, "after": true }],
     },
   },
+  {
+    "files": ["**/*.{cts,mts,ts,tsx,vue}"],
+    "rules": { "@typescript-eslint/explicit-function-return-type": ["warn"] },
+  },
+  {
+    // These literals model Tauri's fixed HTTP asset protocol and HTTP rejection/canonicalization.
+    "files": [
+      "src/lib/capability-broker/image-object-url.{test.,}ts",
+      "src/lib/extensions-manager/scopes/principal.test.ts",
+      "src/lib/security/tauri-config.test.ts",
+    ],
+    "rules": { "unicorn/prefer-https": ["off"] },
+  },
 );
+
+export default [
+  ...eslintConfig,
+  // Keep ESLint only for rules and Vue template behavior that Oxlint does not cover.
+  ...oxlint.buildFromOxlintConfigFile(oxlintConfigPath),
+];

@@ -53,7 +53,7 @@ onMounted(() => {
       limits.value.max = Math.max(limits.value.max, times.value.length);
       limits.value.latency = currentLatency.toFixed(1);
       limits.value.peak = Math.max(
-        Number.parseFloat(limits.value.peak),
+        Number(limits.value.peak),
         currentLatency || 16.7,
       ).toFixed(1);
 

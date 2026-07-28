@@ -1,6 +1,5 @@
-import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
-
 import FileStructure from "@/constants/file-structure.ts";
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -14,19 +13,19 @@ export async function readAllMetadata(): Promise<Array<ExtensionMetadataType>> {
   );
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Checking if extensions metadata file exists");
-  const metadataExists = await exists(metadataPath);
+  const metadataExists = await Host.files.exists(metadataPath);
 
   if (!metadataExists) {
     log.warn(__PRE_BUNDLED_FILENAME__, "Extensions metadata file does not exist");
     log.debug(__PRE_BUNDLED_FILENAME__, "Initializing an extensions metadata file");
-    await writeTextFile(metadataPath, "[]");
+    await Host.files.writeText(metadataPath, "[]");
   }
 
   log.debug(
     __PRE_BUNDLED_FILENAME__,
     "Extensions metadata file exists. Reading an extensions metadata file",
   );
-  const metadata = await readTextFile(metadataPath);
+  const metadata = await Host.files.readText(metadataPath);
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Parsing the extensions metadata file");
   let parsedMetadata: unknown;

@@ -22,10 +22,10 @@ import GlobalStateHelpers from "@/lib/global-state-helpers";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 /**
- * Contains all global application states.
- * Will be overwritten in 'main.ts' once the global states are ready
+ * Stable reactive object containing all global application states.
+ * It is populated in 'main.ts' once the global states are ready.
  */
-export let globalStates: Reactive<GlobalStatesType>;
+export const globalStates: Reactive<GlobalStatesType> = reactive({} as GlobalStatesType);
 
 /**
  * Returns a reference to the proxied object of global states.
@@ -35,9 +35,9 @@ export function getGlobalStates(): GlobalStatesType {
 }
 
 /**
- * Assign the actual global states to 'globalStates'.
+ * Populate 'globalStates' with the actual initial state.
  * This function is called in 'main.ts'
  */
 export function declareGlobalStates(): void {
-  globalStates = reactive<GlobalStatesType>(GlobalStateHelpers.getFromConfig());
+  Object.assign(globalStates, GlobalStateHelpers.getFromConfig());
 }

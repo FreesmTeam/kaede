@@ -44,13 +44,16 @@ async function handleModeSelect(event: Event): Promise<void> {
 </script>
 
 <template>
-  <span id="__log-viewer__information-subtitle-static">
+  <label
+    id="__log-viewer__information-subtitle-static"
+    class="flex items-center gap-2"
+  >
     View
     <select
       id="__log-viewer__information-subtitle-mode-selector"
       class="rounded-md text-sm"
       @change="handleModeSelect"
-      :value="globalStates?.logs?.mode"
+      :value="globalStates.logs?.mode ?? 'launcher'"
     >
       <option value="launcher">
         {{ ApplicationName }}
@@ -64,5 +67,5 @@ async function handleModeSelect(event: Event): Promise<void> {
       </option>
     </select>
     logs
-  </span>
+  </label>
 </template>

@@ -1,5 +1,7 @@
-import { invoke } from "@tauri-apps/api/core";
+import { Host } from "@/lib/capability-broker";
 
 export async function getExecutableDirectory(): Promise<string> {
-  return await invoke("get_executable_directory");
+  const snapshot = await Host.runtime.getSnapshot();
+
+  return snapshot.executableDirectory;
 }

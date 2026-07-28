@@ -30,7 +30,6 @@ export const GlobalInternals: KaedeInternalsType = {
   "changeGlobalStates"  : (): void => {},
   "getInstanceStates"   : (): InstanceStatesType => ({} as InstanceStatesType),
   "changeInstanceStates": (): void => {},
-  "requestPermissions"  : async (): Promise<Array<boolean>> => [],
   "syncConfig"          : async (): Promise<void> => {},
   "joinDelimiter"       : "",
   "launcherVersion"     : "",
@@ -43,4 +42,5 @@ export const GlobalInternals: KaedeInternalsType = {
   "launchCount"         : 0,
   "logLineHeight"       : 20,
   "logsInBrowser"       : [],
+  "serverProcesses"     : [],
 };

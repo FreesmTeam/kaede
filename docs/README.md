@@ -147,11 +147,14 @@ Kaede is in early stages of development. Look at the [plan](./PLAN.md) to see mo
 
 ## Contributing
 
-No prior Rust knowledge is needed to contribute to this project. Most of the code was written in TypeScript using the Tauri API. These files will help in contributing:
+Most UI and launcher orchestration is TypeScript, while privileged filesystem,
+network, process, and system operations pass through the typed Rust capability
+broker. These files will help in contributing:
 
 - [README for TypeScript-related code](../src/README.md) (the most important one)
 - [README for Rust-related code](../src-tauri/README.md)
 - [Contributing Guidelines](./CONTRIBUTING.md)
+- [Portable Build Contract](./PORTABLE-BUILD-CONTRACT.md)
 - [MultiMC Patch System](./MULTIMC.md)
 - [Building from Source](#building-from-source)
 
@@ -159,14 +162,14 @@ I also leave comments in the code.
 
 For launcher plugins, themes, or translations:
 
-- [Making a Plugin](./EXTENSIONS.md#making-a-plugin)
+- [Making a Plugin](./EXTENSIONS.md#sandboxed-plugins)
 - [Type Declarations for Plugins](../types/README.md)
-- [Making a Theme](./EXTENSIONS.md#making-a-theme)
+- [Making a Theme](./EXTENSIONS.md#themes)
 - [Translating the Launcher](https://github.com/kaede-basement/translations)
 
 Pull requests are welcome. AI code is not welcome (with the exception being user plugins). For major changes, please open an issue first to discuss what you would like to change.
 
-In case if you want to run this launcher with [Wails](https://wails.io/) (or any other backend), see [the following file](../src/lib/README.md#browser).
+In case if you want to run this launcher with [Wails](https://wails.io/) (or any other backend), see [the following file](../src/lib/README.md#browser-preview).
 
 ## Building from Source
 
@@ -174,9 +177,16 @@ In case if you want to run this launcher with [Wails](https://wails.io/) (or any
 
 ### Preparations
 
-See [Tauri v2 Prerequisites](https://v2.tauri.app/start/prerequisites/).
+The reproducible development shell pins Bun 1.3.14, Node.js 26.5.0, and Rust
+1.97.1 together with the platform build dependencies:
 
-I also recommend installing [bun](https://bun.sh/).
+```bash
+nix develop
+```
+
+Without Nix, install the same runtime versions and follow the
+[Tauri v2 Prerequisites](https://v2.tauri.app/start/prerequisites/). Bun's
+version is also enforced by `packageManager` and CI.
 
 Once you are ready, clone this repository:
 
@@ -188,7 +198,7 @@ git clone https://github.com/kaede-basement/kaede
 Navigate to the cloned directory and install project dependencies:
 
 ```bash
-bun install
+bun install --frozen-lockfile
 ```
 
 ### Development

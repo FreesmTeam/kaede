@@ -1,6 +1,6 @@
 import { APIEndpoints } from "@/constants/launcher.ts";
+import { GlobalObject } from "@/extendable/global-object.ts";
 import General from "@/lib/general";
-import Parsers from "@/lib/launcher/scopes/parsers/index.ts";
 import { normalizeArtifactPath } from "@/lib/launcher/scopes/parsers/normalize-artifact-path.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { MappedArtifactType } from "@/types/launcher/artifacts/mapped-artifact.type.ts";
@@ -23,9 +23,6 @@ export function parseLibrary({
   const { directories, logPrefix } = necessaries;
   const descriptiveLogPrefix: string = patchUid + ":" + library?.name + ":" + logPrefix;
   const name: string | undefined = library?.name;
-  const baseUrl: string | undefined = library?.url;
-  const url: string | undefined = library?.downloads?.artifact?.url;
-  const hash: string | undefined = library?.downloads?.artifact?.sha1;
 
   if (name === undefined) {
     log.warn(descriptiveLogPrefix, `The '${JSON.stringify(library)}' library is invalid`);
@@ -33,6 +30,9 @@ export function parseLibrary({
     return false;
   }
 
+  const baseUrl: string | undefined = library?.url;
+  const url: string | undefined = library?.downloads?.artifact?.url;
+  const hash: string | undefined = library?.downloads?.artifact?.sha1;
   const { "directory": relativeDirectory, file, "id": artifactID } = normalizeArtifactPath(name);
   const directory: string = General.cachedJoin(
     directories.libraries,
@@ -53,7 +53,7 @@ export function parseLibrary({
       APIEndpoints.Libraries.Base,
     );
 
-    const builtUrl: string | false = Parsers.buildUrlFromBase({
+    const builtUrl: string | false = GlobalObject.libs.Launcher.Parsers.buildUrlFromBase({
       "baseUrl": APIEndpoints.Libraries.Base,
       name,
       file,
@@ -86,7 +86,7 @@ export function parseLibrary({
 
   // The 'net.fabricmc.fabric-loader' patch libraries only have the 'name' and 'url' fields
   if (baseUrl !== undefined) {
-    const builtUrl: string | false = Parsers.buildUrlFromBase({
+    const builtUrl: string | false = GlobalObject.libs.Launcher.Parsers.buildUrlFromBase({
       baseUrl,
       name,
       file,

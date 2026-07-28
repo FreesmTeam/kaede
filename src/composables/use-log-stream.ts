@@ -16,16 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Channel, invoke } from "@tauri-apps/api/core";
 import { onMounted, onUnmounted, type ShallowRef, shallowRef } from "vue";
 
+import { Host, type LogStreamEvent } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
-
-type LogStreamEventType =
-  | { "type": "snapshot"; "data": Array<string> }
-  | { "type": "lines";    "data": Array<string> }
-  | { "type": "truncated" };
 
 export function useLogStream(): {
   "lines": ShallowRef<{ "list": Array<string> }>;
@@ -33,13 +28,10 @@ export function useLogStream(): {
   const lines = shallowRef<{ "list": Array<string> }>({ "list": [] });
 
   onMounted(() => {
-    const channel = new Channel<LogStreamEventType>;
-
-    // eslint-disable-next-line unicorn/prefer-add-event-listener
-    channel.onmessage = (event): void => {
+    const handleEvent = (event: LogStreamEvent): void => {
       switch (event.type) {
         case "snapshot": {
-          lines.value = { "list": event.data };
+          lines.value = { "list": [...event.data] };
 
           break;
         }
@@ -60,13 +52,19 @@ export function useLogStream(): {
       }
     };
 
-    invoke("stream_logs", { "onEvent": channel }).catch((error: unknown) => {
+    void Host.logs.stream(handleEvent).catch((error: unknown) => {
       log.error(__PRE_BUNDLED_FILENAME__, "The log stream failed:", Errors.prettify(error));
     });
   });
 
   onUnmounted(() => {
-    void invoke("stop_log_stream");
+    void Host.logs.stopStream().catch((error: unknown) => {
+      log.error(
+        __PRE_BUNDLED_FILENAME__,
+        "Stopping the log stream failed:",
+        Errors.prettify(error),
+      );
+    });
   });
 
   return { lines };

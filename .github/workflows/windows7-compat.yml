@@ -1,0 +1,143 @@
+name: "Windows 7 compatibility compile"
+
+# This workflow proves the Win7-target application compiles. It deliberately does not
+# build an installer or claim a runtime smoke; see docs/WINDOWS7-COMPATIBILITY.md.
+on:
+  workflow_dispatch:
+  workflow_call:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: "windows7-compat-${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+env:
+  BUN_VERSION: "1.3.14"
+  RUSTUP_TOOLCHAIN: "nightly-2026-06-28"
+  VITE_BUILD_TARGET: "chrome109"
+  WIN7_TARGET: "x86_64-win7-windows-msvc"
+
+jobs:
+  compile:
+    name: "Compile Tauri app for Windows 7"
+    runs-on: windows-2022
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install pinned Rust nightly with standard-library sources
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
+        with:
+          toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
+          components: rust-src
+
+      - name: Verify the Rust Win7 build contract
+        shell: pwsh
+        run: |
+          rustc --version --verbose
+          cargo --version
+
+          $targets = rustc --print target-list
+          if ($targets -notcontains $env:WIN7_TARGET) {
+            throw "Pinned Rust toolchain does not contain target $env:WIN7_TARGET"
+          }
+
+          $rustSrc = rustup component list --toolchain $env:RUSTUP_TOOLCHAIN |
+            Select-String -Pattern '^rust-src.*\(installed\)$'
+          if ($null -eq $rustSrc) {
+            throw "rust-src is not installed for $env:RUSTUP_TOOLCHAIN"
+          }
+
+          $buildStd = cargo -Z help | Select-String -Pattern '^\s*-Z\s+build-std\s'
+          if ($null -eq $buildStd) {
+            throw "Pinned Cargo does not expose -Z build-std"
+          }
+
+      - name: Prepare the Win7-target txiki sidecar
+        shell: pwsh
+        run: |
+          $sourceSidecar = "src-tauri/binaries/txiki-server-x86_64-pc-windows-msvc.exe"
+          $targetSidecar = "src-tauri/binaries/txiki-server-$env:WIN7_TARGET.exe"
+
+          bun ./scripts/check-windows7-pe.ts $sourceSidecar
+          Copy-Item -LiteralPath $sourceSidecar -Destination $targetSidecar
+
+          $sourceHash = (Get-FileHash -LiteralPath $sourceSidecar -Algorithm SHA256).Hash
+          $targetHash = (Get-FileHash -LiteralPath $targetSidecar -Algorithm SHA256).Hash
+          if ($sourceHash -ne $targetHash) {
+            throw "Win7-target sidecar alias differs from the verified source sidecar"
+          }
+
+      - name: Install frontend dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build frontend for WebView2 109
+        run: bun run build:frontend
+
+      # Tauri CLI 2.11.x validates --target only against `rustup target list`.
+      # The nightly-only Win7 target is built from rust-src instead, so invoke
+      # Cargo directly while preserving the same Tauri configuration overlay.
+      - name: Compile Tauri app for the Win7 target
+        shell: pwsh
+        run: |
+          $env:TAURI_CONFIG = Get-Content -LiteralPath "src-tauri/tauri.win7.conf.json" -Raw
+          $cargoArgs = @(
+            "build"
+            "--manifest-path", "src-tauri/Cargo.toml"
+            "--bins"
+            "--features", "tauri/custom-protocol"
+            "--target", $env:WIN7_TARGET
+            "--release"
+            "--locked"
+            "-Z", "build-std"
+          )
+
+          cargo @cargoArgs
+
+      - name: Verify Win7-target PE binaries
+        shell: pwsh
+        run: |
+          $appBinary = "src-tauri/target/$env:WIN7_TARGET/release/kaede.exe"
+          $sourceSidecar = "src-tauri/binaries/txiki-server-x86_64-pc-windows-msvc.exe"
+          $builtSidecar = "src-tauri/target/$env:WIN7_TARGET/release/txiki-server.exe"
+
+          if (-not (Test-Path -LiteralPath $appBinary -PathType Leaf)) {
+            throw "Tauri did not produce the expected Win7-target binary: $appBinary"
+          }
+          if (-not (Test-Path -LiteralPath $builtSidecar -PathType Leaf)) {
+            throw "Tauri did not copy the expected Win7-target sidecar: $builtSidecar"
+          }
+
+          $sourceHash = (Get-FileHash -LiteralPath $sourceSidecar -Algorithm SHA256).Hash
+          $builtHash = (Get-FileHash -LiteralPath $builtSidecar -Algorithm SHA256).Hash
+          if ($sourceHash -ne $builtHash) {
+            throw "Built Win7-target sidecar differs from the verified source sidecar"
+          }
+
+          bun ./scripts/check-windows7-pe.ts $appBinary $builtSidecar
+
+      - name: Record the compatibility boundary
+        shell: pwsh
+        run: |
+          @'
+          ## Windows 7 compatibility gate
+
+          This run compiled the frontend for Chromium 109 and produced an AMD64 PE app
+          with Rust's `x86_64-win7-windows-msvc` target. Both the app and bundled txiki
+          sidecar declare a PE subsystem version no newer than Windows 7 (6.1).
+
+          This compile-only workflow does not build an MSI/NSIS installer and does not
+          prove WebView2 installation or an application runtime smoke on Windows 7.
+          See `docs/WINDOWS7-COMPATIBILITY.md` before distributing a Win7 build.
+          '@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY

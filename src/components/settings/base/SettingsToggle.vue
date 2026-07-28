@@ -22,7 +22,7 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 const { id, modelValue, onToggle } = defineProps<{
   "id"        : string;
   "modelValue": boolean;
-  "onToggle"  : (value: boolean) => void;
+  "onToggle"  : (isEnabled: boolean) => void;
 }>();
 </script>
 

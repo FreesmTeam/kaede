@@ -1,39 +1,82 @@
-import type { PermissionType } from "@/types/extensions/permission.type.ts";
-
-/* 'any' is required since 'GrantedScopes[string]' will contain literally anything */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const GrantedScopes: Record<string, any> = {};
-export const IgnoredExtensionPermissions: Record<string, Partial<{
-  [Key in PermissionType]: boolean;
-}>> = {};
-export const Permissions = {
-  "UI": {
-    "Basic": "ui-basic",
-    "Style": "ui-style",
+export const PERMISSION_CATALOG = {
+  "ui/basic": {
+    "description": "Render basic, non-interactive user interface content.",
+    "dangerLevel": "low",
+    "scoped"     : false,
   },
-  "Events": {
-    "All": "all-events",
+  "ui/forms/non-credential": {
+    "description": "Render forms that must not collect credentials or other secrets.",
+    "dangerLevel": "medium",
+    "scoped"     : false,
   },
-  "Internet": {
-    "General": "internet",
+  "network/http": {
+    "description": "Send HTTP requests to the explicitly granted origins and methods.",
+    "dangerLevel": "high",
+    "scoped"     : true,
   },
-  "ExternalStorage": {
-    "Read" : "read-external-storage",
-    "Write": "write-external-storage",
+  "storage/internal/read": {
+    "description": "Read files in storage isolated to this exact plugin principal.",
+    "dangerLevel": "low",
+    "scoped"     : true,
   },
-  "InternalStorage": {
-    "Read"   : "read-internal-storage",
-    "Write"  : "write-internal-storage",
-    "Logging": "write-to-log-file",
+  "storage/internal/write": {
+    "description": "Write files in storage isolated to this exact plugin principal.",
+    "dangerLevel": "medium",
+    "scoped"     : true,
+  },
+  "storage/external/read": {
+    "description": "Read files below explicitly granted absolute filesystem roots.",
+    "dangerLevel": "high",
+    "scoped"     : true,
+  },
+  "storage/external/write": {
+    "description": "Write files below explicitly granted absolute filesystem roots.",
+    "dangerLevel": "critical",
+    "scoped"     : true,
+  },
+  "system/process/spawn": {
+    "description": "Spawn exact executable paths with exact argument arrays.",
+    "dangerLevel": "critical",
+    "scoped"     : true,
+  },
+  "system/shell": {
+    "description": "Execute unrestricted shell commands outside the capability sandbox.",
+    "dangerLevel": "critical",
+    "scoped"     : false,
+  },
+  "events/subscribe": {
+    "description": "Subscribe to launcher lifecycle and state-change events.",
+    "dangerLevel": "low",
+    "scoped"     : false,
+  },
+  "logging/write": {
+    "description": "Write entries to the launcher log.",
+    "dangerLevel": "low",
+    "scoped"     : false,
   },
 } as const;
-export const PermissionsList: Array<PermissionType> = Object
-  .values(Permissions)
-  .flatMap(scope => Object.values(scope));
+
+export const PERMISSION_IDS = [
+  "ui/basic",
+  "ui/forms/non-credential",
+  "network/http",
+  "storage/internal/read",
+  "storage/internal/write",
+  "storage/external/read",
+  "storage/external/write",
+  "system/process/spawn",
+  "system/shell",
+  "events/subscribe",
+  "logging/write",
+] as const satisfies ReadonlyArray<keyof typeof PERMISSION_CATALOG>;
+
+export type PermissionDangerLevel =
+  | "low"
+  | "medium"
+  | "high"
+  | "critical";
 
 export default {
-  GrantedScopes,
-  IgnoredExtensionPermissions,
-  Permissions,
-  PermissionsList,
+  PERMISSION_CATALOG,
+  PERMISSION_IDS,
 } as const;

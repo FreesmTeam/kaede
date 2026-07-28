@@ -16,10 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { fetch } from "@tauri-apps/plugin-http";
-
 import { APIEndpoints } from "@/constants/launcher.ts";
 import { CustomPatches, Patches } from "@/constants/meta.ts";
+import { Host } from "@/lib/capability-broker";
 import type {
   ExtendedPatchUIDType,
   PatchDependencyType,
@@ -53,7 +52,7 @@ export async function fetchAllVersions(
   }
 
   const url: string = APIEndpoints.Meta.Base + uid;
-  const response: Response = await fetch(url);
+  const response: Response = await Host.http.fetch(url);
   const parsed: unknown = await response.json();
 
   if (typeof parsed !== "object" || parsed === null) {
@@ -74,7 +73,7 @@ export async function fetchAllVersions(
     throw new Error("No version field in the parsed versions");
   }
 
-  if (uid !== Patches.Minecraft && minecraftPatchVersion) {
+  if (minecraftPatchVersion && uid !== Patches.Minecraft) {
     return parsed.versions.filter(currentVersion => {
       const requires: Array<PatchDependencyType> =
         currentVersion?.requires ?? [];

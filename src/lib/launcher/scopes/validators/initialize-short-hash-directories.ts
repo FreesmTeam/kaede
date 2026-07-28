@@ -16,8 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type DirEntry, mkdir, readDir } from "@tauri-apps/plugin-fs";
-
+import { type DirectoryEntry, Host } from "@/lib/capability-broker";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
@@ -35,7 +34,9 @@ export async function initializeShortHashDirectories({
   logPrefix,
 }: PreLaunchInformationType): Promise<void> {
   log.debug(logPrefix, "Reading the '/assets/objects' directory");
-  const objects: Array<DirEntry> = await readDir(directories.assetObjects);
+  const objects: ReadonlyArray<DirectoryEntry> = await Host.files.readDirectory(
+    directories.assetObjects,
+  );
   const existingFolders: Set<string> = new Set(
     objects.map(({ name }) => name),
   );
@@ -51,7 +52,5 @@ export async function initializeShortHashDirectories({
     logPrefix,
     `Missing ${missingPaths.length} short hash directories; creating them`,
   );
-  await Promise.all(
-    missingPaths.map(path => mkdir(path)),
-  );
+  await Host.files.ensureDirectories(missingPaths);
 }

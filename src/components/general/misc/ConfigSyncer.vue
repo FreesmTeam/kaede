@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { writeTextFile } from "@tauri-apps/plugin-fs";
 import { useIntervalFn } from "@vueuse/core";
 import { ref, watchEffect } from "vue";
 
 import FileStructure from "@/constants/file-structure.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import { Host } from "@/lib/capability-broker";
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
@@ -69,7 +69,7 @@ async function handleConfigSync(): Promise<void> {
 
   try {
     log.debug(__PRE_BUNDLED_FILENAME__, "Updating the config file with new values");
-    await writeTextFile(
+    await Host.files.writeText(
       configPath,
       JSON.stringify(configOnlyGlobalStates, null, 2),
     );

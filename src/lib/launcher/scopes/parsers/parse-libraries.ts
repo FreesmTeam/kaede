@@ -56,12 +56,12 @@ export function parseLibraries({
       continue;
     }
 
-    const toInclude: boolean = shouldIncludeLibrary({
+    const shouldInclude: boolean = shouldIncludeLibrary({
       necessaries,
       library,
     });
 
-    if (!toInclude) {
+    if (!shouldInclude) {
       continue;
     }
 

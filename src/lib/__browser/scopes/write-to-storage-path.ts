@@ -18,9 +18,10 @@
 
 import { BrowserStorageStoreKey } from "@/constants/browser.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import type { BrowserStorageValue } from "@/lib/browser/scopes/browser-storage.ts";
 import { getDatabaseStore } from "@/lib/browser/scopes/get-database-store.ts";
 
-export async function writeToStoragePath(path: string, value: string): Promise<void> {
+export async function writeToStoragePath(path: string, value: BrowserStorageValue): Promise<void> {
   const database: IDBDatabase | undefined = GlobalInternals.indexedDB;
 
   if (!database) {
@@ -36,7 +37,7 @@ export async function writeToStoragePath(path: string, value: string): Promise<v
       resolve();
     }, { "once": true });
     request.addEventListener("error", () => {
-      reject("An error occurred while writing to indexed DB");
+      reject(new Error("An error occurred while writing to IndexedDB"));
     }, { "once": true });
   });
 }

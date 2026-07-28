@@ -1,5 +1,4 @@
-import { exists, readTextFile, writeTextFile } from "@tauri-apps/plugin-fs";
-
+import { Host } from "@/lib/capability-broker";
 import Errors from "@/lib/errors";
 import { cachedJoin } from "@/lib/general/scopes/cached-join.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -19,7 +18,7 @@ export async function handleJsonFile({
     const filePath: string = cachedJoin(baseDirectory, ...path);
 
     log.debug(__PRE_BUNDLED_FILENAME__, `Checking if the '${label}' file exists`);
-    const fileExists = await exists(filePath);
+    const fileExists = await Host.files.exists(filePath);
 
     if (!fileExists) {
       log.warn(__PRE_BUNDLED_FILENAME__, `The '${label}' file does not exist`);
@@ -27,7 +26,7 @@ export async function handleJsonFile({
       const defaultValue = await getDefaultValue();
 
       log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${label}' file`);
-      await writeTextFile(
+      await Host.files.writeText(
         filePath,
         JSON.stringify(
           defaultValue,
@@ -40,7 +39,7 @@ export async function handleJsonFile({
     }
 
     log.debug(__PRE_BUNDLED_FILENAME__, `Reading the '${label}' file`);
-    const storedFileData: string = await readTextFile(filePath);
+    const storedFileData: string = await Host.files.readText(filePath);
     let parsed: unknown;
 
     try {

@@ -66,7 +66,7 @@ export async function downloadAssets({
     const refetch = async (): Promise<unknown> => {
       log.warn(logPrefix, "No cache; fetching the assets metadata");
       statuses.current = LaunchStatus.AssetIndex.Fetching;
-      const fetched: { "data": unknown } | LaunchStatusType = await fetchMetadata({
+      const fetched: LaunchStatusType | { "data": unknown } = await fetchMetadata({
         "url"   : assetIndex.url,
         "label" : "assets index",
         "scope" : "AssetIndex",
@@ -193,7 +193,7 @@ export async function downloadAssets({
     "label"      : "assets",
   });
 
-  if (report.cancelled) {
+  if (report.cancelled || report.failed > 0) {
     return false;
   }
 

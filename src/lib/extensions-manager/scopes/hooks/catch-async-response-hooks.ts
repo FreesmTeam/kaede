@@ -5,7 +5,7 @@ import Errors from "@/lib/errors";
 import { handleHookResponse } from "@/lib/extensions-manager/scopes/hooks/handle-hook-response.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { ExtensionStatusType, HookReturnType } from "@/types/extensions/hook-return.type.ts";
-import IsKeyInObject from "@/types/utils/is-key-in-object.ts";
+import isKeyInObject from "@/types/utils/is-key-in-object.ts";
 
 export async function catchAsyncResponseHooks<T>({
   scope,
@@ -19,7 +19,7 @@ export async function catchAsyncResponseHooks<T>({
   const timeMeasurementStartBefore = performance.now();
   const currentScopeHooks = GlobalObject.hooks[scope];
 
-  if (!IsKeyInObject(timing, currentScopeHooks)) {
+  if (!isKeyInObject(timing, currentScopeHooks)) {
     return;
   }
 

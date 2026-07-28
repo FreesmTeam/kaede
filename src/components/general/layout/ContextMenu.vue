@@ -53,18 +53,18 @@ const styles = computed((): {
    * The browser context menu seems to always go to the right and bottom sides
    * so we place the custom one to left and top
    */
-  const toShowNativeMenu: boolean = hasNativeContextMenu.value;
+  const shouldShowNativeMenu: boolean = hasNativeContextMenu.value;
   // By default, the context menu goes to the right and bottom sides
   const isHorizontallyOutOfBounds: boolean = cachedSize.value.width + x + offset > boundaries.width;
   const isVerticallyOutOfBounds: boolean = cachedSize.value.height + y + offset > boundaries.height;
 
-  if (toShowNativeMenu || isHorizontallyOutOfBounds) {
+  if (shouldShowNativeMenu || isHorizontallyOutOfBounds) {
     position.right = `${boundaries.width - x + offset}px`;
   } else {
     position.left = `${x + offset}px`;
   }
 
-  if (toShowNativeMenu || isVerticallyOutOfBounds) {
+  if (shouldShowNativeMenu || isVerticallyOutOfBounds) {
     position.bottom = `${boundaries.height - y + offset}px`;
   } else {
     position.top = `${y + offset}px`;

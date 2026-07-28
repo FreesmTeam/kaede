@@ -2,7 +2,8 @@ import { CustomPatches, Patches } from "@/constants/meta.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 
 export const FamousAndOldJavaMajorVersion = 8;
-export const DefaultInstanceIcon = "https://minecraft.wiki/images/Minecraft_Preview_App_Store_icon_2.png";
+const DefaultInstanceIcon = "https://minecraft.wiki/images/Minecraft_Preview_App_Store_icon_2.png";
+
 export const DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions"> = {
   "name"        : "Minecraft - Vanilla",
   "icon"        : DefaultInstanceIcon,
@@ -101,68 +102,6 @@ export const LaunchStatus = {
     "UnhandledError"      : "errors-unhandled-error",
     "IncompatiblePlatform": "errors-incompatible-platform",
     "IncompatibleArch"    : "errors-incompatible-arch",
-  },
-} as const;
-// TODO remove this one
-export const _LaunchStatus = {
-  "General": {
-    "Starting": "general-starting",
-    "Success" : "general-success",
-  },
-  "Patches": {
-    "ReadingLatestVersion" : "patches-reading-latest-version",
-    "FetchingLatestVersion": "patches-fetching-latest-version",
-    "Done"                 : "patches-done",
-  },
-  "Metadata": {
-    "ReadingCachedVersionMeta": "meta-reading-cached-version-meta",
-    "FetchingVersionMeta"     : "meta-fetching-version-meta",
-    "ValidatingVersionMeta"   : "meta-validating-version-meta",
-    "ReadingCachedPatchMeta"  : "meta-reading-cached-patch-meta",
-    "FetchingPatchMeta"       : "meta-fetching-patch-meta",
-  },
-  "Assets": {
-    "ReadingCachedMeta": "assets-reading-cached-meta",
-    "FetchingMeta"     : "assets-fetching-meta",
-    "DownloadingAsset" : "assets-downloading-asset",
-    "Done"             : "assets-done",
-  },
-  "Client": {
-    "CheckingIfPresent": "client-checking-if-present",
-    "DownloadingJar"   : "client-downloading-jar",
-    "Done"             : "client-done",
-  },
-  "Logging": {
-    "CheckingIfPresent": "logging-checking-if-present",
-    "DownloadingConfig": "logging-downloading-config",
-    "Done"             : "logging-done",
-  },
-  "Libraries": {
-    "DownloadingLibrary": "libraries-downloading-library",
-    "Done"              : "libraries-done",
-  },
-  "Errors": {
-    "UnhandledError"                    : "error-unhandled-error",
-    "UndefinedInstanceVersion"          : "error-undefined-instance-version",
-    "IncompatiblePlatform"              : "error-incompatible-platform",
-    "IncompatibleArch"                  : "error-incompatible-arch",
-    "MetaVersionFetchFailed"            : "error-meta-version-fetch-failed",
-    "MetaVersionParseFailed"            : "error-meta-version-parse-failed",
-    "MetaVersionShallowValidationFailed": "error-meta-version-shallow-validation-failed",
-    "MetaVersionFullValidationFailed"   : "error-meta-version-full-validation-failed",
-    "MetaAssetsMissingMeta"             : "error-meta-assets-missing-meta",
-    "MetaAssetsFetchFailed"             : "error-meta-assets-fetch-failed",
-    "MetaAssetsParseFailed"             : "error-meta-assets-parse-failed",
-    "MetaAssetsShallowValidationFailed" : "error-meta-assets-shallow-validation-failed",
-    "ClientMainJarMissingMeta"          : "error-client-main-jar-missing-meta",
-    "LoggingMissingMeta"                : "error-logging-missing-meta",
-    "PatchMissingMeta"                  : "error-patch-missing-meta",
-    "PatchFullValidationFailed"         : "error-patch-full-validation-failed",
-    "LibrariesMissingMeta"              : "error-libraries-missing-meta",
-    "LibraryShallowValidationFailed"    : "error-library-shallow-validation-failed",
-    "VersionNotFoundInMeta"             : "error-version-not-found-in-meta",
-    "MissingJava"                       : "error-missing-java",
-    "IncorrectJavaVersion"              : "error-incorrect-java-version",
   },
 } as const;
 export const APIEndpoints = {

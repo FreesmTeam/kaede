@@ -18,38 +18,6 @@
 
 import { shallowRef } from "vue";
 
-import { log } from "@/lib/logging/scopes/log.ts";
-import { rehydrateProcesses } from "@/lib/processes/core.ts";
-import { hydrate } from "@/lib/processes/hydrate.ts";
-import type {
-  ProcessHandleType,
-  ServerMetaType,
-  ServerProcessType,
-} from "@/types/application/server-process.type.ts";
+import type { KaedeInternalsType } from "@/declarations.ts";
 
-export const serverProcesses = shallowRef<Array<ServerProcessType>>([]);
-
-export async function declareServerProcesses(): Promise<void> {
-  const servers: Array<ServerProcessType> = [];
-
-  await rehydrateProcesses(handle => {
-    if (handle.kind !== "extension-server") {
-      return;
-    }
-
-    const meta = handle.meta as ServerMetaType;
-
-    servers.push(hydrate(handle as ProcessHandleType<ServerMetaType>));
-
-    return {
-      "onExit": (): void => {
-        serverProcesses.value = serverProcesses.value.filter(item => item.name !== meta.name);
-      },
-      "onOutput": (line, stream): void => (stream === "stdout" ? log.debug : log.error)(
-        __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", line,
-      ),
-    };
-  });
-
-  serverProcesses.value = servers;
-}
+export const serverProcesses = shallowRef<KaedeInternalsType["serverProcesses"]>([]);

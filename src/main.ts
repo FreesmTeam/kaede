@@ -33,6 +33,7 @@ import { ApplicationRootID } from "@/constants/application";
 import ASCIIArt from "@/constants/ascii-art.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Browser from "@/lib/browser";
+import { initializeCapabilityBroker } from "@/lib/capability-broker";
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
@@ -42,7 +43,6 @@ import { log } from "@/lib/logging/scopes/log.ts";
 import Watchers from "@/lib/watchers";
 import { declareGlobalStates } from "@/states/global.ts";
 import { declareInstanceStates } from "@/states/instance.ts";
-import { declareServerProcesses } from "@/states/servers.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
@@ -57,11 +57,12 @@ Watchers.watchErrors();
 // The global object is accessed not only by extensions but by the application itself
 Globals.declareGlobals();
 
-// For a live preview: https://kaede-basement.github.io/kaede/
-if (Browser.detectIsBrowser()) {
-  // Handle Tauri API placeholders
-  await Browser.handleTauriEnvironment();
+const isBrowserPreview = Browser.detectIsBrowser();
 
+await initializeCapabilityBroker({ "browserPreview": isBrowserPreview });
+
+// For a live preview: https://kaede-basement.github.io/kaede/
+if (isBrowserPreview) {
   Browser.handleLogsFlush();
 }
 
@@ -116,17 +117,6 @@ GlobalInternals.temporaryAccounts = accounts;
  */
 declareGlobalStates();
 declareInstanceStates();
-declareServerProcesses()
-  .then(() => {
-    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated server processes state");
-  })
-  .catch((error: unknown) => {
-    log.error(
-      __PRE_BUNDLED_FILENAME__,
-      "Failed to hydrate server processes state:",
-      Errors.prettify(error),
-    );
-  });
 
 /*
  * They handle the necessary watching actions.
@@ -134,18 +124,6 @@ declareServerProcesses()
  */
 Watchers.watchDevelopmentStates();
 Watchers.watchLayoutStates();
-Watchers.watchProcesses()
-  .then(() => declareServerProcesses())
-  .then(() => {
-    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated and wired server processes state");
-  })
-  .catch((error: unknown) => {
-    log.error(
-      __PRE_BUNDLED_FILENAME__,
-      "Failed to attach a listener to server processes:",
-      Errors.prettify(error),
-    );
-  });
 
 log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
   "Config contents",
@@ -172,8 +150,8 @@ log.debug(
 AppInstance.mount(ApplicationRootID);
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Initializing launcher");
-await General
-  .finalizeInitialization({ config, baseDirectory })
-  .catch((error: unknown) => {
-    log.error(__PRE_BUNDLED_FILENAME__, "Failed to initialize launcher:", Errors.prettify(error));
-  });
+try {
+  await General.finalizeInitialization({ config, baseDirectory });
+} catch (error: unknown) {
+  log.error(__PRE_BUNDLED_FILENAME__, "Failed to initialize launcher:", Errors.prettify(error));
+}

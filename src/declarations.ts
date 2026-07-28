@@ -117,9 +117,9 @@ declare global {
       "internals": {
         // Requests plugin permissions from user
         "requestPermissions"  : (
-          permissions: Array<PermissionType>,
+          permissions: Array<PermissionType | string> | unknown,
           extension: string
-        ) => Promise<Array<boolean>>;
+        ) => Promise<Array<unknown>>;
         // Platform-specific delimiter
         "joinDelimiter"       : string;
         // Launcher version

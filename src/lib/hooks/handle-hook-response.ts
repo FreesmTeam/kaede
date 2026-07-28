@@ -1,4 +1,4 @@
-import { ExtraHookResponseStatus, HookResponseStatus } from "@/constants/hooks.ts";
+import { ExtraHookResponseStatus, HookResponseStatus } from "@/constants/application.ts";
 import type { KaedeNamespaceType } from "@/declarations.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { ExtensionStatusType } from "@/types/extensions/hook-return.type.ts";

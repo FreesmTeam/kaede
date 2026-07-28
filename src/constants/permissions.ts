@@ -1,11 +1,5 @@
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
-/* 'any' is required since 'GrantedScopes[string]' will contain literally anything */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const GrantedScopes: Record<string, any> = {};
-export const IgnoredExtensionPermissions: Record<string, Partial<{
-  [Key in PermissionType]: boolean;
-}>> = {};
 export const Permissions = {
   "UI": {
     "Basic": "ui-basic",
@@ -32,8 +26,6 @@ export const PermissionsList: Array<PermissionType> = Object
   .flatMap(scope => Object.values(scope));
 
 export default {
-  GrantedScopes,
-  IgnoredExtensionPermissions,
   Permissions,
   PermissionsList,
 } as const;

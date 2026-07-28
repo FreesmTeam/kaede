@@ -24,7 +24,7 @@ import type { TranslationsType } from "@/types/translations/translations.type.ts
 export const GlobalInternals: KaedeNamespaceType["internals"] = {
 
   /* All these fields will be overwritten */
-  "requestPermissions" : async (): Promise<Array<boolean>> => [],
+  "requestPermissions" : async (): Promise<Array<unknown>> => [],
   "joinDelimiter"      : "",
   "launcherVersion"    : "",
   "initialConfig"      : {} as ConfigType,

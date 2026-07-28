@@ -16,10 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export class Extension {
-  readonly kind: string;
+import { createSafeDocument, type SafeDocument } from "ark-of-atrahasis";
 
-  constructor(kind: "d") {
-    this.kind = kind;
-  }
+import { log } from "@/lib/logging/scopes/log.ts";
+
+export function handleBasicUIPermission({
+  id,
+}: {
+  "id": string;
+}): unknown {
+  return (elementId: string): unknown => {
+    const gui: SafeDocument = createSafeDocument(elementId);
+
+    log.info(__PRE_BUNDLED_FILENAME__, `Created a safe DOM for '${id}'`);
+
+    return harden({
+      ...gui,
+      // These will be granted with other permissions
+      "createStyle" : undefined,
+      "createAnchor": undefined,
+      "createCanvas": undefined,
+      "createImage" : undefined,
+      "createVideo" : undefined,
+      "createAudio" : undefined,
+      "createSource": undefined,
+    });
+  };
 }
+

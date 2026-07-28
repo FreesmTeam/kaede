@@ -26,6 +26,7 @@ export async function getDefaultConfig(): Promise<ConfigType> {
     },
     "extensions": {
       "list"                      : [],
+      "permissions"               : {},
       "enabled"                   : true,
       "allowUnrestrictedUntrusted": true,
       "showAppAfterExtensionsLoad": false,

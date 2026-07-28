@@ -104,8 +104,7 @@ onMounted(async () => {
   log.debug(__PRE_BUNDLED_FILENAME__, "Initializing all enabled sandboxed extensions");
   for (const { id, code, permissions } of toExecute.sandbox) {
     try {
-      ExtensionsManager.grantStaticPermissions({ id, permissions });
-      ExtensionsManager.runInSandbox({ id, code });
+      ExtensionsManager.runInSandbox({ id, permissions, code });
     } catch (error: unknown) {
       log.error(
         __PRE_BUNDLED_FILENAME__,

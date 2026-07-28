@@ -1,15 +1,17 @@
-import { EventListeners } from "@/constants/event-listeners.ts";
-import { GrantedScopes } from "@/constants/permissions.ts";
 import ExtensionsManager from "@/lib/extensions-manager";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
 export function runInSandbox({
   id,
   code,
+  permissions = [],
 }: {
-  "id"  : string;
-  "code": string;
+  "id"          : string;
+  "code"        : string;
+  "permissions"?: Array<PermissionType>;
 }): void {
+  const scopedThis = ExtensionsManager.grantStaticPermissions({ id, permissions });
+
   /*
    * Create a plugin-scoped handler for requesting permissions
    * to prevent the 'ExtensionsManager#requestPermissions' tampering
@@ -22,21 +24,21 @@ export function runInSandbox({
 
   try {
     const compartment = new Compartment({
-      "globals": {
+      "globals": harden({
         "requestPermissions": wrappedPermissionsRequest,
 
         /*
          * Provide a reference to the plugin-scoped 'GrantedScopes' object to make it
          * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handlePermission'
          */
-        "GrantedScopes": GrantedScopes[id],
+        "scopedThis": scopedThis,
 
         /*
          * Provide a reference to the plugin-scoped 'EventListeners' object to make it
          * modifiable from other JavaScript scopes, i.e. from 'ExtensionsManager#handleEvent'
          */
-        "EventListeners": EventListeners[id],
-      },
+        // TODO: DO NOT DO THIS; CHANGE LATER --- "EventListeners": EventListeners[id],
+      }),
 
       /*
        * Code execution does not work without this property,

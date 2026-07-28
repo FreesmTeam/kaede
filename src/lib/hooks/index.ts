@@ -16,10 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { lockdownEnvironment } from "@/lib/extensions/lockdown-environment.ts";
-import { readExtensions } from "@/lib/extensions/read-extensions.ts";
+import { catchAsyncResponseHooks } from "@/lib/hooks/catch-async-response-hooks.ts";
+import { catchAsyncVoidHooks } from "@/lib/hooks/catch-async-void-hooks.ts";
+import { catchSyncResponseHooks } from "@/lib/hooks/catch-sync-response-hooks.ts";
+import { catchSyncVoidHooks } from "@/lib/hooks/catch-sync-void-hooks.ts";
+import { handleHookResponse } from "@/lib/hooks/handle-hook-response.ts";
 
 export default {
-  lockdownEnvironment,
-  readExtensions,
+  catchAsyncResponseHooks,
+  catchAsyncVoidHooks,
+  catchSyncResponseHooks,
+  catchSyncVoidHooks,
+  handleHookResponse,
 } as const;

@@ -14,6 +14,7 @@ type DevelopmentType = {
 };
 type ExtensionsType = {
   "list"                      : Array<{ "enabled": boolean; "id": string }>;
+  "permissions"               : Record<string, Record<string, boolean>>;
   "enabled"                   : boolean;
   "allowUnrestrictedUntrusted": boolean;
   "showAppAfterExtensionsLoad": boolean;

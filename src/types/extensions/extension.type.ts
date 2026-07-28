@@ -16,10 +16,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { lockdownEnvironment } from "@/lib/extensions/lockdown-environment.ts";
-import { readExtensions } from "@/lib/extensions/read-extensions.ts";
+import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
-export default {
-  lockdownEnvironment,
-  readExtensions,
-} as const;
+type MetadataType = {
+  // Should be unique
+  "id"        : string;
+  "logo"      : string;
+  "name"      : string;
+  "type"      : "sandbox" | "unrestricted";
+  "source"    : string;
+  "version"   : string;
+  "authors"   : Array<string>;
+  // Use ISO 639-1 two-letter language codes
+  "languages" : Array<string>;
+  "categories": Array<string>;
+} & Partial<{
+  "description": string;
+  "permissions": Array<PermissionType>;
+  "enabled"    : boolean;
+}>;
+
+export type ExtensionType = {
+  "id"      : string;
+  "code"    : string;
+  "metadata": MetadataType;
+};

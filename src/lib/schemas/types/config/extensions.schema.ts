@@ -7,6 +7,13 @@ export const ExtensionsSchema = Type.Object({
       "id"     : Type.String(),
     }),
   ),
+  "permissions": Type.Record(
+    Type.String(),
+    Type.Record(
+      Type.String(),
+      Type.Boolean(),
+    ),
+  ),
   "enabled"                   : Type.Boolean(),
   "allowUnrestrictedUntrusted": Type.Boolean(),
   "showAppAfterExtensionsLoad": Type.Boolean(),

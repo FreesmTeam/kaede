@@ -3,21 +3,20 @@ import { ref } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import AllowButton from "@/components/general/extensions/permissions/AllowButton.vue";
-import { IgnoredExtensionPermissions } from "@/constants/permissions.ts";
+import { ContextMenu } from "@/constants/application.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
-import { GlobalObject } from "@/extendable/global-object.ts";
-import { __requestPermissions } from "@/lib/extensions-manager/scopes/request-permissions.ts";
+import { __requestPermissions } from "@/lib/permissions/request-permissions.ts";
+import { globalStates } from "@/states/global.ts";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
 const requestedPermissionState = ref<{
-  "id"       : PermissionType;
+  "id"       : PermissionType | string;
   "extension": string;
   "resolve"  : (state: boolean) => void;
 } | undefined>(undefined);
-const doNotAsk = ref<boolean>(false);
 
 function handlePermissionRequest(
-  permission?: PermissionType,
+  permission?: PermissionType | string,
   extension?: string,
   resolve?: (state: boolean) => void,
 ): void {
@@ -35,9 +34,10 @@ function handlePermissionRequest(
 }
 
 function requestPermissions(
-  permissions: Array<PermissionType>,
+  // After all, this is the value provided by the extension
+  permissions: unknown,
   extension: string,
-): Promise<Array<boolean>> {
+): Promise<Array<unknown>> {
   return __requestPermissions(permissions, extension, handlePermissionRequest);
 }
 
@@ -46,16 +46,15 @@ function handleUserRequest(state: boolean): void {
     return;
   }
 
-  if (doNotAsk.value) {
-    const _extension = requestedPermissionState.value.extension;
-    const _permission = requestedPermissionState.value.id;
+  const currentPermissions = globalStates.extensions.permissions;
+  const _extension = requestedPermissionState.value.extension;
+  const _permission = requestedPermissionState.value.id;
 
-    if (!IgnoredExtensionPermissions[_extension]) {
-      IgnoredExtensionPermissions[_extension] = {};
-    }
-
-    IgnoredExtensionPermissions[_extension][_permission] = state;
+  if (!currentPermissions[_extension]) {
+    currentPermissions[_extension] = {};
   }
+
+  currentPermissions[_extension][_permission] = state;
 
   requestedPermissionState.value.resolve(state);
 }
@@ -106,29 +105,6 @@ GlobalInternals.requestPermissions = requestPermissions;
               to access {{ requestedPermissionState.id }}?
             </span>
           </div>
-        </div>
-        <div
-          id="__extensions-loader__permission-request-ignore-wrapper"
-          class="flex flex-nowrap items-center px-2"
-        >
-          <div
-            id="__extensions-loader__permission-request-ignore-checkbox-wrapper"
-            class="grid size-5 shrink-0 cursor-pointer place-items-center border-2 border-neutral-300 rounded-md"
-          >
-            <input
-              id="__extensions-loader__permission-request-ignore-checkbox"
-              type="checkbox"
-              v-model="doNotAsk"
-              class="size-3 cursor-pointer appearance-none rounded-sm bg-transparent transition-[background-color] duration-75 checked:bg-white"
-            />
-          </div>
-          <label
-            id="__extensions-loader__permission-request-ignore-label"
-            for="__extensions-loader__permission-request-ignore-checkbox"
-            class="cursor-pointer pl-4 text-neutral-300"
-          >
-            Don't ask again
-          </label>
         </div>
         <div
           id="__extensions-loader__permission-request-control"

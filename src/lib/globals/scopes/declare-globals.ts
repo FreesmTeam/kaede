@@ -11,7 +11,6 @@ import _Launcher from "@/constants/launcher.ts";
 import _Meta from "@/constants/meta.ts";
 import _Permissions from "@/constants/permissions.ts";
 import _Routes from "@/constants/routes.ts";
-import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Browser from "@/lib/browser";
 import Configs from "@/lib/configs";
@@ -36,7 +35,6 @@ export function declareGlobals(): void {
       start,
     },
   };
-  window.__KAEDE_INTERNALS__ = GlobalInternals;
   window.__KAEDE__ = GlobalObject;
 
   GlobalObject.constants = {

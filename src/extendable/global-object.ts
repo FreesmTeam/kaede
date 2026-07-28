@@ -17,6 +17,7 @@
  */
 
 import type { KaedeNamespaceType } from "@/declarations.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 
 /**
  * An object that contains everything that can be changed by extensions.
@@ -24,15 +25,8 @@ import type { KaedeNamespaceType } from "@/declarations.ts";
  * The launcher heavily relies on this object in all kind of code places
  */
 export const GlobalObject: KaedeNamespaceType = {
+  "internals": GlobalInternals,
   "packages" : {},
-  "variables": {
-    "rippleColor"     : "#ffffff15",
-    "sparklesColorRGB": "255 255 255",
-    "logs"            : {
-      "targetCollapse"       : false,
-      "collapsedTargetLength": 17,
-    },
-  },
   "constants": {} as KaedeNamespaceType["constants"],
   "libs"     : {} as KaedeNamespaceType["libs"],
   "hooks"    : {

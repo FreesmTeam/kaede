@@ -16,12 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { KaedeInternalsType } from "@/declarations.ts";
+import type { KaedeNamespaceType } from "@/declarations.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
-export const GlobalInternals: KaedeInternalsType = {
+export const GlobalInternals: KaedeNamespaceType["internals"] = {
 
   /* All these fields will be overwritten */
   "requestPermissions" : async (): Promise<Array<boolean>> => [],
@@ -33,6 +33,5 @@ export const GlobalInternals: KaedeInternalsType = {
   "portable"           : false,
   "baseDirectory"      : "",
   "launchCount"        : 0,
-  "logLineHeight"      : 20,
   "logsInBrowser"      : [],
 };

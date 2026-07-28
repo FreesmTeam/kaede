@@ -3,91 +3,6 @@ import type { RouteType } from "@/types/application/route.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
-export type GlobalStatesPagesType = {
-  "current": RouteType;
-  "states" : {
-    "home": Partial<{
-      // TODO: something
-      "stats": unknown;
-    }>;
-    "library": Partial<{
-      // TODO: instance list groups
-      "group": unknown;
-    }>;
-    "settings": Partial<{
-      "tab": string;
-    }>;
-    "add-instance": Partial<{
-      "instanceVersionSearch": {
-        "patch": ExtendedPatchUIDType;
-        "input": string;
-      };
-      "instance": {
-        "name"         : string;
-        "entry"        : ExtendedPatchUIDType;
-        "checksum"     : boolean;
-        "groups"       : Array<string>;
-        "javaBinary"   : string;
-        "patchVersions": InstanceStateType["patchVersions"];
-        "windowHeight" : number;
-        "windowWidth"  : number;
-        "icon"        ?: string;
-        "add"          : {
-          "jvmArguments" : Array<string>;
-          "gameArguments": Array<string>;
-        };
-      };
-      "full"          : boolean;
-      "tab"           : string;
-      "customSettings": Array<{
-        "label"?: string;
-        "input"?: {
-          "onInput": (
-            value: string,
-            currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"],
-            currentPatch: ExtendedPatchUIDType,
-          ) => void;
-          "iconClassName": string;
-          "placeholder"  : string;
-          "defaultValue"?: () => string | undefined;
-          "tooltip"     ?: string;
-          "type"        ?: "text" | "number";
-          "debounceTime"?: number;
-        };
-      }>;
-    }>;
-    // Reserved for extensions' needs
-    "none": Record<string, unknown>;
-  };
-};
-export type GlobalStatesSidebarItemsType = Array<"divider" | {
-  "path"  : RouteType;
-  "name"  : string;
-  "action": () => void;
-  "icon" ?: string;
-  "image"?: string;
-}>;
-export type GlobalStatesContextMenuItemsType = Array<{
-  "name"  : string;
-  "action": () => void;
-  "icon" ?: string;
-  "image"?: string;
-}>;
-// Global minecraft settings
-export type GlobalStatesMinecraftType = {
-  "windowHeight": number;
-  "windowWidth" : number;
-  "icon"        : string;
-  "javaBinary"  : string;
-  "add"         : Partial<{
-    "jvmArguments" : Array<string>;
-    "gameArguments": Array<string>;
-  }>;
-  "remove": Partial<{
-    "jvmArguments" : Array<string>;
-    "gameArguments": Array<string>;
-  }>;
-};
 type DevelopmentType = {
   "loadErudaDevTools"         : boolean;
   "showFPS"                   : boolean;
@@ -137,13 +52,87 @@ type SelectedType = {
   "stats"          : "playtime" | "last-launch";
 };
 type LogsType = {
-  "show"       : boolean;
-  "virtualized": boolean;
-  "mode"       : "kaede-launcher" | string;
-  "filtering"  : string;
-  "lineHeight" : number;
-  "partsShown" : Record<"time" | "level" | "target" | "message", boolean>;
-  "partsSize"  : Record<"time" | "level" | "target" | "message", number>;
+  "show"      : boolean;
+  "mode"      : "kaede-launcher" | string;
+  "filtering" : string;
+  "lineHeight": number;
+  "partsShown": Record<"time" | "level" | "target" | "message", boolean>;
+  "partsSize" : Record<"time" | "level" | "target" | "message", number>;
+};
+type MinecraftType = {
+  "windowHeight": number;
+  "windowWidth" : number;
+  "icon"        : string;
+  "javaBinary"  : string;
+  "add"         : Partial<{
+    "jvmArguments" : Array<string>;
+    "gameArguments": Array<string>;
+  }>;
+  "remove": Partial<{
+    "jvmArguments" : Array<string>;
+    "gameArguments": Array<string>;
+  }>;
+};
+type SidebarItemsType = Array<"divider" | {
+  "path"  : RouteType;
+  "name"  : string;
+  "action": () => void;
+  "icon" ?: string;
+  "image"?: string;
+}>;
+type ContextMenuItemsType = Array<{
+  "name"  : string;
+  "action": () => void;
+  "icon" ?: string;
+  "image"?: string;
+}>;
+type PagesType = {
+  "home"    : Partial<object>;
+  "library" : Partial<object>;
+  "settings": Partial<{
+    "tab": string;
+  }>;
+  "add-instance": Partial<{
+    "instanceVersionSearch": {
+      "patch": ExtendedPatchUIDType;
+      "input": string;
+    };
+    "instance": {
+      "name"         : string;
+      "entry"        : ExtendedPatchUIDType;
+      "checksum"     : boolean;
+      "groups"       : Array<string>;
+      "javaBinary"   : string;
+      "patchVersions": InstanceStateType["patchVersions"];
+      "windowHeight" : number;
+      "windowWidth"  : number;
+      "icon"        ?: string;
+      "add"          : {
+        "jvmArguments" : Array<string>;
+        "gameArguments": Array<string>;
+      };
+    };
+    "full"          : boolean;
+    "tab"           : string;
+    "customSettings": Array<{
+      "label"?: string;
+      "input"?: {
+        "onInput": (
+          value: string,
+          currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
+          currentPatch: ExtendedPatchUIDType,
+        ) => void;
+        "iconClassName": string;
+        "placeholder"  : string;
+        "defaultValue"?: () => string | undefined;
+        "tooltip"     ?: string;
+        "type"        ?: "text" | "number";
+        "debounceTime"?: number;
+      };
+    }>;
+  }>;
+  // Reserved for extensions' needs
+  "none": Record<string, unknown>;
 };
 
 export type GlobalStatesType = {
@@ -153,11 +142,11 @@ export type GlobalStatesType = {
   "ui"              : UIType;
   "selected"        : SelectedType;
   "logs"            : LogsType;
-
-  "minecraft"       : GlobalStatesMinecraftType;
+  "minecraft"       : MinecraftType;
   // Not specified in config (non-JSON values)
+  "currentPage"     : RouteType;
   "translations"    : TranslationsType;
-  "sidebarItems"    : GlobalStatesSidebarItemsType;
-  "contextMenuItems": GlobalStatesContextMenuItemsType;
-  "pages"           : GlobalStatesPagesType;
+  "sidebarItems"    : SidebarItemsType;
+  "contextMenuItems": ContextMenuItemsType;
+  "pages"           : PagesType;
 };

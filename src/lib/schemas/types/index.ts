@@ -16,10 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { AccountSchema } from "@/lib/schemas/scopes/accounts";
-export { ConfigSchema } from "@/lib/schemas/scopes/config";
-export { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
-export { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
-export { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
+export { AccountSchema } from "@/lib/schemas/types/accounts";
+export { ConfigSchema } from "@/lib/schemas/types/config";
+export { ExtensionMetadataSchema } from "@/lib/schemas/types/extensions";
+export { InstanceMetadataSchema } from "@/lib/schemas/types/instances";
+export { PatchMetaSchema } from "@/lib/schemas/types/meta";
 
 export { Errors } from "typebox/value";

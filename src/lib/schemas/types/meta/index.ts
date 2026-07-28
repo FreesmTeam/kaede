@@ -1,10 +1,10 @@
 import { Type } from "typebox";
 
-import { AssetIndexSchema } from "@/lib/schemas/scopes/meta/asset-index.schema.ts";
-import { LibrarySchema } from "@/lib/schemas/scopes/meta/library.schema.ts";
-import { LoggingSchema } from "@/lib/schemas/scopes/meta/logging.schema.ts";
-import { MainJarSchema } from "@/lib/schemas/scopes/meta/main-jar.schema.ts";
-import { RequireSchema } from "@/lib/schemas/scopes/meta/require.schema.ts";
+import { AssetIndexSchema } from "@/lib/schemas/types/meta/asset-index.schema.ts";
+import { LibrarySchema } from "@/lib/schemas/types/meta/library.schema.ts";
+import { LoggingSchema } from "@/lib/schemas/types/meta/logging.schema.ts";
+import { MainJarSchema } from "@/lib/schemas/types/meta/main-jar.schema.ts";
+import { RequireSchema } from "@/lib/schemas/types/meta/require.schema.ts";
 
 /*
  * Validates only top-level and some nested fields

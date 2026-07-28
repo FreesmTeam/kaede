@@ -111,50 +111,49 @@ declare global {
     };
 
     /**
-     * Workarounds for application internals.
-     *
-     * These fields are generally not intended to be modified by extensions
-     */
-    "__KAEDE_INTERNALS__": {
-      // Requests plugin permissions from user
-      "requestPermissions"  : (
-        permissions: Array<PermissionType>,
-        extension: string
-      ) => Promise<Array<boolean>>;
-      // Platform-specific delimiter
-      "joinDelimiter"       : string;
-      // Launcher version
-      "launcherVersion"     : string;
-      // Config state before launcher initialization
-      "initialConfig"       : ConfigType;
-      // Translations state before launcher initialization
-      "initialTranslations" : TranslationsType;
-      // Instances metadata state before launcher initialization
-      "initialInstances"    : InstanceStatesType;
-      // Portable state
-      "portable"            : boolean;
-      // Base directory
-      "baseDirectory"       : string;
-      // This counter starts as 0 and increases by 1 each time the UI is reloaded via window#reload
-      "launchCount"         : number;
-      "logLineHeight"       : number;
-      // A temporary storage for the 'At a Glance' widget
-      "atAGlance"          ?: AtAGlanceType;
-      // A Java major version (for example, 8, 11, or 17)
-      "javaMajor"          ?: number;
-      "appInstance"        ?: App<Element>;
-
-      /* Needed for browser environments (non-application) */
-      "logsInBrowser"       : Array<string>;
-      "indexedDB"          ?: IDBDatabase;
-    };
-
-    /**
      * Application namespace.
      *
      * Extensions can extend this namespace
      */
     "__KAEDE__": {
+
+      /**
+       * Workarounds for application internals.
+       *
+       * These fields are generally not intended to be modified by extensions
+       */
+      "internals": {
+        // Requests plugin permissions from user
+        "requestPermissions"  : (
+          permissions: Array<PermissionType>,
+          extension: string
+        ) => Promise<Array<boolean>>;
+        // Platform-specific delimiter
+        "joinDelimiter"       : string;
+        // Launcher version
+        "launcherVersion"     : string;
+        // Config state before launcher initialization
+        "initialConfig"       : ConfigType;
+        // Translations state before launcher initialization
+        "initialTranslations" : TranslationsType;
+        // Instances metadata state before launcher initialization
+        "initialInstances"    : InstanceStatesType;
+        // Portable state
+        "portable"            : boolean;
+        // Base directory
+        "baseDirectory"       : string;
+        // This counter starts as 0 and increases by 1 each time the UI is reloaded (window#reload)
+        "launchCount"         : number;
+        // A temporary storage for the 'At a Glance' widget
+        "atAGlance"          ?: AtAGlanceType;
+        // A Java major version (for example, 8, 11, or 17)
+        "javaMajor"          ?: number;
+        "appInstance"        ?: App<Element>;
+
+        /* Needed for browser environments (non-application) */
+        "logsInBrowser"       : Array<string>;
+        "indexedDB"          ?: IDBDatabase;
+      };
 
       /**
        * Exposed packages.
@@ -1731,4 +1730,3 @@ declare global {
 
 /* Export the Kaede namespace type */
 export type KaedeNamespaceType = Window["__KAEDE__"];
-export type KaedeInternalsType = Window["__KAEDE_INTERNALS__"];

@@ -29,7 +29,7 @@ const handleError = async (
     InstanceMetadataSchema,
     PatchMetaSchema,
     Errors,
-  } = await import("@/lib/schemas/scopes");
+  } = await import("@/lib/schemas/types");
 
   switch (kind) {
     case "account": { return Errors(AccountSchema, value); }

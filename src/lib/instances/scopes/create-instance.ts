@@ -28,7 +28,7 @@ import type { GlobalStatesType } from "@/types/application/global-states.type.ts
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 
 export async function createInstance(
-  currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"],
+  currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
   uid: ExtendedPatchUIDType,
 ): Promise<void> {
   if (!currentInstance) {

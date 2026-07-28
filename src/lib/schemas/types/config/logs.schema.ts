@@ -15,6 +15,5 @@ export const LogsSchema = Type.Object({
     "time"   : Type.Number(),
     "level"  : Type.Number(),
     "target" : Type.Number(),
-    "message": Type.Number(),
   }),
 });

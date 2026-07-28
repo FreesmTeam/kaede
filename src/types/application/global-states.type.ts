@@ -41,13 +41,12 @@ type UIType = {
     "secondaryColor": string | null;
     "background"    : string | null;
   };
-  "atAGlance": {
-    "title"   : string | null;
-    "subtitle": string | null;
-  };
+  "atAGlance": Array<{
+    "title"   : string;
+    "subtitle": string;
+  }>;
 };
 type SelectedType = {
-  "locale"         : string;
   "currentInstance": string | null;
   "stats"          : "playtime" | "last-launch";
 };
@@ -57,7 +56,7 @@ type LogsType = {
   "filtering" : string;
   "lineHeight": number;
   "partsShown": Record<"time" | "level" | "target" | "message", boolean>;
-  "partsSize" : Record<"time" | "level" | "target" | "message", number>;
+  "partsSize" : Record<"time" | "level" | "target", number>;
 };
 type MinecraftType = {
   "windowHeight": number;
@@ -141,6 +140,7 @@ export type GlobalStatesType = {
   "extensions"      : ExtensionsType;
   "ui"              : UIType;
   "selected"        : SelectedType;
+  "locale"          : string;
   "logs"            : LogsType;
   "minecraft"       : MinecraftType;
   // Not specified in config (non-JSON values)

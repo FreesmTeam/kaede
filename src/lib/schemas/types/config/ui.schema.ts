@@ -66,14 +66,10 @@ export const UISchema = Type.Object({
       Type.Null(),
     ]),
   }),
-  "atAGlance": Type.Object({
-    "title": Type.Union([
-      Type.String(),
-      Type.Null(),
-    ]),
-    "subtitle": Type.Union([
-      Type.String(),
-      Type.Null(),
-    ]),
-  }),
+  "atAGlance": Type.Array(
+    Type.Object({
+      "title"   : Type.String(),
+      "subtitle": Type.String(),
+    }),
+  ),
 });

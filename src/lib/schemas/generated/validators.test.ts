@@ -28,11 +28,11 @@ import {
   CheckInstanceMetadata,
   CheckPatchMeta,
 } from "@/lib/schemas/generated/validators.ts";
-import { AccountSchema } from "@/lib/schemas/scopes/accounts";
-import { ConfigSchema } from "@/lib/schemas/scopes/config";
-import { ExtensionMetadataSchema } from "@/lib/schemas/scopes/extensions";
-import { InstanceMetadataSchema } from "@/lib/schemas/scopes/instances";
-import { PatchMetaSchema } from "@/lib/schemas/scopes/meta";
+import { AccountSchema } from "@/lib/schemas/types/accounts";
+import { ConfigSchema } from "@/lib/schemas/types/config";
+import { ExtensionMetadataSchema } from "@/lib/schemas/types/extensions";
+import { InstanceMetadataSchema } from "@/lib/schemas/types/instances";
+import { PatchMetaSchema } from "@/lib/schemas/types/meta";
 
 const Targets: Array<{
   "name"  : string;

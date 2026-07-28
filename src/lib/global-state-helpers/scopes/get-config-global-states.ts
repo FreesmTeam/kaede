@@ -24,11 +24,9 @@ export function getConfigGlobalStates(): GlobalStatesType {
 
   return {
     ...configFile,
+    "currentPage" : GlobalStateHelpers.Pages.getRouteFromSearchParameters(searchParameters),
     "translations": GlobalInternals.initialTranslations,
-    "pages"       : {
-      "current": GlobalStateHelpers.Pages.getRouteFromSearchParameters(searchParameters),
-      "states" : DefaultGlobalStatesPagesStates,
-    },
+    "pages"       : DefaultGlobalStatesPagesStates,
     "sidebarItems": [
       ...SidebarRouteGroupItems.map(item => {
         return {

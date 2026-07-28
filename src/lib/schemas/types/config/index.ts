@@ -12,6 +12,7 @@ export const ConfigSchema = Type.Object({
   "extensions" : ExtensionsSchema,
   "ui"         : UISchema,
   "selected"   : SelectedSchema,
+  "locale"     : Type.String(),
   "logs"       : LogsSchema,
   "minecraft"  : MinecraftSchema,
 });

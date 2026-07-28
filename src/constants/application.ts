@@ -42,7 +42,7 @@ export const CSSThemeExtensions = {
   "Disabled": ".css.disabled",
 } as const;
 
-export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"]["states"] = {
+export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
   "home"        : {},
   "library"     : {},
   "settings"    : { "tab": "general" },
@@ -58,7 +58,7 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"]["states"]
         "input": {
           "onInput": (
             value: string,
-            currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"],
+            currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
           ): void => {
             if (!currentInstance) {
               return;
@@ -96,7 +96,7 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"]["states"]
         "input": {
           "onInput": (
             value: string,
-            currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"],
+            currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
           ): void => {
             if (!currentInstance) {
               return;
@@ -242,7 +242,7 @@ export const ContextMenuItems = [
     "name"  : "Open Instance Folder",
     "icon"  : "i-lucide-box",
     "action": (): void => {
-      const currentInstanceId: string | null = GlobalStateHelpers.get().layout.currentInstance;
+      const currentInstanceId: string | null = GlobalStateHelpers.get().selected.currentInstance;
       const baseDirectory: string = General.getCachedBaseDirectory();
 
       GlobalObject.libs.ContextMenu.close();
@@ -283,6 +283,14 @@ export const ContextMenuItems = [
   },
 ] as const;
 
+export const HookResponseStatus = {
+  "Stop"    : "stop",
+  "Continue": "continue",
+} as const;
+export const ExtraHookResponseStatus = {
+  "ContinueLoop": "continue-hooks-loop",
+} as const;
+
 export default {
   AsyncFunction,
   ApplicationName,
@@ -299,4 +307,6 @@ export default {
   InstanceCreationSections,
   SettingsSections,
   ContextMenuItems,
+  HookResponseStatus,
+  ExtraHookResponseStatus,
 } as const;

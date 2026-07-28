@@ -22,11 +22,13 @@ import path from "node:path";
 import type { TSchema } from "typebox";
 import { Code } from "typebox/compile";
 
-import { AccountSchema } from "../src/lib/schemas/scopes/accounts";
-import { ConfigSchema } from "../src/lib/schemas/scopes/config";
-import { ExtensionMetadataSchema } from "../src/lib/schemas/scopes/extensions";
-import { InstanceMetadataSchema } from "../src/lib/schemas/scopes/instances";
-import { PatchMetaSchema } from "../src/lib/schemas/scopes/meta";
+import {
+  AccountSchema,
+  ConfigSchema,
+  ExtensionMetadataSchema,
+  InstanceMetadataSchema,
+  PatchMetaSchema,
+} from "../src/lib/schemas/types";
 
 const OutputDirectory: string = path.join(
   // @ts-expect-error It works
@@ -179,5 +181,5 @@ await writeFile(OutputFile, contents);
 
 // eslint-disable-next-line no-console
 console.log(
-  `Generated ${Targets.length} validators into '${path.relative(process.cwd(), OutputFile)}'`
+  `Generated ${Targets.length} validators into '${path.relative(process.cwd(), OutputFile)}'`,
 );

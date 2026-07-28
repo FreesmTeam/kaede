@@ -1,3 +1,4 @@
+import { GlobalObject } from "@/extendable/global-object.ts";
 import { changeGlobalState } from "@/lib/global-state-helpers/scopes/change-global-state.ts";
 import {
   getConfigGlobalStates,
@@ -5,19 +6,20 @@ import {
 import {
   getDefaultGlobalStates,
 } from "@/lib/global-state-helpers/scopes/get-default-global-states.ts";
-import { Layout } from "@/lib/global-state-helpers/scopes/layout.ts";
-import { Logs } from "@/lib/global-state-helpers/scopes/logs.ts";
 import { Pages } from "@/lib/global-state-helpers/scopes/pages.ts";
-import { showContextMenu } from "@/lib/global-state-helpers/scopes/show-context-menu.ts";
-import { getGlobalStates } from "@/states/global.ts";
+import { getGlobalStates, globalStates } from "@/states/global.ts";
+import type { RouteType } from "@/types/application/route.type.ts";
 
 export default {
+  "navigate": (path: RouteType): void => {
+    globalStates.currentPage = path;
+  },
+  "showContextMenu": (event: MouseEvent): void => {
+    GlobalObject.libs.ContextMenu.show(event);
+  },
   "get"          : getGlobalStates,
   "change"       : changeGlobalState,
   "getFromConfig": getConfigGlobalStates,
   "getDefault"   : getDefaultGlobalStates,
-  Layout,
-  Logs,
   Pages,
-  showContextMenu,
 } as const;

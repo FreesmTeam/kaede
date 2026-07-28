@@ -116,6 +116,7 @@ const [
         return accounts;
       }
 
+      // HMR might trigger this branch
       log.error(__PRE_BUNDLED_FILENAME__, "You cannot load accounts once more");
 
       return [];
@@ -140,17 +141,6 @@ GlobalInternals.initialInstances = instances;
  */
 declareGlobalStates();
 declareInstanceStates();
-declareServerProcesses()
-  .then(() => {
-    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated server processes state");
-  })
-  .catch((error: unknown) => {
-    log.error(
-      __PRE_BUNDLED_FILENAME__,
-      "Failed to hydrate server processes state:",
-      Errors.prettify(error),
-    );
-  });
 
 /*
  * They handle the necessary watching actions.
@@ -161,7 +151,7 @@ Watchers.watchLayoutStates();
 Watchers.watchProcesses()
   .then(() => declareServerProcesses())
   .then(() => {
-    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated and wired server processes state");
+    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated server processes state");
   })
   .catch((error: unknown) => {
     log.error(

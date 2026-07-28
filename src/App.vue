@@ -25,7 +25,6 @@ import ExtensionsError from "@/components/general/errors/ExtensionsError.vue";
 import GlobalError from "@/components/general/errors/GlobalError.vue";
 import CssThemeLoader from "@/components/general/extensions/CssThemeLoader.vue";
 import ExtensionLoader from "@/components/general/extensions/ExtensionLoader.vue";
-import CustomLayout from "@/components/general/layout/CustomLayout.vue";
 import Layout from "@/components/general/layout/Layout.vue";
 import Router from "@/components/general/layout/Router.vue";
 import ConfigSyncer from "@/components/general/misc/ConfigSyncer.vue";
@@ -54,35 +53,16 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
   <!-- Global error boundary -->
   <ErrorBoundary>
     <template #default>
-      <Layout
-        v-if="globalStates.layout.custom !== true"
-        :page="globalStates.pages.current"
-        :to-show-sidebar="
-          !Array.isArray(globalStates.layout.custom) ||
-          !globalStates.layout.custom.includes('sidebar')
-        "
-        :to-show-context-menu="
-          !Array.isArray(globalStates.layout.custom) ||
-          !globalStates.layout.custom.includes('contextMenu')
-        "
-        :to-show-native-context-menu="globalStates.development?.enableNativeContextMenu ?? false"
-      >
-        <Router
-          v-if="globalStates.pages.current !== 'none'"
-          :page="globalStates.pages.current"
-        />
+      <Layout>
+        <Router />
 
         <Transition name="pop">
           <LogViewer v-if="globalStates.logs.show" />
         </Transition>
 
-        <DevelopmentMode
-          v-if="globalStates.development"
-          :development="globalStates.development"
-        />
+        <DevelopmentMode />
         <NonBundledClasses />
       </Layout>
-      <CustomLayout v-else />
 
       <ConfigSyncer />
     </template>

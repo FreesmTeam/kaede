@@ -2,7 +2,6 @@
 import { Ripple } from "m3ripple-vue";
 import { computed } from "vue";
 
-import { GlobalObject } from "@/extendable/global-object.ts";
 import { globalStates } from "@/states/global.ts";
 
 const { id, label, disabled, colors } = defineProps<{
@@ -15,24 +14,28 @@ const { id, label, disabled, colors } = defineProps<{
   };
 }>();
 
-const enableRipple = computed((): boolean => {
-  return globalStates.layout?.enableMaterialYouRipple ?? false;
-});
+const defaultColors = computed((): {
+  "color"   : string | null;
+  "sparkles": string | null;
+} | undefined => {
+  const { color, sparkles } = globalStates.ui.ripple;
 
-const defaultColors = {
-  "ripple"  : GlobalObject.variables.rippleColor,
-  "sparkles": GlobalObject.variables.sparklesColorRGB,
-};
+  if (color || sparkles) {
+    return { color, sparkles };
+  }
+
+  return undefined;
+});
 </script>
 
 <template>
   <Ripple
-    v-if="enableRipple"
+    v-if="defaultColors"
     :id="id"
     :aria-label="label"
     :aria-hidden="true"
     :class="[disabled ? 'pointer-events-none' : '']"
-    :ripple-color="colors?.ripple ?? defaultColors.ripple"
+    :ripple-color="colors?.ripple ?? defaultColors.color"
     :sparkles-color-r-g-b="colors?.sparkles ?? defaultColors.sparkles"
   />
 </template>

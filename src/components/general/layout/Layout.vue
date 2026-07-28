@@ -7,14 +7,7 @@ import PageError from "@/components/general/errors/PageError.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import { getComponents } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
-import type { RouteType } from "@/types/application/route.type.ts";
-
-const { toShowSidebar, toShowContextMenu, toShowNativeContextMenu, page } = defineProps<{
-  "toShowSidebar"          : boolean;
-  "toShowContextMenu"      : boolean;
-  "toShowNativeContextMenu": boolean;
-  "page"                   : RouteType;
-}>();
+import { globalStates } from "@/states/global.ts";
 
 const contextMenu = ref<{
   "opened": boolean;
@@ -26,7 +19,7 @@ function closeContextMenu(): void {
   contextMenu.value.opened = false;
 }
 function showContextMenu(event: MouseEvent): void {
-  if (!toShowNativeContextMenu) {
+  if (!globalStates.development.enableNativeContextMenu) {
     event.preventDefault();
   }
 
@@ -81,14 +74,13 @@ const C = getComponents();
     >
       <C.LaunchProgress />
       <C.ContextMenu
-        v-if="toShowContextMenu"
         :opened="contextMenu.opened"
         :x="contextMenu.x"
         :y="contextMenu.y"
       />
-      <C.Sidebar v-if="toShowSidebar" />
+      <C.Sidebar />
       <!-- Pages error boundary -->
-      <ErrorBoundary :reset-key="page">
+      <ErrorBoundary :reset-key="globalStates.currentPage">
         <template #default>
           <slot />
         </template>

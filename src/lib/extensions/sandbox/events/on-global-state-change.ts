@@ -1,3 +1,4 @@
+
 /*
  * Kaede, a Minecraft Launcher
  * Copyright (C) 2026  windstone <notwindstone@gmail.com> and contributors
@@ -16,10 +17,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { grantStaticPermissions } from "@/lib/permissions/grant-static-permissions.ts";
-import { handlePermission } from "@/lib/permissions/handle-permission.ts";
+import { handleEvent } from "@/lib/extensions/sandbox/handle-event.ts";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
-export default {
-  grantStaticPermissions,
-  handlePermission,
-} as const;
+export function onGlobalStateChange<Key extends keyof GlobalStatesType>(
+  key: Key,
+  value: unknown,
+): void {
+  switch (key) {
+    case "pages": {
+      const page = value as GlobalStatesType["currentPage"];
+
+      handleEvent("routing", page);
+
+      break;
+    }
+  }
+}

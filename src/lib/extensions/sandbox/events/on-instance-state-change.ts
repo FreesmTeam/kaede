@@ -16,10 +16,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { grantStaticPermissions } from "@/lib/permissions/grant-static-permissions.ts";
-import { handlePermission } from "@/lib/permissions/handle-permission.ts";
+import { handleEvent } from "@/lib/extensions/sandbox/handle-event.ts";
+import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 
-export default {
-  grantStaticPermissions,
-  handlePermission,
-} as const;
+export function onInstanceStateChange<Key extends keyof InstanceStatesType>(
+  key: Key,
+  value: InstanceStatesType[Key],
+): void {
+  handleEvent("instance", {
+    key,
+    value,
+  });
+}

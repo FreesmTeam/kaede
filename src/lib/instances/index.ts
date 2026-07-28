@@ -1,4 +1,3 @@
-import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { addInstanceWithSync } from "@/lib/instances/scopes/add-instance-with-sync.ts";
 import { changeInstanceState } from "@/lib/instances/scopes/change-instance-state.ts";
 import { createInstance } from "@/lib/instances/scopes/create-instance.ts";
@@ -8,10 +7,10 @@ import { getConfigInstanceStates } from "@/lib/instances/scopes/get-config-insta
 import { getMinecraftDirectory } from "@/lib/instances/scopes/get-minecraft-directory.ts";
 import { readStoredInstances } from "@/lib/instances/scopes/read-stored-instances.ts";
 import { saveInstanceStatesToFile } from "@/lib/instances/scopes/save-instance-states-to-file.ts";
-import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
+import { getInstanceStates } from "@/states/instance.ts";
 
 export default {
-  "get"          : (): InstanceStatesType => GlobalInternals.getInstanceStates(),
+  "get"          : getInstanceStates,
   "change"       : changeInstanceState,
   "add"          : addInstanceWithSync,
   "create"       : createInstance,

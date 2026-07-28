@@ -26,8 +26,6 @@ import Launcher from "@/lib/launcher";
 import Logging from "@/lib/logging";
 import Schemas from "@/lib/schemas";
 import Txiki from "@/lib/txiki";
-import { getGlobalStates } from "@/states/global.ts";
-import { getInstanceStates } from "@/states/instance.ts";
 
 export function declareGlobals(): void {
   window.__TAURI_PLUGINS_COMMUNITY__ = {
@@ -40,11 +38,6 @@ export function declareGlobals(): void {
   };
   window.__KAEDE_INTERNALS__ = GlobalInternals;
   window.__KAEDE__ = GlobalObject;
-
-  GlobalInternals.getGlobalStates = getGlobalStates;
-  GlobalInternals.changeGlobalStates = GlobalStateHelpers.change;
-  GlobalInternals.getInstanceStates = getInstanceStates;
-  GlobalInternals.changeInstanceStates = Instances.change;
 
   GlobalObject.constants = {
     "Application"   : _Application,

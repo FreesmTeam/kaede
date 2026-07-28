@@ -3,31 +3,6 @@ import type { RouteType } from "@/types/application/route.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
-export type GlobalStatesLayoutType = {
-  "locale"                 : string;
-  "stats"                  : "playtime" | "last-launch";
-  "currentInstance"        : string | null;
-  "enableMaterialYouRipple": boolean;
-  "custom"                 : boolean | Array<"sidebar" | "contextMenu">;
-  "background"             : {
-    "url"    : string | null;
-    "key"    : string | number | null;
-    "blur"   : number | null;
-    "color"  : string | null;
-    "isVideo": boolean;
-  };
-  "sidebar": {
-    "blur"      : number | null;
-    "color"     : string | null;
-    "ripple"    : string | null;
-    "sparkles"  : string | null;
-    "background": string | null;
-  };
-  "atAGlance": {
-    "title"   : string | null;
-    "subtitle": string | null;
-  };
-};
 export type GlobalStatesPagesType = {
   "current": RouteType;
   "states" : {
@@ -85,13 +60,6 @@ export type GlobalStatesPagesType = {
     "none": Record<string, unknown>;
   };
 };
-export type GlobalStatesLogsType = {
-  "show"       : boolean;
-  "lineBreaks" : boolean;
-  "virtualized": boolean;
-  "mode"       : "launcher" | string;
-  "filtering"  : string;
-};
 export type GlobalStatesSidebarItemsType = Array<"divider" | {
   "path"  : RouteType;
   "name"  : string;
@@ -105,19 +73,6 @@ export type GlobalStatesContextMenuItemsType = Array<{
   "icon" ?: string;
   "image"?: string;
 }>;
-export type GlobalStatesDevelopmentType = {
-  "loadErudaDevTools"         : boolean;
-  "showFPS"                   : boolean;
-  "showCPUUsage"              : boolean;
-  "showMemoryUsage"           : boolean;
-  "enableDebugMode"           : boolean;
-  "enableNativeContextMenu"   : boolean;
-  "enableNativeReloadKeyBinds": boolean;
-};
-export type GlobalStatesMiscType = {
-  "showAfterExtensionsInitialization": boolean;
-  "autoConfigSync"                   : boolean;
-};
 // Global minecraft settings
 export type GlobalStatesMinecraftType = {
   "windowHeight": number;
@@ -133,18 +88,72 @@ export type GlobalStatesMinecraftType = {
     "gameArguments": Array<string>;
   }>;
 };
-export type GlobalStatesExtensionsType = {
+type DevelopmentType = {
+  "loadErudaDevTools"         : boolean;
+  "showFPS"                   : boolean;
+  "showCPUUsage"              : boolean;
+  "showMemoryUsage"           : boolean;
+  "enableDebugMode"           : boolean;
+  "enableNativeContextMenu"   : boolean;
+  "enableNativeReloadKeyBinds": boolean;
+};
+type ExtensionsType = {
+  "list"                      : Array<{ "enabled": boolean; "id": string }>;
   "enabled"                   : boolean;
   "allowUnrestrictedUntrusted": boolean;
+  "showAppAfterExtensionsLoad": boolean;
+};
+type UIType = {
+  "ripple": {
+    "color"   : string | null;
+    "sparkles": string | null;
+  };
+  "background": {
+    "image"  : string | null;
+    "blur"   : number | null;
+    "color"  : string | null;
+    "isVideo": boolean | null;
+    "key"    : string | number | null;
+  };
+  "text": {
+    "font"          : string | null;
+    "mainColor"     : string | null;
+    "secondaryColor": string | null;
+  };
+  "widget": {
+    "blur"          : number | null;
+    "textColor"     : string | null;
+    "secondaryColor": string | null;
+    "background"    : string | null;
+  };
+  "atAGlance": {
+    "title"   : string | null;
+    "subtitle": string | null;
+  };
+};
+type SelectedType = {
+  "locale"         : string;
+  "currentInstance": string | null;
+  "stats"          : "playtime" | "last-launch";
+};
+type LogsType = {
+  "show"       : boolean;
+  "virtualized": boolean;
+  "mode"       : "kaede-launcher" | string;
+  "filtering"  : string;
+  "lineHeight" : number;
+  "partsShown" : Record<"time" | "level" | "target" | "message", boolean>;
+  "partsSize"  : Record<"time" | "level" | "target" | "message", number>;
 };
 
 export type GlobalStatesType = {
   // Specified in config (only JSON values)
-  "development"     : GlobalStatesDevelopmentType;
-  "extensions"      : GlobalStatesExtensionsType;
-  "layout"          : GlobalStatesLayoutType;
-  "logs"            : GlobalStatesLogsType;
-  "misc"            : GlobalStatesMiscType;
+  "development"     : DevelopmentType;
+  "extensions"      : ExtensionsType;
+  "ui"              : UIType;
+  "selected"        : SelectedType;
+  "logs"            : LogsType;
+
   "minecraft"       : GlobalStatesMinecraftType;
   // Not specified in config (non-JSON values)
   "translations"    : TranslationsType;
@@ -152,7 +161,3 @@ export type GlobalStatesType = {
   "contextMenuItems": GlobalStatesContextMenuItemsType;
   "pages"           : GlobalStatesPagesType;
 };
-export type GlobalStatesChangerType = <Key extends keyof GlobalStatesType>(
-  key  : Key,
-  value: GlobalStatesType[Key],
-) => void;

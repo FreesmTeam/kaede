@@ -29,7 +29,7 @@ import { VueQueryPlugin } from "@tanstack/vue-query";
 import { createApp } from "vue";
 
 import App from "@/App.vue";
-import { ApplicationRootID } from "@/constants/application";
+import { ApplicationRootID, AuthOneTimeFetchContextKey } from "@/constants/application";
 import ASCIIArt from "@/constants/ascii-art.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Browser from "@/lib/browser";
@@ -83,19 +83,44 @@ log.info(
 
 const [
   config,
-  accounts,
   translations,
   instances,
+  fetchAccounts,
 ]: [
   ConfigType,
-  Array<AccountType>,
   TranslationsType,
   InstanceStatesType,
+  () => Array<AccountType>,
 ] = await Promise.all([
   Configs.getSafe({ baseDirectory, "parsedFile": parsed.config }),
-  Configs.getAccounts({ baseDirectory, "parsedFile": parsed.accounts }),
   Configs.getTranslations({ baseDirectory, "parsedFile": parsed.translations }),
   Instances.readStored({ baseDirectory, "parsedFile": parsed.instances }),
+
+  /*
+   * Variables returned from this 'Promise#all' are globally visible,
+   * and exposing user accounts like that feels bad (even though
+   * anyone can use 'Configs#getAccounts' to fetch accounts again),
+   * so we return a one-time fetch function (for ContextProviders)
+   */
+  (async (): Promise<() => Array<AccountType>> => {
+    const accounts: Array<AccountType> = await Configs.getAccounts({
+      baseDirectory,
+      "parsedFile": parsed.accounts,
+    });
+    let executed: boolean = false;
+
+    return function () {
+      if (!executed) {
+        executed = true;
+
+        return accounts;
+      }
+
+      log.error(__PRE_BUNDLED_FILENAME__, "You cannot load accounts once more");
+
+      return [];
+    };
+  })(),
 ]);
 
 // Define launcher's initial values at globals to make them accessible from anywhere
@@ -108,7 +133,6 @@ GlobalInternals.initialInstances = instances;
  * makes retrieving account tokens in extensions a bit easier,
  * so we will delete this field as soon as the app-scoped reactive state will be created
  */
-GlobalInternals.temporaryAccounts = accounts;
 
 /*
  * The global and instance states were declared outside the Vue instance,
@@ -158,6 +182,8 @@ log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Creating a Vue instance");
 const AppInstance = createApp(App);
+
+AppInstance.provide(AuthOneTimeFetchContextKey, fetchAccounts);
 
 // Expose the app instance so that plugins can register components, etc.
 GlobalInternals.appInstance = AppInstance;

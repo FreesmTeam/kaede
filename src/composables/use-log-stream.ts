@@ -19,6 +19,8 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
 import { onMounted, onUnmounted, type ShallowRef, shallowRef } from "vue";
 
+import { GlobalInternals } from "@/extendable/global-internals.ts";
+import Browser from "@/lib/browser";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
 
@@ -30,9 +32,23 @@ type LogStreamEventType =
 export function useLogStream(): {
   "lines": ShallowRef<{ "list": Array<string> }>;
 } {
+  const isBrowser = Browser.detectIsBrowser();
   const lines = shallowRef<{ "list": Array<string> }>({ "list": [] });
 
-  onMounted(() => {
+  if (isBrowser) {
+    const currentLogs = GlobalInternals.logsInBrowser;
+    const intervalId = setInterval((): void => {
+      lines.value = { "list": currentLogs };
+    }, 100);
+
+    onUnmounted(() => {
+      clearInterval(intervalId);
+    });
+
+    return { lines };
+  }
+
+  onMounted(async (): Promise<void> => {
     const channel = new Channel<LogStreamEventType>;
 
     // eslint-disable-next-line unicorn/prefer-add-event-listener
@@ -60,13 +76,13 @@ export function useLogStream(): {
       }
     };
 
-    invoke("stream_logs", { "onEvent": channel }).catch((error: unknown) => {
+    await invoke("stream_logs", { "onEvent": channel }).catch((error: unknown) => {
       log.error(__PRE_BUNDLED_FILENAME__, "The log stream failed:", Errors.prettify(error));
     });
   });
 
-  onUnmounted(() => {
-    void invoke("stop_log_stream");
+  onUnmounted(async (): Promise<void> => {
+    await invoke("stop_log_stream");
   });
 
   return { lines };

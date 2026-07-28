@@ -17,30 +17,22 @@
  */
 
 import type { KaedeInternalsType } from "@/declarations.ts";
-import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
-import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
 export const GlobalInternals: KaedeInternalsType = {
 
   /* All these fields will be overwritten */
-  "getGlobalStates"     : (): GlobalStatesType => ({} as GlobalStatesType),
-  "changeGlobalStates"  : (): void => {},
-  "getInstanceStates"   : (): InstanceStatesType => ({} as InstanceStatesType),
-  "changeInstanceStates": (): void => {},
-  "requestPermissions"  : async (): Promise<Array<boolean>> => [],
-  "syncConfig"          : async (): Promise<void> => {},
-  "joinDelimiter"       : "",
-  "launcherVersion"     : "",
-  "initialConfig"       : {} as ConfigType,
-  "temporaryAccounts"   : [] as Array<AccountType>,
-  "initialTranslations" : {} as TranslationsType,
-  "initialInstances"    : {} as InstanceStatesType,
-  "portable"            : false,
-  "baseDirectory"       : "",
-  "launchCount"         : 0,
-  "logLineHeight"       : 20,
-  "logsInBrowser"       : [],
+  "requestPermissions" : async (): Promise<Array<boolean>> => [],
+  "joinDelimiter"      : "",
+  "launcherVersion"    : "",
+  "initialConfig"      : {} as ConfigType,
+  "initialTranslations": {} as TranslationsType,
+  "initialInstances"   : {} as InstanceStatesType,
+  "portable"           : false,
+  "baseDirectory"      : "",
+  "launchCount"        : 0,
+  "logLineHeight"      : 20,
+  "logsInBrowser"      : [],
 };

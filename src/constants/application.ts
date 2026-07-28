@@ -24,6 +24,7 @@ export const ApplicationRootID = "#app";
 export const DefaultLocale = "en";
 
 export const TranslationsContextKey = Symbol();
+export const AuthOneTimeFetchContextKey = Symbol();
 export const AuthStatesContextKey = Symbol();
 export const LaunchStatesContextKey = Symbol();
 export const InstanceLogsContextKey = Symbol();

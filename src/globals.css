@@ -63,38 +63,6 @@ input::-webkit-inner-spin-button {
   margin: 0;
 }
 
-/* Show a custom tooltip on button hover */
-[data-tooltip] {
-  position: relative;
-
-  &:after {
-    content: attr(data-tooltip);
-    font-size: 14px;
-    line-height: 1;
-    white-space: wrap;
-
-    position: absolute;
-    left: 0;
-    top: calc(100% + 8px);
-    z-index: 10;
-
-    width: 256px;
-    max-width: max-content;
-    padding: 8px;
-    border-radius: 6px;
-
-    background: #262626;
-    visibility: hidden;
-    opacity: 0;
-
-    transition: opacity 150ms ease;
-  }
-  &:hover:after {
-    visibility: visible;
-    opacity: 1;
-  }
-}
-
 .__log-viewer__log-line {
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 1;
@@ -107,14 +75,6 @@ input::-webkit-inner-spin-button {
   position: sticky;
   width: 100%;
   cursor: pointer;
-}
-
-.__log-viewer__log-line--expanded {
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-  display: block;
-  overflow: visible;
-  height: auto;
 }
 
 .__log-entry__time {

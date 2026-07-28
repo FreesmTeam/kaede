@@ -1,7 +1,16 @@
 <script setup lang="ts">
-import { markRaw, provide, reactive, ref, type ShallowReactive, shallowReactive } from "vue";
+import {
+  inject,
+  markRaw,
+  provide,
+  reactive,
+  ref,
+  type ShallowReactive,
+  shallowReactive,
+} from "vue";
 
 import {
+  AuthOneTimeFetchContextKey,
   AuthStatesContextKey,
   CloseInstanceContextKey,
   InstanceLogsContextKey,
@@ -30,14 +39,15 @@ import type {
 } from "@/types/launcher/launch/launch-status.type.ts";
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 
-const accounts = ref<Array<AccountType>>(GlobalInternals.temporaryAccounts);
+// 'fetchAccounts' breaks HMR
+const fetchAccounts = inject<() => Array<AccountType>>(AuthOneTimeFetchContextKey)
+  ?? ((): Array<AccountType> => []);
+
+const accounts = ref<Array<AccountType>>(fetchAccounts());
 const launches = reactive<Record<string, LauncherStatusesType>>({});
 const logs = shallowReactive<Record<string, Array<string>>>({});
 
 const childProcesses: Record<string, MinecraftProcessType> = {};
-
-// Do not expose accounts data to globals since extensions will easily access it
-GlobalInternals.temporaryAccounts = [];
 
 function onClose(instanceId: string): void {
   const statuses: LauncherStatusesType | undefined = launches[instanceId];
@@ -59,7 +69,6 @@ function createLogSink(instanceId: string): (line: string) => void {
 
   // Retrieving a reference to the logs array by using computed properties is quite expensive
   const currentLogsArray: Array<string> = logs[instanceId];
-  // Avoid checking three references in a row just to get the line count limit
   const lineLimit: number = GeneralSettings.Logs.LineLimit;
 
   return (line: string): void => {
@@ -250,7 +259,7 @@ async function rehydrateLaunchedInstances(): Promise<void> {
   }
 }
 
-rehydrateLaunchedInstances();
+void rehydrateLaunchedInstances();
 
 /*
  * AFAIK, even unrestricted extensions should not be able to access this context

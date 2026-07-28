@@ -54,16 +54,13 @@ import type Logging from "@/lib/logging";
 import type Schemas from "@/lib/schemas";
 import Txiki from "@/lib/txiki";
 import type {
-  GlobalStatesChangerType,
   GlobalStatesType,
 } from "@/types/application/global-states.type.ts";
 import type {
-  InstanceStatesChangerType,
   InstanceStatesType,
   InstanceStateType,
 } from "@/types/application/instance-states.type.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
-import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 import type { HookReturnType } from "@/types/extensions/hook-return.type.ts";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
@@ -119,29 +116,17 @@ declare global {
      * These fields are generally not intended to be modified by extensions
      */
     "__KAEDE_INTERNALS__": {
-      // Gets current application global states (use 'libs.GlobalStateHelpers#get')
-      "getGlobalStates"     : () => GlobalStatesType;
-      // Changes application global states (use 'libs.GlobalStateHelpers#change')
-      "changeGlobalStates"  : GlobalStatesChangerType;
-      // Gets current application instance states (use 'libs.Instances#get')
-      "getInstanceStates"   : () => InstanceStatesType;
-      // Changes application instance states (use 'libs.Instances#change')
-      "changeInstanceStates": InstanceStatesChangerType;
       // Requests plugin permissions from user
       "requestPermissions"  : (
         permissions: Array<PermissionType>,
         extension: string
       ) => Promise<Array<boolean>>;
-      // Syncs the config file using global states
-      "syncConfig"          : () => Promise<void>;
-      // Platform-specific delimiter obtained by a single invoke of Tauri 'join'
+      // Platform-specific delimiter
       "joinDelimiter"       : string;
       // Launcher version
       "launcherVersion"     : string;
       // Config state before launcher initialization
       "initialConfig"       : ConfigType;
-      // Accounts state before launcher initialization
-      "temporaryAccounts"   : Array<AccountType>;
       // Translations state before launcher initialization
       "initialTranslations" : TranslationsType;
       // Instances metadata state before launcher initialization
@@ -361,23 +346,6 @@ declare global {
           "mount"  : (page: Exclude<RouteType, "none">, id: string) => void;
           // Removes the specified page from DOM
           "unmount": (page: Exclude<RouteType, "none">) => void;
-        };
-      };
-
-      /**
-       * Global variables that are allowed to be changed by plugins
-       */
-      "variables": {
-        // Applies a background color to the ripple effect
-        "rippleColor"     : string;
-        // Applies a sparkles color to the ripple effect
-        "sparklesColorRGB": string;
-        // Logs-related variables
-        "logs"            : {
-          // Whether to shorten the target string in logs
-          "targetCollapse"       : boolean;
-          // The number of characters to display in the shortened form of target
-          "collapsedTargetLength": number;
         };
       };
 

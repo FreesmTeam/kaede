@@ -91,7 +91,7 @@ async function handleIconPick(): Promise<void> {
   <div
     id="__add-instance-page__instance-icon-wrapper"
     class="shrink-0 rounded-md p-2"
-    data-tooltip="Instance icon"
+    title="Instance icon"
   >
     <Image
       id="__add-instance-page__instance-icon-image"

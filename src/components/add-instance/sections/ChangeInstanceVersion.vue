@@ -89,7 +89,7 @@ onClickOutside(target, () => handleDropdown(false));
       v-if="currentInstance?.patchVersions?.[Patches.Minecraft]"
       id="__add-instance-page__instance-version-selected-badge"
       class="grid place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
-      :data-tooltip="`Selected version of '${Patches.Minecraft}'`"
+      :title="`Selected version of '${Patches.Minecraft}'`"
     >
       {{ currentInstance.patchVersions[Patches.Minecraft] }}
     </div>
@@ -97,7 +97,7 @@ onClickOutside(target, () => handleDropdown(false));
       v-if="currentPatch !== Patches.Minecraft && currentInstance?.patchVersions?.[currentPatch]"
       id="__add-instance-page__instance-version-selected-badge"
       class="grid h-full place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
-      :data-tooltip="`Selected version of '${currentPatch}'`"
+      :title="`Selected version of '${currentPatch}'`"
     >
       {{ currentInstance.patchVersions[currentPatch] }}
     </div>

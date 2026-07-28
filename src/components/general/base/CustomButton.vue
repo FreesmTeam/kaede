@@ -25,7 +25,7 @@ const {
       'z-10 shrink-0 relative grid px-2 w-fit flex-nowrap gap-2 bg-neutral-800',
       'items-center h-full place-items-center rounded-md transition-[filter]',
     ]"
-    :data-tooltip="tooltip"
+    :title="tooltip"
   >
     <span v-if="icon" :id="ids.icon" :class="[icon, 'block size-4']"></span>
     <span

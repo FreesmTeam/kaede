@@ -145,6 +145,8 @@ fn obtained_main_window_is_confined_to_broker_acl() {
             json!({ "cancelId": "test" }),
             "cancel_downloads",
         ),
+        ("stream_logs", json!({}), "stream_logs"),
+        ("stop_log_stream", json!({}), "stop_log_stream"),
     ];
     for (command, body, diagnostic_name) in denied_commands {
         assert_acl_denied(&webview, command, body, diagnostic_name);

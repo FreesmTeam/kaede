@@ -18,6 +18,7 @@
     "analyze:fallow": "fallow dead-code",
     "typecheck": "vue-tsc -b",
     "generate:validators": "bun scripts/generate-validators.ts",
+    "generate:bundle-analysis": "bunx vite build --sourcemap && bunx source-map-explorer 'dist/assets/*.js' --html bundle-analysis.html --no-border-checks",
     "check:validators": "bun run generate:validators --check",
     "check:dependency-compatibility": "bun ./scripts/check-dependency-compatibility.ts",
     "generate:types": "bun ./scripts/generate-types.ts",
@@ -36,8 +37,7 @@
     "serialize-javascript": "^7.0.7",
     "ses": "^2.2.0",
     "typebox": "1.3.8",
-    "vue": "^3.5.40",
-    "vue-virtualised": "^0.1.8"
+    "vue": "^3.5.40"
   },
   "devDependencies": {
     "@eslint/compat": "^2.1.0",

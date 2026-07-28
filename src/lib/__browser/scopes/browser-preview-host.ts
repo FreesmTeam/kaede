@@ -1,10 +1,8 @@
 import {
   createBrowserDownloads,
 } from "@/lib/browser/scopes/browser-preview-downloads.ts";
-import {
-  logInBrowser,
-  pickBrowserIcon,
-} from "@/lib/browser/scopes/browser-preview-io.ts";
+import { pickBrowserIcon } from "@/lib/browser/scopes/browser-preview-io.ts";
+import { createBrowserLogs } from "@/lib/browser/scopes/browser-preview-logs.ts";
 import {
   cloneStorageValue,
   joinBrowserPath,
@@ -35,7 +33,6 @@ type RenameInput = Parameters<HostFacade["files"]["rename"]>[0];
 type PickIconInput = Parameters<HostFacade["assets"]["pickAndCopyInstanceIcon"]>[0];
 type DialogMessageInput = Parameters<HostFacade["dialogs"]["message"]>[0];
 type DialogAskInput = Parameters<HostFacade["dialogs"]["ask"]>[0];
-type LogInput = Parameters<HostFacade["logs"]["write"]>[0];
 
 function credentiallessRequestInit(init: HostHttpRequestInit | undefined): RequestInit {
   const requestInit: RequestInit = {
@@ -221,10 +218,6 @@ export function createBrowserHostFacade(
         throw new UnsupportedInBrowserPreviewError("txiki server process launch");
       },
     }),
-    "logs": Object.freeze({
-      "write": (input: LogInput): void => {
-        logInBrowser(input.level, input.message, input.location);
-      },
-    }),
+    "logs": createBrowserLogs(storage, runtimeSnapshot),
   } satisfies HostFacade);
 }

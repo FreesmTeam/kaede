@@ -52,26 +52,29 @@ Every folder has its own `README` file for more detailed explanations.
 
 ## Bundle size
 
-Last measured from `bun run build:frontend` on 27.07.2026. Values are the
+Last measured from `bun run build:frontend` on 28.07.2026. Values are the
 minified JavaScript chunks before gzip; image and CSS assets are excluded.
 
 | Logical chunk | Minified |
 |---------------|----------|
-| sandbox dependencies | 315.1 kB |
-| application entry | 171.3 kB |
-| framework dependencies | 154.6 kB |
-| other dependencies | 117.2 kB |
-| server management | 99.2 kB |
+| sandbox dependencies | 304.0 kB |
+| application entry | 156.5 kB |
+| framework dependencies | 152.0 kB |
+| other dependencies | 85.3 kB |
+| server management | 100.8 kB |
 | editor dependencies | 29.6 kB |
-| desktop capability adapter | 18.0 kB |
-| permission preparation | 7.1 kB |
+| desktop capability adapter | 18.5 kB |
+| permission preparation | 7.5 kB |
 | plugin playground | 4.4 kB |
-| remaining runtime chunks | 2.8 kB |
-| **Total JavaScript** | **919.3 kB** |
+| remaining runtime chunks | 21.2 kB |
+| **Total JavaScript** | **879.7 kB** |
 
-The shared dependency chunk includes the `@noble/hashes` fallback used for
-synchronous capability fingerprints and browser preview. Desktop launcher
-MD5/SHA-256 work goes through host-only typed broker operations backed by Rust.
+`bun generate:bundle-analysis` writes the ignored `bundle-analysis.html`
+source-map report. The production report contains only the SHA-256 branch of
+`@noble/hashes` (about 4.4 KiB) for synchronous capability fingerprints; MD5 is
+tree-shaken from the desktop bundle and remains available only to browser
+preview. Desktop launcher MD5/SHA-256 work goes through host-only typed broker
+operations backed by Rust.
 
 # References
 

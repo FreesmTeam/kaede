@@ -6,6 +6,14 @@ void Host.files.readText("config.json5");
 void DirectHost.app.version();
 void Kaede.libs;
 
+const downloadWithProgress = Kaede.libs.Launcher.Fetching.downloadWithProgress;
+
+void downloadWithProgress({
+  "url"     : "https://example.test/client.jar",
+  "path"    : "libraries/client.jar",
+  "statuses": {} as Parameters<typeof downloadWithProgress>[0]["statuses"],
+});
+
 const validationErrors = Kaede.libs.Schemas.AccountValidator.Errors({});
 
 void validationErrors.then(errors => errors.length);

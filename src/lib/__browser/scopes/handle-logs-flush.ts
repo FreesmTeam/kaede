@@ -19,49 +19,60 @@
 import { BrowserStorageStoreKey } from "@/constants/browser.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import {
+  withBrowserLogOperation,
+} from "@/lib/browser/scopes/browser-preview-io.ts";
 import { getDatabaseStore } from "@/lib/browser/scopes/get-database-store.ts";
 import General from "@/lib/general";
 
 const logFlushState = { "isFirstFlush": true };
 
 export function handleLogsFlush(): void {
-  setInterval(async () => {
-    const database: IDBDatabase | undefined = GlobalInternals.indexedDB;
-    const currentLogs: Array<string> | undefined = GlobalInternals.logsInBrowser;
+  setInterval(() => {
+    void withBrowserLogOperation(async () => {
+      const database: IDBDatabase | undefined = GlobalInternals.indexedDB;
+      const currentLogs: Array<string> | undefined = GlobalInternals.logsInBrowser;
 
-    if (!database || !currentLogs) {
-      return;
-    }
+      if (!database || !currentLogs || currentLogs.length === 0) {
+        return;
+      }
 
-    const store: IDBObjectStore = getDatabaseStore(BrowserStorageStoreKey, database);
-    const logsKey: string = General.cachedJoin(
-      General.getCachedBaseDirectory(),
-      FileStructure.Folders.Logs.Path,
-      FileStructure.Folders.Logs.Files.LatestLog,
-    );
-    const logsRequest = store.get(logsKey);
+      const pendingLogs = [...currentLogs];
 
-    await new Promise((resolve, reject) => {
-      logsRequest.addEventListener("success", (): void => {
-        const storedLogs: string = logsRequest.result?.value ?? "";
-        const parsedLogs: Array<string> = storedLogs.split("\n");
+      const store: IDBObjectStore = getDatabaseStore(BrowserStorageStoreKey, database);
+      const logsKey: string = General.cachedJoin(
+        General.getCachedBaseDirectory(),
+        FileStructure.Folders.Logs.Path,
+        FileStructure.Folders.Logs.Files.LatestLog,
+      );
+      const logsRequest = store.get(logsKey);
 
-        parsedLogs.push(...currentLogs);
-        store.put({
-          "path" : logsKey,
-          "value": logFlushState.isFirstFlush
-            ? currentLogs.join("\n")
-            : parsedLogs.join("\n"),
-        });
+      await new Promise<void>((resolve, reject) => {
+        logsRequest.addEventListener("success", (): void => {
+          const storedLogs: string = logsRequest.result?.value ?? "";
+          const parsedLogs: Array<string> = storedLogs === "" ? [] : storedLogs.split("\n");
 
-        logFlushState.isFirstFlush = false;
-        resolve(true);
-      }, { "once": true });
-      logsRequest.addEventListener("error", error => {
-        reject(error);
-      }, { "once": true });
+          parsedLogs.push(...pendingLogs);
+          const writeRequest = store.put({
+            "path" : logsKey,
+            "value": logFlushState.isFirstFlush
+              ? pendingLogs.join("\n")
+              : parsedLogs.join("\n"),
+          });
+
+          writeRequest.addEventListener("success", (): void => {
+            logFlushState.isFirstFlush = false;
+            currentLogs.splice(0, pendingLogs.length);
+            resolve();
+          }, { "once": true });
+          writeRequest.addEventListener("error", error => {
+            reject(error);
+          }, { "once": true });
+        }, { "once": true });
+        logsRequest.addEventListener("error", error => {
+          reject(error);
+        }, { "once": true });
+      });
     });
-
-    currentLogs.length = 0;
   }, 500);
 }

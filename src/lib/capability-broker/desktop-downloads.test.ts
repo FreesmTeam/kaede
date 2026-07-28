@@ -59,6 +59,7 @@ test("exposes host-only download batching and cancel-id-scoped cancellation", as
         "concurrency": 8,
         "label"      : "libraries",
         "cancelId"   : "example-download",
+        "debug"      : false,
       },
       "events": expect.any(Object),
     },

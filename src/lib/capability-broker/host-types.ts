@@ -14,6 +14,20 @@ export type SystemMemory = Readonly<{
   "totalBytes": number;
 }>;
 
+export type LogStreamEvent =
+  | Readonly<{ "type": "snapshot" | "lines"; "data": ReadonlyArray<string> }>
+  | Readonly<{ "type": "truncated" }>;
+
+export interface HostLogs {
+  write(input: Readonly<{
+    "level"   : "debug" | "info" | "warn" | "error";
+    "message" : string;
+    "location": string;
+  }>): void;
+  stream(onEvent: (event: LogStreamEvent) => void): Promise<void>;
+  stopStream(): Promise<boolean>;
+}
+
 export type RuntimeKind = "desktop" | "browser-preview";
 
 export type RuntimeSnapshot = Readonly<{
@@ -48,6 +62,7 @@ export type DownloadBatchInput = Readonly<{
   "concurrency": number;
   "label"      : string;
   "cancelId"   : string;
+  "debug"     ?: boolean;
 }>;
 
 export type DownloadBatchSnapshot = Readonly<{

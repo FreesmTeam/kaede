@@ -4,6 +4,40 @@ import { normalizeBrowserPath } from "@/lib/browser/scopes/browser-preview-paths
 import type { BrowserStorage } from "@/lib/browser/scopes/browser-storage.ts";
 import type { DownloadProgress } from "@/lib/capability-broker/types.ts";
 
+type BrowserLogListener = (line: string) => void;
+
+const browserLogListeners = new Set<BrowserLogListener>;
+const browserLogState: { "operation": Promise<void> } = {
+  "operation": Promise.resolve(),
+};
+
+export function subscribeToBrowserLogs(listener: BrowserLogListener): () => void {
+  browserLogListeners.add(listener);
+
+  return (): void => {
+    browserLogListeners.delete(listener);
+  };
+}
+
+export async function withBrowserLogOperation<Result>(
+  operation: () => Promise<Result>,
+): Promise<Result> {
+  const previousOperation = browserLogState.operation;
+  let releaseOperation: (() => void) | undefined;
+
+  browserLogState.operation = new Promise(resolve => {
+    releaseOperation = resolve;
+  });
+
+  await previousOperation;
+
+  try {
+    return await operation();
+  } finally {
+    releaseOperation?.();
+  }
+}
+
 export async function pickBrowserIcon(
   allowedExtensions: ReadonlyArray<string>,
 ): Promise<File | null> {
@@ -38,7 +72,7 @@ export function logInBrowser(
   level: "debug" | "info" | "warn" | "error",
   message: string,
   location: string,
-): void {
+): string {
   const now = new Date;
   const time = [
     now.getHours().toString(),
@@ -58,6 +92,12 @@ export function logInBrowser(
   ].join(LogInfo.delimiter);
 
   GlobalInternals.logsInBrowser.push(formatted);
+
+  for (const listener of browserLogListeners) {
+    listener(formatted);
+  }
+
+  return formatted;
 }
 
 export async function downloadToBrowserStorage(

@@ -56,6 +56,10 @@ The `./src/plugin_broker` directory includes:
   including across regular-to-FIFO races, plus atomic decision persistence;
 - redirect-aware HTTP and session-bound process/resource handling, with plugin
   child stdin closed and no broker stdin-write request;
+- host-only log tail snapshots, appended lines, truncation events, and stream
+  cancellation through the broker event channel; page reset stops an orphaned
+  stream, while the legacy raw `stream_logs` / `stop_log_stream` commands remain
+  absent and Runtime Authority smoke-tested;
 - page/session-scoped concurrent download cancellation, exclusive destination
   leases, collision-free partial files, and atomic destination replacement.
 - deterministic `.kaede` / `.zip` discovery under the runtime `extensions`

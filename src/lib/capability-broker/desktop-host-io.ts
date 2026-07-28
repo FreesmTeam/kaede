@@ -29,6 +29,7 @@ type DownloadBatchProgressHandler = Parameters<HostFacade["downloads"]["batch"]>
 type DialogMessageInput = Parameters<HostFacade["dialogs"]["message"]>[0];
 type DialogAskInput = Parameters<HostFacade["dialogs"]["ask"]>[0];
 type LogInput = Parameters<HostFacade["logs"]["write"]>[0];
+type LogStreamHandler = Parameters<HostFacade["logs"]["stream"]>[0];
 
 export function createDesktopHostIo(call: BrokerCall): DesktopHostIo {
   return Object.freeze({
@@ -74,6 +75,7 @@ export function createDesktopHostIo(call: BrokerCall): DesktopHostIo {
           "concurrency": input.concurrency,
           "label"      : input.label,
           "cancelId"   : input.cancelId,
+          "debug"      : input.debug ?? false,
         }, event => {
           if (event.kind === "download_batch_progress") {
             onProgress(toDownloadBatchSnapshot({
@@ -126,6 +128,36 @@ export function createDesktopHostIo(call: BrokerCall): DesktopHostIo {
         void call({ "kind": "log", ...input }).catch(error => {
           reportBackgroundBrokerError("Failed to write broker log entry", error);
         });
+      },
+      "stream": async (onEvent: LogStreamHandler): Promise<void> => {
+        expectResponse(await call({ "kind": "host_stream_logs" }, event => {
+          switch (event.kind) {
+            case "log_snapshot": {
+              onEvent(Object.freeze({
+                "type": "snapshot",
+                "data": Object.freeze([...event.lines]),
+              }));
+              break;
+            }
+            case "log_lines": {
+              onEvent(Object.freeze({
+                "type": "lines",
+                "data": Object.freeze([...event.lines]),
+              }));
+              break;
+            }
+            case "log_truncated": {
+              onEvent(Object.freeze({ "type": "truncated" }));
+              break;
+            }
+          }
+        }), "unit");
+      },
+      "stopStream": async (): Promise<boolean> => {
+        return expectResponse(
+          await call({ "kind": "host_stop_log_stream" }),
+          "boolean",
+        ).value;
       },
     }),
   });

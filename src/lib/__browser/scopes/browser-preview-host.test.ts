@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
 
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import {
   createBrowserHostFacade,
 } from "@/lib/browser/scopes/browser-preview-host.ts";
@@ -7,7 +8,10 @@ import {
   BROWSER_RUNTIME_SNAPSHOT,
   createBrowserDirectHostFacade,
 } from "@/lib/browser/scopes/browser-preview-runtime.ts";
-import type { BrowserStorage } from "@/lib/browser/scopes/browser-storage.ts";
+import type {
+  BrowserStorage,
+  BrowserStorageValue,
+} from "@/lib/browser/scopes/browser-storage.ts";
 
 type RuntimeHostHttp = Readonly<{
   fetch(input: unknown, init?: unknown): Promise<Response>;
@@ -21,7 +25,58 @@ const UNUSED_STORAGE: BrowserStorage = Object.freeze({
 });
 
 afterEach(() => {
+  GlobalInternals.logsInBrowser.length = 0;
   vi.unstubAllGlobals();
+});
+
+test("streams persisted, buffered, and future browser-preview logs until stopped", async () => {
+  const logsPath = "indexed_db/logs/latest.log";
+  const values = new Map<string, BrowserStorageValue>([
+    [logsPath, "persisted-first\npersisted-second"],
+  ]);
+  const storage: BrowserStorage = Object.freeze({
+    "keys": async () => [...values.keys()],
+    "read": async (path: string) => {
+      const value = values.get(path);
+
+      return value === undefined
+        ? Object.freeze({ "kind": "missing" as const })
+        : Object.freeze({ "kind": "value" as const, value });
+    },
+    "write": async (path: string, value: BrowserStorageValue) => {
+      values.set(path, value);
+    },
+    "remove": async (path: string) => {
+      values.delete(path);
+    },
+  });
+  const host = createBrowserHostFacade(
+    storage,
+    BROWSER_RUNTIME_SNAPSHOT,
+    createBrowserDirectHostFacade(),
+  );
+  const events: Array<unknown> = [];
+
+  GlobalInternals.logsInBrowser.push("buffered-third");
+  await host.logs.stream(event => {
+    events.push(event);
+  });
+
+  host.logs.write({ "level": "info", "message": "future-fourth", "location": "test" });
+
+  expect(events).toHaveLength(2);
+  expect(events[0]).toEqual({
+    "type": "snapshot",
+    "data": ["persisted-first", "persisted-second", "buffered-third"],
+  });
+  expect(events[1]).toMatchObject({ "type": "lines" });
+  expect((events[1] as { "data": Array<string> }).data[0]).toContain("future-fourth");
+  expect(await host.logs.stopStream()).toBe(true);
+
+  host.logs.write({ "level": "warn", "message": "after-stop", "location": "test" });
+
+  expect(events).toHaveLength(2);
+  expect(await host.logs.stopStream()).toBe(false);
 });
 
 describe("browser-preview host HTTP", () => {

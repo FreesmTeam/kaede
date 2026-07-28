@@ -85,6 +85,9 @@
       "configPatterns": [
         "uno.config.ts"
       ],
+      "toolingDependencies": [
+        "@iconify-json/lucide"
+      ],
       "usedExports": [
         {
           "pattern": "uno.config.ts",

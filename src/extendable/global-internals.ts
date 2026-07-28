@@ -40,6 +40,7 @@ export const GlobalInternals: KaedeInternalsType = {
   "portable"            : false,
   "baseDirectory"       : "",
   "launchCount"         : 0,
+  "logLineHeight"       : 20,
   "logsInBrowser"       : [],
   "serverProcesses"     : [],
 };

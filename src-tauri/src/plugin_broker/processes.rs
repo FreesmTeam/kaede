@@ -113,6 +113,13 @@ pub enum BrokerEvent {
         success: usize,
         failed: usize,
     },
+    LogSnapshot {
+        lines: Vec<String>,
+    },
+    LogLines {
+        lines: Vec<String>,
+    },
+    LogTruncated,
 }
 
 trait ChildControl: Send {

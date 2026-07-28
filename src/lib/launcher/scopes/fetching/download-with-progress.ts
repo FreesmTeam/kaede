@@ -1,6 +1,10 @@
 import { Host } from "@/lib/capability-broker";
 import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";
 
+/**
+ * Compatibility entry point for trusted plugins that use the published
+ * `Kaede.libs.Launcher.Fetching.downloadWithProgress` API.
+ */
 export async function downloadWithProgress({
   url,
   path,
@@ -18,7 +22,9 @@ export async function downloadWithProgress({
         : Math.floor(transferred / total * 100);
 
       if (total !== null && transferred >= total) {
-        return statuses.downloads.current.delete(url);
+        statuses.downloads.current.delete(url);
+
+        return;
       }
 
       statuses.downloads.current.set(url, [percents, bytesPerSecond]);

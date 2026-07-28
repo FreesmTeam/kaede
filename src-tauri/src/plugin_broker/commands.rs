@@ -358,10 +358,14 @@ pub enum BrokerRequest {
         concurrency: usize,
         label: String,
         cancel_id: String,
+        #[serde(default)]
+        debug: bool,
     },
     HostCancelDownloads {
         cancel_id: String,
     },
+    HostStreamLogs,
+    HostStopLogStream,
     HostProbeJavaMajor,
     HostLaunchMinecraft {
         executable: PathBuf,
@@ -1297,6 +1301,7 @@ async fn dispatch<R: Runtime>(
             concurrency,
             label,
             cancel_id,
+            debug,
         } => {
             require_host(state, session)?;
             validate_host_label("download label", &label)?;
@@ -1310,6 +1315,7 @@ async fn dispatch<R: Runtime>(
                     concurrency,
                     label,
                     cancel_id,
+                    debug,
                     events,
                 },
             )
@@ -1327,6 +1333,23 @@ async fn dispatch<R: Runtime>(
             let generation = active_host_generation(state, session)?;
             Ok(BrokerResponse::Boolean {
                 value: state.downloads.cancel(session, generation, &cancel_id),
+            })
+        }
+        BrokerRequest::HostStreamLogs => {
+            require_host(state, session)?;
+            let events = events
+                .ok_or_else(|| invalid_request("host log streaming requires an event channel"))?;
+            state
+                .log_tail
+                .stream(events)
+                .await
+                .map_err(|error| operation_error("log_stream", error))?;
+            Ok(BrokerResponse::Unit)
+        }
+        BrokerRequest::HostStopLogStream => {
+            require_host(state, session)?;
+            Ok(BrokerResponse::Boolean {
+                value: state.log_tail.stop(),
             })
         }
         BrokerRequest::PluginHttpFetch { request } => {
@@ -3691,6 +3714,7 @@ struct DownloadBatchOptions {
     concurrency: usize,
     label: String,
     cancel_id: String,
+    debug: bool,
     events: Option<Channel<BrokerEvent>>,
 }
 
@@ -3713,6 +3737,7 @@ async fn download_batch(
         concurrency,
         label,
         cancel_id,
+        debug,
         events,
     } = options;
     let registration = state
@@ -3820,10 +3845,14 @@ async fn download_batch(
         match completed.result {
             Ok(()) => {
                 execution.success.fetch_add(1, Ordering::Relaxed);
-                log::debug!("{label}: downloaded '{}'", completed.entry.url);
+                if debug {
+                    log::debug!("{label}: downloaded '{}'", completed.entry.url);
+                }
             }
             Err(DownloadTransferError::Cancelled) => {
-                log::debug!("{label}: cancelled '{}'", completed.entry.url);
+                if debug {
+                    log::debug!("{label}: cancelled '{}'", completed.entry.url);
+                }
             }
             Err(DownloadTransferError::Command(error)) => {
                 execution.failed.fetch_add(1, Ordering::Relaxed);
@@ -4558,6 +4587,16 @@ mod tests {
                 "current": {},
                 "success": 2,
                 "failed": 1
+            })
+        );
+        assert_eq!(
+            serde_json::to_value(BrokerEvent::LogSnapshot {
+                lines: vec!["first".to_owned()],
+            })
+            .expect("log snapshot should serialize"),
+            serde_json::json!({
+                "kind": "log_snapshot",
+                "lines": ["first"]
             })
         );
     }
@@ -5990,6 +6029,8 @@ mod tests {
                 },
                 "file metadata",
             ),
+            (BrokerRequest::HostStreamLogs, "log streaming"),
+            (BrokerRequest::HostStopLogStream, "log stream cancellation"),
         ] {
             let error = dispatch(app.handle(), &state, &plugin, request, None)
                 .await
@@ -6884,6 +6925,7 @@ mod tests {
                 concurrency: 0,
                 label: "test batch".to_owned(),
                 cancel_id: "launch".to_owned(),
+                debug: false,
                 events: Some(events),
             },
         );
@@ -6946,6 +6988,7 @@ mod tests {
                 concurrency: 1,
                 label: "test batch".to_owned(),
                 cancel_id: "launch".to_owned(),
+                debug: false,
                 events: None,
             },
         )

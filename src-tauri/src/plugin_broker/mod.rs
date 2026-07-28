@@ -2,6 +2,7 @@ pub(crate) mod authorizer;
 pub(crate) mod commands;
 mod decisions;
 mod processes;
+pub(crate) use processes::BrokerEvent;
 
 use authorizer::{Authorizer, PermissionId, ResourceHandle, SessionToken};
 use cap_fs_ext::MetadataExt;
@@ -29,10 +30,15 @@ pub struct BrokerState {
     storage_roots: StorageRootStore,
     operations: OperationRegistry,
     downloads: Arc<crate::downloads::DownloadRegistry>,
+    log_tail: crate::logging::LogTail,
 }
 
 impl BrokerState {
     pub fn new(decisions_path: PathBuf) -> io::Result<Self> {
+        let log_path = decisions_path
+            .parent()
+            .unwrap_or_else(|| Path::new("."))
+            .join("latest.log");
         Ok(Self {
             authorizer: Mutex::new(Authorizer::new()),
             page_generation: AtomicU64::new(0),
@@ -44,12 +50,16 @@ impl BrokerState {
             process_finalization: Mutex::new(()),
             operations: OperationRegistry::default(),
             downloads: Arc::new(crate::downloads::DownloadRegistry::default()),
+            log_tail: crate::logging::LogTail::new(log_path),
         })
     }
 
     pub fn new_for_runtime(runtime_paths: crate::launcher::RuntimePaths) -> io::Result<Self> {
         let decisions_path = runtime_paths.capability_decisions_path();
         let mut state = Self::new(decisions_path)?;
+        state.log_tail = crate::logging::LogTail::new(
+            runtime_paths.base_directory.join("logs").join("latest.log"),
+        );
         state.runtime_paths = Some(runtime_paths);
         Ok(state)
     }
@@ -570,6 +580,7 @@ pub fn reset_for_page_load<R: Runtime>(webview: &Webview<R>) {
 
 fn reset_state_for_page_load(state: &BrokerState) {
     state.page_generation.fetch_add(1, Ordering::SeqCst);
+    state.log_tail.stop();
     let mut authorizer = state
         .authorizer
         .lock()

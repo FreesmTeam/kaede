@@ -92,6 +92,7 @@ test("deduplicates paths and ignores an out-of-order cumulative snapshot", async
     "concurrency": 4,
     "label"      : "assets",
     "cancelId"   : "instance-download",
+    "debug"      : false,
   }, expect.any(Function));
   expect(currentStatuses.downloads).toMatchObject({
     "success"    : 1,

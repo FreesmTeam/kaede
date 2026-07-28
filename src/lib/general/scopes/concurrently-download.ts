@@ -35,12 +35,14 @@ export async function concurrentlyDownload({
   statuses,
   label,
   cancelId = `${Math.random()}`,
+  debug = false,
 }: {
   "concurrency": number;
   "entries"    : ReadonlyArray<Readonly<{ "url": string; "path": string }>>;
   "statuses"   : LauncherStatusesType;
   "label"      : string;
   "cancelId"  ?: string;
+  "debug"     ?: boolean;
 }): Promise<DownloadReportType> {
   const logPrefix: string = `${label}:${__PRE_BUNDLED_FILENAME__}`;
   const uniqueMap = new Map<string, string>(
@@ -111,6 +113,7 @@ export async function concurrentlyDownload({
       concurrency,
       label,
       cancelId,
+      debug,
     }, applySnapshot);
 
     applySnapshot({

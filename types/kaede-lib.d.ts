@@ -17,6 +17,21 @@ export type SystemMemory = Readonly<{
 	"usedBytes": number;
 	"totalBytes": number;
 }>;
+export type LogStreamEvent = Readonly<{
+	"type": "snapshot" | "lines";
+	"data": ReadonlyArray<string>;
+}> | Readonly<{
+	"type": "truncated";
+}>;
+export interface HostLogs {
+	write(input: Readonly<{
+		"level": "debug" | "info" | "warn" | "error";
+		"message": string;
+		"location": string;
+	}>): void;
+	stream(onEvent: (event: LogStreamEvent) => void): Promise<void>;
+	stopStream(): Promise<boolean>;
+}
 export type RuntimeKind = "desktop" | "browser-preview";
 export type RuntimeSnapshot = Readonly<{
 	"kind": RuntimeKind;
@@ -49,6 +64,7 @@ export type DownloadBatchInput = Readonly<{
 	"concurrency": number;
 	"label": string;
 	"cancelId": string;
+	"debug"?: boolean;
 }>;
 export type DownloadBatchSnapshot = Readonly<{
 	"current": Readonly<Record<string, readonly [
@@ -582,13 +598,7 @@ export interface HostFacade {
 			"filePath": string;
 		}>, onEvent: (event: ProcessEvent) => void): Promise<BrokerServerProcess>;
 	}>;
-	readonly "logs": Readonly<{
-		write(input: Readonly<{
-			"level": "debug" | "info" | "warn" | "error";
-			"message": string;
-			"location": string;
-		}>): void;
-	}>;
+	readonly "logs": Readonly<HostLogs>;
 }
 declare const PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
 declare const CustomPatches: {
@@ -937,6 +947,7 @@ export type KaedeInternalsSurfaceType<ApplicationType> = {
 	"portable": boolean;
 	"baseDirectory": string;
 	"launchCount": number;
+	"logLineHeight": number;
 	"atAGlance"?: AtAGlanceType;
 	"javaMajor"?: number;
 	"appInstance"?: ApplicationType;
@@ -3075,7 +3086,7 @@ declare const _default$13: {
 declare function cachedJoin(...paths: Array<string>): string;
 declare function capitalize(input: string): string;
 declare function checkDaysDifference(from: Date, to: Date): number;
-declare function concurrentlyDownload({ concurrency, entries, statuses, label, cancelId, }: {
+declare function concurrentlyDownload({ concurrency, entries, statuses, label, cancelId, debug, }: {
 	"concurrency": number;
 	"entries": ReadonlyArray<Readonly<{
 		"url": string;
@@ -3084,6 +3095,7 @@ declare function concurrentlyDownload({ concurrency, entries, statuses, label, c
 	"statuses": LauncherStatusesType;
 	"label": string;
 	"cancelId"?: string;
+	"debug"?: boolean;
 }): Promise<DownloadReport>;
 export type FinalizeInitializationInput = Readonly<{
 	"config": ConfigType;

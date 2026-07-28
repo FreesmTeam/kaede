@@ -138,7 +138,7 @@ use the Bun version pinned by `packageManager`, the Nix shell, and CI.
 
 ### Rust dependency audit status
 
-Verified 2026-07-27: `cargo audit` reports no vulnerability and leaves 17
+Verified 2026-07-28: `cargo audit` reports no vulnerability and leaves 17
 upstream warnings visible; the repository has no RustSec ignore list. Ten
 unmaintained GTK3 binding warnings, the `glib 0.18.5` soundness warning, and
 the `proc-macro-error 1.0.4` maintenance warning come through Tauri 2.11.5's

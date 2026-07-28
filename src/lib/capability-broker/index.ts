@@ -16,6 +16,8 @@ type DownloadToFileInput = Parameters<HostDownloads["toFile"]>[0];
 type DownloadProgressHandler = Parameters<HostDownloads["toFile"]>[1];
 type DownloadBatchInput = Parameters<HostDownloads["batch"]>[0];
 type DownloadBatchProgressHandler = Parameters<HostDownloads["batch"]>[1];
+type LogInput = Parameters<HostFacade["logs"]["write"]>[0];
+type LogStreamHandler = Parameters<HostFacade["logs"]["stream"]>[0];
 
 export type {
   BrokerDecisionStore,
@@ -27,6 +29,7 @@ export type {
   DownloadReport,
   HostFacade,
   InstalledExtensionsReadResult,
+  LogStreamEvent,
   PermissionTargetIdentity,
   PermissionTargetKind,
   PreparedPermissionRequest,
@@ -170,7 +173,9 @@ export const Host: HostFacade = Object.freeze({
     "serveFile": (input, onEvent) => requireRuntime().host.servers.serveFile(input, onEvent),
   }),
   "logs": Object.freeze({
-    "write": input => requireRuntime().host.logs.write(input),
+    "write"     : (input: LogInput) => requireRuntime().host.logs.write(input),
+    "stream"    : (onEvent: LogStreamHandler) => requireRuntime().host.logs.stream(onEvent),
+    "stopStream": () => requireRuntime().host.logs.stopStream(),
   }),
 } satisfies HostFacade);
 

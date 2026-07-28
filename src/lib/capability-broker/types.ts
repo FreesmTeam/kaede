@@ -3,6 +3,7 @@ import type {
   FileMetadata,
   HostDownloads,
   HostHttpRequestInit,
+  HostLogs,
   InstalledExtensionsReadResult,
   PickedIcon,
   RuntimeSnapshot,
@@ -32,7 +33,9 @@ export type {
   FileMetadata,
   HostDownloads,
   HostHttpRequestInit,
+  HostLogs,
   InstalledExtensionsReadResult,
+  LogStreamEvent,
   PickedIcon,
   RuntimeSnapshot,
   SystemMemory,
@@ -220,13 +223,7 @@ export interface HostFacade {
       onEvent: (event: ProcessEvent) => void,
     ): Promise<BrokerServerProcess>;
   }>;
-  readonly "logs": Readonly<{
-    write(input: Readonly<{
-      "level"   : "debug" | "info" | "warn" | "error";
-      "message" : string;
-      "location": string;
-    }>): void;
-  }>;
+  readonly "logs": Readonly<HostLogs>;
 }
 
 export type PluginCapabilityFactories = Readonly<{

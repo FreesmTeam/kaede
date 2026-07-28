@@ -1,4 +1,5 @@
 import type * as DownloadContract from "@/lib/capability-broker/download-contract.ts";
+export type { RawBrokerEvent } from "@/lib/capability-broker/broker-events.ts";
 import type {
   InstalledExtensionsReadResult,
   PreparedPermissionRequest,
@@ -115,6 +116,8 @@ export type BrokerRequest =
   }>
   | DownloadContract.HostDownloadBatchRequest
   | DownloadContract.HostCancelDownloadsRequest
+  | Readonly<{ "kind": "host_stream_logs" }>
+  | Readonly<{ "kind": "host_stop_log_stream" }>
   | Readonly<{ "kind": "host_probe_java_major" }>
   | Readonly<{
     "kind"      : "host_launch_minecraft";
@@ -236,20 +239,3 @@ export type BrokerResponse =
     "kind"  : "initialization_finalized";
     "report": InitialState.InitializationFinalizationReport;
   }>;
-export type RawBrokerEvent =
-  | Readonly<{ "kind": "stdout" | "stderr"; "handle": string; "bytes": ReadonlyArray<number> }>
-  | Readonly<{
-    "kind"  : "terminated";
-    "handle": string;
-    "code"  : number | null;
-    "signal": number | null;
-  }>
-  | Readonly<{ "kind": "error"; "handle": string; "message": string }>
-  | Readonly<{ "kind": "failed"; "handle": string; "message": string }>
-  | Readonly<{
-    "kind"          : "download_progress";
-    "transferred"   : number;
-    "total"         : number | null;
-    "bytesPerSecond": number;
-  }>
-  | DownloadContract.DownloadBatchProgressEvent;

@@ -116,6 +116,7 @@ describe("desktop host downloads", () => {
         "concurrency": 4,
         "label"      : "assets",
         "cancelId"   : "instance-download",
+        "debug"      : false,
       },
       { "kind": "host_cancel_downloads", "cancelId": "instance-download" },
     ]);
@@ -138,5 +139,42 @@ describe("desktop host downloads", () => {
       "label"      : "test",
       "cancelId"   : "test-download",
     }, () => {})).rejects.toThrow("failed count");
+  });
+});
+
+describe("desktop host log streaming", () => {
+  test("routes typed stream events and stop requests through the broker", async () => {
+    const requests: Array<BrokerRequest> = [];
+    const events: Array<unknown> = [];
+    const call: BrokerCall = async (request, onEvent) => {
+      requests.push(request);
+
+      if (request.kind === "host_stream_logs") {
+        onEvent?.({ "kind": "log_snapshot", "lines": ["first"] });
+        onEvent?.({ "kind": "log_lines", "lines": ["second"] });
+        onEvent?.({ "kind": "log_truncated" });
+
+        return { "kind": "unit" };
+      }
+
+      return { "kind": "boolean", "value": true };
+    };
+    const logs = createDesktopHostIo(call).logs;
+
+    await logs.stream(event => {
+      events.push(event);
+    });
+    await expect(logs.stopStream()).resolves.toBe(true);
+
+    expect(requests).toEqual([
+      { "kind": "host_stream_logs" },
+      { "kind": "host_stop_log_stream" },
+    ]);
+    expect(events).toEqual([
+      { "type": "snapshot", "data": ["first"] },
+      { "type": "lines", "data": ["second"] },
+      { "type": "truncated" },
+    ]);
+    expect(events.every(event => Object.isFrozen(event))).toBe(true);
   });
 });

@@ -18,245 +18,183 @@
 
 <script setup lang="ts">
 import {
-  computed, inject, nextTick,
-  onMounted, ref, type ShallowReactive,
-  shallowRef, useTemplateRef, watchEffect,
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  type ShallowReactive,
+  useTemplateRef,
+  watch,
 } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import LogControls from "@/components/logging/controls/LogControls.vue";
 import LogHeader from "@/components/logging/header/LogHeader.vue";
-import NonVirtualizedLogs from "@/components/logging/wrappers/NonVirtualizedLogs.vue";
-import VirtualizedLogs from "@/components/logging/wrappers/VirtualizedLogs.vue";
+import { useLogStream } from "@/composables/use-log-stream.ts";
 import { InstanceLogsContextKey } from "@/constants/application.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Logging from "@/lib/logging";
-import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
 
+const { "lines": launcherLines } = useLogStream();
 const instanceLogs = inject<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey);
 
-const virtualList = useTemplateRef("virtualList");
-const nonVirtualList = useTemplateRef("nonVirtualList");
+// TODO
+const shouldHideDetails = false;
 
-const logs = shallowRef<Array<string>>(["__kaede-trigger-loading"]);
-// References the launcher logs even if user is viewing instance logs
-const launcherLogsReference = shallowRef<Array<string>>(logs.value);
+const selectedLines = computed((): Array<string> => {
+  const mode = globalStates.logs?.mode ?? "launcher";
 
-const fileData = ref<{
-  "size": string | undefined;
-  "time": string | undefined;
-}>({ "size": undefined, "time": undefined });
-const searching = ref<{
-  // Takes a searching value
-  "current"     : string;
-  // Takes indexes from the relative matches array (example: [0, 1, 2, ...])
-  "relative"    : number;
-  // Takes indexes from the logs array (example: [4, 23, 95, ...])
-  "absolute"    : number | undefined;
-  // Stores the current search index
-  "currentIndex": number | undefined;
-}>({
-  "current"     : "",
-  "relative"    : 1,
-  "absolute"    : undefined,
-  "currentIndex": undefined,
-});
-// A key that re-renders virtualized list on every log viewer reopen
-const mountedKey = ref<number>(Math.random());
-// Keeps track of index range text selections in virtualized mode
-const currentTextSelection = ref<[number, number] | undefined>(undefined);
-
-const filtering = computed((): string => globalStates?.logs?.filtering ?? "");
-const filteredLogs = computed((): (Array<[number, string]> | undefined) => {
-  if (filtering.value === "") {
-    return undefined;
-  }
-
-  const filteredArray: Array<[number, string]> = [];
-
-  for (const [_index, _log] of logs.value.entries()) {
-    if (_log.toLowerCase().includes(filtering.value.toLowerCase())) {
-      filteredArray.push([_index, _log]);
-    }
-  }
-
-  return filteredArray;
+  return mode === "launcher"
+    ? launcherLines.value.list
+    : (instanceLogs?.[mode] ?? []);
 });
 
-function scrollToIndex(index: number): void {
-  searching.value.currentIndex = filteredLogs.value?.[index]?.[0];
-  virtualList?.value?.scrollToIndex?.(index);
-}
-function setSearchPosition(newValue: number, newAbsoluteValue: number | undefined): void {
-  searching.value.relative = newValue;
-  searching.value.absolute = newAbsoluteValue;
-}
-function setTextSelectionRange(newValue: [number, number] | undefined): void {
-  currentTextSelection.value = newValue;
-}
-function selectAllLogs(): void {
-  Logging.selectAllText(nonVirtualList.value?.nonVirtualizedLogsTarget);
-}
+const filtered = computed((): Array<string> => {
+  const filtered: Array<string> = [];
 
-function searchLogs(searchValue: string): Array<number> {
-  const found: Array<number> = [];
-  const lowerCaseSearch: string = searchValue.toLowerCase();
-  const currentLogsArray: Array<string | [number, string]> = filteredLogs.value ?? logs.value;
+  for (const line of selectedLines.value) {
+    if (!shouldHideDetails) {
+      filtered.push(line);
 
-  searching.value.current = lowerCaseSearch;
-
-  for (const [index, value] of currentLogsArray.entries()) {
-    const actualValue = typeof value === "string" ? value : value[1];
-
-    if (actualValue.toLowerCase().includes(lowerCaseSearch)) {
-      found.push(index);
+      continue;
     }
-  }
 
-  return found;
-}
-
-watchEffect(() => {
-  const currentLogsMode: "launcher" | string | undefined = globalStates?.logs?.mode;
-
-  if (currentLogsMode === undefined) {
-    return log.error(__PRE_BUNDLED_FILENAME__, `The selected logs mode is '${currentLogsMode}'`);
-  }
-
-  log.debug(__PRE_BUNDLED_FILENAME__, `The selected logs mode is '${currentLogsMode}'`);
-  if (currentLogsMode === "launcher") {
-    const logsLength: number = launcherLogsReference.value.length;
-
-    log.debug(
-      __PRE_BUNDLED_FILENAME__,
-      `Using a previously saved reference to the launcher logs (length: ${logsLength})`,
+    const part: string = line.slice(0, 2).trim();
+    const areDetails = Number.isNaN(
+      Number(part === "" ? "no" : part),
     );
-    logs.value = launcherLogsReference.value;
-  } else {
-    const currentInstanceLogs: Array<string> | undefined = instanceLogs?.[currentLogsMode];
-    let shouldReassignLauncherLogs: boolean = true;
-    const allInstanceLogs = Object.values(instanceLogs ?? {});
 
-    log.debug(
-      __PRE_BUNDLED_FILENAME__,
-      `Using an instance logs (length: ${currentInstanceLogs?.length})`,
-    );
-    for (const instanceLogsReference of allInstanceLogs) {
-      if (logs.value === instanceLogsReference) {
-        shouldReassignLauncherLogs = false;
-      }
+    if (!areDetails) {
+      filtered.push(line);
     }
-
-    if (shouldReassignLauncherLogs) {
-      // Re-assign the launcher logs reference only if the current logs are actually launcher logs
-      launcherLogsReference.value = logs.value;
-    }
-
-    logs.value = currentInstanceLogs ?? [];
   }
+
+  return filtered;
 });
 
-onMounted(async () => {
-  if (globalStates?.logs?.mode && instanceLogs?.[globalStates.logs.mode] === undefined) {
-    // Reset to launcher logs if the instance logs do not exist (if just empty, then do not reset)
+const position = ref<number>(0);
+const visibleLineCount = computed((): number => {
+  return Math.max(0, Math.min(16, filtered.value.length - position.value));
+});
+
+const container = useTemplateRef("container");
+
+function updateView(event: Event): void {
+  const target = event.target as HTMLDivElement | null;
+
+  if (!target) {
+    return;
+  }
+
+  position.value = Math.round(target.scrollTop / GlobalInternals.logLineHeight);
+}
+
+watch(
+  () => [globalStates.logs?.mode, filtered.value.length] as const,
+  async ([mode], [previousMode]) => {
+    position.value = mode === previousMode
+      ? Math.min(position.value, Math.max(0, filtered.value.length - 16))
+      : 0;
+
+    if (!container.value) {
+      return;
+    }
+
+    const viewer = container.value;
+    const twoLinesHeight = GlobalInternals.logLineHeight * 2;
+    const toCatchRange = viewer.scrollTop + twoLinesHeight + 1;
+    const isAtTheBottom = viewer.scrollHeight - viewer.clientHeight <= toCatchRange;
+
+    await nextTick();
+
+    if (isAtTheBottom) {
+      viewer.scrollTo({ "top": viewer.scrollHeight - viewer.clientHeight });
+    }
+  },
+);
+
+function closeViewer(): void {
+  Logging.closeViewer();
+}
+
+onMounted(() => {
+  const mode = globalStates.logs?.mode;
+
+  if (mode !== undefined && mode !== "launcher" && instanceLogs?.[mode] === undefined) {
     GlobalStateHelpers.Logs.selectMode("launcher");
   }
 
-  const startTime = performance.now();
+  if (!container.value) {
+    return;
+  }
 
-  // Notify virtualized list component that it should re-render
-  mountedKey.value = Math.random();
+  container.value.addEventListener("scroll", updateView, { "passive": true });
+});
+onUnmounted(() => {
+  if (!container.value) {
+    return;
+  }
 
-  const { "size": filesize, "logs": existingLogs, currentInstanceLogs } =
-    await Logging.readLogs({ globalStates, instanceLogs });
-
-  logs.value = globalStates?.logs?.mode === "launcher" ? existingLogs : currentInstanceLogs;
-  // Update the reference to the launcher logs
-  launcherLogsReference.value = existingLogs;
-
-  const endTime = performance.now();
-  const totalTime = ((endTime - startTime) / 1000).toFixed(2);
-
-  fileData.value.time = `took ${totalTime}s`;
-  fileData.value.size = `${filesize} MB`;
-
-  await nextTick();
-  // Virtual list does not scroll to its end unless we wait two (???) Vue ticks
-  await nextTick();
-
-  virtualList.value?.scrollToEnd?.();
+  container.value.removeEventListener("scroll", updateView);
 });
 </script>
 
 <template>
   <div
-    id="__log-viewer__wrapper"
     @contextmenu.prevent
-    class="absolute bottom-0 left-0 right-0 top-0 z-6000 grid place-items-center bg-[theme(colors.black/.5)]"
+    id="__log-viewer__wrapper"
+    class="absolute bottom-0 left-0 right-0 top-0 z-6000 grid place-items-center p-16 text-start text-sm bg-[theme(colors.black/.5)]"
   >
     <div
       id="__log-viewer__inner"
-      @contextmenu.prevent
-      @contextmenu="GlobalStateHelpers.showContextMenu"
-      class="h-fit max-h-[calc(100vh-64px)] max-w-[calc(100vw-64px)] w-fit flex flex-col gap-2 rounded-md bg-neutral-900 p-4 text-white drop-shadow-lg"
+      class="max-w-320 w-full flex flex-col gap-3 rounded-md bg-neutral-900 p-4 text-white drop-shadow-lg"
     >
-      <div id="__log-viewer__information-wrapper" class="w-full flex shrink-0 flex-nowrap items-start justify-between gap-4 pb-2">
-        <div id="__log-viewer__information-text-wrapper" class="flex flex-col gap-2">
-          <p id="__log-viewer__information-title" class="text-xl font-medium leading-none">
-            Logs
-          </p>
-          <p id="__log-viewer__information-subtitle" class="text-neutral-300">
-            <LogHeader />
-            <span
-              v-if="fileData?.size !== undefined && fileData?.time !== undefined"
-              id="__log-viewer__information-subtitle-file-data"
-              class="text-neutral-400"
-            >
-              ({{ fileData.size }}, {{ fileData.time }})
-            </span>
-          </p>
-          <LogControls
-            :searching="searching"
-            :set-search-position="setSearchPosition"
-            :search-logs="searchLogs"
-            :scroll-to-index="scrollToIndex"
-            :select-all-logs="selectAllLogs"
-            :text-selection-range="currentTextSelection"
-            :set-text-selection-range="setTextSelectionRange"
-            :logs-array="filteredLogs ?? logs"
-          />
-        </div>
+      <div id="__log-viewer__header" class="flex items-center justify-between gap-4">
+        <LogHeader />
         <button
           id="__log-viewer__close-logs-button"
+          aria-label="Close logs"
           class="relative rounded-md p-2 hover:bg-neutral-800"
-          @click="Logging.closeViewer"
+          type="button"
+          @click="closeViewer"
         >
           <span id="__log-viewer__close-logs-icon" class="i-lucide-x block size-5"></span>
           <MaterialRipple />
         </button>
       </div>
       <div
-        id="__log-viewer__virtual-list-wrapper"
-        class="group relative max-w-320 w-[calc(100vw-128px)] overflow-auto border border-neutral-300 bg-neutral-950 text-sm font-mono"
+        id="__log-viewer__bound"
+        class="relative w-full select-text overflow-y-auto border border-neutral-300 bg-neutral-950"
+        ref="container"
+        :style="{ 'height': 16 * GlobalInternals.logLineHeight + 'px' }"
       >
-        <VirtualizedLogs
-          v-if="globalStates?.logs?.virtualized"
-          ref="virtualList"
-          :logs="logs"
-          :filtered-logs="filteredLogs"
-          :filtering="filtering"
-          :mounted-key="mountedKey"
-          :searching="searching"
-          :current-text-selection="currentTextSelection"
-        />
-        <NonVirtualizedLogs
-          v-else
-          ref="nonVirtualList"
-          :logs="filteredLogs ?? logs"
-          :searching="searching"
-          :horizontal-scroll="globalStates?.logs?.lineBreaks === false"
-        />
+        <div
+          id="__log-viewer__scroll-placeholder"
+          class="font-mono"
+          :style="{
+            'height': filtered.length * GlobalInternals.logLineHeight + 'px',
+          }"
+        >
+          <p
+            v-if="filtered.length === 0"
+            id="__log-viewer__empty-state"
+            class="p-2 text-neutral-400"
+          >
+            No logs are available for this source.
+          </p>
+          <div
+            v-for="(_, index) in Array.from({ length: visibleLineCount })"
+            :key="position + index"
+            :id="`${position + index}-log-line`"
+            class="__log-viewer__log-line"
+            :style="{ 'top': index * GlobalInternals.logLineHeight + 'px' }"
+          >
+            {{ position + index }} {{ filtered?.[position + index] }}
+          </div>
+        </div>
       </div>
     </div>
   </div>

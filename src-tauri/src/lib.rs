@@ -8,6 +8,7 @@ mod hashes;
 #[cfg(test)]
 mod ipc_acl_smoke;
 mod launcher;
+mod logging;
 mod plugin_broker;
 mod zip;
 

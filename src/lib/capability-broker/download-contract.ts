@@ -6,6 +6,7 @@ export type HostDownloadBatchRequest = Readonly<{
   "concurrency": number;
   "label"      : string;
   "cancelId"   : string;
+  "debug"      : boolean;
 }>;
 
 export type HostCancelDownloadsRequest = Readonly<{

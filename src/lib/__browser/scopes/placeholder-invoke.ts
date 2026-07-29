@@ -17,11 +17,15 @@
  */
 
 import { LogInfo } from "@/constants/browser.ts";
+import EnglishTranslations from "@/constants/english.json";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { handleBodyRead } from "@/lib/browser/scopes/handle-body-read.ts";
 import { listStores } from "@/lib/browser/scopes/list-stores.ts";
 import { readStoragePath } from "@/lib/browser/scopes/read-storage-path.ts";
 import { writeToStoragePath } from "@/lib/browser/scopes/write-to-storage-path.ts";
+import Configs from "@/lib/configs";
+import { FamousAndOldJavaMajorVersion } from "@/lib/constants/launcher";
+import Instances from "@/lib/instances";
 
 export async function placeholderInvoke(
   command: string,
@@ -198,7 +202,32 @@ export async function placeholderInvoke(
         "stderr": "A Kaede Placeholder",
       };
     }
+    case "get_initial_state": {
+      return {
+        "basic": {
+          "launcherVersion": "0.0.1-browser",
+          "baseDirectory"  : "indexed_db",
+          "launchCount"    : 0,
+          "separator"      : "/",
+          "portable"       : true,
+        },
+        "parsed": {
+          "config"      : { "status": "loaded", "data": await Configs.getSafe() },
+          "accounts"    : { "status": "loaded", "data": await Configs.getAccounts() },
+          "instances"   : { "status": "loaded", "data": await Instances.readInstances() },
+          "translations": { "status": "loaded", "data": EnglishTranslations },
+        },
+      };
+    }
+    case "finalize_initialization": {
+      return {
+        "createdDirectories": [],
+        "javaMajor"         : FamousAndOldJavaMajorVersion,
+        "javaMajorSource"   : "unresolved",
+      };
+    }
     default: {
+      // eslint-disable-next-line no-console
       console.log(command, payload, options);
 
       return;

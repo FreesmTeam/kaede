@@ -161,7 +161,7 @@ pub fn run() {
             processes::run_process,
             system::get_system_memory,
             system::get_cpu_usage,
-            zip::unzip_file,
+            zip::unzip_files,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

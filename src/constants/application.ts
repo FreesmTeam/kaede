@@ -45,6 +45,8 @@ export const ContextMenu: {
   "show" : (event: MouseEvent) => void;
   "close": () => void;
 } = {
+
+  /* These fields will be overwritten later */
   "show" : () => {},
   "close": () => {},
 };

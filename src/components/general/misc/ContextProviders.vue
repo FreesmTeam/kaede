@@ -20,8 +20,7 @@ import {
 import { GeneralSettings, LaunchStatus } from "@/constants/launcher.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Errors from "@/lib/errors";
-import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
+import Hooks from "@/lib/hooks";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -122,7 +121,7 @@ async function launchInstance(instanceId?: string): Promise<void> {
   try {
     const onInput = createLogSink(instanceId);
     const javaMajor: number = GlobalInternals.javaMajor
-      ?? await General.getJavaMajor();
+      ?? await Launcher.fetchJavaMajor();
 
     const { success, process }: LaunchResponseType = await Launcher.handleLaunch({
       "instance"       : currentInstance.instance,
@@ -177,7 +176,7 @@ async function closeInstance(instanceId: string): Promise<void> {
   }
 
   const beforeHooksResult: "continue" | void | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<void>({
+    await Hooks.catchAsyncResponseHooks<void>({
       "scope" : "onMinecraftKill",
       "toPass": process,
       "timing": "before",
@@ -222,7 +221,7 @@ async function rehydrateLaunchedInstances(): Promise<void> {
         "onOutput": createLogSink(instanceId),
         "onExit"  : (payload): void => {
           onClose(instanceId);
-          ExtensionsManager.catchAsyncVoidHooks({
+          Hooks.catchAsyncVoidHooks({
             "scope" : "onMinecraftKill",
             "toPass": payload.pid,
             "timing": "after",

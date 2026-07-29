@@ -26,7 +26,6 @@ import GlobalError from "@/components/general/errors/GlobalError.vue";
 import CssThemeLoader from "@/components/general/extensions/CssThemeLoader.vue";
 import Layout from "@/components/general/layout/Layout.vue";
 import Router from "@/components/general/layout/Router.vue";
-import ConfigSyncer from "@/components/general/misc/ConfigSyncer.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
@@ -63,8 +62,6 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
         <DevelopmentMode />
         <NonBundledClasses />
       </Layout>
-
-      <ConfigSyncer />
     </template>
 
     <template #error="{ currentError }">

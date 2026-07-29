@@ -16,15 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchConfigSync } from "@/lib/watchers/watch-config-sync.ts";
-import { watchErrors } from "@/lib/watchers/watch-errors.ts";
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import { watchDevelopmentStates, watchLocaleStates } from "@/lib/watchers/watch-states.ts";
+import { useDebounceFn } from "@vueuse/core";
+import { watch } from "vue";
 
-export default {
-  watchConfigSync,
-  watchErrors,
-  watchProcesses,
-  watchDevelopmentStates,
-  watchLocaleStates,
-} as const;
+import Configs from "@/lib/configs";
+import { globalStates } from "@/states/global.ts";
+
+export function watchConfigSync(): () => void {
+  const debouncedWrite = useDebounceFn(Configs.sync, 300);
+
+  /**
+   * Updates translations on locale change.
+   */
+  return watch(
+    // Only watch config-related fields
+    () => [
+      globalStates.development,
+      globalStates.extensions,
+      globalStates.ui,
+      globalStates.selected,
+      globalStates.locale,
+      globalStates.logs,
+      globalStates.minecraft,
+    ],
+    debouncedWrite,
+    { "deep": true },
+  );
+}

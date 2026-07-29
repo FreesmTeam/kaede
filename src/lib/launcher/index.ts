@@ -1,3 +1,4 @@
+import { fetchJavaMajor } from "@/lib/launcher/fetching/fetch-java-major.ts";
 import Arguments from "@/lib/launcher/scopes/arguments";
 import { createCommand } from "@/lib/launcher/scopes/create-command.ts";
 import Extractors from "@/lib/launcher/scopes/extractors";
@@ -16,6 +17,7 @@ export default {
      * useShell,
      */
   },
+  fetchJavaMajor,
   Arguments,
   Extractors,
   Fetching,

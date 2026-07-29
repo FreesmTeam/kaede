@@ -19,7 +19,7 @@
 import { watchEffect } from "vue";
 
 import Configs from "@/lib/configs";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
@@ -66,7 +66,7 @@ export function watchLocaleStates(): () => void {
    * Updates translations on locale change.
    */
   return watchEffect(async () => {
-    const baseDirectory: string = General.getBaseDirectory();
+    const baseDirectory: string = FileManager.getBaseDirectory();
     const locale: string = globalStates.locale;
 
     log.debug(__PRE_BUNDLED_FILENAME__, `Overriding default translations to '${locale}'`);

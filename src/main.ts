@@ -140,6 +140,7 @@ declareInstanceStates();
  * They handle the necessary watching actions.
  * For example, if 'enableDebugMode' is true, they allow debug messages to be logged
  */
+Watchers.watchConfigSync();
 Watchers.watchDevelopmentStates();
 Watchers.watchLocaleStates();
 Watchers.watchProcesses()

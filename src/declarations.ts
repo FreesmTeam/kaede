@@ -28,6 +28,7 @@ import type * as TauriOpener from "@tauri-apps/plugin-opener";
 import type * as TauriOs from "@tauri-apps/plugin-os";
 import type * as TauriProcess from "@tauri-apps/plugin-process";
 import type * as TauriUpload from "@tauri-apps/plugin-upload";
+import type DevelopmentMode from "src/lib/development-mode";
 import type { App } from "vue";
 
 import type _Application from "@/constants/application.ts";
@@ -41,16 +42,25 @@ import type _Permissions from "@/constants/permissions.ts";
 import type _Routes from "@/constants/routes.ts";
 import type Browser from "@/lib/browser";
 import type Configs from "@/lib/configs";
-import type DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import type Errors from "@/lib/errors";
+import type ExtensionAPI from "@/lib/extension-api";
+import type Extensions from "@/lib/extensions";
+import FileManager from "@/lib/file-manager";
 import type General from "@/lib/general";
 import type Globals from "@/lib/globals";
+import Hashing from "@/lib/hashing";
 import type Hooks from "@/lib/hooks";
+import Initialization from "@/lib/initialization";
 import type Instances from "@/lib/instances";
 import type Launcher from "@/lib/launcher";
 import type Logging from "@/lib/logging";
+import Network from "@/lib/network";
+import type Permissions from "@/lib/permissions";
+import Processes from "@/lib/processes";
+import Router from "@/lib/router";
 import type Schemas from "@/lib/schemas";
 import Txiki from "@/lib/txiki";
+import Watchers from "@/lib/watchers";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
@@ -255,12 +265,27 @@ declare global {
         /**
          * Launcher development mode related collection of utilities
          */
-        "DevelopmentModeHelpers": typeof DevelopmentModeHelpers;
+        "DevelopmentMode": typeof DevelopmentMode;
 
         /**
          * Launcher errors-related collection of utilities
          */
         "Errors": typeof Errors;
+
+        /**
+         * Launcher untrusted extensions API
+         */
+        "ExtensionAPI": typeof ExtensionAPI;
+
+        /**
+         * Launcher extensions-related collection of utilities
+         */
+        "Extensions": typeof Extensions;
+
+        /**
+         * Launcher file management related collection of utilities
+         */
+        "FileManager": typeof FileManager;
 
         /**
          * Launcher general-purpose collection of utilities
@@ -273,9 +298,19 @@ declare global {
         "Globals": typeof Globals;
 
         /**
+         * Hashing functions
+         */
+        "Hashing": typeof Hashing;
+
+        /**
          * Launcher hook system related collection of utilities
          */
         "Hooks": typeof Hooks;
+
+        /**
+         * Launcher initialization-related collection of utilities
+         */
+        "Initialization": typeof Initialization;
 
         /**
          * Launcher Minecraft instances related collection of utilities
@@ -293,6 +328,26 @@ declare global {
         "Logging": typeof Logging;
 
         /**
+         * Launcher network and fetching related collection of utilities
+         */
+        "Network": typeof Network;
+
+        /**
+         * Launcher extensions-related collection of permission utilities
+         */
+        "Permissions": typeof Permissions;
+
+        /**
+         * Launcher processes and servers related collection of utilities
+         */
+        "Processes": typeof Processes;
+
+        /**
+         * Launcher navigation-related collection of utilities
+         */
+        "Router": typeof Router;
+
+        /**
          * Launcher collection of typebox validation schemas
          */
         "Schemas": typeof Schemas;
@@ -301,6 +356,11 @@ declare global {
          * Launcher utils for extensions to conveniently run txiki.js servers
          */
         "Txiki": typeof Txiki;
+
+        /**
+         * Launcher watchers for handling various events
+         */
+        "Watchers": typeof Watchers;
 
         /**
          * Launcher context menu related collection of utilities

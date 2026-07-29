@@ -19,7 +19,7 @@
 import FileStructure from "@/constants/file-structure.ts";
 import { getDefaultConfig } from "@/lib/configs/scopes/get-default-config.ts";
 import { regenerateConfigFile } from "@/lib/configs/scopes/regenerate-config-file.ts";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import Hooks from "@/lib/hooks";
 import Schemas from "@/lib/schemas";
 import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
@@ -29,9 +29,9 @@ export async function getMain(properties?: Partial<{
   "baseDirectory": string;
   "parsedFile"   : ParsedFile;
 }>): Promise<ConfigType> {
-  const baseDirectory: string = properties?.baseDirectory ?? General.getCachedBaseDirectory();
+  const baseDirectory: string = properties?.baseDirectory ?? FileManager.getBaseDirectory();
   const parsedFile: ParsedFile | undefined = properties?.parsedFile;
-  const configFileDirectory = General.cachedJoin(baseDirectory, FileStructure.Files.Config);
+  const configFileDirectory = FileManager.join(baseDirectory, FileStructure.Files.Config);
 
   const hooksResult: "continue" | ConfigType | undefined =
     await Hooks.catchAsyncResponseHooks<ConfigType>({
@@ -53,7 +53,7 @@ export async function getMain(properties?: Partial<{
 
   const parsedConfig: unknown = parsedFile?.status === "loaded"
     ? parsedFile.data
-    : await General.handleJsonFile({
+    : await FileManager.handleJsonFile({
       baseDirectory,
       "path"           : [FileStructure.Files.Config],
       "label"          : FileStructure.Files.Config,

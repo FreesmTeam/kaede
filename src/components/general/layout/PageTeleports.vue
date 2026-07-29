@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
-import PagesSelector from "@/components/general/layout/PagesSelector.vue";
 import { Routes } from "@/constants/routes.ts";
+import { C } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
@@ -55,7 +55,7 @@ GlobalObject.libs.Pages.unmount = unmountPage;
     :key="`${state.key}-${state.value}`"
   >
     <Teleport v-if="state.value" :to="state.value">
-      <PagesSelector :page="state.key" />
+      <C.PagesSelector :page="state.key" />
     </Teleport>
   </template>
 </template>

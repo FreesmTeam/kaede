@@ -66,7 +66,11 @@ function handleSourceFileNames(): {
 
 export default defineConfig({
   // Use '/kaede' base path for GitHub Pages
-  "base"       : kaedeExtraConfiguration.useKaedeBase ? "/kaede" : undefined,
+  "base" : kaedeExtraConfiguration.useKaedeBase ? "/kaede" : undefined,
+  "build": {
+    // Do not inline any images
+    "assetsInlineLimit": 0,
+  },
   // Better support for Tauri CLI output
   "clearScreen": false,
   // Enable environment variables

@@ -26,15 +26,17 @@ export async function runInUnrestricted(id: string, code: string): Promise<Exten
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${id}' extension code`);
 
-  const compiled = new AsyncFunction("scopedThis", code);
-  const scopedThis = new ExtensionAPI(id);
+  const compiled = new AsyncFunction("scopedThis", "Kaede", code);
+  const scopedThis = {
+    "Kaede": new ExtensionAPI(id),
+  };
 
   log.debug(
     __PRE_BUNDLED_FILENAME__,
     `Executing the '${id}' extension code in the unrestricted environment`,
   );
   try {
-    await compiled(scopedThis);
+    await compiled(scopedThis, scopedThis.Kaede);
   } catch (error: unknown) {
     return log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -51,5 +53,5 @@ export async function runInUnrestricted(id: string, code: string): Promise<Exten
     `The '${id}' plugin was successfully executed in ${timeDifference} ms`,
   );
 
-  return scopedThis;
+  return scopedThis.Kaede;
 }

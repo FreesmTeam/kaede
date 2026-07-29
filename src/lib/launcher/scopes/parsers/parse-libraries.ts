@@ -1,4 +1,4 @@
-import ExtensionsManager from "@/lib/extensions-manager";
+import Hooks from "@/lib/hooks";
 import { checkIsNative } from "@/lib/launcher/scopes/parsers/check-is-native.ts";
 import { parseLibrary } from "@/lib/launcher/scopes/parsers/parse-library.ts";
 import { parseNative } from "@/lib/launcher/scopes/parsers/parse-native.ts";
@@ -25,7 +25,7 @@ export function parseLibraries({
   "isMaven"    : boolean;
 }): Array<MappedArtifactType> {
   const beforeHooksResult: "continue" | Array<MappedArtifactType> | undefined =
-    ExtensionsManager.catchSyncResponseHooks<Array<MappedArtifactType>>({
+    Hooks.catchSyncResponseHooks<Array<MappedArtifactType>>({
       "scope" : "onLibrariesParsing",
       "toPass": { necessaries, libraries },
       "timing": "before",
@@ -91,7 +91,7 @@ export function parseLibraries({
   }
 
   const afterHooksResult: "continue" | Array<MappedArtifactType> | undefined =
-    ExtensionsManager.catchSyncResponseHooks<Array<MappedArtifactType>>({
+    Hooks.catchSyncResponseHooks<Array<MappedArtifactType>>({
       "scope" : "onLibrariesParsing",
       "toPass": {
         necessaries,

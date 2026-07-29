@@ -35,8 +35,8 @@ import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Browser from "@/lib/browser";
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
 import Globals from "@/lib/globals";
+import Initialization from "@/lib/initialization";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/scopes/log.ts";
 import Watchers from "@/lib/watchers";
@@ -65,7 +65,7 @@ if (Browser.detectIsBrowser()) {
   Browser.handleLogsFlush();
 }
 
-const { basic, parsed } = await General.getInitialState();
+const { basic, parsed } = await Initialization.start();
 const baseDirectory = basic.baseDirectory;
 
 // Caching
@@ -130,12 +130,6 @@ GlobalInternals.initialTranslations = translations;
 GlobalInternals.initialInstances = instances;
 
 /*
- * Exposing account details to the global object
- * makes retrieving account tokens in extensions a bit easier,
- * so we will delete this field as soon as the app-scoped reactive state will be created
- */
-
-/*
  * The global and instance states were declared outside the Vue instance,
  * so they require the value assigning at this point
  */
@@ -147,7 +141,7 @@ declareInstanceStates();
  * For example, if 'enableDebugMode' is true, they allow debug messages to be logged
  */
 Watchers.watchDevelopmentStates();
-Watchers.watchLayoutStates();
+Watchers.watchLocaleStates();
 Watchers.watchProcesses()
   .then(() => declareServerProcesses())
   .then(() => {
@@ -188,8 +182,8 @@ log.debug(
 AppInstance.mount(ApplicationRootID);
 
 log.debug(__PRE_BUNDLED_FILENAME__, "Initializing launcher");
-await General
-  .finalizeInitialization({ config, baseDirectory })
+await Initialization
+  .finish({ config, baseDirectory })
   .catch((error: unknown) => {
     log.error(__PRE_BUNDLED_FILENAME__, "Failed to initialize launcher:", Errors.prettify(error));
   });

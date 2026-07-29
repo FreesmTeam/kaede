@@ -132,7 +132,7 @@ export async function handleLaunch({
           "paths": finalizedPatch
             .artifacts
             .filter(({ status }) => status === "native")
-            .map(({ path }) => path),
+            .map(({ path, exclude }) => ({ path, "exclude": exclude ?? [] })),
         });
 
         return true;

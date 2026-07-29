@@ -18,10 +18,8 @@
 
 import { mock } from "bun:test";
 
-import type { KaedeInternalsType, KaedeNamespaceType } from "./src/declarations";
-import type { GlobalStatesType } from "./src/types/application/global-states.type";
+import type { KaedeNamespaceType } from "./src/declarations";
 import type { InstanceStatesType } from "./src/types/application/instance-states.type";
-import type { AccountType } from "./src/types/configs/account.type";
 import type { ConfigType } from "./src/types/configs/config.type";
 import type { TranslationsType } from "./src/types/translations/translations.type";
 
@@ -29,39 +27,22 @@ import type { TranslationsType } from "./src/types/translations/translations.typ
 
 // Overwrite the 'window' object for tests only
 const testWindow = {
-  "__KAEDE_INTERNALS__": {
-    "getGlobalStates"     : (): GlobalStatesType => ({} as GlobalStatesType),
-    "changeGlobalStates"  : (): void => {},
-    "getInstanceStates"   : (): InstanceStatesType => ({} as InstanceStatesType),
-    "changeInstanceStates": (): void => {},
-    "requestPermissions"  : async (): Promise<Array<boolean>> => ([]),
-    "syncConfig"          : async (): Promise<void> => {},
-    "joinDelimiter"       : "",
-    "launcherVersion"     : "",
-    "portable"            : false,
-    "baseDirectory"       : "",
-    "launchCount"         : 0,
-    "initialConfig"       : {} as ConfigType,
-    "temporaryAccounts"   : [] as Array<AccountType>,
-    "initialTranslations" : {} as TranslationsType,
-    "initialInstances"    : {} as InstanceStatesType,
-    "logsInBrowser"       : [],
-  },
   "__KAEDE__": {
+    "internals": {
+      "requestPermissions" : async (): Promise<Array<boolean>> => ([]),
+      "joinDelimiter"      : "",
+      "launcherVersion"    : "",
+      "portable"           : false,
+      "baseDirectory"      : "",
+      "launchCount"        : 0,
+      "initialConfig"      : {} as ConfigType,
+      "initialTranslations": {} as TranslationsType,
+      "initialInstances"   : {} as InstanceStatesType,
+      "logsInBrowser"      : [],
+    },
     "hooks": {
       "onConfigFileGet"              : { "before": [], "after": [] },
       "onDefaultConfigGet"           : { "before": [] },
-      "onPagesChange"                : { "before": [], "after": [] },
-      "onLayoutChange"               : { "before": [], "after": [] },
-      "onLogsChange"                 : { "before": [], "after": [] },
-      "onSidebarItemsChange"         : { "before": [], "after": [] },
-      "onContextMenuItemsChange"     : { "before": [], "after": [] },
-      "onDevelopmentChange"          : { "before": [], "after": [] },
-      "onMiscChange"                 : { "before": [], "after": [] },
-      "onMinecraftChange"            : { "before": [], "after": [] },
-      "onTranslationsChange"         : { "before": [], "after": [] },
-      "onExtensionsChange"           : { "before": [], "after": [] },
-      "onInstanceChange"             : { "before": [], "after": [] },
       "onPreLaunchInformation"       : { "before": [], "after": [] },
       "onVersionMeta"                : { "before": [], "after": [] },
       "onLibrariesParsing"           : { "before": [], "after": [] },
@@ -83,15 +64,14 @@ const testWindow = {
     },
   },
 } satisfies {
-  "__KAEDE_INTERNALS__": KaedeInternalsType;
 
   /*
-   * Kaede itself uses only the "hooks" property.
+   * Kaede itself uses only the "hooks" and "internals" properties.
    * The remaining fields provide access to the Kaede utilities for plugin developers.
    */
   "__KAEDE__": Pick<
     KaedeNamespaceType,
-    "hooks"
+    "hooks" | "internals"
   >;
 };
 

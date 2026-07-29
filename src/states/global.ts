@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { type Reactive, reactive } from "vue";
+import { markRaw, type Reactive, reactive } from "vue";
 
 import { ContextMenuItems, DefaultGlobalStatesPagesStates } from "@/constants/application.ts";
 import { Routes, SidebarRouteGroupItems } from "@/constants/routes.ts";
@@ -45,14 +45,21 @@ export function getGlobalStates(): GlobalStatesType {
  */
 export function declareGlobalStates(): void {
   const configFile: ConfigType = Configs.getCachedInitial();
+  const customSettings = DefaultGlobalStatesPagesStates["add-instance"].customSettings;
 
   globalStates = reactive<GlobalStatesType>({
     ...configFile,
-    "contextMenuItems": ContextMenuItems,
+    "contextMenuItems": markRaw(ContextMenuItems),
     "currentPage"     : Router.getInitialPage(),
-    "translations"    : GlobalInternals.initialTranslations,
-    "pages"           : DefaultGlobalStatesPagesStates,
-    "sidebarItems"    : [
+    "translations"    : markRaw(GlobalInternals.initialTranslations),
+    "pages"           : {
+      ...DefaultGlobalStatesPagesStates,
+      "add-instance": {
+        ...DefaultGlobalStatesPagesStates["add-instance"],
+        "customSettings": markRaw(customSettings ?? []),
+      },
+    },
+    "sidebarItems": markRaw([
       ...SidebarRouteGroupItems.map(item => {
         return {
           "path"  : item.Path,
@@ -72,6 +79,6 @@ export function declareGlobalStates(): void {
           globalStates.currentPage = Routes.AddInstance;
         },
       },
-    ],
+    ]),
   });
 }

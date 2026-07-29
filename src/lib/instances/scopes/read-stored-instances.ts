@@ -2,7 +2,7 @@ import FileStructure from "@/constants/file-structure.ts";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import Schemas from "@/lib/schemas";
-import type { ParsedFile } from "@/types/application/initial-state.type.ts";
+import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 import type {
   InstanceStatesType,
   InstanceStateType,

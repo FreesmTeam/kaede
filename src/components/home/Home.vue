@@ -12,7 +12,7 @@ import { globalStates } from "@/states/global.ts";
 <template>
   <PageWrapper>
     <div id="__home-page__wrapper" class="h-full flex flex-col justify-between gap-2">
-      <AtAGlance />
+      <AtAGlance v-if="globalStates.ui.atAGlance.length > 0" />
       <div
         id="__home-page__content"
         class="flex flex-nowrap items-end justify-between gap-2 pb-2 pr-2"
@@ -22,8 +22,8 @@ import { globalStates } from "@/states/global.ts";
           class="relative w-88 flex flex-col items-stretch gap-0"
         >
           <CurrentInstance />
-          <CurrentPlaytime v-if="globalStates?.layout?.stats === 'playtime'" />
-          <LastPlayed v-else-if="globalStates?.layout?.stats === 'last-launch'" />
+          <CurrentPlaytime v-if="globalStates?.selected?.stats === 'playtime'" />
+          <LastPlayed v-else-if="globalStates?.selected?.stats === 'last-launch'" />
         </div>
         <div id="__home-page__launch-section-wrapper" class="flex flex-nowrap gap-1 p-2">
           <Launch />

@@ -16,16 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getBaseDirectory } from "@/lib/file-manager/get-base-directory.ts";
-import { handleJsonFile } from "@/lib/file-manager/handle-json-file.ts";
-import { join } from "@/lib/file-manager/join.ts";
-import { unzip } from "@/lib/file-manager/unzip.ts";
-import { verifyPaths } from "@/lib/file-manager/verify-paths.ts";
+import { hashFileContents } from "@/lib/hashing/hash-file-contents.ts";
+import { hashOfflineNickname } from "@/lib/hashing/hash-offline-nickname.ts";
+import { hashString } from "@/lib/hashing/hash-string.ts";
+import { hashStringCrypto } from "@/lib/hashing/hash-string-crypto.ts";
 
 export default {
-  getBaseDirectory,
-  handleJsonFile,
-  join,
-  unzip,
-  verifyPaths,
+  hashFileContents,
+  hashOfflineNickname,
+  hashString,
+  hashStringCrypto,
 } as const;

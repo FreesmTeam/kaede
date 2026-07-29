@@ -43,9 +43,9 @@ import type Browser from "@/lib/browser";
 import type Configs from "@/lib/configs";
 import type DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import type Errors from "@/lib/errors";
-import type ExtensionsManager from "@/lib/extensions-manager";
 import type General from "@/lib/general";
 import type Globals from "@/lib/globals";
+import type Hooks from "@/lib/hooks";
 import type Instances from "@/lib/instances";
 import type Launcher from "@/lib/launcher";
 import type Logging from "@/lib/logging";
@@ -69,7 +69,6 @@ import type {
   SpecificPatchLibraryType,
   SpecificPatchMetaType,
 } from "@/types/launcher/meta/specific-patch-meta.type.ts";
-import type { AtAGlanceType } from "@/types/misc/at-a-glance.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
 /* Expand the globals with Kaede and Tauri namespaces */
@@ -136,8 +135,6 @@ declare global {
         "baseDirectory"       : string;
         // This counter starts as 0 and increases by 1 each time the UI is reloaded (window#reload)
         "launchCount"         : number;
-        // A temporary storage for the 'At a Glance' widget
-        "atAGlance"          ?: AtAGlanceType;
         // A Java major version (for example, 8, 11, or 17)
         "javaMajor"          ?: number;
         "appInstance"        ?: App<Element>;
@@ -265,11 +262,6 @@ declare global {
         "Errors": typeof Errors;
 
         /**
-         * Launcher extension system related collection of utilities
-         */
-        "ExtensionsManager": typeof ExtensionsManager;
-
-        /**
          * Launcher general-purpose collection of utilities
          */
         "General": typeof General;
@@ -278,6 +270,11 @@ declare global {
          * Launcher 'window' object related collection of utilities
          */
         "Globals": typeof Globals;
+
+        /**
+         * Launcher hook system related collection of utilities
+         */
+        "Hooks": typeof Hooks;
 
         /**
          * Launcher Minecraft instances related collection of utilities

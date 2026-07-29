@@ -24,6 +24,7 @@ export function parseNative({
   const { directories, platform, arch, logPrefix } = necessaries;
   const descriptiveLogPrefix: string = patchUid + ":" + library?.name + ":" + logPrefix;
   const classifiers: SpecificPatchClassifiersType | undefined = library?.downloads?.classifiers;
+  const exclude: Array<string> = library?.extract?.exclude ?? [];
   const name: string | undefined = library?.name;
   const newFormattedUrl: string | undefined = library?.downloads?.artifact?.url;
 
@@ -62,6 +63,7 @@ export function parseNative({
       "url"   : newFormattedUrl,
       "status": "native",
       "first" : false,
+      exclude,
       directory,
       file,
       path,
@@ -131,6 +133,7 @@ export function parseNative({
       "hash"     : sha1,
       "status"   : "native",
       "first"    : false,
+      "exclude"  : exclude,
     };
   }
 

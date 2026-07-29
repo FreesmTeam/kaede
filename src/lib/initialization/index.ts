@@ -16,9 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { GlobalStatesLayoutType } from "@/types/application/global-states.type.ts";
-import type { UiColorsType } from "@/types/application/ui-colors.type.ts";
+import { finish } from "@/lib/initialization/finish.ts";
+import { start } from "@/lib/initialization/start.ts";
 
-export function extractUiColors(layout: GlobalStatesLayoutType): UiColorsType {
-  return layout as unknown as UiColorsType;
-}
+export default {
+  finish,
+  start,
+} as const;

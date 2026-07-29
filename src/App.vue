@@ -24,13 +24,13 @@ import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import ExtensionsError from "@/components/general/errors/ExtensionsError.vue";
 import GlobalError from "@/components/general/errors/GlobalError.vue";
 import CssThemeLoader from "@/components/general/extensions/CssThemeLoader.vue";
-import ExtensionLoader from "@/components/general/extensions/ExtensionLoader.vue";
 import Layout from "@/components/general/layout/Layout.vue";
 import Router from "@/components/general/layout/Router.vue";
 import ConfigSyncer from "@/components/general/misc/ConfigSyncer.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
+import { LazyExtensionLoader } from "@/extendable/component-registry.ts";
 import { globalStates } from "@/states/global.ts";
 import type {
   TranslationsStateType,
@@ -76,7 +76,15 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
   <ErrorBoundary>
     <template #default>
       <CssThemeLoader />
-      <ExtensionLoader v-if="globalStates.extensions.enabled" />
+      <!--
+        -- Loading this component triggers side-effects, such as:
+        -- * defining 'Extensions', 'Permissions', and 'Txiki' at Window;
+        -- * importing 'ses', 'ark-of-atrahasis', and 'serialize-javascript'.
+        --
+        -- Therefore, if one has disabled extensions,
+        -- they will not have any extensions-related packages in their launcher
+        -->
+      <LazyExtensionLoader v-if="globalStates.extensions.enabled" />
     </template>
 
     <template #error="{ currentError }">

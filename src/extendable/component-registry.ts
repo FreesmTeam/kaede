@@ -36,6 +36,10 @@ interface ComponentRegistryType {
   "LazyPluginPlayground": Component;
 }
 
+export const LazyExtensionLoader = defineAsyncComponent(() => (
+  import("@/components/general/extensions/ExtensionLoader.vue")
+));
+
 /*
  * Extensions can use this registry to replace existing components with their own ones.
  * When generating types using 'dts-bundle-generator', make sure to remove any Vue components

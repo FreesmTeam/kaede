@@ -1,10 +1,10 @@
 import { DefaultLocale } from "@/constants/application.ts";
-import ExtensionsManager from "@/lib/extensions-manager";
+import Hooks from "@/lib/hooks";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 export async function getDefaultConfig(): Promise<ConfigType> {
   const hooksResult: "continue" | ConfigType | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks({
+    await Hooks.catchAsyncResponseHooks({
       "scope" : "onDefaultConfigGet",
       "toPass": undefined,
       "timing": "before",

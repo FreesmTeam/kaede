@@ -13,19 +13,3 @@ export type ParsedFile =
    * It will be backed up and a new file with default contents will be created
    */
   | { "status": "corrupt"; "raw": string; "error": string };
-
-export type InitialStateType = {
-  "basic": {
-    "launcherVersion": string;
-    "baseDirectory"  : string;
-    "launchCount"    : number;
-    "separator"      : string;
-    "portable"       : boolean;
-  };
-  "parsed": {
-    "config"      : ParsedFile;
-    "accounts"    : ParsedFile;
-    "instances"   : ParsedFile;
-    "translations": ParsedFile;
-  };
-};

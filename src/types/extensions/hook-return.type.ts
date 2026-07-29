@@ -1,4 +1,4 @@
-import type { HookResponseStatus } from "@/constants/hooks.ts";
+import type { HookResponseStatus } from "@/constants/application.ts";
 
 type ExtensionResponseStatusType = typeof HookResponseStatus;
 

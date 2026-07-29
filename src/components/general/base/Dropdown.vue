@@ -22,7 +22,7 @@ import { useTemplateRef } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import type { DropdownItemType } from "@/types/application/dropdown-item.type.ts";
+import type { DropdownItemType } from "@/types/ui/dropdown-item.type.ts";
 
 const { shown, close, id, sizeClassNames, addClassNames, items } = defineProps<{
   "shown"         : boolean;

@@ -15,9 +15,25 @@ export type MappedArtifactType = {
    */
   "status"?: "library" | "mavenFile" | "native" | "empty";
 
-  /*
+  /**
    * Indicates the '+libraries' field in MultiMC patches.
+   *
    * Should be specified the first in classpaths
    */
   "first"?: boolean;
+
+  /**
+   * Used when unzipping natives.
+   *
+   * Taken from 'library.extract.exclude':
+   *
+   * ```
+   * "extract": {
+   *   "exclude": [
+   *     "META-INF/"
+   *   ]
+   * },
+   * ```
+   */
+  "exclude"?: Array<string>;
 };

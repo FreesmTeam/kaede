@@ -16,14 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type FinalizedType = {
-  "createdDirectories": Array<string>;
-  "javaMajor"         : number | null;
+/*
+ * Source - https://stackoverflow.com/a/65239086
+ * Posted by amirhe, modified by community. See post 'Timeline' for change history
+ * Retrieved 2026-04-06, License - CC BY-SA 4.0
+ */
+export function hashString(input: string): number {
+  let hash: number = 0;
 
-  /*
-   * "release-file" (JVM was not spawned)
-   * "spawn" (JVM was spawned)
-   * "unresolved" (returns None)
-   */
-  "javaMajorSource": "release-file" | "spawn" | "unresolved";
-};
+  for (let index = 0; index < input.length; index++) {
+    hash = Math.imul(31, hash) + (input.codePointAt(index) ?? 0);
+  }
+
+  return Math.trunc(hash);
+}

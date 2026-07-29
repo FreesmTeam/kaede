@@ -1,82 +1,56 @@
 <script setup lang="ts">
-import { onClickOutside, useDebounceFn } from "@vueuse/core";
-import { computed, nextTick, ref, useTemplateRef } from "vue";
+import { onClickOutside } from "@vueuse/core";
+import { computed, ref, useTemplateRef } from "vue";
 
-import { GlobalInternals } from "@/extendable/global-internals.ts";
-import Configs from "@/lib/configs";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
-import type { AtAGlanceType } from "@/types/misc/at-a-glance.type.ts";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
+
+// On every new component mount, this will change (i.e., when page changes)
+const randomIndex = Math.floor(Math.random() * globalStates.ui.atAGlance.length);
 
 const target = useTemplateRef<HTMLDivElement>("target");
 
-const editing = ref<keyof AtAGlanceType | undefined>(undefined);
+const editing = ref<keyof GlobalStatesType["ui"]["atAGlance"][number] | undefined>(undefined);
 
-const currentGlance = computed((): AtAGlanceType => {
-  const configGlance: {
-    "title"   : string | null | undefined;
-    "subtitle": string | null | undefined;
-  } = {
-    "title"   : globalStates?.layout?.atAGlance?.title,
-    "subtitle": globalStates?.layout?.atAGlance?.subtitle,
-  };
-
-  if (!configGlance.title || !configGlance.subtitle) {
-    log.debug(
-      __PRE_BUNDLED_FILENAME__,
-      "No custom 'At a Glance' text in the config, using defaults",
-    );
-    const currentTitle = GlobalInternals.atAGlance?.title;
-    const newAtAGlance = General.getAtAGlance(currentTitle);
-
-    GlobalInternals.atAGlance = newAtAGlance;
-
-    return newAtAGlance;
-  }
-
-  log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
-    "Showing a custom 'At a Glance' text",
-    configGlance,
-  ));
-
-  return {
-    "title"   : configGlance.title,
-    "subtitle": configGlance.subtitle,
-  };
+const currentGlance = computed((): GlobalStatesType["ui"]["atAGlance"][number] => {
+  return globalStates.ui.atAGlance[randomIndex];
 });
 
-const handleEdit = useDebounceFn(async (event: Event): Promise<void> => {
-  const target = event?.target as HTMLInputElement;
-  const value = target?.value;
-  const key: keyof AtAGlanceType | undefined = editing.value;
+/*
+ * Previously, this function was debounced as it triggered updates
+ * of a field at 'globalStates'. Since at that time global states were
+ * simply a 'shallowReactive' object, all other fields in the 'ui' field
+ * were changed as well, triggering extension hooks and Vue reactivity system
+ */
+const handleEdit = (event: Event, field: "title" | "subtitle"): void => {
+  const target = event?.target as (HTMLInputElement | undefined);
+  const value: string | undefined = target?.value;
 
-  if (!key || !value || !globalStates) {
+  if (value === undefined) {
     return;
   }
 
   log.debug(
     __PRE_BUNDLED_FILENAME__,
-    `Setting the global 'At a Glance - ${key}' value to: ${value}`,
+    `Setting the global 'At a Glance - ${field}' value to: ${value}`,
   );
-  GlobalStateHelpers.change("layout", {
-    ...globalStates.layout,
-    "atAGlance": {
-      ...currentGlance.value,
-      [key]: value,
-    },
-  });
-
-  // Vue batches state changes
-  await nextTick();
-  // Global states have changed, now we can sync the config file
-  await Configs.sync();
-}, 300);
+  globalStates.ui.atAGlance[randomIndex][field] = value;
+};
 
 onClickOutside(target, () => {
   editing.value = undefined;
 });
+
+function transformInput(input: string): string {
+  const currentDate = (new Date)
+    .toDateString()
+    .split(" ");
+
+  return input.replace("%date%", (
+    currentDate[0] + ", " + currentDate[1] + " " + currentDate[2]
+  ));
+}
 </script>
 
 <template>
@@ -91,16 +65,16 @@ onClickOutside(target, () => {
       class="relative w-fit cursor-pointer break-all border border-transparent rounded-md p-2 text-3xl leading-none transition-[background-color,border-color] hover:border-[theme(colors.white/.3)] hover:bg-[theme(colors.white/.1)]"
     >
       <p id="__home-page__header-title-text" class="whitespace-pre-wrap">
-        {{ currentGlance.title }}
+        {{ transformInput(currentGlance.title) }}
       </p>
       <Transition name="pop">
         <input
           v-if="editing === 'title'"
+          @input="event => handleEdit(event, 'title')"
+          :value="currentGlance.title"
           autocomplete="off"
           id="__home-page__header-title-editor-wrapper"
           class="absolute left-0 top-13 z-10 rounded-md bg-neutral-950 p-1 text-lg leading-none outline-none focus:outline-none"
-          :value="currentGlance.title"
-          @input="handleEdit"
       />
       </Transition>
     </div>
@@ -110,16 +84,16 @@ onClickOutside(target, () => {
       class="relative w-fit cursor-pointer break-all border border-transparent rounded-md p-2 text-lg text-neutral-300 leading-none transition-[background-color,border-color] hover:border-[theme(colors.white/.3)] hover:bg-[theme(colors.white/.1)]"
     >
       <p id="__home-page__header-subtitle-text" class="whitespace-pre-wrap">
-        {{ currentGlance.subtitle }}
+        {{ transformInput(currentGlance.subtitle) }}
       </p>
       <Transition name="pop">
         <input
           v-if="editing === 'subtitle'"
-          autocomplete="off"
-          id="__home-page__header-title-editor-wrapper"
-          class="absolute left-0 top-10 z-10 rounded-md bg-neutral-950 p-1 text-lg leading-none outline-none focus:outline-none"
+          @input="event => handleEdit(event, 'subtitle')"
           :value="currentGlance.subtitle"
-          @input="handleEdit"
+          autocomplete="off"
+          id="__home-page__header-subtitle-editor-wrapper"
+          class="absolute left-0 top-10 z-10 rounded-md bg-neutral-950 p-1 text-lg leading-none outline-none focus:outline-none"
         />
       </Transition>
     </div>

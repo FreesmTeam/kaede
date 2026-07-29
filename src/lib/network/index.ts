@@ -16,16 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getBaseDirectory } from "@/lib/file-manager/get-base-directory.ts";
-import { handleJsonFile } from "@/lib/file-manager/handle-json-file.ts";
-import { join } from "@/lib/file-manager/join.ts";
-import { unzip } from "@/lib/file-manager/unzip.ts";
-import { verifyPaths } from "@/lib/file-manager/verify-paths.ts";
+import { concurrentlyDownload } from "@/lib/network/concurrently-download.ts";
 
 export default {
-  getBaseDirectory,
-  handleJsonFile,
-  join,
-  unzip,
-  verifyPaths,
+  concurrentlyDownload,
 } as const;

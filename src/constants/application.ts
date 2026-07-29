@@ -15,7 +15,7 @@ import FTBIcon from "@/resources/FTBIcon.svg";
 import ModrinthIcon from "@/resources/ModrinthIcon.webp";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
-import type { TabSectionType } from "@/types/application/tab-section.type.ts";
+import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 
 export const ApplicationName = "Kaede";
 export const ApplicationRootID = "#app";

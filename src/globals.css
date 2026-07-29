@@ -77,37 +77,6 @@ input::-webkit-inner-spin-button {
   cursor: pointer;
 }
 
-.__log-entry__time {
-  white-space: pre-wrap;
-}
-
-/* Allow log viewer to have a horizontal scroll */
-#__non-virtualized-list-logs {
-  .__log-entry__time {
-    white-space: pre;
-  }
-  .__log-entry__text-wrapper {
-    white-space: nowrap;
-  }
-}
-#__virtualized-list-logs > div {
-  width: fit-content;
-
-  /*
-   * A library that implements the virtual list overwrites
-   * this field to 'hidden', so we use the '!important' directive
-   */
-  overflow: visible !important;
-}
-#__virtualized-list-logs {
-  .__log-entry__time {
-    white-space: pre;
-  }
-  .__log-entry__text-wrapper {
-    white-space: nowrap;
-  }
-}
-
 /**
  * Data Attributes
  */

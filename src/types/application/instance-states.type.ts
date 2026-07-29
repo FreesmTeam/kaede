@@ -19,7 +19,3 @@ export type InstanceStateType = GlobalStatesType["minecraft"] & {
 /* Per-instance Minecraft settings */
 export type InstanceStatesType = Record<string, InstanceStateType>;
 
-export type InstanceStatesChangerType = <Key extends keyof InstanceStatesType>(
-  key  : Key,
-  value: InstanceStatesType[Key],
-) => void;

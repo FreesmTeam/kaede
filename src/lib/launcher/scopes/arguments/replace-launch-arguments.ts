@@ -1,7 +1,7 @@
 import { ApplicationName } from "@/constants/application.ts";
 import { Patches } from "@/constants/meta.ts";
-import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
+import Hooks from "@/lib/hooks";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
   ArgumentAuthReplacementsType,
@@ -36,7 +36,7 @@ export function replaceLaunchArguments({
   const { directories, instance, logPrefix } = necessaries;
   const assetIndexId: string = finalizedPatch?.assetIndex?.id ?? "";
   const toReplace: Array<string> = builtLaunchArguments.toReplace;
-  const applicationVersion: string = General.getLauncherVersion();
+  const applicationVersion: string = GlobalInternals.launcherVersion;
 
   log.debug(logPrefix, "Initializing replacements (without auth)");
   const replacements: ArgumentReplacementsType = {
@@ -74,7 +74,7 @@ export function replaceLaunchArguments({
   };
 
   const beforeHooksResult: "continue" | Array<string> | undefined =
-    ExtensionsManager.catchSyncResponseHooks<Array<string>>({
+    Hooks.catchSyncResponseHooks<Array<string>>({
       "scope" : "onLaunchArgumentsReplace",
       "toPass": {
         auth,
@@ -131,7 +131,7 @@ export function replaceLaunchArguments({
   };
 
   const afterHooksResult: "continue" | Array<string> | undefined =
-    ExtensionsManager.catchSyncResponseHooks<Array<string>>({
+    Hooks.catchSyncResponseHooks<Array<string>>({
       "scope" : "onLaunchArgumentsReplace",
       "toPass": {
         auth,

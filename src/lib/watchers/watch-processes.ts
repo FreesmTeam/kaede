@@ -56,6 +56,8 @@ async function attachListeners(): Promise<() => void> {
   ]);
 
   return () => {
-    for (const unlisten of unlistenFunctions) unlisten();
+    for (const unlisten of unlistenFunctions) {
+      unlisten();
+    }
   };
 }

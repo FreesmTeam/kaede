@@ -1,7 +1,7 @@
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/scopes/log.ts";
-import type { ParsedFile } from "@/types/application/initial-state.type.ts";
+import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 export async function getSafeConfigFile(properties?: Partial<{

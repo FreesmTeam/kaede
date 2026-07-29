@@ -19,9 +19,25 @@
 import { invoke } from "@tauri-apps/api/core";
 
 import { log } from "@/lib/logging/scopes/log.ts";
-import type { InitialStateType } from "@/types/application/initial-state.type.ts";
+import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 
-export async function getInitialState(): Promise<InitialStateType> {
+type InitialStateType = {
+  "basic": {
+    "launcherVersion": string;
+    "baseDirectory"  : string;
+    "launchCount"    : number;
+    "separator"      : string;
+    "portable"       : boolean;
+  };
+  "parsed": {
+    "config"      : ParsedFile;
+    "accounts"    : ParsedFile;
+    "instances"   : ParsedFile;
+    "translations": ParsedFile;
+  };
+};
+
+export async function start(): Promise<InitialStateType> {
   try {
     return await invoke("get_initial_state");
   } catch (error: unknown) {

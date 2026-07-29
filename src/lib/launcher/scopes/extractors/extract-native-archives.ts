@@ -1,5 +1,5 @@
-import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
+import Hooks from "@/lib/hooks";
 import { log } from "@/lib/logging/scopes/log.ts";
 import type {
   PreLaunchInformationType,
@@ -10,10 +10,10 @@ export async function extractNativeArchives({
   paths,
 }: {
   "necessaries": PreLaunchInformationType;
-  "paths"      : Array<string>;
+  "paths"      : Array<{ "path": string; "exclude": Array<string> }>;
 }): Promise<void> {
   const beforeHooksResult: "continue" | void | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<void>({
+    await Hooks.catchAsyncResponseHooks<void>({
       "scope" : "onNativesExtract",
       "toPass": { necessaries, paths },
       "timing": "before",
@@ -28,12 +28,10 @@ export async function extractNativeArchives({
   log.debug(logPrefix, `Extracting ${paths.length} native archives`);
   const startTime: number = performance.now();
 
-  await Promise.all(
-    paths.map(path => General.unzip({
-      "from": path,
-      "to"  : directories.natives,
-    })),
-  );
+  await FileManager.unzip({
+    "from": paths,
+    "to"  : directories.natives,
+  });
 
   const endTime: number = performance.now();
   const totalTime: string = (endTime - startTime).toFixed(2);
@@ -43,7 +41,7 @@ export async function extractNativeArchives({
     `Successfully extracted ${paths.length} native archives in ${totalTime} ms`,
   );
 
-  await ExtensionsManager.catchAsyncVoidHooks({
+  await Hooks.catchAsyncVoidHooks({
     "scope" : "onNativesExtract",
     "toPass": { necessaries, paths },
     "timing": "after",

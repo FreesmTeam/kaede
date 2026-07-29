@@ -25,7 +25,7 @@ import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
-import type { TabSectionType } from "@/types/application/tab-section.type.ts";
+import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 
 const { sections, stateKey } = defineProps<{
   "sections": Array<TabSectionType>;

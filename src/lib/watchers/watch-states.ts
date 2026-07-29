@@ -22,10 +22,7 @@ import Configs from "@/lib/configs";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/scopes/log.ts";
 import { globalStates } from "@/states/global.ts";
-import type {
-  GlobalStatesDevelopmentType,
-  GlobalStatesLayoutType,
-} from "@/types/application/global-states.type.ts";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { CleanupType } from "@/types/watchers/cleanup.type.ts";
 
 const reload = (event: KeyboardEvent): void => {
@@ -48,8 +45,8 @@ const reload = (event: KeyboardEvent): void => {
   }
 };
 
-export function watchDevelopmentStates(): CleanupType<GlobalStatesDevelopmentType> {
-  const cleanup: CleanupType<GlobalStatesDevelopmentType> = {};
+export function watchDevelopmentStates(): CleanupType<GlobalStatesType["development"]> {
+  const cleanup: CleanupType<GlobalStatesType["development"]> = {};
 
   cleanup.enableDebugMode = watchEffect(() => {
     const enabled: boolean = globalStates.development.enableDebugMode;
@@ -64,15 +61,13 @@ export function watchDevelopmentStates(): CleanupType<GlobalStatesDevelopmentTyp
   return cleanup;
 }
 
-export function watchLayoutStates(): CleanupType<GlobalStatesLayoutType> {
-  const cleanup: CleanupType<GlobalStatesLayoutType> = {};
-
+export function watchLocaleStates(): () => void {
   /**
    * Updates translations on locale change.
    */
-  cleanup.locale = watchEffect(async () => {
+  return watchEffect(async () => {
     const baseDirectory: string = General.getBaseDirectory();
-    const locale: string = globalStates.layout.locale;
+    const locale: string = globalStates.locale;
 
     log.debug(__PRE_BUNDLED_FILENAME__, `Overriding default translations to '${locale}'`);
     globalStates.translations = await Configs.getTranslations({
@@ -81,6 +76,4 @@ export function watchLayoutStates(): CleanupType<GlobalStatesLayoutType> {
     });
     log.info(__PRE_BUNDLED_FILENAME__, `Successfully set translations to '${locale}'`);
   });
-
-  return cleanup;
 }

@@ -18,7 +18,7 @@
 
 import { FamousAndOldJavaMajorVersion } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { runProcess } from "@/lib/processes/run-process.ts";
 import type { RunResultType } from "@/types/application/server-process.type.ts";
 

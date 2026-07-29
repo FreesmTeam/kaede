@@ -1,6 +1,6 @@
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 export async function showWebviewWindow(show: boolean | undefined): Promise<void> {
   if (show) {

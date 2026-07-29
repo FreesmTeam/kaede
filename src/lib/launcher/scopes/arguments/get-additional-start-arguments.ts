@@ -1,8 +1,8 @@
-import ExtensionsManager from "@/lib/extensions-manager";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
+import Hooks from "@/lib/hooks";
 
 export async function getAdditionalStartArguments({
   necessaries,
@@ -13,7 +13,7 @@ export async function getAdditionalStartArguments({
 }): Promise<Array<string>> {
   const additional: Array<string> = [];
   const beforeHooksResult: "continue" | Array<string> | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<Array<string>>({
+    await Hooks.catchAsyncResponseHooks<Array<string>>({
       "scope" : "onAdditionalStartArgumentsGet",
       "toPass": { additional, necessaries, finalizedPatch },
       "timing": "before",

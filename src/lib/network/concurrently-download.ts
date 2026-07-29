@@ -18,7 +18,7 @@
 
 import { Channel, invoke } from "@tauri-apps/api/core";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type {
   DownloadReportType,
   DownloadSnapshotType,

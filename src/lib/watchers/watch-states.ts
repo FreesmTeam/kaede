@@ -20,7 +20,7 @@ import { watchEffect } from "vue";
 
 import Configs from "@/lib/configs";
 import FileManager from "@/lib/file-manager";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { CleanupType } from "@/types/watchers/cleanup.type.ts";

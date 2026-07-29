@@ -17,7 +17,7 @@
  */
 
 import Errors from "@/lib/errors";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 const handleError = (event: ErrorEvent): void => {
   log.error(__PRE_BUNDLED_FILENAME__, "Uncaught error:", Errors.prettify(event.error));

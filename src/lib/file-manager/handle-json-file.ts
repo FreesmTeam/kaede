@@ -27,7 +27,7 @@ import {
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
 import { cachedJoin } from "@/lib/general/scopes/cached-join.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 export async function handleJsonFile({
   baseDirectory,

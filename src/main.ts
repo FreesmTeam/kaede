@@ -38,7 +38,7 @@ import Errors from "@/lib/errors";
 import Globals from "@/lib/globals";
 import Initialization from "@/lib/initialization";
 import Instances from "@/lib/instances";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import Watchers from "@/lib/watchers";
 import { declareGlobalStates } from "@/states/global.ts";
 import { declareInstanceStates } from "@/states/instance.ts";

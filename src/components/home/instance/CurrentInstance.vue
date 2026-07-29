@@ -9,7 +9,7 @@ import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import { instanceStates } from "@/states/instance.ts";
 import type { DropdownItemType } from "@/types/ui/dropdown-item.type.ts";

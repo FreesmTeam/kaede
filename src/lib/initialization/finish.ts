@@ -22,7 +22,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import FileStructure from "@/constants/file-structure.ts";
 import { FamousAndOldJavaMajorVersion } from "@/constants/launcher.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 type FinalizedType = {

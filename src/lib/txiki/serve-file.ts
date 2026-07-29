@@ -17,7 +17,7 @@
  */
 
 import Errors from "@/lib/errors";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import Processes from "@/lib/processes";
 import { getFreePort } from "@/lib/txiki/get-free-port.ts";
 import type { ServerProcessType } from "@/types/application/server-process.type.ts";

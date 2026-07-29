@@ -19,7 +19,7 @@
 import { AsyncFunction } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
 import ExtensionAPI from "@/lib/extension-api";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 export async function runInUnrestricted(id: string, code: string): Promise<ExtensionAPI | void> {
   const startTime = performance.now();

@@ -5,7 +5,7 @@ import PermissionsHandler from "@/components/general/extensions/PermissionsHandl
 import PageTeleports from "@/components/general/layout/PageTeleports.vue";
 import Errors from "@/lib/errors";
 import ExtensionsManager from "@/lib/extensions-manager";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { ExtensionInfoType } from "@/types/extensions/extension-info.type.ts";
 import type { ExtensionMetadataType } from "@/types/extensions/extension-metadata.type.ts";

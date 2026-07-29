@@ -22,7 +22,7 @@ import Fetching from "@/lib/launcher/scopes/fetching";
 import Parsers from "@/lib/launcher/scopes/parsers";
 import Patches from "@/lib/launcher/scopes/patches";
 import Validators from "@/lib/launcher/scopes/validators";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { LaunchResponseType } from "@/types/launcher/launch/launch-response.type.ts";
 import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";

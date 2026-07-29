@@ -1,9 +1,9 @@
-import ExtensionsManager from "@/lib/extensions-manager";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
+import Hooks from "@/lib/hooks";
 
 export async function getJavaBinary({
   necessaries,
@@ -13,7 +13,7 @@ export async function getJavaBinary({
   "finalizedPatch": FinalizedPatchType;
 }): Promise<string> {
   const beforeHooksResult: "continue" | string | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<string>({
+    await Hooks.catchAsyncResponseHooks<string>({
       "scope" : "onJavaBinaryGet",
       "toPass": { necessaries, finalizedPatch },
       "timing": "before",

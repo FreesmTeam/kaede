@@ -21,7 +21,7 @@ import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 import FileStructure from "@/constants/file-structure.ts";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { serveFile } from "@/lib/txiki/serve-file.ts";
 import type { ServerProcessType } from "@/types/application/server-process.type.ts";
 

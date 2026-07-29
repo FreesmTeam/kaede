@@ -18,7 +18,7 @@
 
 import { createSafeDocument, type SafeDocument } from "ark-of-atrahasis";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 export function handleBasicUIPermission({
   id,

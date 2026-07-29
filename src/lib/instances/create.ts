@@ -18,19 +18,20 @@
 
 import { message } from "@tauri-apps/plugin-dialog";
 
+import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import { Patches, PrettyPatchLabels } from "@/constants/meta.ts";
 import { Routes } from "@/constants/routes.ts";
-import General from "@/lib/general";
-import Instances from "@/lib/instances";
-import { log } from "@/lib/logging/scopes/log.ts";
+import Hashing from "@/lib/hashing";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
+import { instanceStates } from "@/states/instance.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 
-export async function createInstance(
+export function create(
   currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
   uid: ExtendedPatchUIDType,
-): Promise<void> {
+): void {
   if (!currentInstance) {
     return log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -39,7 +40,7 @@ export async function createInstance(
   }
 
   if (currentInstance.patchVersions[Patches.Minecraft] === undefined) {
-    await message(
+    void message(
       "Please, select the Minecraft version.",
       {
         "title": "Instance creation",
@@ -54,7 +55,7 @@ export async function createInstance(
   }
 
   if (currentInstance.patchVersions[uid] === undefined) {
-    await message(
+    void message(
       `Please, specify the ${PrettyPatchLabels[uid]} version.`,
       {
         "title": "Instance creation",
@@ -71,14 +72,15 @@ export async function createInstance(
   const randomDigits: number = Math.floor(Math.random() * 1000);
   const id: string =
     "instance_" + randomDigits + "_" +
-    General.hashString(currentInstance.name).toString();
+    Hashing.hashString(currentInstance.name).toString();
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Creating an instance with the entry patch:", uid);
 
-  await Instances.add(id, {
+  instanceStates[id] = {
+    ...DefaultInstanceSettings,
     ...currentInstance,
     "entry": uid,
-  });
+  };
 
   log.info(
     __PRE_BUNDLED_FILENAME__,

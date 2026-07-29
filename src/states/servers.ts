@@ -18,7 +18,7 @@
 
 import { shallowRef } from "vue";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { rehydrateProcesses } from "@/lib/processes/core.ts";
 import { hydrate } from "@/lib/processes/hydrate.ts";
 import type {

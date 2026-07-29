@@ -2,7 +2,7 @@ import { ApplicationName } from "@/constants/application.ts";
 import { Patches } from "@/constants/meta.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Hooks from "@/lib/hooks";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type {
   ArgumentAuthReplacementsType,
   ArgumentReplacementsType,

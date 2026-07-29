@@ -4,7 +4,7 @@ import { ref } from "vue";
 import { Routes } from "@/constants/routes.ts";
 import { C } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
 
 const teleportStates = ref<Record<

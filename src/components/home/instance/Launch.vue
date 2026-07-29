@@ -12,7 +12,7 @@ import {
 import Errors from "@/lib/errors";
 import Instances from "@/lib/instances";
 import Fetching from "@/lib/launcher/scopes/fetching";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import { instanceStates } from "@/states/instance.ts";
 import type {

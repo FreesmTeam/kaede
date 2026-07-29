@@ -1,22 +1,22 @@
 import FileStructure from "@/constants/file-structure.ts";
-import General from "@/lib/general";
-import { log } from "@/lib/logging/scopes/log.ts";
+import FileManager from "@/lib/file-manager";
+import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
-import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 import type {
   InstanceStatesType,
   InstanceStateType,
 } from "@/types/application/instance-states.type.ts";
+import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 
-export async function readStoredInstances(properties?: Partial<{
+export async function readInstances(properties?: Partial<{
   "baseDirectory": string;
   "parsedFile"   : ParsedFile;
 }>): Promise<InstanceStatesType> {
-  const baseDirectory = properties?.baseDirectory ?? General.getCachedBaseDirectory();
+  const baseDirectory = properties?.baseDirectory ?? FileManager.getBaseDirectory();
   const parsedFile: ParsedFile | undefined = properties?.parsedFile;
   const parsedMetadata: unknown = parsedFile?.status === "loaded"
     ? parsedFile.data
-    : await General.handleJsonFile({
+    : await FileManager.handleJsonFile({
       baseDirectory,
       "path"           : [FileStructure.Files.Metadata],
       "label"          : FileStructure.Files.Metadata,

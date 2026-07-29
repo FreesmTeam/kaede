@@ -1,10 +1,10 @@
 import { mkdir } from "@tauri-apps/plugin-fs";
 
 import { GeneralSettings, LaunchStatus } from "@/constants/launcher.ts";
-import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
-import { verifyArtifacts } from "@/lib/launcher/scopes/validators/verify-artifacts.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import FileManager from "@/lib/file-manager";
+import Hooks from "@/lib/hooks";
+import { log } from "@/lib/logging/log.ts";
+import Network from "@/lib/network";
 import type { MappedArtifactType } from "@/types/launcher/artifacts/mapped-artifact.type.ts";
 import type {
   PreLaunchInformationType,
@@ -19,7 +19,7 @@ export async function downloadLibraries({
   "finalizedPatch": FinalizedPatchType;
 }): Promise<boolean> {
   const beforeHooksResult: "continue" | boolean | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<boolean>({
+    await Hooks.catchAsyncResponseHooks<boolean>({
       "scope" : "onMinecraftLibrariesGet",
       "toPass": { necessaries, finalizedPatch },
       "timing": "before",
@@ -41,9 +41,9 @@ export async function downloadLibraries({
   );
   const startTime: number = performance.now();
   const missing: Set<string> = new Set(
-    await verifyArtifacts({
-      "paths"   : artifacts,
-      "checksum": instance.checksum,
+    await FileManager.verifyPaths({
+      "paths": artifacts,
+      "sha1" : instance.checksum,
     }),
   );
   const endTime: number = performance.now();
@@ -69,7 +69,7 @@ export async function downloadLibraries({
     )),
   );
 
-  const report = await General.concurrentlyDownload({
+  const report = await Network.concurrentlyDownload({
     statuses,
     cancelId,
     "concurrency": GeneralSettings.ConcurrentDownloads.Libraries,
@@ -81,7 +81,7 @@ export async function downloadLibraries({
     return false;
   }
 
-  await ExtensionsManager.catchAsyncVoidHooks({
+  await Hooks.catchAsyncVoidHooks({
     "scope" : "onMinecraftLibrariesGet",
     "toPass": { necessaries, finalizedPatch },
     "timing": "after",

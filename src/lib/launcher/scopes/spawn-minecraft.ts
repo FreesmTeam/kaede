@@ -18,7 +18,7 @@
 
 import { LaunchStatus } from "@/constants/launcher.ts";
 import ExtensionsManager from "@/lib/extensions-manager";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import Processes from "@/lib/processes";
 import type {
   LaunchResponseType,

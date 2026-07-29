@@ -3,7 +3,7 @@ import type { KaedeNamespaceType } from "@/declarations.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
 import { handleHookResponse } from "@/lib/hooks/handle-hook-response.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { ExtensionStatusType, HookReturnType } from "@/types/extensions/hook-return.type.ts";
 import IsKeyInObject from "@/types/utils/is-key-in-object.ts";
 

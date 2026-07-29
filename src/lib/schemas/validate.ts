@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { FullValidationArgumentsType } from "@/types/schemas/validation-arguments.type.ts";
 
 export function validate<T>({

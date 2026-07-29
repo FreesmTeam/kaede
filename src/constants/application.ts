@@ -7,7 +7,7 @@ import Errors from "@/lib/errors";
 import FileManager from "@/lib/file-manager";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import ATLauncherIcon from "@/resources/ATLauncherIcon.svg";
 import CraftingTableIcon from "@/resources/CraftingTableIcon.webp";
 import CurseForgeIcon from "@/resources/CurseForgeIcon.webp";

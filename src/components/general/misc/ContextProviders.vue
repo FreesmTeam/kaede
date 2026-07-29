@@ -23,9 +23,8 @@ import Errors from "@/lib/errors";
 import Hooks from "@/lib/hooks";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { rehydrateProcesses } from "@/lib/processes/core.ts";
-import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
 import type {
   LaunchResponseType,
@@ -90,11 +89,7 @@ async function launchInstance(instanceId?: string): Promise<void> {
     return;
   }
 
-  const currentInstances: InstanceStatesType = Instances.get();
-  const currentInstance: CurrentInstanceType = Instances.findCurrent(
-    instanceId,
-    currentInstances,
-  );
+  const currentInstance: CurrentInstanceType = Instances.findCurrent(instanceId);
 
   if (!currentInstance || !currentInstance.instance) {
     log.error(__PRE_BUNDLED_FILENAME__, "No current instance found");

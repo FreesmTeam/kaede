@@ -22,7 +22,7 @@ import FileStructure from "@/constants/file-structure.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Errors from "@/lib/errors";
 import FileManager from "@/lib/file-manager";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
@@ -52,12 +52,10 @@ export async function sync(): Promise<void> {
   const currentConfigStatesStringy: string = JSON.stringify(currentConfigStates);
 
   if (lastWritten === currentConfigStatesStringy) {
-    log.debug(
+    return log.debug(
       __PRE_BUNDLED_FILENAME__,
       "Seems like config didn't change. No need for config sync",
     );
-
-    return;
   }
 
   const configPath = FileManager.join(
@@ -72,7 +70,7 @@ export async function sync(): Promise<void> {
     );
     lastWritten = currentConfigStatesStringy;
   } catch (error: unknown) {
-    log.error(
+    return log.error(
       __PRE_BUNDLED_FILENAME__,
       "Failed to sync the config file:",
       Errors.prettify(error),

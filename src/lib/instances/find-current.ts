@@ -16,8 +16,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import GlobalStateHelpers from "@/lib/global-state-helpers";
+import { instanceStates } from "@/states/instance.ts";
+import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
+import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 
-export function closeViewer(): void {
-  GlobalStateHelpers.Logs.toggle("show", false);
+export function findCurrent(id: string | null | undefined): CurrentInstanceType {
+  if (!id) {
+    return;
+  }
+
+  const instance: InstanceStateType | undefined = instanceStates[id];
+
+  if (!instance) {
+    return undefined;
+  }
+
+  return { instance, id };
 }

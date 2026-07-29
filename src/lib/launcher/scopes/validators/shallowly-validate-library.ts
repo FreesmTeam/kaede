@@ -1,5 +1,5 @@
 import { LaunchStatus } from "@/constants/launcher.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";
 import type { SpecificPatchLibraryType } from "@/types/launcher/meta/specific-patch-meta.type.ts";
 

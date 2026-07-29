@@ -1,5 +1,5 @@
-import ExtensionsManager from "@/lib/extensions-manager";
-import { log } from "@/lib/logging/scopes/log.ts";
+import Hooks from "@/lib/hooks";
+import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
@@ -45,7 +45,7 @@ export async function getClassPaths({
     "argument"  : [string, string];
     "classPaths": string;
   } | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<{
+    await Hooks.catchAsyncResponseHooks<{
       "argument"  : [string, string];
       "classPaths": string;
     }>({

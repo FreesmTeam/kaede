@@ -18,7 +18,7 @@
 
 import { type ShallowReactive, shallowReactive } from "vue";
 
-import Instances from "@/lib/instances";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 
 /**
@@ -31,5 +31,5 @@ export let instanceStates: ShallowReactive<InstanceStatesType>;
  * This function is called in 'main.ts'
  */
 export function declareInstanceStates(): void {
-  instanceStates = shallowReactive<InstanceStatesType>(Instances.getFromConfig());
+  instanceStates = shallowReactive<InstanceStatesType>(GlobalInternals.initialInstances);
 }

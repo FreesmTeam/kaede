@@ -24,7 +24,7 @@ import FileManager from "@/lib/file-manager";
 import Hooks from "@/lib/hooks";
 import Fetching from "@/lib/launcher/scopes/fetching";
 import Patches from "@/lib/launcher/scopes/patches/index.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
 import type { LaunchStatusType } from "@/types/launcher/launch/launch-status.type.ts";
 import type { PatchDependencyType } from "@/types/launcher/meta/patch-index.type.ts";

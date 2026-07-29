@@ -18,7 +18,7 @@
 
 import { exists, mkdir } from "@tauri-apps/plugin-fs";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";

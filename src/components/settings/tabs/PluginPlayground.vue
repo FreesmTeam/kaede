@@ -45,7 +45,7 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { AsyncFunction } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
 import General from "@/lib/general";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import { codeOutput, codeToEvaluate } from "@/states/plugin-playground.ts";
 import { serverProcesses } from "@/states/servers.ts";

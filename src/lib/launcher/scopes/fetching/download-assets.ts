@@ -20,11 +20,10 @@ import FileStructure from "@/constants/file-structure.ts";
 import { APIEndpoints, GeneralSettings, LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
 import FileManager from "@/lib/file-manager";
-import General from "@/lib/general";
 import { fetchMetadata } from "@/lib/launcher/scopes/fetching/fetch-metadata.ts";
 import { shallowlyValidateMeta } from "@/lib/launcher/scopes/validators/shallowly-validate-meta.ts";
-import { verifyArtifacts } from "@/lib/launcher/scopes/validators/verify-artifacts.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
+import Network from "@/lib/network";
 import type { AssetObjectsType } from "@/types/launcher/artifacts/asset-objects.type.ts";
 import type { LaunchStatusType } from "@/types/launcher/launch/launch-status.type.ts";
 import type {
@@ -138,11 +137,11 @@ export async function downloadAssets({
     .map(({ hash }) => {
       const shortHash = hash.slice(0, 2);
       const url = APIEndpoints.Resources.Base + shortHash + "/" + hash;
-      const shortHashPath = General.cachedJoin(
+      const shortHashPath = FileManager.join(
         directories.assetObjects,
         shortHash,
       );
-      const filePath = General.cachedJoin(
+      const filePath = FileManager.join(
         shortHashPath,
         hash,
       );
@@ -162,9 +161,9 @@ export async function downloadAssets({
   );
   const startTime: number = performance.now();
   const hashesToReDownload: Set<string> = new Set(
-    await verifyArtifacts({
-      "paths"   : mappedAssetObjects,
-      "checksum": instance.checksum,
+    await FileManager.verifyPaths({
+      "paths": mappedAssetObjects,
+      "sha1" : instance.checksum,
     }),
   );
   const endTime: number = performance.now();
@@ -185,7 +184,7 @@ export async function downloadAssets({
     return hashesToReDownload.has(path);
   });
 
-  const report = await General.concurrentlyDownload({
+  const report = await Network.concurrentlyDownload({
     statuses,
     cancelId,
     "concurrency": GeneralSettings.ConcurrentDownloads.Assets,

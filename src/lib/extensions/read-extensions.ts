@@ -18,7 +18,7 @@
 
 import { invoke } from "@tauri-apps/api/core";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 

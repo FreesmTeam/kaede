@@ -2,7 +2,7 @@
 import { onClickOutside } from "@vueuse/core";
 import { computed, ref, useTemplateRef } from "vue";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 

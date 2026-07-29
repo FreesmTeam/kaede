@@ -21,7 +21,7 @@ import { exists, mkdir } from "@tauri-apps/plugin-fs";
 import FileStructure from "@/constants/file-structure.ts";
 import { CustomPatches, PatchUIDs } from "@/constants/meta.ts";
 import General from "@/lib/general";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 import type {
   PreLaunchInformationType,

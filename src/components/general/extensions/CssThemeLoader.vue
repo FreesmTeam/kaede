@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { type DirEntry, readDir, readTextFile } from "@tauri-apps/plugin-fs";
-import { onMounted, shallowReactive } from "vue";
+import { onMounted, onUnmounted, shallowReactive } from "vue";
 
 import { CSSThemeExtensions } from "@/constants/application.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import Errors from "@/lib/errors";
-import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
-import { log } from "@/lib/logging/scopes/log.ts";
+import FileManager from "@/lib/file-manager";
+import { log } from "@/lib/logging/log.ts";
 import type { CustomThemeType } from "@/types/extensions/custom-theme.type.ts";
 
 const stylesheets = shallowReactive<{
@@ -15,8 +14,10 @@ const stylesheets = shallowReactive<{
   "disabled": Array<CustomThemeType["id"]>;
 }>({ "applied": [], "disabled": [] });
 
+const cleanup: Array<() => void> = [];
+
 async function transformToPromise(path: string, filename: string): Promise<CustomThemeType> {
-  const filePath = General.cachedJoin(path, filename);
+  const filePath = FileManager.join(path, filename);
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Reading the '${filename}' theme in the 'themes' folder`);
   const fileCode = await readTextFile(filePath);
@@ -29,8 +30,8 @@ async function transformToPromise(path: string, filename: string): Promise<Custo
 
 onMounted(async () => {
   try {
-    const path = General.cachedJoin(
-      General.getCachedBaseDirectory(),
+    const path = FileManager.join(
+      FileManager.getBaseDirectory(),
       FileStructure.Folders.Themes.Path,
     );
 
@@ -76,13 +77,22 @@ onMounted(async () => {
 
   for (const { id, content } of stylesheets.applied) {
     log.debug(__PRE_BUNDLED_FILENAME__, `Applying CSS styles of the '${id}' theme`);
-    ExtensionsManager.handleCssTheme(
-      `.garbage_collection_id_${id} {} ` +
-      content,
-    );
+    const stylesheet = document.createElement("style");
+
+    stylesheet.textContent = content;
+
+    document.head.append(stylesheet);
+
+    cleanup.push(() => stylesheet.remove());
   }
 
   log.info(__PRE_BUNDLED_FILENAME__, `Custom CSS themes applied: ${stylesheets.applied.length}`);
+});
+
+onUnmounted(() => {
+  for (const callback of cleanup) {
+    callback();
+  }
 });
 </script>
 

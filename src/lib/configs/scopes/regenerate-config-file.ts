@@ -3,7 +3,7 @@ import { rename } from "@tauri-apps/plugin-fs";
 import { getDefaultConfig } from "@/lib/configs/scopes/get-default-config.ts";
 import { initializeConfigFile } from "@/lib/configs/scopes/initialize-config-file.ts";
 import General from "@/lib/general";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 export async function regenerateConfigFile({

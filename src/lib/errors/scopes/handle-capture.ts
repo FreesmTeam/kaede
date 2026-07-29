@@ -1,5 +1,5 @@
 import { extract } from "@/lib/errors/scopes/extract.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { NativeErrorType } from "@/types/errors/error-handling.type.ts";
 
 export function handleCapture(error: Error): NativeErrorType {

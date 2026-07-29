@@ -6,7 +6,7 @@ import { shouldIncludeLibrary } from "@/lib/launcher/scopes/parsers/should-inclu
 import {
   shallowlyValidateLibrary,
 } from "@/lib/launcher/scopes/validators/shallowly-validate-library.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { MappedArtifactType } from "@/types/launcher/artifacts/mapped-artifact.type.ts";
 import type {
   PreLaunchInformationType,

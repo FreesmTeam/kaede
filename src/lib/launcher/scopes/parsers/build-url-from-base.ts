@@ -1,4 +1,4 @@
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 export function buildUrlFromBase({
   baseUrl,

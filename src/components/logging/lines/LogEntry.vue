@@ -5,7 +5,7 @@ import LogHighlighter from "@/components/logging/lines/LogHighlighter.vue";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
 import Logging from "@/lib/logging";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { LogControlsType } from "@/types/logging/log-controls.type.ts";
 import type { LogEntryInformationType } from "@/types/logging/log-entry-information.type.ts";
 import type { FieldTextType } from "@/types/logging/log-field-text.type.ts";

@@ -1,6 +1,6 @@
 import FileManager from "@/lib/file-manager";
 import Hooks from "@/lib/hooks";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";

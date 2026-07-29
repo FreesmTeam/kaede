@@ -2,7 +2,7 @@ import { DefaultLocale } from "@/constants/application.ts";
 import EnglishTranslations from "@/constants/english.json";
 import FileStructure from "@/constants/file-structure.ts";
 import General from "@/lib/general";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 

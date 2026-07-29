@@ -3,7 +3,7 @@ import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { computed, onMounted, type Ref } from "vue";
 
 import Errors from "@/lib/errors";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { NativeErrorType } from "@/types/errors/error-handling.type.ts";
 

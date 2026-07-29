@@ -18,7 +18,7 @@
 
 import { type ClientOptions, fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 function guard(input: RequestInfo | URL, scope: string): void {
   const scopeUrl = new URL(scope);

@@ -22,7 +22,7 @@ import { onMounted, onUnmounted, type ShallowRef, shallowRef } from "vue";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Browser from "@/lib/browser";
 import Errors from "@/lib/errors";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 
 type LogStreamEventType =
   | { "type": "snapshot"; "data": Array<string> }

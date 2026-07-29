@@ -1,5 +1,5 @@
 import FileStructure from "@/constants/file-structure.ts";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 
 export function getMinecraftDirectory({
   baseDirectory,
@@ -8,7 +8,7 @@ export function getMinecraftDirectory({
   "baseDirectory": string;
   "instanceId"   : string;
 }): string {
-  return General.cachedJoin(
+  return FileManager.join(
     baseDirectory,
     FileStructure.Folders.Instances.Path,
     instanceId,

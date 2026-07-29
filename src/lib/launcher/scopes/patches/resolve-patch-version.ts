@@ -21,7 +21,7 @@ import { APIEndpoints, LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
 import FileManager from "@/lib/file-manager";
 import Fetching from "@/lib/launcher/scopes/fetching";
-import { log } from "@/lib/logging/scopes/log.ts";
+import { log } from "@/lib/logging/log.ts";
 import type { LaunchStatusType } from "@/types/launcher/launch/launch-status.type.ts";
 import type { PatchDependencyType } from "@/types/launcher/meta/patch-index.type.ts";
 import type {

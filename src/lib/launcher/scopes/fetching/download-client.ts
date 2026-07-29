@@ -2,10 +2,10 @@ import { mkdir } from "@tauri-apps/plugin-fs";
 
 import { LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
-import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
-import { verifyArtifacts } from "@/lib/launcher/scopes/validators/verify-artifacts.ts";
-import { log } from "@/lib/logging/scopes/log.ts";
+import FileManager from "@/lib/file-manager";
+import Hooks from "@/lib/hooks";
+import { log } from "@/lib/logging/log.ts";
+import Network from "@/lib/network";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
@@ -19,7 +19,7 @@ export async function downloadClient({
   "finalizedPatch": FinalizedPatchType;
 }): Promise<boolean> {
   const beforeHooksResult: "continue" | boolean | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<boolean>({
+    await Hooks.catchAsyncResponseHooks<boolean>({
       "scope" : "onMinecraftClientGet",
       "toPass": { necessaries, finalizedPatch },
       "timing": "before",
@@ -42,9 +42,9 @@ export async function downloadClient({
     `Checking if the main jar exists. SHA1 checks enabled: ${instance.checksum}`,
   );
   statuses.current = LaunchStatus.Client.Checking;
-  const mismatches: Array<string> = await verifyArtifacts({
-    "paths"   : [client],
-    "checksum": instance.checksum,
+  const mismatches: Array<string> = await FileManager.verifyPaths({
+    "paths": [client],
+    "sha1" : instance.checksum,
   });
   const isMismatch: boolean =
     mismatches.length > 0 &&
@@ -60,7 +60,7 @@ export async function downloadClient({
 
     log.debug(logPrefix, "Downloading the main jar");
     try {
-      const report = await General.concurrentlyDownload({
+      const report = await Network.concurrentlyDownload({
         statuses,
         cancelId,
         "concurrency": 1,
@@ -86,7 +86,7 @@ export async function downloadClient({
     );
   }
 
-  await ExtensionsManager.catchAsyncVoidHooks({
+  await Hooks.catchAsyncVoidHooks({
     "scope" : "onMinecraftClientGet",
     "toPass": { necessaries, finalizedPatch },
     "timing": "after",

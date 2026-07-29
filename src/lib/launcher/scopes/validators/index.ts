@@ -32,7 +32,6 @@ import {
   shallowlyValidateLibrary,
 } from "@/lib/launcher/scopes/validators/shallowly-validate-library.ts";
 import { shallowlyValidateMeta } from "@/lib/launcher/scopes/validators/shallowly-validate-meta.ts";
-import { verifyArtifacts } from "@/lib/launcher/scopes/validators/verify-artifacts.ts";
 
 export default {
   ensureMinecraftDirectory,
@@ -41,5 +40,4 @@ export default {
   initializeShortHashDirectories,
   shallowlyValidateLibrary,
   shallowlyValidateMeta,
-  verifyArtifacts,
 } as const;

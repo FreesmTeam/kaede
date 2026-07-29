@@ -2,13 +2,12 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { globalStates } from "@/states/global.ts";
 
 const filtering = computed((): string => globalStates?.logs?.filtering ?? "");
 
 function handleInput(newValue: string): void {
-  GlobalStateHelpers.Logs.filterBy(newValue);
+  globalStates.logs.filtering = newValue;
 }
 </script>
 

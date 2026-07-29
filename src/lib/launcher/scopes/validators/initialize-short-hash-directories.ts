@@ -18,12 +18,11 @@
 
 import { type DirEntry, mkdir, readDir } from "@tauri-apps/plugin-fs";
 
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
-import FileManager from "@/lib/file-manager";
 
 const shortHashes: Array<string> = Array
   .from(

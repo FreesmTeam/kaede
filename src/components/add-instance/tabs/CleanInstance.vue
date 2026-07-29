@@ -31,29 +31,18 @@ import ChangeJavaBinary from "@/components/add-instance/sections/ChangeJavaBinar
 import ChangeMemoryAllocation from "@/components/add-instance/sections/ChangeMemoryAllocation.vue";
 import CreateInstance from "@/components/add-instance/sections/CreateInstance.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { globalStates } from "@/states/global.ts";
 
 const expanded = computed(
   (): boolean => (
-    globalStates?.pages?.states?.["add-instance"]?.full === true
+    globalStates?.pages?.["add-instance"]?.full === true
   ),
 );
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
+const { styles } = useConfigColors();
 
 function toggleOtherOptions(): void {
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "full": !expanded.value,
-  });
+  globalStates.pages["add-instance"].full = !expanded.value;
 }
 </script>
 
@@ -61,7 +50,7 @@ function toggleOtherOptions(): void {
   <div
     id="__add-instance-page__instance-wrapper"
     class="h-fit w-full flex flex-col gap-2 rounded-md p-2"
-    :style="cardStyles"
+    :style="styles.widget"
   >
     <div
       id="__add-instance-page__instance-main-group"

@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { computed, inject, ref, shallowRef } from "vue";
+import { inject, ref, shallowRef } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import SidebarProfile from "@/components/general/layout/SidebarProfile.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { TranslationsContextKey } from "@/constants/application.ts";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { globalStates } from "@/states/global.ts";
 import type {
   TranslationKey,
@@ -15,15 +14,7 @@ import type {
 
 const Translations = inject<TranslationsStateType>(TranslationsContextKey);
 
-const innerStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
+const { styles } = useConfigColors();
 
 const delayed = ref<NodeJS.Timeout | undefined>(undefined);
 const tooltip = shallowRef<{
@@ -104,7 +95,7 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
   action();
   closeTooltip();
   // Close the log viewer in case of a page change
-  GlobalStateHelpers.Logs.toggle("show", false);
+  globalStates.logs.show = false;
 }
 </script>
 
@@ -113,7 +104,7 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
     id="__sidebar__hovering-tooltip"
     class="pointer-events-none absolute left-20 top-2 z-7000 w-fit rounded-md p-2 leading-none transition-[transform,opacity]"
     :style="{
-      ...innerStyles,
+      ...styles.widget,
       transform: `translateY(${tooltip.top}px)`,
       opacity  : tooltip.show ? 1 : 0,
     }"
@@ -126,7 +117,6 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
     class="absolute bottom-0 left-0 top-0 z-5000 w-20 flex flex-col gap-2 p-2"
   >
     <SidebarProfile
-      :inner-styles="innerStyles"
       :handle-mouse-over="handleMouseOver"
       :handle-button-action="handleButtonAction"
     />
@@ -138,7 +128,7 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
       tag="div"
       id="__sidebar__inner"
       class="thin-scrollbar scroll-gutter-stable-both h-fit w-full flex flex-col items-center gap-2 overflow-y-auto rounded-md p-2"
-      :style="innerStyles"
+      :style="styles.widget"
     >
       <template
         v-for="(item, index) in globalStates?.sidebarItems"
@@ -147,7 +137,7 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
         <button
           v-if="item !== 'divider'"
           :id="`__sidebar__entry-${item.name}-button`"
-          :disabled="item.path === globalStates?.pages?.current"
+          :disabled="item.path === globalStates.currentPage"
           @pointerdown="(event: PointerEvent) => handleButtonAction(event, item.action)"
           class="__sidebar__entry-button relative grid size-12 shrink-0 place-items-center rounded-md transition-[background-color] duration-150 disabled:bg-[theme(colors.neutral.100/.1)] hover:bg-[theme(colors.neutral.100/.05)]"
           :aria-label="item.name"
@@ -170,10 +160,6 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
           <MaterialRipple
             :id="`__sidebar__entry-${item.name}-overlay`"
             :label="item.name"
-            :colors="{
-              ripple  : globalStates?.layout?.sidebar?.ripple,
-              sparkles: globalStates?.layout?.sidebar?.sparkles,
-            }"
           />
         </button>
         <div

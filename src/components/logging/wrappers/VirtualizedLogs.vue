@@ -81,7 +81,7 @@ const nodeLineSize = 20;
 function getNodeHeight(node: string | [number, string]): number {
   const actualNodeLine = typeof node === "string" ? node : node[1];
 
-  if (actualNodeLine.length === 0 || !globalStates?.logs?.lineBreaks) {
+  if (actualNodeLine.length === 0) {
     return nodeLineSize;
   }
 
@@ -92,13 +92,13 @@ function getNodeHeight(node: string | [number, string]): number {
 <template>
   <VirtualisedList
     :key="
-      `${logs.length}-${globalStates?.logs?.lineBreaks}-${filtering}-
+      `${logs.length}-${filtering}-
        ${throttledHeight}-${globalStates?.logs?.mode}-${mountedKey}`
     "
     :get-node-height="getNodeHeight"
     :viewport-height="throttledHeight - 248"
     :nodes="filteredLogs ?? logs"
-    :id="globalStates?.logs?.lineBreaks ? '' : '__virtualized-list-logs'"
+    id="__virtualized-list-logs"
     class="w-full"
     ref="target"
   >

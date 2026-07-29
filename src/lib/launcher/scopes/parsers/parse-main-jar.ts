@@ -1,5 +1,5 @@
 import { LaunchStatus } from "@/constants/launcher.ts";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import { normalizeArtifactPath } from "@/lib/launcher/scopes/parsers/normalize-artifact-path.ts";
 import { log } from "@/lib/logging/log.ts";
 import type { MappedArtifactType } from "@/types/launcher/artifacts/mapped-artifact.type.ts";
@@ -7,7 +7,6 @@ import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { SpecificPatchMetaType } from "@/types/launcher/meta/specific-patch-meta.type.ts";
-import FileManager from "@/lib/file-manager";
 
 export function parseMainJar({
   necessaries,

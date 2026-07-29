@@ -7,13 +7,10 @@ import CustomButton from "@/components/general/base/CustomButton.vue";
 import LogFilterer from "@/components/logging/controls/LogFilterer.vue";
 import LogSearcher from "@/components/logging/controls/LogSearcher.vue";
 import FileStructure from "@/constants/file-structure.ts";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
-import Logging from "@/lib/logging";
-import { globalStates } from "@/states/global.ts";
-import type { CustomButtonType } from "@/types/ui/custom-button.type.ts";
-import type { LogControlsType } from "@/types/logging/log-controls.type.ts";
 import FileManager from "@/lib/file-manager";
+import Logging from "@/lib/logging";
+import type { LogControlsType } from "@/types/logging/log-controls.type.ts";
+import type { CustomButtonType } from "@/types/ui/custom-button.type.ts";
 
 const {
   searching,
@@ -26,8 +23,10 @@ const {
   logsArray,
 } = defineProps<LogControlsType>();
 
-const shouldVirtualize = computed((): boolean => globalStates?.logs?.virtualized === true);
-const horizontalScroll = computed((): boolean => globalStates?.logs?.lineBreaks === false);
+// --- computed((): boolean => globalStates?.logs?.virtualized === true);
+const shouldVirtualize = true;
+// --- computed((): boolean => globalStates?.logs?.lineBreaks === false);
+const horizontalScroll = true;
 
 const found = shallowRef<Array<number>>([]);
 const copied = ref<boolean>(false);
@@ -37,10 +36,12 @@ function toggleTextSelection(): void {
   textIsInSelection.value = !textIsInSelection.value;
 }
 function toggleShouldVirtualizeWithCursorHandling(): void {
-  Logging.toggleVirtualization({
-    "virtualized": shouldVirtualize.value,
-    "length"     : logsArray.length,
-  });
+  /*
+   * Logging.toggleVirtualization({
+   *   "virtualized": shouldVirtualize.value,
+   *   "length"     : logsArray.length,
+   * });
+   */
 
   if (textIsInSelection.value) {
     selectTextVirtualized();
@@ -104,8 +105,9 @@ const lineBreaksControl = computed((): CustomButtonType => ({
     "label"  : "__log-controls__horizontal-scroll-label",
   },
   "tooltip" : "Toggle text wrapping",
-  "onClick" : (): void => GlobalStateHelpers.Logs.toggle("lineBreaks"),
-  "invert"  : !horizontalScroll.value,
+  "onClick" : (): void => {},
+  // "onClick" : (): void => GlobalStateHelpers.Logs.toggle("lineBreaks"),
+  "invert"  : !horizontalScroll,
   "hideOnSm": true,
 }));
 const virtualizeControl = computed((): CustomButtonType => ({
@@ -118,7 +120,7 @@ const virtualizeControl = computed((): CustomButtonType => ({
   },
   "tooltip" : "Improve viewer performance by pre-rendering only visible lines of text",
   "onClick" : toggleShouldVirtualizeWithCursorHandling,
-  "invert"  : shouldVirtualize.value,
+  "invert"  : shouldVirtualize,
   "hideOnMd": true,
 }));
 const textSelectionControl = computed((): CustomButtonType => ({
@@ -131,7 +133,7 @@ const textSelectionControl = computed((): CustomButtonType => ({
   "tooltip": "Select a text",
   "onClick": selectTextVirtualized,
   "invert" : textIsInSelection.value,
-  "hidden" : !shouldVirtualize.value,
+  "hidden" : !shouldVirtualize,
 }));
 const textSelectionCopyControl = computed((): CustomButtonType => ({
   "icon": "i-lucide-copy",

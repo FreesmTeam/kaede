@@ -20,7 +20,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 
 import { useLogStream } from "@/composables/use-log-stream.ts";
-import { GlobalInternals } from "@/extendable/global-internals.ts";
+import { globalStates } from "@/states/global.ts";
 
 const { lines } = useLogStream();
 
@@ -61,7 +61,7 @@ function updateView(event: Event): void {
     return;
   }
 
-  position.value = Math.round(target.scrollTop / GlobalInternals.logLineHeight);
+  position.value = Math.round(target.scrollTop / globalStates.logs.lineHeight);
 }
 
 watch(
@@ -72,7 +72,7 @@ watch(
     }
 
     const viewer = container.value;
-    const twoLinesHeight = GlobalInternals.logLineHeight * 2;
+    const twoLinesHeight = globalStates.logs.lineHeight * 2;
     const toCatchRange = viewer.scrollTop + twoLinesHeight + 1;
     const isAtTheBottom = viewer.scrollHeight - viewer.clientHeight <= toCatchRange;
 
@@ -115,13 +115,13 @@ onUnmounted(() => {
         id="__log-viewer__bound"
         class="relative w-full select-text overflow-y-auto"
         ref="container"
-        :style="{ 'height': 16 * GlobalInternals.logLineHeight + 'px' }"
+        :style="{ 'height': 16 * globalStates.logs.lineHeight + 'px' }"
       >
         <div
           id="__log-viewer__scroll-placeholder"
           class="font-mono"
           :style="{
-            'height': lines.list.length * GlobalInternals.logLineHeight + 'px',
+            'height': lines.list.length * globalStates.logs.lineHeight + 'px',
           }"
         >
           <div
@@ -129,7 +129,7 @@ onUnmounted(() => {
             :key="index"
             :id="`${index}-log-line`"
             class="__log-viewer__log-line"
-            :style="{ 'top': index * GlobalInternals.logLineHeight + 'px' }"
+            :style="{ 'top': index * globalStates.logs.lineHeight + 'px' }"
           >
             {{ position + index }} {{ filtered?.[position + index] }}
           </div>

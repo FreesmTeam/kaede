@@ -7,25 +7,21 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { Patches } from "@/constants/meta.ts";
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import { instanceStates } from "@/states/instance.ts";
-import type { DropdownItemType } from "@/types/ui/dropdown-item.type.ts";
-import type {
-  GlobalStatesType,
-} from "@/types/application/global-states.type.ts";
 import type {
   InstanceStateType,
 } from "@/types/application/instance-states.type.ts";
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
+import type { DropdownItemType } from "@/types/ui/dropdown-item.type.ts";
 
 const selector = ref<boolean>(false);
 const syncing = ref<boolean>(false);
 
 const currentInstance = computed((): CurrentInstanceType => (
-  Instances.findCurrent(globalStates?.layout?.currentInstance, instanceStates)
+  Instances.findCurrent(globalStates?.selected?.currentInstance)
 ));
 
 function openInstancesSelector(): void {
@@ -45,14 +41,11 @@ function closeInstancesSelector(event?: Event): void {
   selector.value = false;
 }
 
-async function selectInstance(id: string, layout: GlobalStatesType["layout"]): Promise<void> {
+async function selectInstance(id: string): Promise<void> {
   syncing.value = true;
 
   try {
-    GlobalStateHelpers.change("layout", {
-      ...layout,
-      "currentInstance": id,
-    });
+    globalStates.selected.currentInstance = id;
     closeInstancesSelector();
 
     await Configs.sync();
@@ -79,7 +72,7 @@ const dropdownItems = computed((): Array<DropdownItemType> => {
     return {
       "id"      : `__home-page__current-instance-${id}`,
       "image"   : instance.icon,
-      "onclick" : (): Promise<void> => selectInstance(id, globalStates.layout),
+      "onclick" : (): Promise<void> => selectInstance(id),
       "title"   : instance.name,
       "subtitle": instance.patchVersions?.[Patches.Minecraft] ?? "unknown version",
       "disabled": id === currentId,

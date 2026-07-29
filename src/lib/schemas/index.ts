@@ -11,7 +11,7 @@ import { validate } from "@/lib/schemas/validate.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
-import type { ExtensionMetadataType } from "@/types/extensions/extension-metadata.type.ts";
+import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 import type { SpecificPatchMetaType } from "@/types/launcher/meta/specific-patch-meta.type.ts";
 import type {
   CompiledValidatorType,
@@ -93,7 +93,7 @@ export default {
       "label" : data.label,
       "schema": InstanceMetadataValidator,
     }),
-    "extension": (data: ValidationArgumentsType) => validate<ExtensionMetadataType>({
+    "extension": (data: ValidationArgumentsType) => validate<ExtensionType["metadata"]>({
       "value" : data.value,
       "info"  : data.info,
       "label" : data.label,

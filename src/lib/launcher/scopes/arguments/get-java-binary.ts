@@ -1,9 +1,9 @@
+import Hooks from "@/lib/hooks";
 import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
-import Hooks from "@/lib/hooks";
 
 export async function getJavaBinary({
   necessaries,

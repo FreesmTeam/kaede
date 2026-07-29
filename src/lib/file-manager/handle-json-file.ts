@@ -25,8 +25,8 @@ import {
 } from "@tauri-apps/plugin-fs";
 
 import Errors from "@/lib/errors";
+import { join } from "@/lib/file-manager/join.ts";
 import General from "@/lib/general";
-import { cachedJoin } from "@/lib/general/scopes/cached-join.ts";
 import { log } from "@/lib/logging/log.ts";
 
 export async function handleJsonFile({
@@ -45,7 +45,7 @@ export async function handleJsonFile({
     "getNewValue": () => Promise<unknown>;
   };
 }): Promise<unknown> {
-  const filePath: string = cachedJoin(baseDirectory, ...path);
+  const filePath: string = join(baseDirectory, ...path);
   const overwrite: (toWrite: unknown) => Promise<unknown> = async toWrite => {
     await writeTextFile(
       filePath,

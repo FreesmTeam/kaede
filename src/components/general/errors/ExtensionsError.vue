@@ -26,11 +26,11 @@ onMounted(async () => {
    * Launcher's window is not visible by default
    * to prevent white screen flashing while webview has not loaded
    */
-  if (globalStates?.misc?.showAfterExtensionsInitialization) {
+  if (globalStates.extensions.showAppAfterExtensionsLoad) {
     try {
       log.debug(
         __PRE_BUNDLED_FILENAME__,
-        "User has enabled 'show-after-extensions-initialization';",
+        "User has enabled 'show-app-after-extensions-load';",
         "extensions loading has failed. Showing the webview now",
       );
       await getCurrentWebviewWindow().show();

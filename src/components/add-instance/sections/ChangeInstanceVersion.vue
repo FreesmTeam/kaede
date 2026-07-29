@@ -25,7 +25,6 @@ import ChangeInstanceVersionDropdown
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { Patches } from "@/constants/meta.ts";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type {
@@ -39,13 +38,13 @@ const currentFilter = ref<"release" | "all">("release");
 const selector = ref<boolean>(false);
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
 const currentVersionSearch = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instanceVersionSearch"] => (
-    globalStates?.pages?.states?.["add-instance"]?.instanceVersionSearch
+  (): GlobalStatesType["pages"]["add-instance"]["instanceVersionSearch"] => (
+    globalStates?.pages?.["add-instance"]?.instanceVersionSearch
   ),
 );
 const currentPatch = computed((): ExtendedPatchUIDType => (
@@ -67,13 +66,11 @@ function handleDropdown(state: boolean, event?: PointerEvent): void {
   selector.value = state;
 }
 function handleVersionSearch(input: string): void {
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instanceVersionSearch": {
-      "patch": Patches.Minecraft,
-      ...currentVersionSearch.value,
-      input,
-    },
-  });
+  globalStates.pages["add-instance"].instanceVersionSearch = {
+    "patch": Patches.Minecraft,
+    ...currentVersionSearch.value,
+    input,
+  };
 }
 
 onClickOutside(target, () => handleDropdown(false));

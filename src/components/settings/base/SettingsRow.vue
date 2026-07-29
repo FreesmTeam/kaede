@@ -17,10 +17,7 @@
   -->
 
 <script setup lang="ts">
-import { computed } from "vue";
-
-import General from "@/lib/general";
-import { globalStates } from "@/states/global.ts";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 
 const { idRoot, title, subtitle } = defineProps<{
   "idRoot"   : string;
@@ -28,22 +25,14 @@ const { idRoot, title, subtitle } = defineProps<{
   "subtitle"?: string;
 }>();
 
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
+const { styles } = useConfigColors();
 </script>
 
 <template>
   <div
     :id="`${idRoot}-wrapper`"
     class="relative w-full flex flex-nowrap items-center justify-between gap-4 rounded-md p-2"
-    :style="cardStyles"
+    :style="styles.widget"
   >
     <div
       :id="`${idRoot}-information`"

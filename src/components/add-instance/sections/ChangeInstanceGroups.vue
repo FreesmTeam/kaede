@@ -20,14 +20,13 @@
 import { computed } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances/index.js";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.js";
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
@@ -48,12 +47,10 @@ function handleGroup(group: string): void {
     currentGroups.add(group);
   }
 
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instance": {
-      ...currentInstance.value,
-      "groups": [...currentGroups],
-    },
-  });
+  globalStates.pages["add-instance"].instance = {
+    ...currentInstance.value,
+    "groups": [...currentGroups],
+  };
 }
 </script>
 

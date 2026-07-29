@@ -10,7 +10,7 @@ import { globalStates } from "@/states/global.ts";
 const stateKey = "add-instance" as const;
 
 const selected = computed((): string => (
-  globalStates?.pages?.states?.[stateKey]?.tab ?? InstanceCreationSections[0].id
+  globalStates?.pages?.[stateKey]?.tab ?? InstanceCreationSections[0].id
 ));
 </script>
 

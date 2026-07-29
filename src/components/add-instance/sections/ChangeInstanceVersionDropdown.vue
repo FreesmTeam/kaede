@@ -20,10 +20,9 @@
 import { useQuery } from "@tanstack/vue-query";
 import { computed } from "vue";
 
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { APIEndpoints } from "@/constants/launcher.ts";
 import { Patches } from "@/constants/meta.ts";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { globalStates } from "@/states/global.ts";
@@ -41,27 +40,19 @@ const { handleDropdown, currentFilter } = defineProps<{
 }>();
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
 const currentVersionSearch = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instanceVersionSearch"] => (
-    globalStates?.pages?.states?.["add-instance"]?.instanceVersionSearch
+  (): GlobalStatesType["pages"]["add-instance"]["instanceVersionSearch"] => (
+    globalStates?.pages?.["add-instance"]?.instanceVersionSearch
   ),
 );
 const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
+const { styles } = useConfigColors();
 
 const queryKey = computed((): Array<unknown> => [
   "meta",
@@ -206,12 +197,10 @@ function selectVersion(event: MouseEvent): void {
     [currentPatch.value]: extractedVersion,
   };
 
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instance": {
-      ...currentInstance.value,
-      "patchVersions": handledPatchVersions,
-    },
-  });
+  globalStates.pages["add-instance"].instance = {
+    ...currentInstance.value,
+    "patchVersions": handledPatchVersions,
+  };
 }
 function slideOverVersions(event: MouseEvent): void {
   const pressed: number = event.buttons;
@@ -229,7 +218,7 @@ function slideOverVersions(event: MouseEvent): void {
   <button
     id="__add-instance-page__instance-version-dropdown-wrapper"
     class="absolute left-0 top-14 z-50 max-h-73 w-full flex flex-col overflow-y-auto break-all rounded-md text-start text-sm"
-    :style="cardStyles"
+    :style="styles.widget"
     @pointerdown="selectVersion"
     @pointerover="slideOverVersions"
     @pointerup="event => handleDropdown(false, event)"

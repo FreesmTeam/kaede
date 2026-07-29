@@ -39,26 +39,17 @@ import {
 } from "prism-code-editor/autocomplete/javascript";
 import { cursorPosition } from "prism-code-editor/cursor";
 import { indentGuides } from "prism-code-editor/guides";
-import { computed, onMounted } from "vue";
+import { onMounted } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { AsyncFunction } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
 import { log } from "@/lib/logging/log.ts";
-import { globalStates } from "@/states/global.ts";
 import { codeOutput, codeToEvaluate } from "@/states/plugin-playground.ts";
 import { serverProcesses } from "@/states/servers.ts";
 
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
+const { styles } = useConfigColors();
 
 async function handleCode(): Promise<void> {
   try {
@@ -117,7 +108,7 @@ onMounted(() => {
   <div
     id="__settings-page__plugin-playground-wrapper"
     class="h-full min-h-fit w-full flex flex-col gap-2 rounded-md p-2"
-    :style="cardStyles"
+    :style="styles.widget"
   >
     <div
       id="__settings-page__plugin-playground-description"

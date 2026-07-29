@@ -72,7 +72,7 @@ onUnmounted(() => {
 <template>
   <div
     id="__dev-fps-counter__wrapper"
-    class="pointer-events-none fixed right-0 top-0 z-9500 flex flex-col items-end gap-2 bg-black p-2 opacity-50"
+    class="flex flex-col items-end gap-2 bg-black p-2 opacity-50"
   >
     <div
       :key="key"

@@ -23,17 +23,15 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import {
   TranslationsContextKey,
 } from "@/constants/application.ts";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
-import { instanceStates } from "@/states/instance.ts";
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 import type { TranslationsStateType } from "@/types/translations/translations.type.ts";
 
 const Translations = inject<TranslationsStateType>(TranslationsContextKey);
 
 const currentInstance = computed((): CurrentInstanceType => (
-  Instances.findCurrent(globalStates?.layout?.currentInstance, instanceStates)
+  Instances.findCurrent(globalStates?.selected?.currentInstance)
 ));
 const lastLaunch = computed(() => {
   const currentMillisecondsTime: number | undefined =
@@ -50,14 +48,7 @@ const lastLaunch = computed(() => {
 });
 
 function handleSwitch(): void {
-  if (!globalStates?.layout) {
-    return;
-  }
-
-  GlobalStateHelpers.change("layout", {
-    ...globalStates.layout,
-    "stats": "playtime",
-  });
+  globalStates.selected.stats = "playtime";
 }
 </script>
 

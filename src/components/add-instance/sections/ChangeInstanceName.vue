@@ -20,7 +20,6 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
@@ -29,7 +28,7 @@ import type {
 } from "@/types/application/global-states.type.ts";
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
@@ -42,12 +41,10 @@ function handleNameChange(input: string): void {
     );
   }
 
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instance": {
-      ...currentInstance.value,
-      "name": input,
-    },
-  });
+  globalStates.pages["add-instance"].instance = {
+    ...currentInstance.value,
+    "name": input,
+  };
 }
 </script>
 

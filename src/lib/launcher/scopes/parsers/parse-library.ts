@@ -1,5 +1,5 @@
 import { APIEndpoints } from "@/constants/launcher.ts";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import Parsers from "@/lib/launcher/scopes/parsers/index.ts";
 import { normalizeArtifactPath } from "@/lib/launcher/scopes/parsers/normalize-artifact-path.ts";
 import { log } from "@/lib/logging/log.ts";
@@ -8,7 +8,6 @@ import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { SpecificPatchLibraryType } from "@/types/launcher/meta/specific-patch-meta.type.ts";
-import FileManager from "@/lib/file-manager";
 
 export function parseLibrary({
   necessaries,
@@ -75,10 +74,11 @@ export function parseLibrary({
        * for empty libraries
        */
       // "status": "empty",
-      "status": "library",
-      "url"   : builtUrl,
-      "hash"  : "ignore",
-      "first" : false,
+      "status" : "library",
+      "url"    : builtUrl,
+      "hash"   : "ignore",
+      "first"  : false,
+      "exclude": library?.extract?.exclude ?? [],
       directory,
       file,
       path,
@@ -99,11 +99,12 @@ export function parseLibrary({
     }
 
     return {
-      "id"    : artifactID,
-      "status": isMaven ? "mavenFile" : "library",
-      "url"   : builtUrl,
-      "hash"  : "ignore",
-      "first" : false,
+      "id"     : artifactID,
+      "status" : isMaven ? "mavenFile" : "library",
+      "url"    : builtUrl,
+      "hash"   : "ignore",
+      "first"  : false,
+      "exclude": library?.extract?.exclude ?? [],
       directory,
       file,
       path,
@@ -117,9 +118,10 @@ export function parseLibrary({
   }
 
   return {
-    "id"    : artifactID,
-    "status": isMaven ? "mavenFile" : "library",
-    "first" : false,
+    "id"     : artifactID,
+    "status" : isMaven ? "mavenFile" : "library",
+    "first"  : false,
+    "exclude": library?.extract?.exclude ?? [],
     directory,
     file,
     url,

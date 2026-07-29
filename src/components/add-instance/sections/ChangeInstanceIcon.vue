@@ -19,23 +19,20 @@
 <script setup lang="ts">
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { copyFile } from "@tauri-apps/plugin-fs";
 import { computed } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
 import FileStructure from "@/constants/file-structure.ts";
 import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
+import FileManager from "@/lib/file-manager";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
-import FileManager from "@/lib/file-manager";
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
@@ -76,15 +73,15 @@ async function handleIconPick(): Promise<void> {
    * an access, then the dynamically expanded scope will disappear
    * on the next application launch.
    * That is why we need to copy that file to the 'resources/' folder
+   *
+   * UPD: not needed anymore as Kaede has full file storage scope now
    */
-  await copyFile(selectedIconPath, copyDestination);
+  // --- await copyFile(selectedIconPath, copyDestination);
 
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instance": {
-      ...currentInstance.value,
-      "icon": convertFileSrc(copyDestination),
-    },
-  });
+  globalStates.pages["add-instance"].instance = {
+    ...currentInstance.value,
+    "icon": convertFileSrc(copyDestination),
+  };
 }
 </script>
 

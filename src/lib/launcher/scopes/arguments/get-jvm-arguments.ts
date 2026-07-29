@@ -1,13 +1,12 @@
 import { version } from "@tauri-apps/plugin-os";
 
 import { JVMArguments } from "@/constants/launcher.ts";
-import ExtensionsManager from "@/lib/extensions-manager";
+import Hooks from "@/lib/hooks";
 import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
-import Hooks from "@/lib/hooks";
 
 export async function getJvmArguments({
   necessaries,

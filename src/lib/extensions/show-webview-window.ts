@@ -7,7 +7,7 @@ export async function showWebviewWindow(): Promise<void> {
   if (globalStates.extensions.showAppAfterExtensionsLoad) {
     log.debug(
       __PRE_BUNDLED_FILENAME__,
-      "User has enabled 'show-after-extensions-initialization';",
+      "User has enabled 'show-app-after-extensions-load';",
       "Showing the webview now",
     );
     await getCurrentWebviewWindow().show();

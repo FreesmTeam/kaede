@@ -2,7 +2,6 @@
 import { computed } from "vue";
 
 import LogHighlighter from "@/components/logging/lines/LogHighlighter.vue";
-import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
 import Logging from "@/lib/logging";
 import { log } from "@/lib/logging/log.ts";
@@ -67,8 +66,10 @@ const isInRange = computed((): boolean => {
     (rangeEnd >= index)
   );
 });
-const toCollapseTarget: boolean = GlobalObject.variables.logs.targetCollapse;
-const collapsedTargetLength: number = GlobalObject.variables.logs.collapsedTargetLength;
+// GlobalObject.variables.logs.targetCollapse;
+const toCollapseTarget: boolean = true;
+// GlobalObject.variables.logs.collapsedTargetLength;
+const collapsedTargetLength: number = 17;
 </script>
 
 <template>

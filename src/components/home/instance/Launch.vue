@@ -37,7 +37,7 @@ const closeInstance = inject<(instanceId: string) => Promise<void>>(
 );
 
 const currentInstance = computed((): CurrentInstanceType => (
-  Instances.findCurrent(globalStates?.layout?.currentInstance, instanceStates)
+  Instances.findCurrent(globalStates?.selected?.currentInstance)
 ));
 const statuses = computed((): LauncherStatusesType | undefined => {
   const instanceId: string | undefined = currentInstance?.value?.id;
@@ -80,10 +80,7 @@ function handleLaunch(): void {
         ));
       }
 
-      Instances.change(instanceId, {
-        ...instanceContent,
-        "lastLaunch": Date.now(),
-      });
+      instanceStates[instanceId].lastLaunch = Date.now();
     });
 }
 async function handleClose(): Promise<void> {
@@ -153,18 +150,11 @@ useIntervalFn((): void => {
     const previousAbsoluteTime: number = previousIntervalTime.value;
     const timeToAdd: number = currentAbsoluteTime - previousAbsoluteTime;
 
-    Instances.change(currentId, {
-      ...currentInstanceContent,
-      "playTime": currentPlayTime + timeToAdd,
-    });
+    instanceStates[currentId].playTime = currentPlayTime + timeToAdd;
 
     previousIntervalTime.value = currentAbsoluteTime;
-
-    if (instanceStates) {
-      Instances.syncMetadata(instanceStates);
-    }
   }
-}, 2000);
+}, 1000);
 </script>
 
 <template>

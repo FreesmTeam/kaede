@@ -2,13 +2,13 @@ import { exists, mkdir } from "@tauri-apps/plugin-fs";
 
 import { LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
+import Hooks from "@/lib/hooks";
 import { log } from "@/lib/logging/log.ts";
+import Network from "@/lib/network";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
-import Hooks from "@/lib/hooks";
 
 export async function downloadLogging({
   necessaries,
@@ -67,7 +67,7 @@ export async function downloadLogging({
     log.warn(logPrefix, "The logging config file does not exist");
     log.debug(logPrefix, "Downloading the logging config file");
     try {
-      const report = await General.concurrentlyDownload({
+      const report = await Network.concurrentlyDownload({
         statuses,
         cancelId,
         "concurrency": 1,

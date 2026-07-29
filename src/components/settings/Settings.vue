@@ -12,7 +12,7 @@ import { globalStates } from "@/states/global.ts";
 const stateKey = "settings" as const;
 
 const selected = computed((): string => (
-  globalStates?.pages?.states?.[stateKey]?.tab ?? SettingsSections[0].id
+  globalStates?.pages?.[stateKey]?.tab ?? SettingsSections[0].id
 ));
 
 const C = getComponents();

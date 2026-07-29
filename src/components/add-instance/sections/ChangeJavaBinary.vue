@@ -20,7 +20,6 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type {
@@ -28,7 +27,7 @@ import type {
 } from "@/types/application/global-states.type.ts";
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
@@ -38,12 +37,10 @@ function handleJavaProgram(value: string): void {
     return;
   }
 
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instance": {
-      ...currentInstance.value,
-      "javaBinary": value,
-    },
-  });
+  globalStates.pages["add-instance"].instance = {
+    ...currentInstance.value,
+    "javaBinary": value,
+  };
 }
 </script>
 

@@ -21,8 +21,7 @@ import { computed } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
@@ -30,28 +29,18 @@ import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 const { sections, stateKey } = defineProps<{
   "sections": Array<TabSectionType>;
   "stateKey": Extract<
-    keyof GlobalStatesType["pages"]["states"],
+    keyof GlobalStatesType["pages"],
     "add-instance" | "settings"
   >;
 }>();
 
 const selected = computed((): string => (
-  globalStates?.pages?.states?.[stateKey]?.tab ?? sections[0].id
+  globalStates?.pages?.[stateKey]?.tab ?? sections[0].id
 ));
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
+const { styles } = useConfigColors();
 
 function handleModeSelect(id: string): void {
-  GlobalStateHelpers.Pages.addToState(stateKey, {
-    "tab": id,
-  });
+  globalStates.pages[stateKey].tab = id;
 }
 </script>
 
@@ -59,7 +48,7 @@ function handleModeSelect(id: string): void {
   <div
     :id="`__${stateKey}-page__type-selector`"
     class="h-fit w-full flex shrink-0 flex-wrap gap-2 rounded-md p-2"
-    :style="cardStyles"
+    :style="styles.widget"
   >
     <button
       v-for="tab in sections"

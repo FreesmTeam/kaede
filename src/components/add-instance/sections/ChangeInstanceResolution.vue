@@ -21,7 +21,6 @@ import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import General from "@/lib/general";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type {
@@ -29,7 +28,7 @@ import type {
 } from "@/types/application/global-states.type.ts";
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
@@ -64,12 +63,10 @@ function handleWidthChange(value: string): void {
     return;
   }
 
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instance": {
-      ...currentInstance.value,
-      "windowWidth": width,
-    },
-  });
+  globalStates.pages["add-instance"].instance = {
+    ...currentInstance.value,
+    "windowWidth": width,
+  };
 }
 function handleHeightChange(value: string): void {
   const height: number = Number(value);
@@ -78,12 +75,10 @@ function handleHeightChange(value: string): void {
     return;
   }
 
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instance": {
-      ...currentInstance.value,
-      "windowHeight": height,
-    },
-  });
+  globalStates.pages["add-instance"].instance = {
+    ...currentInstance.value,
+    "windowHeight": height,
+  };
 }
 </script>
 

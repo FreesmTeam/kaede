@@ -27,21 +27,21 @@ import type { GlobalStatesType } from "@/types/application/global-states.type.ts
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 
 const currentInstance = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
+  (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
     Instances.extractSavedFromPages(globalStates)
   ),
 );
 const currentVersionSearch = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instanceVersionSearch"] => (
-    globalStates?.pages?.states?.["add-instance"]?.instanceVersionSearch
+  (): GlobalStatesType["pages"]["add-instance"]["instanceVersionSearch"] => (
+    globalStates?.pages?.["add-instance"]?.instanceVersionSearch
   ),
 );
 const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
 const customSettings = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["customSettings"] => (
-    globalStates?.pages?.states?.["add-instance"]?.customSettings
+  (): GlobalStatesType["pages"]["add-instance"]["customSettings"] => (
+    globalStates?.pages?.["add-instance"]?.customSettings
   ),
 );
 </script>

@@ -2,10 +2,9 @@ import { rename } from "@tauri-apps/plugin-fs";
 
 import { getDefaultConfig } from "@/lib/configs/scopes/get-default-config.ts";
 import { initializeConfigFile } from "@/lib/configs/scopes/initialize-config-file.ts";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import { log } from "@/lib/logging/log.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
-import FileManager from "@/lib/file-manager";
 
 export async function regenerateConfigFile({
   baseDirectory,

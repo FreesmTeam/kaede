@@ -17,63 +17,32 @@
   -->
 
 <script setup lang="ts">
-import { computed, nextTick } from "vue";
+import { computed } from "vue";
 
 import SettingsRow from "@/components/settings/base/SettingsRow.vue";
 import SettingsToggle from "@/components/settings/base/SettingsToggle.vue";
-import Configs from "@/lib/configs";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { globalStates } from "@/states/global.ts";
-import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 const idRoot = "__settings-page__extensions";
 
 const enabled = computed((): boolean => (
-  globalStates?.extensions?.enabled === true
+  globalStates.extensions.enabled
 ));
 const allowUntrusted = computed((): boolean => (
-  globalStates?.extensions?.allowUnrestrictedUntrusted === true
+  globalStates.extensions.allowUnrestrictedUntrusted
 ));
 const showAfterInitialization = computed((): boolean => (
-  globalStates?.misc?.showAfterExtensionsInitialization === true
-));
-const autoConfigSync = computed((): boolean => (
-  globalStates?.misc?.autoConfigSync === true
+  globalStates.extensions.showAppAfterExtensionsLoad
 ));
 
-function overrideExtensions(
-  input: Partial<GlobalStatesType["extensions"]>,
-): void {
-  GlobalStateHelpers.change("extensions", {
-    ...GlobalStateHelpers.get().extensions,
-    ...input,
-  });
-
-  // Global states have changed, persist them to the config file
-  nextTick().then(() => Configs.sync());
-}
-function overrideMisc(
-  input: Partial<GlobalStatesType["misc"]>,
-): void {
-  GlobalStateHelpers.change("misc", {
-    ...GlobalStateHelpers.get().misc,
-    ...input,
-  });
-
-  // Global states have changed, persist them to the config file
-  nextTick().then(() => Configs.sync());
-}
 function handleEnabledToggle(value: boolean): void {
-  overrideExtensions({ "enabled": value });
+  globalStates.extensions.enabled = value;
 }
 function handleAllowUntrustedToggle(value: boolean): void {
-  overrideExtensions({ "allowUnrestrictedUntrusted": value });
+  globalStates.extensions.allowUnrestrictedUntrusted = value;
 }
 function handleShowAfterInitializationToggle(value: boolean): void {
-  overrideMisc({ "showAfterExtensionsInitialization": value });
-}
-function handleAutoConfigSyncToggle(value: boolean): void {
-  overrideMisc({ "autoConfigSync": value });
+  globalStates.extensions.showAppAfterExtensionsLoad = value;
 }
 </script>
 
@@ -113,17 +82,6 @@ function handleAutoConfigSyncToggle(value: boolean): void {
         :id="`${idRoot}-show-after-initialization-toggle`"
         :model-value="showAfterInitialization"
         :on-toggle="handleShowAfterInitializationToggle"
-      />
-    </SettingsRow>
-    <SettingsRow
-      :id-root="`${idRoot}-auto-config-sync`"
-      title="Automatic config sync"
-      subtitle="Keep the configuration file in sync with the launcher state automatically"
-    >
-      <SettingsToggle
-        :id="`${idRoot}-auto-config-sync-toggle`"
-        :model-value="autoConfigSync"
-        :on-toggle="handleAutoConfigSyncToggle"
       />
     </SettingsRow>
   </div>

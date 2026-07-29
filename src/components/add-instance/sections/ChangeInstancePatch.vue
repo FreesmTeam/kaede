@@ -22,7 +22,6 @@ import { computed } from "vue";
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { InstallablePatches, Patches } from "@/constants/meta.ts";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { globalStates } from "@/states/global.ts";
 import type {
   GlobalStatesType,
@@ -30,8 +29,8 @@ import type {
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 
 const currentVersionSearch = computed(
-  (): GlobalStatesType["pages"]["states"]["add-instance"]["instanceVersionSearch"] => (
-    globalStates?.pages?.states?.["add-instance"]?.instanceVersionSearch
+  (): GlobalStatesType["pages"]["add-instance"]["instanceVersionSearch"] => (
+    globalStates?.pages?.["add-instance"]?.instanceVersionSearch
   ),
 );
 const currentPatch = computed((): ExtendedPatchUIDType => (
@@ -39,14 +38,12 @@ const currentPatch = computed((): ExtendedPatchUIDType => (
 ));
 
 function handlePatch(uid: ExtendedPatchUIDType): void {
-  GlobalStateHelpers.Pages.addToState("add-instance", {
-    "instanceVersionSearch": {
-      ...currentVersionSearch.value,
-      "patch": uid,
-      // Reset the search bar as well
-      "input": "",
-    },
-  });
+  globalStates.pages["add-instance"].instanceVersionSearch = {
+    ...currentVersionSearch.value,
+    "patch": uid,
+    // Reset the search bar as well
+    "input": "",
+  };
 }
 </script>
 

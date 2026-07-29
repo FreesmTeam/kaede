@@ -24,7 +24,6 @@ import {
   InstanceLogsContextKey,
 } from "@/constants/application.ts";
 import Configs from "@/lib/configs";
-import GlobalStateHelpers from "@/lib/global-state-helpers";
 import { globalStates } from "@/states/global.ts";
 
 const instanceLogs = inject<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey);
@@ -37,7 +36,7 @@ async function handleModeSelect(event: Event): Promise<void> {
     return;
   }
 
-  GlobalStateHelpers.Logs.selectMode(newValue);
+  // GlobalStateHelpers.Logs.selectMode(newValue);
 
   return Configs.sync();
 }

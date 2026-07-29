@@ -20,8 +20,7 @@ import { BrowserStorageStoreKey } from "@/constants/browser.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { getDatabaseStore } from "@/lib/browser/scopes/get-database-store.ts";
-import General from "@/lib/general";
-import FileManager from "../../file-manager";
+import FileManager from "@/lib/file-manager";
 
 let firstTime: boolean = true;
 

@@ -2,15 +2,14 @@
 import { useIntervalFn } from "@vueuse/core";
 import { computed, inject, ref } from "vue";
 
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import {
   LaunchStatesContextKey,
   TranslationsContextKey,
 } from "@/constants/application.ts";
 import { LaunchStatus } from "@/constants/launcher.ts";
-import General from "@/lib/general";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
-import { instanceStates } from "@/states/instance.ts";
 import type {
   LauncherStatusesType,
   WrappedInstanceLauncherStatusesType,
@@ -25,20 +24,12 @@ const instanceStatuses = inject<WrappedInstanceLauncherStatusesType>(
 );
 const Translations = inject<TranslationsStateType>(TranslationsContextKey);
 
-const cardStyles = computed(
-  (): ReturnType<typeof General.getSidebarInnerStyles> => (
-    General.getSidebarInnerStyles(
-      globalStates?.layout?.sidebar?.background,
-      globalStates?.layout?.sidebar?.color,
-      globalStates?.layout?.sidebar?.blur,
-    )
-  ),
-);
+const { styles } = useConfigColors();
 
 const currentDownloadSpeed = ref<string>("0");
 
 const currentInstance = computed((): CurrentInstanceType => (
-  Instances.findCurrent(globalStates?.layout?.currentInstance, instanceStates)
+  Instances.findCurrent(globalStates.selected.currentInstance)
 ));
 const statuses = computed((): LauncherStatusesType | undefined => {
   const instanceId: string | undefined = currentInstance?.value?.id;
@@ -114,7 +105,7 @@ useIntervalFn(() => {
     v-if="statuses?.downloads"
     id="__layout__launch-progress-downloads-count"
     class="pointer-events-none absolute right-2 top-2 z-10 flex flex-col items-end gap-1 rounded-md p-2 leading-none opacity-60"
-    :style="cardStyles"
+    :style="styles.widget"
   >
     <div
       v-if="currentDownloadSpeed !== '0.00'"

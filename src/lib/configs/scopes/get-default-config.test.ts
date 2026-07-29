@@ -18,40 +18,62 @@ test(testName, async () => {
       "enableNativeReloadKeyBinds": false,
     },
     "extensions": {
+      "list"                      : [],
+      "permissions"               : {},
       "enabled"                   : true,
       "allowUnrestrictedUntrusted": true,
+      "showAppAfterExtensionsLoad": false,
     },
-    "layout": {
-      "locale"                 : "en",
-      "stats"                  : "playtime",
-      "currentInstance"        : null,
-      "enableMaterialYouRipple": true,
-      "custom"                 : false,
-      "background"             : {
-        "url"    : null,
-        "key"    : null,
+    "ui": {
+      "ripple": {
+        "color"   : "#ffffff15",
+        "sparkles": "255 255 255",
+      },
+      "background": {
+        "image"  : null,
         "blur"   : null,
         "color"  : null,
-        "isVideo": false,
+        "isVideo": null,
+        "key"    : null,
       },
-      "sidebar": {
-        "background": null,
-        "blur"      : null,
-        "color"     : null,
-        "ripple"    : null,
-        "sparkles"  : null,
+      "text": {
+        "font"          : null,
+        "mainColor"     : null,
+        "secondaryColor": null,
       },
-      "atAGlance": {
-        "title"   : null,
-        "subtitle": null,
+      "widget": {
+        "blur"          : null,
+        "textColor"     : null,
+        "secondaryColor": null,
+        "background"    : null,
       },
+      "atAGlance": [
+        {
+          "title"   : "A promising future",
+          "subtitle": "without JavaScript",
+        },
+        {
+          "title"   : "These messages",
+          "subtitle": "were inspired by the \"At a Glance\" android widget",
+        },
+        {
+          "title"   : "%date%",
+          "subtitle": "What a great day to play Minecraft, right?",
+        },
+      ],
     },
-    "logs": {
-      "show"       : false,
-      "lineBreaks" : false,
-      "virtualized": false,
-      "mode"       : "launcher",
-      "filtering"  : "",
+    "selected": {
+      "currentInstance": null,
+      "stats"          : "playtime",
+    },
+    "locale": "en",
+    "logs"  : {
+      "show"      : false,
+      "mode"      : "launcher",
+      "filtering" : "",
+      "lineHeight": 20,
+      "partsShown": { "time": true, "level": true, "target": true, "message": true },
+      "partsSize" : { "time": 64, "level": 64, "target": 128 },
     },
     "minecraft": {
       "windowHeight": 480,
@@ -60,10 +82,6 @@ test(testName, async () => {
       "javaBinary"  : "java",
       "add"         : {},
       "remove"      : {},
-    },
-    "misc": {
-      "showAfterExtensionsInitialization": false,
-      "autoConfigSync"                   : false,
     },
   };
 

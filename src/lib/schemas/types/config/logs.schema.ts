@@ -12,8 +12,8 @@ export const LogsSchema = Type.Object({
     "message": Type.Boolean(),
   }),
   "partsSize": Type.Object({
-    "time"   : Type.Number(),
-    "level"  : Type.Number(),
-    "target" : Type.Number(),
+    "time"  : Type.Number(),
+    "level" : Type.Number(),
+    "target": Type.Number(),
   }),
 });

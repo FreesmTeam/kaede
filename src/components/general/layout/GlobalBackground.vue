@@ -8,12 +8,12 @@ import type {
 } from "@/types/application/global-states.type.ts";
 import type { DeepNonNullable } from "@/types/utils/deep-non-nullable.type.ts";
 
-const image = computed((): DeepNonNullable<GlobalStatesType["layout"]["background"]> => {
-  const background = globalStates?.layout?.background;
+const image = computed((): DeepNonNullable<GlobalStatesType["ui"]["background"]> => {
+  const background = globalStates?.ui?.background;
 
   return {
-    "key"    : background?.key ?? background?.url ?? "",
-    "url"    : background?.url ?? "",
+    "key"    : background?.key ?? background?.image ?? "",
+    "image"  : background?.image ?? "",
     "blur"   : background?.blur ?? 0,
     "color"  : background?.color ?? "rgba(28, 28, 28, 0.6)",
     "isVideo": background?.isVideo ?? false,
@@ -37,7 +37,7 @@ const image = computed((): DeepNonNullable<GlobalStatesType["layout"]["backgroun
         backdropFilter : `blur(${image.blur}px)`,
       }"
     ></div>
-    <Transition v-if="image.url !== ''" name="global-background">
+    <Transition v-if="image.image !== ''" name="global-background">
       <video
         id="__router__background-video"
         v-if="image.isVideo"
@@ -46,13 +46,13 @@ const image = computed((): DeepNonNullable<GlobalStatesType["layout"]["backgroun
         loop
         class="absolute left-0 h-full w-full bg-center object-cover -z-10"
       >
-        <source :src="image.url" type="video/mp4">
+        <source :src="image.image" type="video/mp4">
         Your browser does not support the video tag.
       </video>
       <Image
         v-else
         :key="image.key"
-        :src="image.url"
+        :src="image.image"
         id="__router__background-image"
         alt="A custom layout background"
         class-names="absolute left-0 h-full w-full bg-center object-cover -z-10"

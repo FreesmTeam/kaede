@@ -16,11 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import type {
   SpecificPatchClassifierOSType,
 } from "@/types/launcher/meta/specific-patch-meta.type.ts";
-import FileManager from "@/lib/file-manager";
 
 export function normalizeArtifactPath(artifact: string): {
   "directory" : string;

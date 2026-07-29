@@ -20,9 +20,19 @@ import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/log.ts";
 
 const handleError = (event: ErrorEvent): void => {
+  if (window.__TAURI__ === undefined) {
+    // eslint-disable-next-line no-console
+    return console.error("Uncaught error:", Errors.prettify(event.error));
+  }
+
   log.error(__PRE_BUNDLED_FILENAME__, "Uncaught error:", Errors.prettify(event.error));
 };
 const handleRejection = (event: PromiseRejectionEvent): void => {
+  if (window.__TAURI__ === undefined) {
+    // eslint-disable-next-line no-console
+    return console.error("Unhandled rejection:", Errors.prettify(event.reason));
+  }
+
   log.error(__PRE_BUNDLED_FILENAME__, "Unhandled rejection:", Errors.prettify(event.reason));
 };
 

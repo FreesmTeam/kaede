@@ -20,10 +20,10 @@
 import { computed } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import Instances from "@/lib/instances/index.js";
+import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
-import type { GlobalStatesType } from "@/types/application/global-states.type.js";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["add-instance"]["instance"] => (

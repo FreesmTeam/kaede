@@ -11,7 +11,7 @@ import General from "@/lib/general";
 import GlobalStateHelpers from "@/lib/global-state-helpers";
 import Logging from "@/lib/logging";
 import { globalStates } from "@/states/global.ts";
-import type { LogButtonType } from "@/types/logging/log-button.type.ts";
+import type { CustomButtonType } from "@/types/ui/custom-button.type.ts";
 import type { LogControlsType } from "@/types/logging/log-controls.type.ts";
 
 const {
@@ -81,7 +81,7 @@ async function viewInExplorer(): Promise<void> {
   await revealItemInDir(latestLogAbsolutePath);
 }
 
-const explorerControl: LogButtonType = {
+const explorerControl: CustomButtonType = {
   "icon" : "i-lucide-external-link",
   "label": "View in Explorer",
   "ids"  : {
@@ -94,7 +94,7 @@ const explorerControl: LogButtonType = {
   "invert"  : false,
   "hideOnSm": false,
 };
-const lineBreaksControl = computed((): LogButtonType => ({
+const lineBreaksControl = computed((): CustomButtonType => ({
   "icon" : "i-lucide-text-wrap",
   "label": "Line Breaks",
   "ids"  : {
@@ -107,7 +107,7 @@ const lineBreaksControl = computed((): LogButtonType => ({
   "invert"  : !horizontalScroll.value,
   "hideOnSm": true,
 }));
-const virtualizeControl = computed((): LogButtonType => ({
+const virtualizeControl = computed((): CustomButtonType => ({
   "icon" : "i-lucide-zap",
   "label": "Virtualize",
   "ids"  : {
@@ -120,7 +120,7 @@ const virtualizeControl = computed((): LogButtonType => ({
   "invert"  : shouldVirtualize.value,
   "hideOnMd": true,
 }));
-const textSelectionControl = computed((): LogButtonType => ({
+const textSelectionControl = computed((): CustomButtonType => ({
   "icon": "i-lucide-text-cursor",
   "ids" : {
     "wrapper": "__log-controls__text-selection-button",
@@ -132,7 +132,7 @@ const textSelectionControl = computed((): LogButtonType => ({
   "invert" : textIsInSelection.value,
   "hidden" : !shouldVirtualize.value,
 }));
-const textSelectionCopyControl = computed((): LogButtonType => ({
+const textSelectionCopyControl = computed((): CustomButtonType => ({
   "icon": "i-lucide-copy",
   "ids" : {
     "wrapper": "__log-controls__text-copy-button",
@@ -144,7 +144,7 @@ const textSelectionCopyControl = computed((): LogButtonType => ({
   "invert" : copied.value,
   "hidden" : !textSelectionRange,
 }));
-const controlButtons = computed((): Array<LogButtonType> => [
+const controlButtons = computed((): Array<CustomButtonType> => [
   explorerControl,
   lineBreaksControl.value,
   virtualizeControl.value,

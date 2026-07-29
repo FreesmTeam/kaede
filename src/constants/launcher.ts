@@ -208,6 +208,7 @@ export const GeneralSettings = {
 } as const;
 
 export default {
+  FamousAndOldJavaMajorVersion,
   DefaultInstanceIcon,
   DefaultInstanceSettings,
   JVMArguments,

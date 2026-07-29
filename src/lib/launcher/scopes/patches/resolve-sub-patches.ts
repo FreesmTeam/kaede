@@ -42,6 +42,7 @@ export async function resolveSubPatches({
       currentGroup.map(required => resolvePatch({
         "metadata": required,
         necessaries,
+        patchMeta,
       })),
     );
 

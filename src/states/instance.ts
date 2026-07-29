@@ -27,13 +27,6 @@ import type { InstanceStatesType } from "@/types/application/instance-states.typ
 export let instanceStates: ShallowReactive<InstanceStatesType>;
 
 /**
- * Returns a reference to the proxied object of instance states.
- */
-export function getInstanceStates(): InstanceStatesType {
-  return instanceStates;
-}
-
-/**
  * Assign the actual instance states to 'instanceStates'.
  * This function is called in 'main.ts'
  */

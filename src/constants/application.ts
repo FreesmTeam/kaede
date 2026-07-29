@@ -4,7 +4,7 @@ import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import FileStructure from "@/constants/file-structure.ts";
 import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -197,11 +197,11 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
     "name"  : "Open Root Folder",
     "icon"  : "i-lucide-folder",
     "action": (): void => {
-      const baseDirectory: string = General.getCachedBaseDirectory();
+      const baseDirectory: string = FileManager.getBaseDirectory();
 
       ContextMenu.close();
       revealItemInDir(
-        General.cachedJoin(
+        FileManager.join(
           baseDirectory,
           FileStructure.Files.Config,
         ),
@@ -213,7 +213,7 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
         );
 
         revealItemInDir(
-          General.cachedJoin(baseDirectory),
+          FileManager.join(baseDirectory),
         ).catch((error: unknown) => {
           log.error(
             __PRE_BUNDLED_FILENAME__,
@@ -229,14 +229,14 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
     "icon"  : "i-lucide-box",
     "action": (): void => {
       const currentInstanceId: string | null = globalStates.selected.currentInstance;
-      const baseDirectory: string = General.getCachedBaseDirectory();
+      const baseDirectory: string = FileManager.getBaseDirectory();
 
       ContextMenu.close();
 
       if (!currentInstanceId) {
         log.warn("No instance selected; revealing the root directory in explorer");
         revealItemInDir(
-          General.cachedJoin(
+          FileManager.join(
             baseDirectory,
             FileStructure.Folders.Instances.Path,
           ),
@@ -257,7 +257,7 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
       });
 
       revealItemInDir(
-        General.cachedJoin(minecraftDirectory),
+        FileManager.join(minecraftDirectory),
       ).catch((error: unknown) => {
         log.error(
           __PRE_BUNDLED_FILENAME__,
@@ -283,17 +283,18 @@ export default {
   ApplicationRootID,
   DefaultLocale,
   TranslationsContextKey,
+  AuthOneTimeFetchContextKey,
   AuthStatesContextKey,
   LaunchStatesContextKey,
   InstanceLogsContextKey,
   LaunchInstanceContextKey,
   CloseInstanceContextKey,
   CSSThemeExtensions,
+  ContextMenu,
   DefaultGlobalStatesPagesStates,
-  InstanceCreationSections,
   SettingsSections,
+  InstanceCreationSections,
   ContextMenuItems,
   HookResponseStatus,
   ExtraHookResponseStatus,
-  ContextMenu,
 } as const;

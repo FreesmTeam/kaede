@@ -1,4 +1,4 @@
-export type LogButtonType = {
+export type CustomButtonType = {
   "icon" ?: string;
   "label"?: string;
   "ids"   : {

@@ -5,6 +5,7 @@ import { ref } from "vue";
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import PageError from "@/components/general/errors/PageError.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { ContextMenu } from "@/constants/application.ts";
 import { getComponents } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
@@ -15,6 +16,8 @@ const contextMenu = ref<{
   "x"     : number;
   "y"     : number;
 }>({ "opened": false, "x": 0, "y": 0 });
+
+const { styles } = useConfigColors();
 
 function closeContextMenu(): void {
   contextMenu.value.opened = false;
@@ -74,6 +77,7 @@ const C = getComponents();
       id="__layout__wrapper"
       @contextmenu="showContextMenu"
       class="relative h-vh w-full flex flex-nowrap gap-0 overflow-hidden text-white"
+      :style="styles.root"
     >
       <C.LaunchProgress />
       <C.ContextMenu

@@ -62,6 +62,7 @@ import type {
   ArgumentReplacementsType,
 } from "@/types/launcher/launch/argument-replacements.type.ts";
 import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";
+import type { PatchDependencyType } from "@/types/launcher/meta/patch-index.type.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
@@ -1281,9 +1282,63 @@ declare global {
             "nothing"
           >;
         };
+
+        /**
+         * Executed on the 'required' field resolve of a patch
+         */
         "onMinecraftPatchResolve": {
-          "before": [];
-          "after" : [];
+
+          /**
+           * Executes 'async' or 'sync' functions before any actions.
+           *
+           * @param input - an object that has the 'necessaries', 'metadata',
+           * and 'patchMeta' fields is passed as the argument.
+           *
+           * If the hook returns a 'stop' status,
+           * it should also return:
+           * @param output - an object that has the 'SpecificPatchMetaType | false' type
+           * in the 'response' field.
+           *
+           * If the hook returns a 'continue' status,
+           * code execution will continue as if that hook did not exist.
+           */
+          "before": HookReturnType<
+            {
+              "necessaries": PreLaunchInformationType;
+              "metadata"   : PatchDependencyType;
+              // This is the patch that has a 'required' field used as 'metadata' above this line
+              "patchMeta" ?: SpecificPatchMetaType;
+            },
+            SpecificPatchMetaType | false
+          >;
+
+          /**
+           * Executes 'async' or 'sync' functions after resolving and validating the patch.
+           * The passed as 'validPatch' patch may be invalid, so check if it is false
+           * before doing anything with it.
+           *
+           * @param input - an object that has the 'necessaries', 'metadata', 'validPatch',
+           * and 'patchMeta' fields is passed as the argument.
+           *
+           * If the hook returns a 'stop' status,
+           * it should also return:
+           * @param output - an object that has the 'SpecificPatchMetaType | false' type
+           * in the 'response' field.
+           *
+           * If the hook returns a 'continue' status,
+           * code execution will continue as if that hook did not exist.
+           */
+          "after": HookReturnType<
+            {
+              "necessaries": PreLaunchInformationType;
+              "metadata"   : PatchDependencyType;
+              // A resolved patch
+              "validPatch" : SpecificPatchMetaType | false;
+              // This is the patch that has a 'required' field used as 'metadata' above this line
+              "patchMeta" ?: SpecificPatchMetaType;
+            },
+            SpecificPatchMetaType | false
+          >;
         };
       };
     };

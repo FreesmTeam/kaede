@@ -16,21 +16,41 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { computed } from "vue";
+import { computed, type ComputedRef } from "vue";
 
-import General from "@/lib/general";
 import { globalStates } from "@/states/global.ts";
+import type { UIColorsType } from "@/types/ui/ui-colors.type.ts";
 
-export function useConfigColors() {
-  const styles = computed(
-    (): ReturnType<typeof General.getSidebarInnerStyles> => (
-      General.getSidebarInnerStyles(
-        globalStates?.layout?.sidebar?.background,
-        globalStates?.layout?.sidebar?.color,
-        globalStates?.layout?.sidebar?.blur,
-      )
-    ),
-  );
+export function useConfigColors(): {
+  "styles": ComputedRef<UIColorsType>;
+} {
+  const styles = computed((): UIColorsType => {
+    const current: UIColorsType = {
+      "overlay": {
+        "background": globalStates.ui.background.color || "rgb(17, 17, 17)",
+      },
+      "widget": {
+        "background": globalStates.ui.widget.background || "rgb(10, 10, 10)",
+        "color"     : globalStates.ui.widget.textColor || "rgb(255, 255, 255)",
+      },
+    };
+
+    if (globalStates.ui.text.font !== null) {
+      current.root = {
+        "fontFamily": globalStates.ui.text.font,
+      };
+    }
+
+    if (globalStates.ui.background.blur !== null) {
+      current.overlay.backdropFilter = `blur(${globalStates.ui.background.blur}px)`;
+    }
+
+    if (globalStates.ui.widget.blur !== null) {
+      current.widget.backdropFilter = `blur(${globalStates.ui.widget.blur}px)`;
+    }
+
+    return current;
+  });
 
   return { styles };
 }

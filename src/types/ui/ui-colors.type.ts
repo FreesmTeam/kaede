@@ -16,15 +16,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type UiColorsType = {
-  "textMain"       : string;
-  "textSecondary"  : string;
-  "widgetMain"     : string;
-  "widgetSecondary": string;
-  "widgetBlur"     : string;
-  "backgroundImage": string;
-  "backgroundColor": string;
-  "backgroundBlur" : string;
-  "rippleColor"    : string;
-  "sparklesColor"  : string;
+export type UIColorsType = {
+  "root"?: {
+    // 'text.font'
+    "fontFamily": string;
+  };
+  "overlay": {
+    // 'background.color'
+    "background"     : string;
+    // 'background.blur'
+    "backdropFilter"?: string;
+  };
+  "widget": {
+    // 'widget.background'
+    "background"     : string;
+    // 'widget.textColor'
+    "color"          : string;
+    // 'widget.blur'
+    "backdropFilter"?: string;
+  };
 };

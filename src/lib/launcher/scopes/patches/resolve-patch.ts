@@ -20,8 +20,8 @@ import FileStructure from "@/constants/file-structure.ts";
 import { APIEndpoints, LaunchStatus } from "@/constants/launcher.ts";
 import { CustomPatches } from "@/constants/meta.ts";
 import Errors from "@/lib/errors";
-import ExtensionsManager from "@/lib/extensions-manager";
 import FileManager from "@/lib/file-manager";
+import Hooks from "@/lib/hooks";
 import Fetching from "@/lib/launcher/scopes/fetching";
 import Patches from "@/lib/launcher/scopes/patches/index.ts";
 import { log } from "@/lib/logging/scopes/log.ts";
@@ -43,7 +43,7 @@ export async function resolvePatch({
   "patchMeta" ?: SpecificPatchMetaType;
 }): Promise<SpecificPatchMetaType | false> {
   const beforeHooksResult: "continue" | SpecificPatchMetaType | false | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<SpecificPatchMetaType | false>({
+    await Hooks.catchAsyncResponseHooks<SpecificPatchMetaType | false>({
       "scope" : "onMinecraftPatchResolve",
       "toPass": { necessaries, patchMeta, metadata },
       "timing": "before",
@@ -132,21 +132,21 @@ export async function resolvePatch({
     },
   });
 
-  if (validPatch === false) {
-    log.error(descriptiveLogPrefix, "Invalid metadata");
-
-    return false;
-  }
-
   const afterHooksResult: "continue" | SpecificPatchMetaType | false | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<SpecificPatchMetaType | false>({
+    await Hooks.catchAsyncResponseHooks<SpecificPatchMetaType | false>({
       "scope" : "onMinecraftPatchResolve",
-      "toPass": { necessaries, patchMeta, metadata },
+      "toPass": { necessaries, patchMeta, metadata, validPatch },
       "timing": "after",
     });
 
   if (afterHooksResult !== "continue" && afterHooksResult !== undefined) {
     return afterHooksResult;
+  }
+
+  if (validPatch === false) {
+    log.error(descriptiveLogPrefix, "Invalid metadata");
+
+    return false;
   }
 
   log.info(descriptiveLogPrefix, "Successful validation");

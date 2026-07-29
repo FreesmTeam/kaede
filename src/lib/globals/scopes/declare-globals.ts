@@ -15,9 +15,9 @@ import Browser from "@/lib/browser";
 import Configs from "@/lib/configs";
 import DevelopmentModeHelpers from "@/lib/development-mode-helpers";
 import Errors from "@/lib/errors";
-import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
 import Globals from "@/lib/globals";
+import Hooks from "@/lib/hooks";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import Logging from "@/lib/logging";
@@ -51,9 +51,9 @@ export function declareGlobals(): void {
     Configs,
     DevelopmentModeHelpers,
     Errors,
-    ExtensionsManager,
     General,
     Globals,
+    Hooks,
     Instances,
     Launcher,
     Logging,

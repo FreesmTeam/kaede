@@ -1,7 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 
 import { capitalize } from "@/lib/general/scopes/capitalize.ts";
-import type { LogMethodType } from "@/types/logging/log-method.type.ts";
+
+type LogMethodType = (...input: string[]) => void;
 
 const nonDebugModeMessage: string = "  " +
   "log#debug method points to lod#__debug-undefined. What is happening?";
@@ -15,7 +16,7 @@ function invokeLog(
    * We do not care about promises here
    * Yeah, that can possibly lead to racing conditions...
    */
-  invoke("plugin:log|log", {
+  void invoke("plugin:log|log", {
     level,
     message,
     location,
@@ -54,16 +55,17 @@ export const log = {
    */
   "templates": {
     "json": {
-      "contents": (label: string, data: unknown): string => (
+      "contents": (label: string, data: unknown, isInfo?: boolean): string => (
 
         /*
          * Assemble the log message only if debug messages will be logged
          * since JSON#stringify method may produce an expensive output
          */
         label + ":\n" + (
-          log.debug === log["__debug-undefined"]
-            ? nonDebugModeMessage
-            : JSON.stringify(data, null, 2)
+          // 'log["__debug-undefined"]' is a reference to a function that does literally nothing
+          (log.debug !== log["__debug-undefined"] || isInfo)
+            ? JSON.stringify(data, null, 2)
+            : nonDebugModeMessage
         )
       ),
     },

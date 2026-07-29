@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-import type { LogButtonType } from "@/types/logging/log-button.type.ts";
+import type { CustomButtonType } from "@/types/ui/custom-button.type.ts";
 
 const {
   icon,
@@ -12,7 +12,7 @@ const {
   hideOnMd,
   ids,
   hidden,
-} = defineProps<LogButtonType>();
+} = defineProps<CustomButtonType>();
 </script>
 
 <template>

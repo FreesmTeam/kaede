@@ -33,13 +33,6 @@ import type { ConfigType } from "@/types/configs/config.type.ts";
 export let globalStates: Reactive<GlobalStatesType>;
 
 /**
- * Returns a reference to the proxied object of global states.
- */
-export function getGlobalStates(): GlobalStatesType {
-  return globalStates;
-}
-
-/**
  * Assign the actual global states to 'globalStates'.
  * This function is called in 'main.ts'
  */

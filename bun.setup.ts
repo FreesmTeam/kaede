@@ -85,7 +85,7 @@ const logMock = require("./src/__mocks__/log.cjs");
 const windowMock = require("./src/__mocks__/api/window.cjs");
 
 // Mock the logging utilities
-mock.module("@/lib/logging/scopes/log.ts", () => logMock);
+mock.module("@/lib/logging/log.ts", () => logMock);
 
 // Mock Tauri APIs
 mock.module("@tauri-apps/api/window", () => windowMock);

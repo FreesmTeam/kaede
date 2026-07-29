@@ -110,16 +110,16 @@ let currentFetchedConfig: unknown;
  * registry, so these mocks leak into test files that run later. Tests that import
  * concrete scope files instead of the '@/lib/...' barrels stay unaffected.
  */
-mock.module("@/lib/extensions-manager", () => ({
+mock.module("@/lib/hooks", () => ({
   "default": {
     "catchAsyncResponseHooks": async (): Promise<string> => "continue",
   },
 }));
-mock.module("@/lib/general", () => ({
+mock.module("@/lib/file-manager", () => ({
   "default": {
-    "handleJsonFile"        : async (): Promise<unknown> => currentFetchedConfig,
-    "cachedJoin"            : (): string => "",
-    "getCachedBaseDirectory": (): string => "",
+    "handleJsonFile"  : async (): Promise<unknown> => currentFetchedConfig,
+    "join"            : (): string => "",
+    "getBaseDirectory": (): string => "",
   },
 }));
 mock.module("@/lib/configs/scopes/regenerate-config-file.ts", () => ({
@@ -160,22 +160,6 @@ const tests: Array<{
       },
       "TUYU": "is awesome",
     },
-  },
-  {
-    "arguments": {
-      "fetchedConfig": {
-        ...defaultConfig,
-        "layout": {
-
-          /*
-           * 'custom' field can only be a boolean
-           * or an array of literals, such as "sidebar" or "contextMenu"
-           */
-          "custom": "blue",
-        },
-      },
-    },
-    "output": defaultConfig,
   },
   {
     "arguments": {

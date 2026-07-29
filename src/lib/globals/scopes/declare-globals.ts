@@ -1,5 +1,4 @@
 import { cancel, onInvalidUrl, onUrl, start } from "@fabianlars/tauri-plugin-oauth";
-import DevelopmentMode from "src/lib/development-mode";
 import * as Vue from "vue";
 
 import _Application, { ContextMenu } from "@/constants/application.ts";
@@ -14,6 +13,7 @@ import _Routes from "@/constants/routes.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Browser from "@/lib/browser";
 import Configs from "@/lib/configs";
+import DevelopmentMode from "@/lib/development-mode";
 import Errors from "@/lib/errors";
 import type ExtensionAPI from "@/lib/extension-api";
 import type Extensions from "@/lib/extensions";

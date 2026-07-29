@@ -7,6 +7,7 @@ import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
+import Hooks from "@/lib/hooks";
 
 export async function getJvmArguments({
   necessaries,
@@ -18,7 +19,7 @@ export async function getJvmArguments({
   const jvmArguments: Array<string> = [];
 
   const beforeHooksResult: "continue" | Array<string> | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<Array<string>>({
+    await Hooks.catchAsyncResponseHooks<Array<string>>({
       "scope" : "onJVMArgumentsGet",
       "toPass": { jvmArguments, necessaries, finalizedPatch },
       "timing": "before",
@@ -97,7 +98,7 @@ export async function getJvmArguments({
   }
 
   const afterHooksResult: "continue" | Array<string> | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<Array<string>>({
+    await Hooks.catchAsyncResponseHooks<Array<string>>({
       "scope" : "onJVMArgumentsGet",
       "toPass": { necessaries, finalizedPatch },
       "timing": "after",

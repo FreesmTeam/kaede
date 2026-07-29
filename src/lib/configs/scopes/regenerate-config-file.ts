@@ -5,6 +5,7 @@ import { initializeConfigFile } from "@/lib/configs/scopes/initialize-config-fil
 import General from "@/lib/general";
 import { log } from "@/lib/logging/log.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
+import FileManager from "@/lib/file-manager";
 
 export async function regenerateConfigFile({
   baseDirectory,
@@ -19,7 +20,7 @@ export async function regenerateConfigFile({
 
   await rename(
     configFileDirectory,
-    General.cachedJoin(
+    FileManager.join(
       baseDirectory,
       "config_invalid_" + currentTimestamp + ".json",
     ),

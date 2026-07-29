@@ -1,7 +1,7 @@
 import { DefaultLocale } from "@/constants/application.ts";
 import EnglishTranslations from "@/constants/english.json";
 import FileStructure from "@/constants/file-structure.ts";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
 import { log } from "@/lib/logging/log.ts";
 import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
@@ -16,13 +16,13 @@ export async function getTranslations(properties?: Partial<{
     return EnglishTranslations;
   }
 
-  const baseDirectory = properties?.baseDirectory ?? General.getCachedBaseDirectory();
+  const baseDirectory = properties?.baseDirectory ?? FileManager.getBaseDirectory();
   const parsedFile: ParsedFile | undefined = properties?.parsedFile;
   const selected = properties?.selected ?? DefaultLocale;
 
   const parsedTranslations: unknown = parsedFile?.status === "loaded"
     ? parsedFile.data
-    : await General.handleJsonFile({
+    : await FileManager.handleJsonFile({
       baseDirectory,
       "path"           : [FileStructure.Folders.Translations.Path, selected + ".json"],
       "label"          : `/translations/${selected}.json`,

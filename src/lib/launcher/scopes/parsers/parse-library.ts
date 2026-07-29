@@ -8,6 +8,7 @@ import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { SpecificPatchLibraryType } from "@/types/launcher/meta/specific-patch-meta.type.ts";
+import FileManager from "@/lib/file-manager";
 
 export function parseLibrary({
   necessaries,
@@ -34,11 +35,11 @@ export function parseLibrary({
   }
 
   const { "directory": relativeDirectory, file, "id": artifactID } = normalizeArtifactPath(name);
-  const directory: string = General.cachedJoin(
+  const directory: string = FileManager.join(
     directories.libraries,
     relativeDirectory,
   );
-  const path: string = General.cachedJoin(
+  const path: string = FileManager.join(
     directory,
     file,
   );

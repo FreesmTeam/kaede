@@ -21,6 +21,7 @@ import FileStructure from "@/constants/file-structure.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { getDatabaseStore } from "@/lib/browser/scopes/get-database-store.ts";
 import General from "@/lib/general";
+import FileManager from "../../file-manager";
 
 let firstTime: boolean = true;
 
@@ -34,8 +35,8 @@ export function handleLogsFlush(): void {
     }
 
     const store: IDBObjectStore = getDatabaseStore(BrowserStorageStoreKey, database);
-    const logsKey: string = General.cachedJoin(
-      General.getCachedBaseDirectory(),
+    const logsKey: string = FileManager.join(
+      FileManager.getBaseDirectory(),
       FileStructure.Folders.Logs.Path,
       FileStructure.Folders.Logs.Files.LatestLog,
     );

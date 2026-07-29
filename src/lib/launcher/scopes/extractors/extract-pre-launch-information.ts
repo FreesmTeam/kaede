@@ -20,8 +20,8 @@ import { type Arch, arch, type Platform, platform } from "@tauri-apps/plugin-os"
 
 import FileStructure from "@/constants/file-structure.ts";
 import { LaunchStatus } from "@/constants/launcher.ts";
-import ExtensionsManager from "@/lib/extensions-manager";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
+import Hooks from "@/lib/hooks";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
@@ -44,7 +44,7 @@ export function extractPreLaunchInformation({
   "logPrefix"      : string;
 }): PreLaunchInformationType | false {
   const beforeHooksResult: "continue" | PreLaunchInformationType | false | undefined =
-    ExtensionsManager.catchSyncResponseHooks<PreLaunchInformationType | false>({
+    Hooks.catchSyncResponseHooks<PreLaunchInformationType | false>({
       "scope" : "onPreLaunchInformation",
       "toPass": { statuses, instanceId },
       "timing": "before",
@@ -62,25 +62,25 @@ export function extractPreLaunchInformation({
   let compatiblePlatform: PreLaunchInformationType["platform"];
   let compatibleArch: PreLaunchInformationType["arch"];
 
-  const baseDirectory: string = General.getCachedBaseDirectory();
+  const baseDirectory: string = FileManager.getBaseDirectory();
   const instanceDirectory: string = Instances.getMinecraftDirectory({
     baseDirectory,
     instanceId,
   });
-  const assetsDirectory: string = General.cachedJoin(
+  const assetsDirectory: string = FileManager.join(
     baseDirectory,
     FileStructure.Folders.Assets.Path,
   );
-  const loggingDirectory: string = General.cachedJoin(
+  const loggingDirectory: string = FileManager.join(
     baseDirectory,
     FileStructure.Folders.Assets.Path,
     FileStructure.Folders.Assets.Folders.LogConfigs.Path,
   );
-  const librariesDirectory: string = General.cachedJoin(
+  const librariesDirectory: string = FileManager.join(
     baseDirectory,
     FileStructure.Folders.Libraries.Path,
   );
-  const nativesDirectory: string = General.cachedJoin(
+  const nativesDirectory: string = FileManager.join(
     baseDirectory,
     FileStructure.Folders.Instances.Path,
     instanceId,
@@ -154,11 +154,11 @@ export function extractPreLaunchInformation({
       "logging"     : loggingDirectory,
       "libraries"   : librariesDirectory,
       "natives"     : nativesDirectory,
-      "assetIndexes": General.cachedJoin(
+      "assetIndexes": FileManager.join(
         assetsDirectory,
         FileStructure.Folders.Assets.Folders.Indexes.Path,
       ),
-      "assetObjects": General.cachedJoin(
+      "assetObjects": FileManager.join(
         assetsDirectory,
         FileStructure.Folders.Assets.Folders.Objects.Path,
       ),
@@ -166,7 +166,7 @@ export function extractPreLaunchInformation({
   };
 
   const afterHooksResult: "continue" | PreLaunchInformationType | false | undefined =
-    ExtensionsManager.catchSyncResponseHooks<PreLaunchInformationType | false>({
+    Hooks.catchSyncResponseHooks<PreLaunchInformationType | false>({
       "scope" : "onPreLaunchInformation",
       "toPass": preLaunchInformation,
       "timing": "after",

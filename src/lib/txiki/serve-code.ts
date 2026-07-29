@@ -20,7 +20,8 @@ import { exists, writeTextFile } from "@tauri-apps/plugin-fs";
 
 import FileStructure from "@/constants/file-structure.ts";
 import Errors from "@/lib/errors";
-import General from "@/lib/general";
+import FileManager from "@/lib/file-manager";
+import Hashing from "@/lib/hashing";
 import { log } from "@/lib/logging/log.ts";
 import { serveFile } from "@/lib/txiki/serve-file.ts";
 import type { ServerProcessType } from "@/types/application/server-process.type.ts";
@@ -30,10 +31,10 @@ export async function serveCode(
   code: string,
   port?: number,
 ): Promise<ServerProcessType | undefined> {
-  const hash: string = await General.hashStringCrypto(code);
+  const hash: string = await Hashing.hashStringCrypto(code);
   const shortHash: string = hash.slice(0, 7);
-  const filePath: string = General.cachedJoin(
-    General.getCachedBaseDirectory(),
+  const filePath: string = FileManager.join(
+    FileManager.getBaseDirectory(),
     FileStructure.Folders.Extensions.Path,
     `tjs-${name}-${shortHash}.tjs`,
   );

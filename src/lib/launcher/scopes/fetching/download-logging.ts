@@ -2,13 +2,13 @@ import { exists, mkdir } from "@tauri-apps/plugin-fs";
 
 import { LaunchStatus } from "@/constants/launcher.ts";
 import Errors from "@/lib/errors";
-import ExtensionsManager from "@/lib/extensions-manager";
 import General from "@/lib/general";
 import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
+import Hooks from "@/lib/hooks";
 
 export async function downloadLogging({
   necessaries,
@@ -31,7 +31,7 @@ export async function downloadLogging({
   }
 
   const beforeHooksResult: "continue" | boolean | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<boolean>({
+    await Hooks.catchAsyncResponseHooks<boolean>({
       "scope" : "onMinecraftLoggingGet",
       "toPass": { necessaries, finalizedPatch },
       "timing": "before",
@@ -88,7 +88,7 @@ export async function downloadLogging({
     }
   }
 
-  await ExtensionsManager.catchAsyncVoidHooks({
+  await Hooks.catchAsyncVoidHooks({
     "scope" : "onMinecraftLoggingGet",
     "toPass": { necessaries, finalizedPatch },
     "timing": "after",

@@ -23,6 +23,7 @@ import { log } from "@/lib/logging/log.ts";
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
+import FileManager from "@/lib/file-manager";
 
 const shortHashes: Array<string> = Array
   .from(
@@ -41,7 +42,7 @@ export async function initializeShortHashDirectories({
   );
   const missingPaths = shortHashes
     .filter(hash => !existingFolders.has(hash))
-    .map(hash => General.cachedJoin(directories.assetObjects, hash));
+    .map(hash => FileManager.join(directories.assetObjects, hash));
 
   if (missingPaths.length === 0) {
     return;

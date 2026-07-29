@@ -20,6 +20,7 @@ import General from "@/lib/general";
 import type {
   SpecificPatchClassifierOSType,
 } from "@/types/launcher/meta/specific-patch-meta.type.ts";
+import FileManager from "@/lib/file-manager";
 
 export function normalizeArtifactPath(artifact: string): {
   "directory" : string;
@@ -54,7 +55,7 @@ export function normalizeArtifactPath(artifact: string): {
   ];
 
   return {
-    "directory": General.cachedJoin(...folders),
+    "directory": FileManager.join(...folders),
     "file"     : classifier === undefined
       ? `${name}-${version}.${extension}`
       : `${name}-${version}-${classifier}.${extension}`,

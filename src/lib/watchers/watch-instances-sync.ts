@@ -16,17 +16,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchConfigSync } from "@/lib/watchers/watch-config-sync.ts";
-import { watchErrors } from "@/lib/watchers/watch-errors.ts";
-import { watchInstancesSync } from "@/lib/watchers/watch-instances-sync.ts";
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import { watchDevelopmentStates, watchLocaleStates } from "@/lib/watchers/watch-states.ts";
+import { useDebounceFn } from "@vueuse/core";
+import { watch } from "vue";
 
-export default {
-  watchConfigSync,
-  watchErrors,
-  watchInstancesSync,
-  watchProcesses,
-  watchDevelopmentStates,
-  watchLocaleStates,
-} as const;
+import Instances from "@/lib/instances";
+import { instanceStates } from "@/states/instance.ts";
+
+export function watchInstancesSync(): () => void {
+  const debouncedWrite = useDebounceFn(Instances.sync, 300);
+
+  /**
+   * Updates translations on locale change.
+   */
+  return watch(
+    () => instanceStates,
+    debouncedWrite,
+    { "deep": true },
+  );
+}

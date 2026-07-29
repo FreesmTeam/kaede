@@ -11,6 +11,7 @@ import type {
   SpecificPatchClassifiersType,
   SpecificPatchLibraryType,
 } from "@/types/launcher/meta/specific-patch-meta.type.ts";
+import FileManager from "@/lib/file-manager";
 
 export function parseNative({
   necessaries,
@@ -35,11 +36,11 @@ export function parseNative({
   }
 
   const { "directory": relativeDirectory, file, classifier } = normalizeArtifactPath(name);
-  const directory: string = General.cachedJoin(
+  const directory: string = FileManager.join(
     directories.libraries,
     relativeDirectory,
   );
-  const path: string = General.cachedJoin(directory, file);
+  const path: string = FileManager.join(directory, file);
 
   // New natives format does not have a 'classifiers' field
   if (classifiers === undefined) {
@@ -115,7 +116,7 @@ export function parseNative({
       suffix +
       "." +
       extension;
-    const updatedPath: string = General.cachedJoin(directory, requiredName);
+    const updatedPath: string = FileManager.join(directory, requiredName);
 
     return {
 

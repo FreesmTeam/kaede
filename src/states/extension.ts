@@ -16,17 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchConfigSync } from "@/lib/watchers/watch-config-sync.ts";
-import { watchErrors } from "@/lib/watchers/watch-errors.ts";
-import { watchInstancesSync } from "@/lib/watchers/watch-instances-sync.ts";
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import { watchDevelopmentStates, watchLocaleStates } from "@/lib/watchers/watch-states.ts";
+import type { DeepPartial } from "unocss";
+import { type Reactive, reactive } from "vue";
 
-export default {
-  watchConfigSync,
-  watchErrors,
-  watchInstancesSync,
-  watchProcesses,
-  watchDevelopmentStates,
-  watchLocaleStates,
-} as const;
+import type ExtensionAPI from "@/lib/extension-api";
+import type { ExtensionType } from "@/types/extensions/extension.type.ts";
+
+export const extensionStates: Reactive<{
+  "valid"   : Array<ExtensionType>;
+  "invalid" : Array<DeepPartial<ExtensionType>>;
+  "executed": Array<ExtensionAPI>;
+}> = reactive({
+  "valid"   : [],
+  "invalid" : [],
+  "executed": [],
+});

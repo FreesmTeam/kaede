@@ -26,6 +26,7 @@ import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.typ
 import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
+import FileManager from "@/lib/file-manager";
 
 const customPatchUIDs = Object.values(CustomPatches);
 
@@ -44,7 +45,7 @@ export async function ensurePatchDirectories(
   );
   const existStatuses: Array<boolean> = await Promise.all(
     actualPatchUIDs.map(uid => exists(
-      General.cachedJoin(
+      FileManager.join(
         directories.base,
         FileStructure.Folders.Cache.Path,
         uid,
@@ -59,7 +60,7 @@ export async function ensurePatchDirectories(
     }
 
     toCreate.push(
-      General.cachedJoin(
+      FileManager.join(
         directories.base,
         FileStructure.Folders.Cache.Path,
         actualPatchUIDs[index],

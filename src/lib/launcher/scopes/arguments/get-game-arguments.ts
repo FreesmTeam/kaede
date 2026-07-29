@@ -4,6 +4,7 @@ import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { FinalizedPatchType } from "@/types/launcher/patch/finalized-patch.type.ts";
+import Hooks from "@/lib/hooks";
 
 export async function getGameArguments({
   necessaries,
@@ -13,7 +14,7 @@ export async function getGameArguments({
   "finalizedPatch": FinalizedPatchType;
 }): Promise<Array<string>> {
   const beforeHooksResult: "continue" | Array<string> | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<Array<string>>({
+    await Hooks.catchAsyncResponseHooks<Array<string>>({
       "scope" : "onGameArgumentsGet",
       "toPass": { necessaries, finalizedPatch },
       "timing": "before",
@@ -52,7 +53,7 @@ export async function getGameArguments({
   );
 
   const afterHooksResult: "continue" | Array<string> | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<Array<string>>({
+    await Hooks.catchAsyncResponseHooks<Array<string>>({
       "scope" : "onGameArgumentsGet",
       "toPass": { argumentsWithTweakers, necessaries, finalizedPatch },
       "timing": "after",

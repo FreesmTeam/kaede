@@ -13,6 +13,7 @@ import Logging from "@/lib/logging";
 import { globalStates } from "@/states/global.ts";
 import type { CustomButtonType } from "@/types/ui/custom-button.type.ts";
 import type { LogControlsType } from "@/types/logging/log-controls.type.ts";
+import FileManager from "@/lib/file-manager";
 
 const {
   searching,
@@ -72,8 +73,8 @@ async function copyTextSelection(): Promise<void> {
   );
 }
 async function viewInExplorer(): Promise<void> {
-  const latestLogAbsolutePath = General.cachedJoin(
-    General.getCachedBaseDirectory(),
+  const latestLogAbsolutePath = FileManager.join(
+    FileManager.getBaseDirectory(),
     FileStructure.Folders.Logs.Path,
     FileStructure.Folders.Logs.Files.LatestLog,
   );

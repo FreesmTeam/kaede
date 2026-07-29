@@ -17,7 +17,7 @@
  */
 
 import { LaunchStatus } from "@/constants/launcher.ts";
-import ExtensionsManager from "@/lib/extensions-manager";
+import Hooks from "@/lib/hooks";
 import { log } from "@/lib/logging/log.ts";
 import Processes from "@/lib/processes";
 import type {
@@ -46,7 +46,7 @@ export async function spawnMinecraft({
   "onInput"    : (line: string) => void;
 }): Promise<LaunchResponseType> {
   const beforeHooksResult: "continue" | LaunchResponseType | undefined =
-    await ExtensionsManager.catchAsyncResponseHooks<LaunchResponseType>({
+    await Hooks.catchAsyncResponseHooks<LaunchResponseType>({
       "scope" : "onMinecraftLaunch",
       "toPass": { command, instanceId, necessaries },
       "timing": "before",
@@ -80,7 +80,7 @@ export async function spawnMinecraft({
           "Successfully closed. Payload",
           payload,
         ));
-        void ExtensionsManager.catchAsyncVoidHooks({
+        void Hooks.catchAsyncVoidHooks({
           "scope" : "onMinecraftKill",
           "toPass": payload.pid,
           "timing": "after",
@@ -92,7 +92,7 @@ export async function spawnMinecraft({
           "Something went wrong. Payload",
           payload,
         ));
-        void ExtensionsManager.catchAsyncVoidHooks({
+        void Hooks.catchAsyncVoidHooks({
           "scope" : "onMinecraftKill",
           "toPass": payload.pid,
           "timing": "after",
@@ -109,7 +109,7 @@ export async function spawnMinecraft({
     return { "success": false, "process": undefined };
   }
 
-  await ExtensionsManager.catchAsyncVoidHooks({
+  await Hooks.catchAsyncVoidHooks({
     "scope" : "onMinecraftLaunch",
     "toPass": { process, command, instanceId, necessaries },
     "timing": "after",

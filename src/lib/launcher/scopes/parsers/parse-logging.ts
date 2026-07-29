@@ -6,6 +6,7 @@ import type {
   PreLaunchInformationType,
 } from "@/types/launcher/meta/pre-launch-information.type.ts";
 import type { SpecificPatchMetaType } from "@/types/launcher/meta/specific-patch-meta.type.ts";
+import FileManager from "@/lib/file-manager";
 
 export function parseLogging({
   necessaries,
@@ -48,7 +49,7 @@ export function parseLogging({
     return false;
   }
 
-  const path = General.cachedJoin(
+  const path = FileManager.join(
     directories.logging,
     name,
   );

@@ -32,6 +32,7 @@ import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
+import FileManager from "@/lib/file-manager";
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["states"]["add-instance"]["instance"] => (
@@ -64,8 +65,8 @@ async function handleIconPick(): Promise<void> {
   const delimiter = GlobalInternals.joinDelimiter;
   const splitPath: Array<string> = selectedIconPath.split(delimiter);
   const fileName: string = splitPath[splitPath.length - 1];
-  const copyDestination: string = General.cachedJoin(
-    General.getCachedBaseDirectory(),
+  const copyDestination: string = FileManager.join(
+    FileManager.getBaseDirectory(),
     FileStructure.Folders.Resources.Path,
     fileName,
   );

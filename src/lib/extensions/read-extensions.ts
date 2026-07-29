@@ -17,6 +17,7 @@
  */
 
 import { invoke } from "@tauri-apps/api/core";
+import type { DeepPartial } from "unocss";
 
 import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
@@ -34,21 +35,34 @@ type ReadExtensionsType = {
   }>;
 };
 
-export async function readExtensions(): Promise<Array<ExtensionType>> {
+export async function readExtensions(): Promise<{
+  "valid"  : Array<ExtensionType>;
+  "invalid": Array<DeepPartial<ExtensionType>>;
+}> {
   const result = await invoke<ReadExtensionsType | string>("read_extensions");
 
   if (typeof result === "string") {
     throw new TypeError(result);
   }
 
+  const invalid: Array<DeepPartial<ExtensionType>> = [];
   const { extensions, failures } = result;
 
   for (const failure of failures) {
+    const parts = failure.fileName.split(".");
+
+    // Remove the '.kaede' or '.zip' part
+    parts.pop();
+
+    const id = parts.join(".");
+
     log.error(
       __PRE_BUNDLED_FILENAME__,
-      `An error occurred while reading extension '${failure.fileName}':`,
+      `An error occurred while reading extension '${id}':`,
       failure.error,
     );
+
+    invalid.push({ id });
   }
 
   const validated: Array<ExtensionType> = [];
@@ -69,10 +83,18 @@ export async function readExtensions(): Promise<Array<ExtensionType>> {
       },
     });
 
-    if (valid !== false) {
+    if (valid) {
       validated.push({ id, "code": extension.code, "metadata": valid });
+    } else {
+      invalid.push({
+        id,
+        "code"    : extension.code,
+        "metadata": typeof extension.metadata === "object"
+          ? { ...extension.metadata }
+          : undefined,
+      });
     }
   }
 
-  return validated;
+  return { "valid": validated, invalid };
 }

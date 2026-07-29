@@ -16,7 +16,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import Errors from "@/lib/errors";
 import Extensions from "@/lib/extensions";
+import { log } from "@/lib/logging/log.ts";
 import Permissions from "@/lib/permissions";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
@@ -72,7 +74,10 @@ export function runInSandbox({
      */
     compartment.evaluate(code);
   } catch (error: unknown) {
-    // eslint-disable-next-line
-    console.error("Compartment error:", error);
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      `An error occurred while running the '${id}' extension in the compartment:`,
+      Errors.prettify(error),
+    );
   }
 }

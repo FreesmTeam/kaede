@@ -94,7 +94,7 @@ const [
 ] = await Promise.all([
   Configs.getSafe({ baseDirectory, "parsedFile": parsed.config }),
   Configs.getTranslations({ baseDirectory, "parsedFile": parsed.translations }),
-  Instances.readStored({ baseDirectory, "parsedFile": parsed.instances }),
+  Instances.readInstances({ baseDirectory, "parsedFile": parsed.instances }),
 
   /*
    * Variables returned from this 'Promise#all' are globally visible,
@@ -141,6 +141,7 @@ declareInstanceStates();
  * For example, if 'enableDebugMode' is true, they allow debug messages to be logged
  */
 Watchers.watchConfigSync();
+Watchers.watchInstancesSync();
 Watchers.watchDevelopmentStates();
 Watchers.watchLocaleStates();
 Watchers.watchProcesses()

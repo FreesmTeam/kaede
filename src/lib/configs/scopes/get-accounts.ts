@@ -4,17 +4,18 @@ import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
 import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
+import FileManager from "@/lib/file-manager";
 
 export async function getAccounts(properties?: Partial<{
   "baseDirectory": string;
   "parsedFile"   : ParsedFile;
 }>): Promise<Array<AccountType>> {
-  const baseDirectory: string = properties?.baseDirectory ?? General.getCachedBaseDirectory();
+  const baseDirectory: string = properties?.baseDirectory ?? FileManager.getBaseDirectory();
   const parsedFile: ParsedFile | undefined = properties?.parsedFile;
 
   const parsedAccounts: unknown = parsedFile?.status === "loaded"
     ? parsedFile.data
-    : await General.handleJsonFile({
+    : await FileManager.handleJsonFile({
       baseDirectory,
       "path"           : [FileStructure.Files.Accounts],
       "label"          : FileStructure.Files.Accounts,

@@ -24,7 +24,7 @@ import { listStores } from "@/lib/browser/scopes/list-stores.ts";
 import { readStoragePath } from "@/lib/browser/scopes/read-storage-path.ts";
 import { writeToStoragePath } from "@/lib/browser/scopes/write-to-storage-path.ts";
 import Configs from "@/lib/configs";
-import { FamousAndOldJavaMajorVersion } from "@/lib/constants/launcher";
+import { FamousAndOldJavaMajorVersion } from "@/constants/launcher";
 import Instances from "@/lib/instances";
 
 export async function placeholderInvoke(

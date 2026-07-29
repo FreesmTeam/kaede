@@ -30,6 +30,7 @@ export function parseLogging({
     log.warn(descriptiveLogPrefix, log.templates.json.contents(
       "The 'logging' field is invalid. Contents",
       logging,
+      true,
     ));
     statuses.current = LaunchStatus.Logging.FailedToParse;
 

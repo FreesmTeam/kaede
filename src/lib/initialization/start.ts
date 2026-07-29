@@ -43,7 +43,7 @@ export async function start(): Promise<InitialStateType> {
   } catch (error: unknown) {
     log.error(
       __PRE_BUNDLED_FILENAME__,
-      log.templates.json.contents("An error occurred while trying to get initial state", {}),
+      log.templates.json.contents("An error occurred while trying to get initial state", {}, true),
     );
 
     throw error;

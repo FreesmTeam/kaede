@@ -65,6 +65,7 @@ export async function handleLaunch({
   log.info(logPrefix, log.templates.json.contents(
     "Pre-launch information contents",
     necessaries,
+    true,
   ));
 
   if (necessaries === false) {
@@ -114,6 +115,7 @@ export async function handleLaunch({
       ...finalizedPatch,
       "artifacts": "[ ... ] (" + finalizedPatch.artifacts.length + " entries)",
     },
+    true,
   ));
 
   const responses: Array<boolean> = await Promise.all([

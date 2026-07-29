@@ -130,6 +130,7 @@ export async function resolvePatchVersion({
     log.error(logPrefix, log.templates.json.contents(
       "Failed to shallowly validate the index manifest. Contents",
       parsedPatchIndex,
+      true,
     ));
     statuses.current = LaunchStatus.PatchIndex.FailedToValidate;
 

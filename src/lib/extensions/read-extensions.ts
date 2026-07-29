@@ -19,6 +19,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import type { DeepPartial } from "unocss";
 
+import FileStructure from "@/constants/file-structure.ts";
+import FileManager from "@/lib/file-manager";
 import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
@@ -39,7 +41,13 @@ export async function readExtensions(): Promise<{
   "valid"  : Array<ExtensionType>;
   "invalid": Array<DeepPartial<ExtensionType>>;
 }> {
-  const result = await invoke<ReadExtensionsType | string>("read_extensions");
+  const directory = FileManager.join(
+    FileManager.getBaseDirectory(),
+    FileStructure.Folders.Extensions.Path,
+  );
+  const result = await invoke<ReadExtensionsType | string>("read_extensions", {
+    "extensionsDirPath": directory,
+  });
 
   if (typeof result === "string") {
     throw new TypeError(result);

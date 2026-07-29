@@ -79,6 +79,7 @@ export async function spawnMinecraft({
         log.warn(logPrefix, log.templates.json.contents(
           "Successfully closed. Payload",
           payload,
+          true,
         ));
         void Hooks.catchAsyncVoidHooks({
           "scope" : "onMinecraftKill",
@@ -91,6 +92,7 @@ export async function spawnMinecraft({
         log.error(logPrefix, log.templates.json.contents(
           "Something went wrong. Payload",
           payload,
+          true,
         ));
         void Hooks.catchAsyncVoidHooks({
           "scope" : "onMinecraftKill",
@@ -104,6 +106,7 @@ export async function spawnMinecraft({
     log.error(logPrefix, log.templates.json.contents(
       "Failed to spawn. Payload",
       error,
+      true,
     ));
 
     return { "success": false, "process": undefined };

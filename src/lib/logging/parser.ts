@@ -25,15 +25,19 @@ const separator = " | ";
 const separatorLength = separator.length;
 
 export function parseLine(line: LogLineType): LogParsedLineType  {
-  const [time, level, target, message]: Array<string | undefined> = line.raw.split(separator);
+  const parts: Array<string | undefined> = line.raw.split(separator);
+  const [time, level, target] = parts;
+  const looksStructured = !Number.isNaN(Number(line.raw[0]));
 
-  if (!time || !level || !target) {
+  if (!time || !level || !target || !looksStructured) {
     return {
       "kind"   : "plain",
       "text"   : line.raw,
       "offsets": { "full": [0, line.raw.length] },
     };
   }
+
+  const message = parts.slice(3).join(separator);
 
   const timeEndIndex = line.raw.indexOf(separator);
   const levelEndIndex = line.raw.indexOf(separator, timeEndIndex + separatorLength);

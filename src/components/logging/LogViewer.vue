@@ -190,11 +190,11 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
             class="__log-viewer__log-line"
             :style="{ 'top': index * globalStates.logs.lineHeight + 'px' }"
           >
+            {{ filtered?.list?.[position + index]?.index }}
             <template
               v-for="segment in getSegments(position + index)"
               :key="`${index}-${segment.index}`"
             >
-              {{ filtered?.list?.[position + index]?.index }}
               <mark
                 v-if="segment.state !== 'none'"
                 :class="[

@@ -99,6 +99,7 @@ export function overlaySearch(
       "text" : rawToken.text,
       "kind" : rawToken.kind,
       "state": "none",
+      // Used as Vue 3 loop key
       index,
     }));
   }
@@ -135,7 +136,8 @@ export function overlaySearch(
           ),
           "kind" : token.kind,
           "state": "none",
-          "index": segments.length - 1,
+          // Used as Vue 3 loop key
+          "index": segments.length,
         });
       }
 
@@ -149,7 +151,8 @@ export function overlaySearch(
           "state": match.globalIndex === currentGlobalIndex
             ? "current"
             : "found",
-          "index": segments.length - 1,
+          // Used as Vue 3 loop key
+          "index": segments.length,
         });
       }
 
@@ -161,7 +164,8 @@ export function overlaySearch(
         "text" : token.text.slice(renderCursor - token.renderStart),
         "kind" : token.kind,
         "state": "none",
-        "index": segments.length - 1,
+        // Used as Vue 3 loop key
+        "index": segments.length,
       });
     }
   }

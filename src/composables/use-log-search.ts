@@ -86,7 +86,7 @@ export function useLogSearch(
   lines: ComputedRef<{ "list": Array<LogLineType> }>,
 ): LogSearchComposableType {
   const status = shallowReactive<LogSearchStatusType>({
-    "searching": "trace",
+    "searching": "",
     "valid"    : true,
     "active"   : false,
     "index"    : 0,

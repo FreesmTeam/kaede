@@ -21,7 +21,6 @@ import { markRaw, type Reactive, reactive } from "vue";
 import { ContextMenuItems, DefaultGlobalStatesPagesStates } from "@/constants/application.ts";
 import { Routes, SidebarRouteGroupItems } from "@/constants/routes.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
-import Configs from "@/lib/configs";
 import Router from "@/lib/router";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
@@ -37,7 +36,11 @@ export let globalStates: Reactive<GlobalStatesType>;
  * This function is called in 'main.ts'
  */
 export function declareGlobalStates(): void {
-  const configFile: ConfigType = Configs.getCachedInitial();
+  /*
+   * Since global states are deeply reactive,
+   * we should copy the original config object to avoid its changes
+   */
+  const configFile: ConfigType = structuredClone(GlobalInternals.initialConfig);
   const customSettings = DefaultGlobalStatesPagesStates["add-instance"].customSettings;
 
   globalStates = reactive<GlobalStatesType>({

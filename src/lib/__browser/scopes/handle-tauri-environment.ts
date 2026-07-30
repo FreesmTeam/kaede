@@ -32,7 +32,7 @@ export async function handleTauriEnvironment(): Promise<void> {
       },
     },
     "callbacks"     : new Map,
-    "convertFileSrc": (): void => {},
+    "convertFileSrc": (path: string): string => path,
     "invoke"        : placeholderInvoke,
     "ipc"           : (): void => {},
     "metadata"      : {

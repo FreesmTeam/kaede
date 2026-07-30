@@ -1,6 +1,5 @@
 import { getMain } from "@/lib/configs/get-main.ts";
 import { getAccounts } from "@/lib/configs/scopes/get-accounts.ts";
-import { getCachedInitial } from "@/lib/configs/scopes/get-cached-initial.ts";
 import { getDefaultConfig } from "@/lib/configs/scopes/get-default-config.ts";
 import { getSafeConfigFile } from "@/lib/configs/scopes/get-safe-config-file.ts";
 import { getTranslations } from "@/lib/configs/scopes/get-translations.ts";
@@ -18,6 +17,5 @@ export default {
   "initialize": initializeConfigFile,
   "regenerate": regenerateConfigFile,
   getAccounts,
-  getCachedInitial,
   getTranslations,
 } as const;

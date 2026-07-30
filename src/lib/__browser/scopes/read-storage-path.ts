@@ -20,7 +20,7 @@ import { BrowserStorageStoreKey } from "@/constants/browser.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { getDatabaseStore } from "@/lib/browser/scopes/get-database-store.ts";
 
-export async function readStoragePath(path: string): Promise<string> {
+export async function readStoragePath(path: string): Promise<string | File> {
   const database: IDBDatabase | undefined = GlobalInternals.indexedDB;
 
   if (!database) {

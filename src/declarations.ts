@@ -134,11 +134,11 @@ declare global {
         "joinDelimiter"       : string;
         // Launcher version
         "launcherVersion"     : string;
-        // Config state before launcher initialization
+        // Config state before launcher initialization (used for first sync check)
         "initialConfig"       : ConfigType;
         // Translations state before launcher initialization
         "initialTranslations" : TranslationsType;
-        // Instances metadata state before launcher initialization
+        // Instances metadata state before launcher initialization (used for first sync check)
         "initialInstances"    : InstanceStatesType;
         // Portable state
         "portable"            : boolean;

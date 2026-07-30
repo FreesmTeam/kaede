@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/* eslint-disable max-lines */
 import { LogInfo } from "@/constants/browser.ts";
 import EnglishTranslations from "@/constants/english.json";
 import { FamousAndOldJavaMajorVersion } from "@/constants/launcher";
@@ -130,7 +131,11 @@ export async function placeholderInvoke(
       for (const path of paths) {
         const currentFile = await readStoragePath(path);
 
-        size = size + currentFile.length;
+        size = size + (
+          typeof currentFile === "string"
+            ? currentFile.length
+            : currentFile.size
+        );
       }
 
       return size;
@@ -140,14 +145,20 @@ export async function placeholderInvoke(
     }
     case "plugin:fs|read_file":
     case "plugin:fs|read_text_file": {
-      const input: string = await readStoragePath(payload?.path);
+      const input: string | File = await readStoragePath(payload?.path);
       const encoder: TextEncoder = new TextEncoder;
 
       /*
        * '<Tauri API>#readTextFile' expects Uint8Array,
        * and we cannot change/replace that function since Tauri API is frozen
        */
-      return encoder.encode(input);
+      if (typeof input === "string") {
+        return encoder.encode(input);
+      }
+
+      const buffer = await input.arrayBuffer();
+
+      return new Uint8Array(buffer);
     }
     case "plugin:fs|write_text_file": {
       const path: string = decodeURIComponent(options.headers.path);
@@ -203,6 +214,15 @@ export async function placeholderInvoke(
       };
     }
     case "get_initial_state": {
+      GlobalInternals.baseDirectory = "indexed_db";
+      GlobalInternals.joinDelimiter = "/";
+
+      const [config, accounts, instances] = await Promise.all([
+        Configs.getSafe(),
+        Configs.getAccounts(),
+        Instances.readInstances(),
+      ]);
+
       return {
         "basic": {
           "launcherVersion": "0.0.1-browser",
@@ -212,9 +232,9 @@ export async function placeholderInvoke(
           "portable"       : true,
         },
         "parsed": {
-          "config"      : { "status": "loaded", "data": await Configs.getSafe() },
-          "accounts"    : { "status": "loaded", "data": await Configs.getAccounts() },
-          "instances"   : { "status": "loaded", "data": await Instances.readInstances() },
+          "config"      : { "status": "loaded", "data": config },
+          "accounts"    : { "status": "loaded", "data": accounts },
+          "instances"   : { "status": "loaded", "data": instances },
           "translations": { "status": "loaded", "data": EnglishTranslations },
         },
       };
@@ -225,6 +245,50 @@ export async function placeholderInvoke(
         "javaMajor"         : FamousAndOldJavaMajorVersion,
         "javaMajorSource"   : "unresolved",
       };
+    }
+    case "plugin:dialog|open": {
+      const input = document.createElement("input");
+
+      input.type = "file";
+      input.accept = "image/*";
+
+      const filePath = new Promise<string>((resolve, reject): void => {
+        input.addEventListener("change", async event => {
+          if (!event.target) {
+            return reject();
+          }
+
+          const target = event.target as HTMLInputElement;
+          const file: File | undefined = target?.files?.[0];
+
+          if (!file) {
+            return reject();
+          }
+
+          try {
+            const reader = new FileReader;
+
+            reader.readAsDataURL(file);
+
+            reader.addEventListener("load", () => {
+              if (typeof reader.result !== "string") {
+                return reject();
+              }
+
+              return resolve(reader.result);
+            });
+            reader.addEventListener("error", reject);
+
+            return;
+          } catch {
+            return reject();
+          }
+        });
+      });
+
+      input.click();
+
+      return await filePath;
     }
     default: {
       // eslint-disable-next-line no-console

@@ -31,5 +31,10 @@ export let instanceStates: ShallowReactive<InstanceStatesType>;
  * This function is called in 'main.ts'
  */
 export function declareInstanceStates(): void {
+  /*
+   * We can avoid using 'structuredClone' here since 'GlobalInternals.initialInstances'
+   * is shallowReactive, meaning a simple one-level deep spreading will detach reactive
+   * fields, so any new changes should not touch 'GlobalInternals.initialInstances'
+   */
   instanceStates = shallowReactive<InstanceStatesType>({ ...GlobalInternals.initialInstances });
 }

@@ -34,7 +34,7 @@ interface ComponentRegistryType {
   "ContextMenu"         : Component;
   "LaunchProgress"      : Component;
   "GlobalBackground"    : Component;
-  "PagesSelector"       : typeof PagesSelector;
+  "PagesSelector"       : Component;
   "LazyPluginPlayground": Component;
 }
 

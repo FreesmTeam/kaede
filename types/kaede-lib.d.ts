@@ -13,12 +13,23 @@ import * as TauriProcess from '@tauri-apps/plugin-process';
 import * as TauriUpload from '@tauri-apps/plugin-upload';
 import { App } from 'vue';
 
+declare function getCpuUsage(): Promise<string>;
+declare function getMemoryUsage(): Promise<{
+	"used": string;
+	"total": string;
+}>;
+declare function loadEruda(): Promise<void>;
+declare const _default: {
+	readonly loadEruda: typeof loadEruda;
+	readonly getCpuUsage: typeof getCpuUsage;
+	readonly getMemoryUsage: typeof getMemoryUsage;
+};
 declare const PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
 declare const CustomPatches: {
 	readonly OptiFine: "optifine.OptiFine";
 	readonly MCPHackersLaunchWrapper: "org.mcphackers.launchwrapper";
 };
-declare const _default: {
+declare const _default$1: {
 	readonly Patches: {
 		readonly AzulJava: "com.azul.java";
 		readonly LiteLoader: "com.mumfrey.liteloader";
@@ -93,7 +104,6 @@ export type InstanceStateType = GlobalStatesType["minecraft"] & {
 	} & Partial<Record<ExtendedPatchUIDType, string>>;
 };
 export type InstanceStatesType = Record<string, InstanceStateType>;
-export type InstanceStatesChangerType = <Key extends keyof InstanceStatesType>(key: Key, value: InstanceStatesType[Key]) => void;
 declare const Routes: {
 	readonly Home: "home";
 	readonly Library: "library";
@@ -102,7 +112,7 @@ declare const Routes: {
 	readonly Profile: "profile";
 	readonly None: "none";
 };
-declare const _default$1: {
+declare const _default$2: {
 	readonly Routes: {
 		readonly Home: "home";
 		readonly Library: "library";
@@ -128,102 +138,7 @@ declare const _default$1: {
 };
 export type RouteType = (typeof Routes)[keyof typeof Routes];
 export type TranslationsType = typeof EnglishTranslations;
-export type GlobalStatesLayoutType = {
-	"locale": string;
-	"stats": "playtime" | "last-launch";
-	"currentInstance": string | null;
-	"enableMaterialYouRipple": boolean;
-	"custom": boolean | Array<"sidebar" | "contextMenu">;
-	"background": {
-		"url": string | null;
-		"key": string | number | null;
-		"blur": number | null;
-		"color": string | null;
-		"isVideo": boolean;
-	};
-	"sidebar": {
-		"blur": number | null;
-		"color": string | null;
-		"ripple": string | null;
-		"sparkles": string | null;
-		"background": string | null;
-	};
-	"atAGlance": {
-		"title": string | null;
-		"subtitle": string | null;
-	};
-};
-export type GlobalStatesPagesType = {
-	"current": RouteType;
-	"states": {
-		"home": Partial<{
-			"stats": unknown;
-		}>;
-		"library": Partial<{
-			"group": unknown;
-		}>;
-		"settings": Partial<{
-			"tab": string;
-		}>;
-		"add-instance": Partial<{
-			"instanceVersionSearch": {
-				"patch": ExtendedPatchUIDType;
-				"input": string;
-			};
-			"instance": {
-				"name": string;
-				"entry": ExtendedPatchUIDType;
-				"checksum": boolean;
-				"groups": Array<string>;
-				"javaBinary": string;
-				"patchVersions": InstanceStateType["patchVersions"];
-				"windowHeight": number;
-				"windowWidth": number;
-				"icon"?: string;
-				"add": {
-					"jvmArguments": Array<string>;
-					"gameArguments": Array<string>;
-				};
-			};
-			"full": boolean;
-			"tab": string;
-			"customSettings": Array<{
-				"label"?: string;
-				"input"?: {
-					"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
-					"iconClassName": string;
-					"placeholder": string;
-					"defaultValue"?: () => string | undefined;
-					"tooltip"?: string;
-					"type"?: "text" | "number";
-					"debounceTime"?: number;
-				};
-			}>;
-		}>;
-		"none": Record<string, unknown>;
-	};
-};
-export type GlobalStatesLogsType = {
-	"show": boolean;
-	"lineBreaks": boolean;
-	"virtualized": boolean;
-	"mode": "launcher" | string;
-	"filtering": string;
-};
-export type GlobalStatesSidebarItemsType = Array<"divider" | {
-	"path": RouteType;
-	"name": string;
-	"action": () => void;
-	"icon"?: string;
-	"image"?: string;
-}>;
-export type GlobalStatesContextMenuItemsType = Array<{
-	"name": string;
-	"action": () => void;
-	"icon"?: string;
-	"image"?: string;
-}>;
-export type GlobalStatesDevelopmentType = {
+export type DevelopmentType = {
 	"loadErudaDevTools": boolean;
 	"showFPS": boolean;
 	"showCPUUsage": boolean;
@@ -232,11 +147,57 @@ export type GlobalStatesDevelopmentType = {
 	"enableNativeContextMenu": boolean;
 	"enableNativeReloadKeyBinds": boolean;
 };
-export type GlobalStatesMiscType = {
-	"showAfterExtensionsInitialization": boolean;
-	"autoConfigSync": boolean;
+export type ExtensionsType = {
+	"list": Array<{
+		"enabled": boolean;
+		"id": string;
+	}>;
+	"permissions": Record<string, Record<string, boolean>>;
+	"enabled": boolean;
+	"allowUnrestrictedUntrusted": boolean;
+	"showAppAfterExtensionsLoad": boolean;
 };
-export type GlobalStatesMinecraftType = {
+export type UIType = {
+	"ripple": {
+		"color": string | null;
+		"sparkles": string | null;
+	};
+	"background": {
+		"image": string | null;
+		"blur": number | null;
+		"color": string | null;
+		"isVideo": boolean | null;
+		"key": string | number | null;
+	};
+	"text": {
+		"font": string | null;
+		"mainColor": string | null;
+		"secondaryColor": string | null;
+	};
+	"widget": {
+		"blur": number | null;
+		"textColor": string | null;
+		"secondaryColor": string | null;
+		"background": string | null;
+	};
+	"atAGlance": Array<{
+		"title": string;
+		"subtitle": string;
+	}>;
+};
+export type SelectedType = {
+	"currentInstance": string | null;
+	"stats": "playtime" | "last-launch";
+};
+export type LogsType = {
+	"show": boolean;
+	"mode": "kaede-launcher" | string;
+	"filtering": string;
+	"lineHeight": number;
+	"partsShown": Record<"time" | "level" | "target" | "message", boolean>;
+	"partsSize": Record<"time" | "level" | "target", number>;
+};
+export type MinecraftType = {
 	"windowHeight": number;
 	"windowWidth": number;
 	"icon": string;
@@ -250,23 +211,76 @@ export type GlobalStatesMinecraftType = {
 		"gameArguments": Array<string>;
 	}>;
 };
-export type GlobalStatesExtensionsType = {
-	"enabled": boolean;
-	"allowUnrestrictedUntrusted": boolean;
+export type SidebarItemsType = Array<"divider" | {
+	"path": RouteType;
+	"name": string;
+	"action": () => void;
+	"icon"?: string;
+	"image"?: string;
+}>;
+export type ContextMenuItemsType = Array<{
+	"name": string;
+	"action": () => void;
+	"icon"?: string;
+	"image"?: string;
+}>;
+export type PagesType = {
+	"home": Partial<object>;
+	"library": Partial<object>;
+	"settings": Partial<{
+		"tab": string;
+	}>;
+	"add-instance": Partial<{
+		"instanceVersionSearch": {
+			"patch": ExtendedPatchUIDType;
+			"input": string;
+		};
+		"instance": {
+			"name": string;
+			"entry": ExtendedPatchUIDType;
+			"checksum": boolean;
+			"groups": Array<string>;
+			"javaBinary": string;
+			"patchVersions": InstanceStateType["patchVersions"];
+			"windowHeight": number;
+			"windowWidth": number;
+			"icon"?: string;
+			"add": {
+				"jvmArguments": Array<string>;
+				"gameArguments": Array<string>;
+			};
+		};
+		"full": boolean;
+		"tab": string;
+		"customSettings": Array<{
+			"label"?: string;
+			"input"?: {
+				"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
+				"iconClassName": string;
+				"placeholder": string;
+				"defaultValue"?: () => string | undefined;
+				"tooltip"?: string;
+				"type"?: "text" | "number";
+				"debounceTime"?: number;
+			};
+		}>;
+	}>;
+	"none": Record<string, unknown>;
 };
 export type GlobalStatesType = {
-	"development": GlobalStatesDevelopmentType;
-	"extensions": GlobalStatesExtensionsType;
-	"layout": GlobalStatesLayoutType;
-	"logs": GlobalStatesLogsType;
-	"misc": GlobalStatesMiscType;
-	"minecraft": GlobalStatesMinecraftType;
+	"development": DevelopmentType;
+	"extensions": ExtensionsType;
+	"ui": UIType;
+	"selected": SelectedType;
+	"locale": string;
+	"logs": LogsType;
+	"minecraft": MinecraftType;
+	"currentPage": RouteType;
 	"translations": TranslationsType;
-	"sidebarItems": GlobalStatesSidebarItemsType;
-	"contextMenuItems": GlobalStatesContextMenuItemsType;
-	"pages": GlobalStatesPagesType;
+	"sidebarItems": SidebarItemsType;
+	"contextMenuItems": ContextMenuItemsType;
+	"pages": PagesType;
 };
-export type GlobalStatesChangerType = <Key extends keyof GlobalStatesType>(key: Key, value: GlobalStatesType[Key]) => void;
 export type TabSectionType = {
 	"id": string;
 	"name": string;
@@ -275,17 +289,23 @@ export type TabSectionType = {
 	"action"?: (id: string) => Promise<void>;
 };
 declare const TranslationsContextKey: unique symbol;
+declare const AuthOneTimeFetchContextKey: unique symbol;
 declare const AuthStatesContextKey: unique symbol;
 declare const LaunchStatesContextKey: unique symbol;
 declare const InstanceLogsContextKey: unique symbol;
 declare const LaunchInstanceContextKey: unique symbol;
 declare const CloseInstanceContextKey: unique symbol;
-declare const _default$2: {
+declare const HookResponseStatus: {
+	readonly Stop: "stop";
+	readonly Continue: "continue";
+};
+declare const _default$3: {
 	readonly AsyncFunction: FunctionConstructor;
 	readonly ApplicationName: "Kaede";
 	readonly ApplicationRootID: "#app";
 	readonly DefaultLocale: "en";
 	readonly TranslationsContextKey: typeof TranslationsContextKey;
+	readonly AuthOneTimeFetchContextKey: typeof AuthOneTimeFetchContextKey;
 	readonly AuthStatesContextKey: typeof AuthStatesContextKey;
 	readonly LaunchStatesContextKey: typeof LaunchStatesContextKey;
 	readonly InstanceLogsContextKey: typeof InstanceLogsContextKey;
@@ -295,13 +315,13 @@ declare const _default$2: {
 		readonly Enabled: ".css";
 		readonly Disabled: ".css.disabled";
 	};
+	readonly ContextMenu: {
+		show: (event: MouseEvent) => void;
+		close: () => void;
+	};
 	readonly DefaultGlobalStatesPagesStates: {
-		home: Partial<{
-			"stats": unknown;
-		}>;
-		library: Partial<{
-			"group": unknown;
-		}>;
+		home: Partial<object>;
+		library: Partial<object>;
 		settings: Partial<{
 			"tab": string;
 		}>;
@@ -330,7 +350,7 @@ declare const _default$2: {
 			"customSettings": Array<{
 				"label"?: string;
 				"input"?: {
-					"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
+					"onInput": (value: string, currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
 					"iconClassName": string;
 					"placeholder": string;
 					"defaultValue"?: () => string | undefined;
@@ -342,36 +362,27 @@ declare const _default$2: {
 		}>;
 		none: Record<string, unknown>;
 	};
-	readonly InstanceCreationSections: TabSectionType[];
 	readonly SettingsSections: TabSectionType[];
-	readonly ContextMenuItems: readonly [
-		{
-			readonly name: "Restart UI";
-			readonly icon: "i-lucide-rotate-ccw";
-			readonly action: () => void;
-		},
-		{
-			readonly name: "Show Logs";
-			readonly icon: "i-lucide-bug";
-			readonly action: () => void;
-		},
-		{
-			readonly name: "Open Root Folder";
-			readonly icon: "i-lucide-folder";
-			readonly action: () => void;
-		},
-		{
-			readonly name: "Open Instance Folder";
-			readonly icon: "i-lucide-box";
-			readonly action: () => void;
-		}
-	];
+	readonly InstanceCreationSections: TabSectionType[];
+	readonly ContextMenuItems: {
+		name: string;
+		action: () => void;
+		icon?: string;
+		image?: string;
+	}[];
+	readonly HookResponseStatus: {
+		readonly Stop: "stop";
+		readonly Continue: "continue";
+	};
+	readonly ExtraHookResponseStatus: {
+		readonly ContinueLoop: "continue-hooks-loop";
+	};
 };
 declare function getASCIIArt(portable: boolean, launchCount: number): string;
-declare const _default$3: {
+declare const _default$4: {
 	readonly getASCIIArt: typeof getASCIIArt;
 };
-declare const _default$4: {
+declare const _default$5: {
 	readonly BrowserStorageKey: "kaedeBrowserDB";
 	readonly BrowserStorageStoreKey: "storage";
 	readonly LogInfo: {
@@ -385,16 +396,7 @@ declare const _default$4: {
 		};
 	};
 };
-export type EventListenersType = keyof typeof AllEventListeners;
-declare const AllEventListeners: {
-	readonly "all-clicks": true;
-	readonly "left-click": true;
-	readonly "middle-click": true;
-	readonly "right-click": true;
-	readonly routing: true;
-	readonly instance: true;
-};
-declare const _default$5: {
+declare const _default$6: {
 	readonly AllEventListeners: {
 		readonly "all-clicks": true;
 		readonly "left-click": true;
@@ -406,7 +408,7 @@ declare const _default$5: {
 	readonly EventListeners: Record<string, Record<"instance" | "all-clicks" | "left-click" | "middle-click" | "right-click" | "routing", unknown>>;
 	readonly EventSubscribers: Set<string>;
 };
-declare const _default$6: {
+declare const _default$7: {
 	readonly Folders: {
 		readonly Assets: {
 			readonly Path: "assets";
@@ -472,31 +474,6 @@ declare const _default$6: {
 		readonly Extensions: "extensions.json";
 	};
 };
-declare const HookResponseStatus: {
-	readonly Stop: "stop";
-	readonly Continue: "continue";
-};
-declare const _default$7: {
-	readonly HookMappings: {
-		readonly translations: "onTranslationsChange";
-		readonly layout: "onLayoutChange";
-		readonly pages: "onPagesChange";
-		readonly logs: "onLogsChange";
-		readonly sidebarItems: "onSidebarItemsChange";
-		readonly contextMenuItems: "onContextMenuItemsChange";
-		readonly development: "onDevelopmentChange";
-		readonly misc: "onMiscChange";
-		readonly minecraft: "onMinecraftChange";
-		readonly extensions: "onExtensionsChange";
-	};
-	readonly HookResponseStatus: {
-		readonly Stop: "stop";
-		readonly Continue: "continue";
-	};
-	readonly ExtraHookResponseStatus: {
-		readonly ContinueLoop: "continue-hooks-loop";
-	};
-};
 declare const LaunchStatus: {
 	readonly General: {
 		readonly Starting: "general-pending-starting";
@@ -552,6 +529,7 @@ declare const LaunchStatus: {
 	};
 };
 declare const _default$8: {
+	readonly FamousAndOldJavaMajorVersion: 8;
 	readonly DefaultInstanceIcon: "https://minecraft.wiki/images/Minecraft_Preview_App_Store_icon_2.png";
 	readonly DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions">;
 	readonly JVMArguments: {
@@ -697,18 +675,6 @@ declare const Permissions$1: {
 	};
 };
 declare const _default$9: {
-	readonly GrantedScopes: Record<string, any>;
-	readonly IgnoredExtensionPermissions: Record<string, Partial<{
-		"ui-basic": boolean;
-		"ui-style": boolean;
-		"all-events": boolean;
-		internet: boolean;
-		"read-external-storage": boolean;
-		"write-external-storage": boolean;
-		"read-internal-storage": boolean;
-		"write-internal-storage": boolean;
-		"write-to-log-file": boolean;
-	}>>;
 	readonly Permissions: {
 		readonly UI: {
 			readonly Basic: "ui-basic";
@@ -732,17 +698,11 @@ declare const _default$9: {
 	};
 	readonly PermissionsList: PermissionType[];
 };
-declare function detectIsBrowser(): boolean;
-declare function handleLogsFlush(): void;
-declare function handleTauriEnvironment(): Promise<void>;
-declare function readStoragePath(path: string): Promise<string>;
-declare function writeToStoragePath(path: string, value: string): Promise<void>;
 declare const _default$10: {
-	readonly detectIsBrowser: typeof detectIsBrowser;
-	readonly handleLogsFlush: typeof handleLogsFlush;
-	readonly handleTauriEnvironment: typeof handleTauriEnvironment;
-	readonly readStoragePath: typeof readStoragePath;
-	readonly writeToStoragePath: typeof writeToStoragePath;
+	readonly detectIsBrowser: () => boolean;
+	readonly handleTauriEnvironment: () => Promise<void>;
+	readonly readStoragePath: (path: string) => Promise<string>;
+	readonly writeToStoragePath: (path: string, value: string) => Promise<void>;
 };
 export type ParsedFile = {
 	"status": "loaded";
@@ -754,21 +714,145 @@ export type ParsedFile = {
 	"raw": string;
 	"error": string;
 };
-export type InitialStateType = {
-	"basic": {
-		"launcherVersion": string;
-		"baseDirectory": string;
-		"launchCount": number;
-		"separator": string;
-		"portable": boolean;
-	};
-	"parsed": {
-		"config": ParsedFile;
-		"accounts": ParsedFile;
-		"instances": ParsedFile;
-		"translations": ParsedFile;
-	};
-};
+declare const ConfigSchema: Type.TObject<{
+	development: Type.TObject<{
+		loadErudaDevTools: Type.TBoolean;
+		showFPS: Type.TBoolean;
+		showCPUUsage: Type.TBoolean;
+		showMemoryUsage: Type.TBoolean;
+		enableDebugMode: Type.TBoolean;
+		enableNativeContextMenu: Type.TBoolean;
+		enableNativeReloadKeyBinds: Type.TBoolean;
+	}>;
+	extensions: Type.TObject<{
+		list: Type.TArray<Type.TObject<{
+			enabled: Type.TBoolean;
+			id: Type.TString;
+		}>>;
+		permissions: Type.TAny;
+		enabled: Type.TBoolean;
+		allowUnrestrictedUntrusted: Type.TBoolean;
+		showAppAfterExtensionsLoad: Type.TBoolean;
+	}>;
+	ui: Type.TObject<{
+		ripple: Type.TObject<{
+			color: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+			sparkles: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+		}>;
+		background: Type.TObject<{
+			image: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+			blur: Type.TUnion<[
+				Type.TNumber,
+				Type.TNull
+			]>;
+			color: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+			isVideo: Type.TUnion<[
+				Type.TBoolean,
+				Type.TNull
+			]>;
+			key: Type.TUnion<[
+				Type.TString,
+				Type.TNumber,
+				Type.TNull
+			]>;
+		}>;
+		text: Type.TObject<{
+			font: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+			mainColor: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+			secondaryColor: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+		}>;
+		widget: Type.TObject<{
+			blur: Type.TUnion<[
+				Type.TNumber,
+				Type.TNull
+			]>;
+			textColor: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+			secondaryColor: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+			background: Type.TUnion<[
+				Type.TString,
+				Type.TNull
+			]>;
+		}>;
+		atAGlance: Type.TArray<Type.TObject<{
+			title: Type.TString;
+			subtitle: Type.TString;
+		}>>;
+	}>;
+	selected: Type.TObject<{
+		currentInstance: Type.TUnion<[
+			Type.TString,
+			Type.TNull
+		]>;
+		stats: Type.TUnion<[
+			Type.TLiteral<"playtime">,
+			Type.TLiteral<"last-launch">
+		]>;
+	}>;
+	locale: Type.TString;
+	logs: Type.TObject<{
+		show: Type.TBoolean;
+		mode: Type.TString;
+		filtering: Type.TString;
+		lineHeight: Type.TNumber;
+		partsShown: Type.TObject<{
+			time: Type.TBoolean;
+			level: Type.TBoolean;
+			target: Type.TBoolean;
+			message: Type.TBoolean;
+		}>;
+		partsSize: Type.TObject<{
+			time: Type.TNumber;
+			level: Type.TNumber;
+			target: Type.TNumber;
+		}>;
+	}>;
+	minecraft: Type.TObject<{
+		windowHeight: Type.TNumber;
+		windowWidth: Type.TNumber;
+		icon: Type.TString;
+		javaBinary: Type.TString;
+		add: Type.TObject<{
+			jvmArguments: Type.TOptional<Type.TArray<Type.TString>>;
+			gameArguments: Type.TOptional<Type.TArray<Type.TString>>;
+		}>;
+		remove: Type.TObject<{
+			jvmArguments: Type.TOptional<Type.TArray<Type.TString>>;
+			gameArguments: Type.TOptional<Type.TArray<Type.TString>>;
+		}>;
+	}>;
+}>;
+export type ConfigType = Static<typeof ConfigSchema>;
+declare function getMain(properties?: Partial<{
+	"baseDirectory": string;
+	"parsedFile": ParsedFile;
+}>): Promise<ConfigType>;
 declare const AccountSchema: Type.TObject<{
 	msa: Type.TUnion<[
 		Type.TObject<{
@@ -800,123 +884,6 @@ declare function getAccounts(properties?: Partial<{
 	"baseDirectory": string;
 	"parsedFile": ParsedFile;
 }>): Promise<Array<AccountType>>;
-declare const ConfigSchema: Type.TObject<{
-	development: Type.TObject<{
-		loadErudaDevTools: Type.TBoolean;
-		showFPS: Type.TBoolean;
-		showCPUUsage: Type.TBoolean;
-		showMemoryUsage: Type.TBoolean;
-		enableDebugMode: Type.TBoolean;
-		enableNativeContextMenu: Type.TBoolean;
-		enableNativeReloadKeyBinds: Type.TBoolean;
-	}>;
-	extensions: Type.TObject<{
-		enabled: Type.TBoolean;
-		allowUnrestrictedUntrusted: Type.TBoolean;
-	}>;
-	layout: Type.TObject<{
-		locale: Type.TString;
-		stats: Type.TUnion<[
-			Type.TLiteral<"playtime">,
-			Type.TLiteral<"last-launch">
-		]>;
-		currentInstance: Type.TUnion<[
-			Type.TString,
-			Type.TNull
-		]>;
-		enableMaterialYouRipple: Type.TBoolean;
-		custom: Type.TUnion<[
-			Type.TBoolean,
-			Type.TArray<Type.TUnion<[
-				Type.TLiteral<"sidebar">,
-				Type.TLiteral<"contextMenu">
-			]>>
-		]>;
-		background: Type.TObject<{
-			url: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-			key: Type.TUnion<[
-				Type.TString,
-				Type.TNumber,
-				Type.TNull
-			]>;
-			blur: Type.TUnion<[
-				Type.TNumber,
-				Type.TNull
-			]>;
-			color: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-			isVideo: Type.TBoolean;
-		}>;
-		sidebar: Type.TObject<{
-			background: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-			color: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-			blur: Type.TUnion<[
-				Type.TNumber,
-				Type.TNull
-			]>;
-			ripple: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-			sparkles: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-		}>;
-		atAGlance: Type.TObject<{
-			title: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-			subtitle: Type.TUnion<[
-				Type.TString,
-				Type.TNull
-			]>;
-		}>;
-	}>;
-	logs: Type.TObject<{
-		show: Type.TBoolean;
-		lineBreaks: Type.TBoolean;
-		virtualized: Type.TBoolean;
-		mode: Type.TString;
-		filtering: Type.TString;
-	}>;
-	minecraft: Type.TObject<{
-		windowHeight: Type.TNumber;
-		windowWidth: Type.TNumber;
-		icon: Type.TString;
-		javaBinary: Type.TString;
-		add: Type.TObject<{
-			jvmArguments: Type.TOptional<Type.TArray<Type.TString>>;
-			gameArguments: Type.TOptional<Type.TArray<Type.TString>>;
-		}>;
-		remove: Type.TObject<{
-			jvmArguments: Type.TOptional<Type.TArray<Type.TString>>;
-			gameArguments: Type.TOptional<Type.TArray<Type.TString>>;
-		}>;
-	}>;
-	misc: Type.TObject<{
-		showAfterExtensionsInitialization: Type.TBoolean;
-		autoConfigSync: Type.TBoolean;
-	}>;
-}>;
-export type ConfigType = Static<typeof ConfigSchema>;
-declare function getCachedInitial(): ConfigType;
-declare function getConfigFile(properties?: Partial<{
-	"baseDirectory": string;
-	"parsedFile": ParsedFile;
-}>): Promise<ConfigType>;
 declare function getDefaultConfig(): Promise<ConfigType>;
 declare function getSafeConfigFile(properties?: Partial<{
 	"baseDirectory": string;
@@ -933,29 +900,17 @@ declare function regenerateConfigFile({ baseDirectory, configFileDirectory, }: {
 	"baseDirectory": string;
 	"configFileDirectory": string;
 }): Promise<ConfigType>;
+declare function sync(): Promise<void>;
 declare const _default$11: {
-	readonly get: typeof getConfigFile;
+	readonly getMain: typeof getMain;
+	readonly sync: typeof sync;
+	readonly get: typeof getMain;
 	readonly getDefault: typeof getDefaultConfig;
 	readonly getSafe: typeof getSafeConfigFile;
 	readonly initialize: typeof initializeConfigFile;
 	readonly regenerate: typeof regenerateConfigFile;
-	readonly sync: () => Promise<void>;
 	readonly getAccounts: typeof getAccounts;
-	readonly getCachedInitial: typeof getCachedInitial;
 	readonly getTranslations: typeof getTranslations;
-};
-declare function getCpuUsage(): Promise<string>;
-declare function getMemoryUsage(): Promise<{
-	"used": string;
-	"total": string;
-}>;
-declare function loadEruda(): Promise<void>;
-declare function enableDebugMode(developmentModeEntries?: GlobalStatesType["development"]): void;
-declare const _default$12: {
-	readonly loadEruda: typeof loadEruda;
-	readonly getCpuUsage: typeof getCpuUsage;
-	readonly getMemoryUsage: typeof getMemoryUsage;
-	readonly enableDebugMode: typeof enableDebugMode;
 };
 export type NativeErrorType = {
 	"name": string;
@@ -966,24 +921,136 @@ declare function extract(error: unknown): NativeErrorType;
 declare function handleCapture(error: Error): NativeErrorType;
 declare function prettify(error: unknown): string;
 declare function stringify(error: unknown): string;
-declare const _default$13: {
+declare const _default$12: {
 	readonly extract: typeof extract;
 	readonly handleCapture: typeof handleCapture;
 	readonly prettify: typeof prettify;
 	readonly stringify: typeof stringify;
 };
+declare class ExtensionAPI {
+	private readonly id;
+	private lifecycle;
+	private watchers;
+	constructor(id: string);
+	enable(): Promise<void>;
+	disable(): Promise<void>;
+	subscribe(event: unknown, callback: (data: unknown) => Promise<unknown>): ExtensionAPI;
+	unsubscribe(event: unknown, callback: (data: unknown) => Promise<unknown>): ExtensionAPI;
+}
+export type MetadataType = {
+	"id": string;
+	"logo": string;
+	"name": string;
+	"type": "sandbox" | "unrestricted";
+	"source": string;
+	"version": string;
+	"authors": Array<string>;
+	"languages": Array<string>;
+	"categories": Array<string>;
+} & Partial<{
+	"description": string;
+	"permissions": Array<PermissionType>;
+	"enabled": boolean;
+}>;
+export type ExtensionType = {
+	"id": string;
+	"code": string;
+	"metadata": MetadataType;
+};
+declare function readExtensions(): Promise<{
+	"valid": Array<ExtensionType>;
+	"invalid": Array<DeepPartial<ExtensionType>>;
+}>;
+declare function runInUnrestricted(id: string, code: string): Promise<ExtensionAPI | void>;
 declare function onGlobalStateChange<Key extends keyof GlobalStatesType>(key: Key, value: unknown): void;
 declare function onInstanceStateChange<Key extends keyof InstanceStatesType>(key: Key, value: InstanceStatesType[Key]): void;
 declare function grantEventListeners({ id, }: {
 	"id": string;
 }): void;
-declare function grantStaticPermissions({ id, permissions, }: {
+declare function lockdownEnvironment(): void;
+declare function runInSandbox({ id, code, permissions, }: {
 	"id": string;
+	"code": string;
 	"permissions"?: Array<PermissionType>;
 }): void;
-declare function handleCssTheme(styles: string): HTMLStyleElement;
-declare function handleEvent(type: EventListenersType, value: unknown): void;
-declare function handlePermission(permission: PermissionType, id: string): void;
+declare function showWebviewWindow(): Promise<void>;
+declare const _default$13: {
+	readonly requestPermissions: (permissions: Array<PermissionType | string> | unknown, extension: string) => Promise<Array<unknown>>;
+	readonly readExtensions: typeof readExtensions;
+	readonly runInUnrestricted: typeof runInUnrestricted;
+	readonly onGlobalStateChange: typeof onGlobalStateChange;
+	readonly onInstanceStateChange: typeof onInstanceStateChange;
+	readonly grantEventListeners: typeof grantEventListeners;
+	readonly lockdownEnvironment: typeof lockdownEnvironment;
+	readonly runInSandbox: typeof runInSandbox;
+	readonly showWebviewWindow: typeof showWebviewWindow;
+};
+declare function getBaseDirectory(): string;
+declare function handleJsonFile({ baseDirectory, path, label, getDefaultValue, invalidation, }: {
+	"baseDirectory": string;
+	"path": Array<string>;
+	"label": string;
+	"getDefaultValue": () => Promise<unknown>;
+	"invalidation"?: {
+		"days": number;
+		"getNewValue": () => Promise<unknown>;
+	};
+}): Promise<unknown>;
+declare function join(...paths: Array<string>): string;
+declare function unzip({ from, to, }: {
+	"from": Array<{
+		"path": string;
+		"exclude": Array<string>;
+	}>;
+	"to": string;
+}): Promise<boolean>;
+declare function verifyPaths({ paths, sha1, }: {
+	"paths": Array<{
+		"path": string;
+		"hash": string;
+	}>;
+	"sha1"?: boolean;
+}): Promise<Array<string>>;
+declare const _default$14: {
+	readonly getBaseDirectory: typeof getBaseDirectory;
+	readonly handleJsonFile: typeof handleJsonFile;
+	readonly join: typeof join;
+	readonly unzip: typeof unzip;
+	readonly verifyPaths: typeof verifyPaths;
+};
+declare function capitalize(input: string): string;
+declare function checkDaysDifference(from: Date, to: Date): number;
+declare function gcd(a: number, b: number): number;
+declare function getRelativeDate({ days, hours, minutes, seconds, milliseconds, from, }: {
+	"days"?: number;
+	"hours"?: number;
+	"minutes"?: number;
+	"seconds"?: number;
+	"milliseconds"?: number;
+	"from"?: Date;
+}): Date;
+declare const _default$15: {
+	readonly capitalize: typeof capitalize;
+	readonly checkDaysDifference: typeof checkDaysDifference;
+	readonly gcd: typeof gcd;
+	readonly getRelativeDate: typeof getRelativeDate;
+};
+declare function registerComponent(name: string, component: Component): void;
+declare function declareGlobals(): void;
+declare const _default$16: {
+	readonly declareGlobals: typeof declareGlobals;
+	readonly registerComponent: typeof registerComponent;
+};
+declare function hashFileContents(image: Uint8Array): Promise<string>;
+declare function hashOfflineNickname(input: string): Promise<string>;
+declare function hashString(input: string): number;
+declare function hashStringCrypto(input: string): Promise<string>;
+declare const _default$17: {
+	readonly hashFileContents: typeof hashFileContents;
+	readonly hashOfflineNickname: typeof hashOfflineNickname;
+	readonly hashString: typeof hashString;
+	readonly hashStringCrypto: typeof hashStringCrypto;
+};
 declare function catchAsyncResponseHooks<T>({ scope, toPass, timing, }: {
 	"scope": keyof KaedeNamespaceType["hooks"];
 	"toPass": unknown;
@@ -1026,81 +1093,62 @@ declare function handleHookResponse<T>({ scope, status, response, timing, index,
 		"hookStart": number;
 	};
 }): "continue-hooks-loop" | T | undefined;
-declare function lockdownEnvironment(): void;
-export type ExtensionInfoType = {
-	"id": string;
-	"code": string;
-};
-declare function readAllExtensions(): Promise<Array<ExtensionInfoType>>;
-export type ExtensionMetadataType = {
-	"id": string;
-	"logo": string;
-	"name": string;
-	"type": "sandbox" | "unrestricted";
-	"source": string;
-	"version": string;
-	"authors": Array<string>;
-	"languages": Array<string>;
-	"categories": Array<string>;
-} & Partial<{
-	"description": string;
-	"permissions": Array<PermissionType>;
-	"enabled": boolean;
-}>;
-declare function readAllMetadata(): Promise<Array<ExtensionMetadataType>>;
-declare function runInSandbox({ id, code, }: {
-	"id": string;
-	"code": string;
-}): void;
-declare function runInUnrestricted(id: string, code: string): Promise<void>;
-declare function showWebviewWindow(show: boolean | undefined): Promise<void>;
-declare function getFreePort(): number;
-export type ServerProcessType = {
-	"name": string;
-	"port": number;
-	"value": {
-		"pid": number;
-		"kill": () => Promise<void>;
-		"write": (data: string | Uint8Array | number[]) => Promise<void>;
-	};
-};
-export type ProcessHandleType<Meta = unknown> = {
-	"token": string;
-	"pid": number;
-	"kind": string;
-	"meta": Meta;
-	"kill": () => Promise<void>;
-	"write": (data: string | Uint8Array | number[]) => Promise<void>;
-};
-declare function serveCode(name: string, code: string, port?: number): Promise<ServerProcessType | undefined>;
-declare function serveFile(name: string, filePath: string, port?: number): Promise<ServerProcessType | undefined>;
-declare const _default$14: {
-	readonly requestPermissions: (permissions: Array<PermissionType>, extension: string) => Promise<Array<boolean>>;
+declare const _default$18: {
 	readonly catchAsyncResponseHooks: typeof catchAsyncResponseHooks;
 	readonly catchAsyncVoidHooks: typeof catchAsyncVoidHooks;
 	readonly catchSyncResponseHooks: typeof catchSyncResponseHooks;
 	readonly catchSyncVoidHooks: typeof catchSyncVoidHooks;
-	readonly onGlobalStateChange: typeof onGlobalStateChange;
-	readonly onInstanceStateChange: typeof onInstanceStateChange;
-	readonly getFreePort: typeof getFreePort;
-	readonly grantEventListeners: typeof grantEventListeners;
-	readonly grantStaticPermissions: typeof grantStaticPermissions;
-	readonly handleCssTheme: typeof handleCssTheme;
-	readonly handleEvent: typeof handleEvent;
 	readonly handleHookResponse: typeof handleHookResponse;
-	readonly handlePermission: typeof handlePermission;
-	readonly lockdownEnvironment: typeof lockdownEnvironment;
-	readonly readAllExtensions: typeof readAllExtensions;
-	readonly readAllMetadata: typeof readAllMetadata;
-	readonly runInSandbox: typeof runInSandbox;
-	readonly runInUnrestricted: typeof runInUnrestricted;
-	readonly serveCode: typeof serveCode;
-	readonly serveFile: typeof serveFile;
-	readonly showWebviewWindow: typeof showWebviewWindow;
 };
-declare function cachedJoin(...paths: Array<string>): string;
-declare function capitalize(input: string): string;
-declare function checkDaysDifference(from: Date, to: Date): number;
+declare function finish({ config, baseDirectory, }: {
+	"config": ConfigType;
+	"baseDirectory": string;
+}): Promise<void>;
+export type InitialStateType = {
+	"basic": {
+		"launcherVersion": string;
+		"baseDirectory": string;
+		"launchCount": number;
+		"separator": string;
+		"portable": boolean;
+	};
+	"parsed": {
+		"config": ParsedFile;
+		"accounts": ParsedFile;
+		"instances": ParsedFile;
+		"translations": ParsedFile;
+	};
+};
+declare function start(): Promise<InitialStateType>;
+declare const _default$19: {
+	readonly finish: typeof finish;
+	readonly start: typeof start;
+};
+declare function create(currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"], uid: ExtendedPatchUIDType): void;
+declare function extractSavedFromPages(globalStates: GlobalStatesType | undefined): GlobalStatesType["pages"]["add-instance"]["instance"];
+export type CurrentInstanceType = {
+	"instance": InstanceStateType;
+	"id": string;
+} | undefined;
+declare function findCurrent(id: string | null | undefined): CurrentInstanceType;
+declare function getMinecraftDirectory({ baseDirectory, instanceId, }: {
+	"baseDirectory": string;
+	"instanceId": string;
+}): string;
+declare function readInstances(properties?: Partial<{
+	"baseDirectory": string;
+	"parsedFile": ParsedFile;
+}>): Promise<InstanceStatesType>;
+declare function sync$1(): Promise<void>;
+declare const _default$20: {
+	readonly create: typeof create;
+	readonly extractSavedFromPages: typeof extractSavedFromPages;
+	readonly findCurrent: typeof findCurrent;
+	readonly getMinecraftDirectory: typeof getMinecraftDirectory;
+	readonly readInstances: typeof readInstances;
+	readonly sync: typeof sync$1;
+};
+declare function fetchJavaMajor(): Promise<number>;
 export type LaunchStatusObjectType = typeof LaunchStatus;
 export type LaunchKeyType = keyof LaunchStatusObjectType;
 export type LaunchStatusType = {
@@ -1120,177 +1168,13 @@ export type LauncherStatusesType = {
 	"current": LaunchStatusType | undefined;
 	"downloads": LauncherStatusesDownloadsType;
 };
-declare function concurrentlyDownload({ concurrency, entries, statuses, label, }: {
-	"concurrency": number;
-	"entries": Array<{
-		"url": string;
-		"path": string;
-	}>;
-	"statuses": LauncherStatusesType;
-	"label": string;
-}): Promise<Array<void>>;
-declare function finalizeInitialization({ config, baseDirectory, }: {
-	"config": ConfigType;
-	"baseDirectory": string;
-}): Promise<void>;
-declare function gcd(a: number, b: number): number;
-export type AtAGlanceType = {
-	"title": string;
-	"subtitle": string;
-};
-declare function getAtAGlance(currentTitle?: string): AtAGlanceType;
-declare function getBaseDirectory(): string;
-declare function getCachedBaseDirectory(): string;
-declare function getCachedPortable(): boolean;
-declare function getExecutableDirectory(): Promise<string>;
-declare function getInitialState(): Promise<InitialStateType>;
-declare function getJavaMajor(): Promise<number>;
-declare function getLauncherVersion(): string;
-declare function getMissingPaths({ paths, }: {
-	"paths": Array<string>;
-}): Promise<Array<string>>;
-declare function getRelativeDate({ days, hours, minutes, seconds, milliseconds, from, }: {
-	"days"?: number;
-	"hours"?: number;
-	"minutes"?: number;
-	"seconds"?: number;
-	"milliseconds"?: number;
-	"from"?: Date;
-}): Date;
-declare function getSha1Mismatches({ paths, }: {
-	"paths": Array<{
-		"path": string;
-		"hash": string;
-	}>;
-}): Promise<Array<string>>;
-declare function getSidebarInnerStyles(background: string | null | undefined, textColor: string | null | undefined, blur: number | null | undefined): {
-	"background": string;
-	"color": string;
-	"backdropFilter"?: string;
-};
-declare function handleJsonFile({ baseDirectory, path, label, getDefaultValue, }: {
-	"baseDirectory": string;
-	"path": Array<string>;
-	"label": string;
-	"getDefaultValue": () => Promise<unknown>;
-}): Promise<unknown>;
-declare function hashFileContents(image: Uint8Array): string;
-declare function hashOfflineNickname(input: string): string;
-declare function hashString(input: string): number;
-declare function hashStringCrypto(input: string): string;
-declare function unzip({ from, to, }: {
-	"from": string;
-	"to": string;
-}): Promise<boolean>;
-declare const _default$15: {
-	readonly nextTick: () => Promise<void>;
-	readonly cachedJoin: typeof cachedJoin;
-	readonly capitalize: typeof capitalize;
-	readonly checkDaysDifference: typeof checkDaysDifference;
-	readonly concurrentlyDownload: typeof concurrentlyDownload;
-	readonly finalizeInitialization: typeof finalizeInitialization;
-	readonly gcd: typeof gcd;
-	readonly getAtAGlance: typeof getAtAGlance;
-	readonly getBaseDirectory: typeof getBaseDirectory;
-	readonly getCachedBaseDirectory: typeof getCachedBaseDirectory;
-	readonly getCachedPortable: typeof getCachedPortable;
-	readonly getExecutableDirectory: typeof getExecutableDirectory;
-	readonly getInitialState: typeof getInitialState;
-	readonly getJavaMajor: typeof getJavaMajor;
-	readonly getLauncherVersion: typeof getLauncherVersion;
-	readonly getMissingPaths: typeof getMissingPaths;
-	readonly getSha1Mismatches: typeof getSha1Mismatches;
-	readonly getRelativeDate: typeof getRelativeDate;
-	readonly getSidebarInnerStyles: typeof getSidebarInnerStyles;
-	readonly handleJsonFile: typeof handleJsonFile;
-	readonly hashFileContents: typeof hashFileContents;
-	readonly hashOfflineNickname: typeof hashOfflineNickname;
-	readonly hashString: typeof hashString;
-	readonly hashStringCrypto: typeof hashStringCrypto;
-	readonly unzip: typeof unzip;
-};
-declare function changeGlobalState<Key extends keyof GlobalStatesType>(key: Key, value: GlobalStatesType[Key]): void;
-declare function getConfigGlobalStates(): GlobalStatesType;
-declare function getDefaultGlobalStates(): GlobalStatesType;
-declare function showContextMenu(event: MouseEvent): void;
-declare const _default$16: {
-	readonly get: () => GlobalStatesType;
-	readonly change: typeof changeGlobalState;
-	readonly getFromConfig: typeof getConfigGlobalStates;
-	readonly getDefault: typeof getDefaultGlobalStates;
-	readonly Layout: {
-		toggle: (state?: ConfigType["layout"]["custom"]) => void;
-		overrideBackground: (input: Partial<GlobalStatesType["layout"]["background"]>) => void;
-		overrideSidebar: (input: Partial<GlobalStatesType["layout"]["sidebar"]>) => void;
-	};
-	readonly Logs: {
-		toggle: <Key extends keyof GlobalStatesType["logs"]>(key: Key, state?: boolean) => void;
-		filterBy: (newValue: string) => void;
-		selectMode: (newValue: string) => void;
-	};
-	readonly Pages: {
-		navigate: (path: RouteType) => void;
-		getState: <Key extends keyof GlobalStatesType["pages"]["states"]>(key: Key) => GlobalStatesType["pages"]["states"][Key];
-		getAllStates: () => GlobalStatesType["pages"]["states"];
-		addToState: <Key extends keyof GlobalStatesType["pages"]["states"]>(key: Key, value: GlobalStatesType["pages"]["states"][Key]) => void;
-		replaceState: <Key extends keyof GlobalStatesType["pages"]["states"]>(key: Key, value: GlobalStatesType["pages"]["states"][Key]) => void;
-		getRouteFromSearchParameters: (searchParameters: URLSearchParams) => RouteType;
-	};
-	readonly showContextMenu: typeof showContextMenu;
-};
-declare function cacheLauncherVersion(): Promise<void>;
-declare function cachePathJoin(): Promise<void>;
-declare function declareGlobals(): void;
-declare function getLaunchCount(): Promise<number>;
-declare function registerComponent(name: string, component: Component): void;
-declare const _default$17: {
-	readonly cacheLauncherVersion: typeof cacheLauncherVersion;
-	readonly cachePathJoin: typeof cachePathJoin;
-	readonly declareGlobals: typeof declareGlobals;
-	readonly getLaunchCount: typeof getLaunchCount;
-	readonly registerComponent: typeof registerComponent;
-};
-declare function addInstanceWithSync(id: string, content: {
-	"patchVersions": {
-		"net.minecraft": string;
-	};
-} & Partial<InstanceStateType>): Promise<void>;
-declare function changeInstanceState<Key extends keyof InstanceStatesType>(key: Key, value: InstanceStatesType[Key]): void;
-declare function createInstance(currentInstance: GlobalStatesType["pages"]["states"]["add-instance"]["instance"], uid: ExtendedPatchUIDType): Promise<void>;
-declare function extractSavedFromPages(globalStates: GlobalStatesType | undefined): GlobalStatesType["pages"]["states"]["add-instance"]["instance"];
-export type CurrentInstanceType = {
-	"instance": InstanceStateType;
-	"id": string;
-} | undefined;
-declare function findCurrent(id: string | null | undefined, instances: InstanceStatesType | undefined): CurrentInstanceType;
-declare function getConfigInstanceStates(): InstanceStatesType;
-declare function getMinecraftDirectory({ baseDirectory, instanceId, }: {
-	"baseDirectory": string;
-	"instanceId": string;
-}): string;
-declare function readStoredInstances(properties?: Partial<{
-	"baseDirectory": string;
-	"parsedFile": ParsedFile;
-}>): Promise<InstanceStatesType>;
-declare function saveInstanceStatesToFile(instances: InstanceStatesType): Promise<void>;
-declare const _default$18: {
-	readonly get: () => InstanceStatesType;
-	readonly change: typeof changeInstanceState;
-	readonly add: typeof addInstanceWithSync;
-	readonly create: typeof createInstance;
-	readonly getFromConfig: typeof getConfigInstanceStates;
-	readonly readStored: typeof readStoredInstances;
-	readonly syncMetadata: typeof saveInstanceStatesToFile;
-	readonly extractSavedFromPages: typeof extractSavedFromPages;
-	readonly getMinecraftDirectory: typeof getMinecraftDirectory;
-	readonly findCurrent: typeof findCurrent;
-};
 export type PreLaunchInformationType = {
 	"logPrefix": string;
 	"statuses": LauncherStatusesType;
 	"platform": "windows" | "macos" | "linux";
 	"arch": "x64" | "x86" | "arm64" | "arm32";
 	"instance": InstanceStateType;
+	"cancelId": string;
 	"user": {
 		"javaBinary": string;
 		"javaMajor": number;
@@ -1321,7 +1205,26 @@ export type MappedArtifactType = {
 	 * 'empty' should be just included in the classpath
 	 */
 	"status"?: "library" | "mavenFile" | "native" | "empty";
+	/**
+	 * Indicates the '+libraries' field in MultiMC patches.
+	 *
+	 * Should be specified the first in classpaths
+	 */
 	"first"?: boolean;
+	/**
+	 * Used when unzipping natives.
+	 *
+	 * Taken from 'library.extract.exclude':
+	 *
+	 * ```
+	 * "extract": {
+	 *   "exclude": [
+	 *     "META-INF/"
+	 *   ]
+	 * },
+	 * ```
+	 */
+	"exclude"?: Array<string>;
 };
 export type SpecificPatchRuntimeChecksumType = {
 	"hash": string;
@@ -1457,6 +1360,52 @@ declare function createCommand({ necessaries, finalizedPatch, }: {
 	"java": string;
 	"arguments": Array<string>;
 }>;
+export type ServerProcessType = {
+	"name": string;
+	"port": number;
+	"value": {
+		"pid": number;
+		"kill": () => Promise<void>;
+		"write": (data: string | Uint8Array | number[]) => Promise<void>;
+	};
+};
+export type ServerMetaType = {
+	"name": string;
+	"port": number;
+};
+export type ProgramSpecType = {
+	"type": "path";
+	"value": string;
+} | {
+	"type": "sidecar";
+	"value": string;
+};
+export type ProcessHandlersType = {
+	"onOutput"?: (line: string, stream: "stdout" | "stderr") => void;
+	"onExit"?: (payload: {
+		"pid": number;
+		"code": number | null;
+		"signal": number | null;
+	}) => void;
+	"onError"?: (payload: {
+		"pid": number;
+		"message": string;
+	}) => void;
+};
+export type ProcessHandleType<Meta = unknown> = {
+	"token": string;
+	"pid": number;
+	"kind": string;
+	"meta": Meta;
+	"kill": () => Promise<void>;
+	"write": (data: string | Uint8Array | number[]) => Promise<void>;
+};
+export type RunResultType = {
+	"code": number | null;
+	"success": boolean;
+	"stdout": string;
+	"stderr": string;
+};
 export type MinecraftMetaType = {
 	"instanceId": string;
 };
@@ -1528,7 +1477,10 @@ declare function replaceLaunchArguments({ auth, builtLaunchArguments, necessarie
 declare function splitArguments(input: string | undefined): Array<string>;
 declare function extractNativeArchives({ necessaries, paths, }: {
 	"necessaries": PreLaunchInformationType;
-	"paths": Array<string>;
+	"paths": Array<{
+		"path": string;
+		"exclude": Array<string>;
+	}>;
 }): Promise<void>;
 declare function extractPreLaunchInformation({ statuses, instance, instanceId, userPreferences, logPrefix, }: {
 	"statuses": LauncherStatusesType;
@@ -1537,6 +1489,7 @@ declare function extractPreLaunchInformation({ statuses, instance, instanceId, u
 	"userPreferences": PreLaunchInformationType["user"];
 	"logPrefix": string;
 }): PreLaunchInformationType | false;
+declare function cancelAll(cancelId: string): Promise<boolean>;
 declare function downloadAssets({ necessaries, finalizedPatch, }: {
 	"necessaries": PreLaunchInformationType;
 	"finalizedPatch": FinalizedPatchType;
@@ -1553,11 +1506,6 @@ declare function downloadLogging({ necessaries, finalizedPatch, }: {
 	"necessaries": PreLaunchInformationType;
 	"finalizedPatch": FinalizedPatchType;
 }): Promise<boolean>;
-declare function downloadWithProgress({ url, path, statuses, }: {
-	"url": string;
-	"path": string;
-	"statuses": LauncherStatusesType;
-}): Promise<void>;
 declare function fetchAllVersions(uid: ExtendedPatchUIDType, minecraftPatchVersion?: string): Promise<Array<PatchIndexVersionType>>;
 declare function fetchMetadata({ url, label, scope, prefix, }: {
 	"url": string;
@@ -1659,15 +1607,9 @@ export type AssetObjectsType = {
 declare function shallowlyValidateMeta({ meta }: {
 	"meta": unknown;
 }): AssetObjectsType | false;
-declare function verifyArtifacts({ paths, checksum, }: {
-	"paths": Array<{
-		"path": string;
-		"hash": string;
-	}>;
-	"checksum": boolean;
-}): Promise<Array<string>>;
-declare const _default$19: {
+declare const _default$21: {
 	readonly __unused: {};
+	readonly fetchJavaMajor: typeof fetchJavaMajor;
 	readonly Arguments: {
 		readonly getAdditionalStartArguments: typeof getAdditionalStartArguments;
 		readonly getClassPaths: typeof getClassPaths;
@@ -1683,11 +1625,11 @@ declare const _default$19: {
 		readonly getNecessaries: typeof extractPreLaunchInformation;
 	};
 	readonly Fetching: {
+		readonly cancelAll: typeof cancelAll;
 		readonly downloadAssets: typeof downloadAssets;
 		readonly downloadClient: typeof downloadClient;
 		readonly downloadLibraries: typeof downloadLibraries;
 		readonly downloadLogging: typeof downloadLogging;
-		readonly downloadWithProgress: typeof downloadWithProgress;
 		readonly fetchAllVersions: typeof fetchAllVersions;
 		readonly fetchMetadata: typeof fetchMetadata;
 	};
@@ -1717,13 +1659,11 @@ declare const _default$19: {
 		readonly initializeShortHashDirectories: typeof initializeShortHashDirectories;
 		readonly shallowlyValidateLibrary: typeof shallowlyValidateLibrary;
 		readonly shallowlyValidateMeta: typeof shallowlyValidateMeta;
-		readonly verifyArtifacts: typeof verifyArtifacts;
 	};
 	readonly createCommand: typeof createCommand;
 	readonly handleLaunch: typeof handleLaunch;
 	readonly spawnMinecraft: typeof spawnMinecraft;
 };
-declare function closeViewer(): void;
 export type LogEntryInformationType = {
 	"time": string;
 	"level": string;
@@ -1755,43 +1695,25 @@ declare function handleVirtualTextCopy(copied: boolean, range: [
 	number,
 	string
 ]>, setCopied: (state: boolean) => void): Promise<void>;
-declare function openViewer(): void;
-declare function readLogs({ globalStates, instanceLogs, }: {
-	"globalStates": GlobalStatesType | undefined;
-	"instanceLogs": ShallowReactive<Record<string, string[]>> | undefined;
-}): Promise<{
-	"size": string;
-	"logs": Array<string>;
-	"currentInstanceLogs": Array<string>;
-}>;
 declare function selectAllText(container: HTMLDivElement | null | undefined): void;
-declare function toggleVirtualization({ virtualized, length, }: {
-	"virtualized": boolean;
-	"length": number;
-}): Promise<void>;
-export type LogMethodType = (...input: string[]) => void;
-declare const _default$20: {
-	readonly closeViewer: typeof closeViewer;
+declare const _default$22: {
 	readonly getLogEntryInformation: typeof getLogEntryInformation;
 	readonly getLogFieldText: typeof getLogFieldText;
 	readonly getLogLevelColor: typeof getLogLevelColor;
 	readonly getLogTargetColor: typeof getLogTargetColor;
 	readonly handleVirtualListTextSelection: typeof handleVirtualListTextSelection;
 	readonly handleVirtualTextCopy: typeof handleVirtualTextCopy;
-	readonly openViewer: typeof openViewer;
-	readonly readLogs: typeof readLogs;
 	readonly selectAllText: typeof selectAllText;
-	readonly toggleVirtualization: typeof toggleVirtualization;
 	readonly log: {
 		"__debug-defined": (prefix: string, ...input: string[]) => void;
-		"__debug-undefined": LogMethodType;
-		debug: LogMethodType;
+		"__debug-undefined": (...input: string[]) => void;
+		debug: (...input: string[]) => void;
 		info: (prefix: string, ...input: string[]) => void;
 		warn: (prefix: string, ...input: string[]) => void;
 		error: (prefix: string, ...input: string[]) => void;
 		templates: {
 			json: {
-				contents: (label: string, data: unknown) => string;
+				contents: (label: string, data: unknown, isInfo?: boolean) => string;
 			};
 			hooks: {
 				iterate: {
@@ -1805,6 +1727,78 @@ declare const _default$20: {
 		};
 	};
 };
+export type DownloadReportType = {
+	"success": number;
+	"failed": number;
+	"failures": Array<{
+		"url": string;
+		"path": string;
+		"error": string;
+	}>;
+	"cancelled": boolean;
+};
+declare function concurrentlyDownload({ concurrency, entries, statuses, label, cancelId, debug, }: {
+	"concurrency": number;
+	"entries": Array<{
+		"url": string;
+		"path": string;
+	}>;
+	"statuses": LauncherStatusesType;
+	"label": string;
+	"cancelId"?: string;
+	"debug"?: boolean;
+}): Promise<DownloadReportType>;
+declare const _default$23: {
+	readonly concurrentlyDownload: typeof concurrentlyDownload;
+};
+declare function grantStaticPermissions({ id, permissions, }: {
+	"id": string;
+	"permissions"?: Array<PermissionType>;
+}): Record<string, unknown>;
+declare function handlePermission(permission: PermissionType | string, id: string): unknown;
+declare const _default$24: {
+	readonly grantStaticPermissions: typeof grantStaticPermissions;
+	readonly handlePermission: typeof handlePermission;
+};
+declare function rehydrateProcesses(attach: (handle: ProcessHandleType) => ProcessHandlersType | undefined): Promise<Array<ProcessHandleType>>;
+declare function hydrate(handle: ProcessHandleType<ServerMetaType>): ServerProcessType;
+declare function runProcess(options: {
+	"program": ProgramSpecType;
+	"args"?: Array<string>;
+	"cwd"?: string;
+	"env"?: Record<string, string>;
+}): Promise<RunResultType>;
+declare function spawnProcess<Meta>(options: {
+	"program": ProgramSpecType;
+	"args"?: Array<string>;
+	"cwd"?: string;
+	"env"?: Record<string, string>;
+	"kind": string;
+	"meta": Meta;
+}, processHandlers?: ProcessHandlersType): Promise<ProcessHandleType<Meta>>;
+declare function spawnServer({ name, program, args, port }: {
+	"name": string;
+	"program": ProgramSpecType;
+	"args": Array<string>;
+	"port": number;
+}): Promise<ServerProcessType>;
+declare const _default$25: {
+	readonly rehydrateProcesses: typeof rehydrateProcesses;
+	readonly hydrate: typeof hydrate;
+	readonly runProcess: typeof runProcess;
+	readonly spawnProcess: typeof spawnProcess;
+	readonly spawnServer: typeof spawnServer;
+};
+declare function getInitialPage(): RouteType;
+declare function navigate(path: RouteType): void;
+declare const _default$26: {
+	readonly getInitialPage: typeof getInitialPage;
+	readonly navigate: typeof navigate;
+};
+export interface CompiledValidatorType {
+	"Check": (value: unknown) => boolean;
+	"Errors": (value: unknown) => Promise<Array<TLocalizedValidationError>>;
+}
 export interface ValidationArgumentsType {
 	"label": string;
 	"info": {
@@ -1813,29 +1807,35 @@ export interface ValidationArgumentsType {
 	};
 	"value": unknown;
 }
-declare const _default$21: {
+declare const _default$27: {
 	readonly validate: {
 		readonly account: (data: ValidationArgumentsType) => false | {
 			profile: {
 				name: string;
-				uuid: string;
 				type: "msa" | "offline";
+				uuid: string;
 			};
 			msa: {
 				token: string;
 				refreshToken: string;
 			} | null;
 			skin: {
-				url: string;
 				id: string;
 				data: string;
+				url: string;
 				variant: "classic" | "slim";
 			};
 		};
 		readonly config: (data: ValidationArgumentsType) => false | {
 			extensions: {
+				list: {
+					enabled: boolean;
+					id: string;
+				}[];
 				enabled: boolean;
+				permissions: any;
 				allowUnrestrictedUntrusted: boolean;
+				showAppAfterExtensionsLoad: boolean;
 			};
 			minecraft: {
 				windowHeight: number;
@@ -1853,10 +1853,20 @@ declare const _default$21: {
 			};
 			logs: {
 				show: boolean;
-				lineBreaks: boolean;
-				virtualized: boolean;
 				mode: string;
 				filtering: string;
+				lineHeight: number;
+				partsShown: {
+					time: boolean;
+					level: boolean;
+					target: boolean;
+					message: boolean;
+				};
+				partsSize: {
+					time: number;
+					level: number;
+					target: number;
+				};
 			};
 			development: {
 				loadErudaDevTools: boolean;
@@ -1867,240 +1877,94 @@ declare const _default$21: {
 				enableNativeContextMenu: boolean;
 				enableNativeReloadKeyBinds: boolean;
 			};
-			layout: {
-				sidebar: {
-					background: string | null;
-					blur: number | null;
+			ui: {
+				text: {
+					font: string | null;
+					mainColor: string | null;
+					secondaryColor: string | null;
+				};
+				ripple: {
 					color: string | null;
-					ripple: string | null;
 					sparkles: string | null;
 				};
-				locale: string;
-				stats: "playtime" | "last-launch";
-				currentInstance: string | null;
-				enableMaterialYouRipple: boolean;
-				custom: boolean | ("sidebar" | "contextMenu")[];
 				background: {
-					url: string | null;
-					key: string | number | null;
-					blur: number | null;
 					color: string | null;
-					isVideo: boolean;
+					image: string | null;
+					blur: number | null;
+					isVideo: boolean | null;
+					key: string | number | null;
+				};
+				widget: {
+					background: string | null;
+					blur: number | null;
+					secondaryColor: string | null;
+					textColor: string | null;
 				};
 				atAGlance: {
-					title: string | null;
-					subtitle: string | null;
-				};
+					title: string;
+					subtitle: string;
+				}[];
 			};
-			misc: {
-				showAfterExtensionsInitialization: boolean;
-				autoConfigSync: boolean;
+			selected: {
+				currentInstance: string | null;
+				stats: "playtime" | "last-launch";
 			};
+			locale: string;
 		};
 		readonly instance: (data: ValidationArgumentsType) => false | InstanceStateType;
-		readonly extension: (data: ValidationArgumentsType) => false | ExtensionMetadataType;
+		readonly extension: (data: ValidationArgumentsType) => false | ({
+			id: string;
+			logo: string;
+			name: string;
+			type: "sandbox" | "unrestricted";
+			source: string;
+			version: string;
+			authors: Array<string>;
+			languages: Array<string>;
+			categories: Array<string>;
+		} & Partial<{
+			description: string;
+			permissions: Array<PermissionType>;
+			enabled: boolean;
+		}>);
 		readonly patchMeta: (data: ValidationArgumentsType) => false | SpecificPatchMetaType;
 	};
-	readonly AccountValidator: import("typebox/compile").Validator<{}, import("typebox").TObject<{
-		msa: import("typebox").TUnion<[
-			import("typebox").TObject<{
-				token: import("typebox").TString;
-				refreshToken: import("typebox").TString;
-			}>,
-			import("typebox").TNull
-		]>;
-		profile: import("typebox").TObject<{
-			uuid: import("typebox").TString;
-			name: import("typebox").TString;
-			type: import("typebox").TUnion<[
-				import("typebox").TLiteral<"msa">,
-				import("typebox").TLiteral<"offline">
-			]>;
-		}>;
-		skin: import("typebox").TObject<{
-			id: import("typebox").TString;
-			data: import("typebox").TString;
-			url: import("typebox").TString;
-			variant: import("typebox").TUnion<[
-				import("typebox").TLiteral<"classic">,
-				import("typebox").TLiteral<"slim">
-			]>;
-		}>;
-	}>>;
-	readonly ConfigValidator: import("typebox/compile").Validator<{}, import("typebox").TObject<{
-		development: import("typebox").TObject<{
-			loadErudaDevTools: import("typebox").TBoolean;
-			showFPS: import("typebox").TBoolean;
-			showCPUUsage: import("typebox").TBoolean;
-			showMemoryUsage: import("typebox").TBoolean;
-			enableDebugMode: import("typebox").TBoolean;
-			enableNativeContextMenu: import("typebox").TBoolean;
-			enableNativeReloadKeyBinds: import("typebox").TBoolean;
-		}>;
-		extensions: import("typebox").TObject<{
-			enabled: import("typebox").TBoolean;
-			allowUnrestrictedUntrusted: import("typebox").TBoolean;
-		}>;
-		layout: import("typebox").TObject<{
-			locale: import("typebox").TString;
-			stats: import("typebox").TUnion<[
-				import("typebox").TLiteral<"playtime">,
-				import("typebox").TLiteral<"last-launch">
-			]>;
-			currentInstance: import("typebox").TUnion<[
-				import("typebox").TString,
-				import("typebox").TNull
-			]>;
-			enableMaterialYouRipple: import("typebox").TBoolean;
-			custom: import("typebox").TUnion<[
-				import("typebox").TBoolean,
-				import("typebox").TArray<import("typebox").TUnion<[
-					import("typebox").TLiteral<"sidebar">,
-					import("typebox").TLiteral<"contextMenu">
-				]>>
-			]>;
-			background: import("typebox").TObject<{
-				url: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-				key: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNumber,
-					import("typebox").TNull
-				]>;
-				blur: import("typebox").TUnion<[
-					import("typebox").TNumber,
-					import("typebox").TNull
-				]>;
-				color: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-				isVideo: import("typebox").TBoolean;
-			}>;
-			sidebar: import("typebox").TObject<{
-				background: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-				color: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-				blur: import("typebox").TUnion<[
-					import("typebox").TNumber,
-					import("typebox").TNull
-				]>;
-				ripple: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-				sparkles: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-			}>;
-			atAGlance: import("typebox").TObject<{
-				title: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-				subtitle: import("typebox").TUnion<[
-					import("typebox").TString,
-					import("typebox").TNull
-				]>;
-			}>;
-		}>;
-		logs: import("typebox").TObject<{
-			show: import("typebox").TBoolean;
-			lineBreaks: import("typebox").TBoolean;
-			virtualized: import("typebox").TBoolean;
-			mode: import("typebox").TString;
-			filtering: import("typebox").TString;
-		}>;
-		minecraft: import("typebox").TObject<{
-			windowHeight: import("typebox").TNumber;
-			windowWidth: import("typebox").TNumber;
-			icon: import("typebox").TString;
-			javaBinary: import("typebox").TString;
-			add: import("typebox").TObject<{
-				jvmArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-				gameArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-			}>;
-			remove: import("typebox").TObject<{
-				jvmArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-				gameArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-			}>;
-		}>;
-		misc: import("typebox").TObject<{
-			showAfterExtensionsInitialization: import("typebox").TBoolean;
-			autoConfigSync: import("typebox").TBoolean;
-		}>;
-	}>>;
-	readonly InstanceMetadataValidator: import("typebox/compile").Validator<{}, import("typebox").TIntersect<[
-		import("typebox").TObject<{
-			windowHeight: import("typebox").TNumber;
-			windowWidth: import("typebox").TNumber;
-			icon: import("typebox").TString;
-			javaBinary: import("typebox").TString;
-			add: import("typebox").TObject<{
-				jvmArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-				gameArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-			}>;
-			remove: import("typebox").TObject<{
-				jvmArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-				gameArguments: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-			}>;
-		}>,
-		import("typebox").TObject<{
-			name: import("typebox").TString;
-			checksum: import("typebox").TBoolean;
-			lastLaunch: import("typebox").TNumber;
-			playTime: import("typebox").TNumber;
-			entry: import("typebox").TString;
-			pinned: import("typebox").TBoolean;
-			groups: import("typebox").TArray<import("typebox").TString>;
-			patchVersions: import("typebox").TIntersect<[
-				import("typebox").TObject<{
-					"net.minecraft": import("typebox").TString;
-				}>,
-				import("typebox").TObject<{}>
-			]>;
-		}>
-	]>>;
-	readonly ExtensionMetadataValidator: import("typebox/compile").Validator<{}, import("typebox").TIntersect<[
-		import("typebox").TObject<{
-			id: import("typebox").TString;
-			logo: import("typebox").TString;
-			name: import("typebox").TString;
-			type: import("typebox").TUnion<[
-				import("typebox").TLiteral<"sandbox">,
-				import("typebox").TLiteral<"unrestricted">
-			]>;
-			source: import("typebox").TString;
-			version: import("typebox").TString;
-			authors: import("typebox").TArray<import("typebox").TString>;
-			languages: import("typebox").TArray<import("typebox").TString>;
-			categories: import("typebox").TArray<import("typebox").TString>;
-		}>,
-		import("typebox").TObject<{
-			description: import("typebox").TOptional<import("typebox").TArray<import("typebox").TString>>;
-			permissions: import("typebox").TOptional<import("typebox").TArray<import("typebox").TUnion<[
-			]>>>;
-			enabled: import("typebox").TOptional<import("typebox").TBoolean>;
-		}>
-	]>>;
-	readonly PatchMetaValidator: import("typebox/compile").Validator<{}, import("typebox").TIntersect<[
-		import("typebox").TObject<{
-			formatVersion: import("typebox").TNumber;
-			name: import("typebox").TString;
-			uid: import("typebox").TString;
-			version: import("typebox").TString;
-		}>,
-		import("typebox").TObject<{}>
-	]>>;
+	readonly AccountValidator: CompiledValidatorType;
+	readonly ConfigValidator: CompiledValidatorType;
+	readonly InstanceMetadataValidator: CompiledValidatorType;
+	readonly ExtensionMetadataValidator: CompiledValidatorType;
+	readonly PatchMetaValidator: CompiledValidatorType;
 };
+export type ServerMessage = {
+	"type": "log";
+	"payload": string;
+	"ts": number;
+} | {
+	"type": "error";
+	"payload": {
+		"path": string;
+		"message": string;
+	};
+	"ts": number;
+} | {
+	"type": "meta";
+	"payload": Record<string, unknown>;
+	"ts": number;
+} | {
+	"type": "pong";
+	"ts": number;
+};
+declare class TxikiSocket {
+	private port;
+	private path;
+	private ws;
+	private listeners;
+	constructor(port: number, path?: string);
+	private connect;
+	on(type: string, callback: (message: ServerMessage) => void): () => boolean;
+	send(type: string, payload?: unknown): void;
+	dispose(): void;
+}
 export type LightResponse<T> = Promise<T> | T;
 export type GetCallback = (request: {
 	"params": Record<string, unknown>;
@@ -2118,7 +1982,23 @@ declare class Txiki {
 	post(path: string, callback: PostCallback): Txiki;
 	defineGlobal(name: string, value: unknown): Txiki;
 	listen(port: number): Promise<ServerProcessType | undefined>;
+	static Socket(port: number, path: string | undefined): TxikiSocket;
 }
+declare function watchConfigSync(): () => void;
+declare function watchErrors(): () => void;
+declare function watchInstancesSync(): () => void;
+declare function watchProcesses(): Promise<() => void>;
+export type CleanupType<T extends GlobalStatesType[keyof GlobalStatesType]> = Partial<Record<keyof T, () => void>>;
+declare function watchDevelopmentStates(): CleanupType<GlobalStatesType["development"]>;
+declare function watchLocaleStates(): () => void;
+declare const _default$28: {
+	readonly watchConfigSync: typeof watchConfigSync;
+	readonly watchErrors: typeof watchErrors;
+	readonly watchInstancesSync: typeof watchInstancesSync;
+	readonly watchProcesses: typeof watchProcesses;
+	readonly watchDevelopmentStates: typeof watchDevelopmentStates;
+	readonly watchLocaleStates: typeof watchLocaleStates;
+};
 export type ArgumentReplacementsType = {
 	"assets_index_name": string;
 	"assets_root": string;
@@ -2168,38 +2048,31 @@ declare global {
 			"oauth2": typeof TauriOAuth2;
 		};
 		/**
-		 * Workarounds for application internals.
-		 *
-		 * These fields are generally not intended to be modified by extensions
-		 */
-		"__KAEDE_INTERNALS__": {
-			"getGlobalStates": () => GlobalStatesType;
-			"changeGlobalStates": GlobalStatesChangerType;
-			"getInstanceStates": () => InstanceStatesType;
-			"changeInstanceStates": InstanceStatesChangerType;
-			"requestPermissions": (permissions: Array<PermissionType>, extension: string) => Promise<Array<boolean>>;
-			"syncConfig": () => Promise<void>;
-			"joinDelimiter": string;
-			"launcherVersion": string;
-			"initialConfig": ConfigType;
-			"temporaryAccounts": Array<AccountType>;
-			"initialTranslations": TranslationsType;
-			"initialInstances": InstanceStatesType;
-			"portable": boolean;
-			"baseDirectory": string;
-			"launchCount": number;
-			"atAGlance"?: AtAGlanceType;
-			"javaMajor"?: number;
-			"appInstance"?: App<Element>;
-			"logsInBrowser": Array<string>;
-			"indexedDB"?: IDBDatabase;
-		};
-		/**
 		 * Application namespace.
 		 *
 		 * Extensions can extend this namespace
 		 */
 		"__KAEDE__": {
+			/**
+			 * Workarounds for application internals.
+			 *
+			 * These fields are generally not intended to be modified by extensions
+			 */
+			"internals": {
+				"requestPermissions": (permissions: Array<PermissionType | string> | unknown, extension: string) => Promise<Array<unknown>>;
+				"joinDelimiter": string;
+				"launcherVersion": string;
+				"initialConfig": ConfigType;
+				"initialTranslations": TranslationsType;
+				"initialInstances": InstanceStatesType;
+				"portable": boolean;
+				"baseDirectory": string;
+				"launchCount": number;
+				"javaMajor"?: number;
+				"appInstance"?: App<Element>;
+				"logsInBrowser": Array<string>;
+				"indexedDB"?: IDBDatabase;
+			};
 			/**
 			 * Exposed packages.
 			 *
@@ -2227,27 +2100,23 @@ declare global {
 				/**
 				 * Application constants
 				 */
-				"Application": typeof _default$2;
+				"Application": typeof _default$3;
 				/**
 				 * Includes a default ASCII art generator
 				 */
-				"ASCIIArt": typeof _default$3;
+				"ASCIIArt": typeof _default$4;
 				/**
 				 * Constants related to the 'Browser' lib in 'libs' (non-application)
 				 */
-				"Browser": typeof _default$4;
+				"Browser": typeof _default$5;
 				/**
 				 * Event listeners for the sandboxed plugins
 				 */
-				"EventListeners": typeof _default$5;
+				"EventListeners": typeof _default$6;
 				/**
 				 * Launcher file structure
 				 */
-				"FileStructure": typeof _default$6;
-				/**
-				 * Useful objects for the extension system hooks
-				 */
-				"Hooks": typeof _default$7;
+				"FileStructure": typeof _default$7;
 				/**
 				 * Minecraft launch related constants
 				 */
@@ -2255,7 +2124,7 @@ declare global {
 				/**
 				 * Launcher meta related constants
 				 */
-				"Meta": typeof _default;
+				"Meta": typeof _default$1;
 				/**
 				 * Useful objects for the sandboxed permission system
 				 */
@@ -2263,7 +2132,7 @@ declare global {
 				/**
 				 * Constants related to the application pages
 				 */
-				"Routes": typeof _default$1;
+				"Routes": typeof _default$2;
 			};
 			/**
 			 * Global utilities.
@@ -2300,47 +2169,83 @@ declare global {
 				/**
 				 * Launcher development mode related collection of utilities
 				 */
-				"DevelopmentModeHelpers": typeof _default$12;
+				"DevelopmentMode": typeof _default;
 				/**
 				 * Launcher errors-related collection of utilities
 				 */
-				"Errors": typeof _default$13;
+				"Errors": typeof _default$12;
 				/**
-				 * Launcher extension system related collection of utilities
+				 * Launcher untrusted extensions API
 				 */
-				"ExtensionsManager": typeof _default$14;
+				"ExtensionAPI": typeof ExtensionAPI;
+				/**
+				 * Launcher extensions-related collection of utilities
+				 */
+				"Extensions": typeof _default$13;
+				/**
+				 * Launcher file management related collection of utilities
+				 */
+				"FileManager": typeof _default$14;
 				/**
 				 * Launcher general-purpose collection of utilities
 				 */
 				"General": typeof _default$15;
 				/**
-				 * Launcher global states related collection of utilities
-				 */
-				"GlobalStateHelpers": typeof _default$16;
-				/**
 				 * Launcher 'window' object related collection of utilities
 				 */
-				"Globals": typeof _default$17;
+				"Globals": typeof _default$16;
+				/**
+				 * Hashing functions
+				 */
+				"Hashing": typeof _default$17;
+				/**
+				 * Launcher hook system related collection of utilities
+				 */
+				"Hooks": typeof _default$18;
+				/**
+				 * Launcher initialization-related collection of utilities
+				 */
+				"Initialization": typeof _default$19;
 				/**
 				 * Launcher Minecraft instances related collection of utilities
 				 */
-				"Instances": typeof _default$18;
+				"Instances": typeof _default$20;
 				/**
 				 * Launcher Minecraft-related collection of utilities
 				 */
-				"Launcher": typeof _default$19;
+				"Launcher": typeof _default$21;
 				/**
 				 * Launcher logging-related collection of utilities
 				 */
-				"Logging": typeof _default$20;
+				"Logging": typeof _default$22;
+				/**
+				 * Launcher network and fetching related collection of utilities
+				 */
+				"Network": typeof _default$23;
+				/**
+				 * Launcher extensions-related collection of permission utilities
+				 */
+				"Permissions": typeof _default$24;
+				/**
+				 * Launcher processes and servers related collection of utilities
+				 */
+				"Processes": typeof _default$25;
+				/**
+				 * Launcher navigation-related collection of utilities
+				 */
+				"Router": typeof _default$26;
 				/**
 				 * Launcher collection of typebox validation schemas
 				 */
-				"Schemas": typeof _default$21;
+				"Schemas": typeof _default$27;
 				/**
 				 * Launcher utils for extensions to conveniently run txiki.js servers
 				 */
 				"Txiki": typeof Txiki;
+				/**
+				 * Launcher watchers for handling various events
+				 */
+				"Watchers": typeof _default$28;
 				/**
 				 * Launcher context menu related collection of utilities
 				 */
@@ -2354,17 +2259,6 @@ declare global {
 				"Pages": {
 					"mount": (page: Exclude<RouteType, "none">, id: string) => void;
 					"unmount": (page: Exclude<RouteType, "none">) => void;
-				};
-			};
-			/**
-			 * Global variables that are allowed to be changed by plugins
-			 */
-			"variables": {
-				"rippleColor": string;
-				"sparklesColorRGB": string;
-				"logs": {
-					"targetCollapse": boolean;
-					"collapsedTargetLength": number;
 				};
 			};
 			/**
@@ -2424,356 +2318,6 @@ declare global {
 					 * code execution will continue as if that hook did not exist.
 					 */
 					"before": HookReturnType<unknown, ConfigType>;
-				};
-				/**
-				 * Executed on the translations replacement in global states
-				 */
-				"onTranslationsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'translations' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'TranslationsType' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'TranslationsType' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<TranslationsType, TranslationsType, "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'translations' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'TranslationsType' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<TranslationsType, "nothing">;
-				};
-				/**
-				 * Executed on the 'layout' field replacement in global states
-				 */
-				"onLayoutChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'layout' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["layout"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["layout"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["layout"], GlobalStatesType["layout"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'layout' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["layout"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["layout"], "nothing">;
-				};
-				/**
-				 * Executed on the 'pages' field replacement in global states
-				 */
-				"onPagesChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'pages' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["pages"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["pages"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["pages"], GlobalStatesType["pages"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'pages' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["pages"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["pages"], "nothing">;
-				};
-				/**
-				 * Executed on the 'logs' field replacement in global states
-				 */
-				"onLogsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'logs' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["logs"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["logs"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["logs"], GlobalStatesType["logs"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'logs' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["logs"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["logs"], "nothing">;
-				};
-				/**
-				 * Executed on the 'sidebarItems' field replacement in global states
-				 */
-				"onSidebarItemsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'sidebarItems' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["sidebarItems"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["sidebarItems"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["sidebarItems"], GlobalStatesType["sidebarItems"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'sidebarItems' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["sidebarItems"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["sidebarItems"], "nothing">;
-				};
-				/**
-				 * Executed on the 'contextMenuItems' field replacement in global states
-				 */
-				"onContextMenuItemsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'contextMenuItems' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["contextMenuItems"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["contextMenuItems"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["contextMenuItems"], GlobalStatesType["contextMenuItems"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'contextMenuItems' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["contextMenuItems"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["contextMenuItems"], "nothing">;
-				};
-				/**
-				 * Executed on the 'development' field replacement in global states
-				 */
-				"onDevelopmentChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'development' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["development"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["development"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["development"], GlobalStatesType["development"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'development' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["development"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["development"], "nothing">;
-				};
-				/**
-				 * Executed on the 'misc' field replacement in global states
-				 */
-				"onMiscChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'misc' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["misc"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["misc"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["misc"], GlobalStatesType["misc"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'misc' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["misc"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["misc"], "nothing">;
-				};
-				/**
-				 * Executed on the 'minecraft' field replacement in global states
-				 */
-				"onMinecraftChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'minecraft' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["minecraft"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["minecraft"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["minecraft"], GlobalStatesType["minecraft"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'minecraft' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["minecraft"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["minecraft"], "nothing">;
-				};
-				/**
-				 * Executed on the 'extensions' field replacement in global states
-				 */
-				"onExtensionsChange": {
-					/**
-					 * Executes 'sync'-only functions before the 'extensions' property
-					 * in the global states will change.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["extensions"]' type
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'GlobalStatesType["extensions"]' type
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<GlobalStatesType["extensions"], GlobalStatesType["extensions"], "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the 'extensions' property in the global states has changed.
-					 *
-					 * @param input - an object that has the 'GlobalStatesType["extensions"]' type
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<GlobalStatesType["extensions"], "nothing">;
-				};
-				/**
-				 * Executed on the field addition/overwrite/deletion in instance states
-				 */
-				"onInstanceChange": {
-					/**
-					 * Executes 'sync'-only functions before the provided field
-					 * in the instance states will change.
-					 *
-					 * @param input - an object that has the 'key' and 'value' fields
-					 * is passed as the argument.
-					 *
-					 * If the hook returns a 'stop' status,
-					 * it should also return:
-					 * @param output - an object that has the 'key' and 'value' fields
-					 * in the 'response' field.
-					 *
-					 * If the hook returns a 'continue' status,
-					 * code execution will continue as if that hook did not exist.
-					 */
-					"before": HookReturnType<{
-						"key": string;
-						"value": InstanceStateType;
-					}, {
-						"key": string;
-						"value": InstanceStateType;
-					}, "non-promise">;
-					/**
-					 * Executes 'async' or 'sync' functions on the next Vue tick,
-					 * after the provided field in the instance states has changed.
-					 *
-					 * @param input - an object that has the 'key' and 'value' fields
-					 * is passed as the argument.
-					 *
-					 * Hook should not return anything since the response will not be read.
-					 */
-					"after": HookReturnType<{
-						"key": string;
-						"value": InstanceStateType;
-					}, "nothing">;
 				};
 				/**
 				 * Executed in the very beginning of the instance launch
@@ -3522,17 +3066,56 @@ declare global {
 					 */
 					"after": HookReturnType<number, "nothing">;
 				};
+				/**
+				 * Executed on the 'required' field resolve of a patch
+				 */
 				"onMinecraftPatchResolve": {
-					"before": [
-					];
-					"after": [
-					];
+					/**
+					 * Executes 'async' or 'sync' functions before any actions.
+					 *
+					 * @param input - an object that has the 'necessaries', 'metadata',
+					 * and 'patchMeta' fields is passed as the argument.
+					 *
+					 * If the hook returns a 'stop' status,
+					 * it should also return:
+					 * @param output - an object that has the 'SpecificPatchMetaType | false' type
+					 * in the 'response' field.
+					 *
+					 * If the hook returns a 'continue' status,
+					 * code execution will continue as if that hook did not exist.
+					 */
+					"before": HookReturnType<{
+						"necessaries": PreLaunchInformationType;
+						"metadata": PatchDependencyType;
+						"patchMeta"?: SpecificPatchMetaType;
+					}, SpecificPatchMetaType | false>;
+					/**
+					 * Executes 'async' or 'sync' functions after resolving and validating the patch.
+					 * The passed as 'validPatch' patch may be invalid, so check if it is false
+					 * before doing anything with it.
+					 *
+					 * @param input - an object that has the 'necessaries', 'metadata', 'validPatch',
+					 * and 'patchMeta' fields is passed as the argument.
+					 *
+					 * If the hook returns a 'stop' status,
+					 * it should also return:
+					 * @param output - an object that has the 'SpecificPatchMetaType | false' type
+					 * in the 'response' field.
+					 *
+					 * If the hook returns a 'continue' status,
+					 * code execution will continue as if that hook did not exist.
+					 */
+					"after": HookReturnType<{
+						"necessaries": PreLaunchInformationType;
+						"metadata": PatchDependencyType;
+						"validPatch": SpecificPatchMetaType | false;
+						"patchMeta"?: SpecificPatchMetaType;
+					}, SpecificPatchMetaType | false>;
 				};
 			};
 		};
 	}
 }
 export type KaedeNamespaceType = Window["__KAEDE__"];
-export type KaedeInternalsType = Window["__KAEDE_INTERNALS__"];
 
 export {};

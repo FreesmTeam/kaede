@@ -18,7 +18,6 @@
 
 export default {
   "detectIsBrowser"       : (): boolean => false,
-  "handleLogsFlush"       : (): void => {},
   "handleTauriEnvironment": async (): Promise<void> => {},
   "readStoragePath"       : async (path: string): Promise<string> => path,
   "writeToStoragePath"    : async (path: string, value: string): Promise<void> => {

@@ -99,7 +99,7 @@ const dropdownItems = computed((): Array<DropdownItemType> => {
     <Image
       v-if="currentInstance"
       id="__home-page__current-instance-logo"
-      class-names="object-cover rounded-md size-12 p-1"
+      class-names="shrink-0 object-cover rounded-md size-12 p-1"
       :src="currentInstance.instance.icon"
       :alt="`${currentInstance.instance.name}'s icon`"
     />

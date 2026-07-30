@@ -61,8 +61,6 @@ Globals.declareGlobals();
 if (Browser.detectIsBrowser()) {
   // Handle Tauri API placeholders
   await Browser.handleTauriEnvironment();
-
-  Browser.handleLogsFlush();
 }
 
 const { basic, parsed } = await Initialization.start();

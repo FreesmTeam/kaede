@@ -49,6 +49,10 @@ html {
 ::-webkit-scrollbar-thumb { background: #393939; cursor: pointer }
 ::-webkit-scrollbar-thumb:hover { background: #494949 }
 
+@-moz-document url-prefix() {
+  .thin-scrollbar { scrollbar-width: thin; }
+}
+
 .thin-scrollbar::-webkit-scrollbar { width: 8px }
 
 .scroll-gutter-stable-both {

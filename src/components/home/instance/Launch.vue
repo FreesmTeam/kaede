@@ -159,10 +159,10 @@ useIntervalFn((): void => {
 
 <template>
   <button
+    v-if="statuses === undefined || statuses?.launching === 0"
     @click="handleLaunch"
-    :disabled="statuses?.launching === 1 || statuses?.launching === 2"
     id="__home-page__launch-button"
-    class="relative w-fit rounded-l-md rounded-r-sm bg-white px-4 py-2 text-black transition-[opacity] disabled:opacity-70"
+    class="relative min-w-24 rounded-l-md rounded-r-sm bg-white px-4 py-2 text-black transition-[opacity] disabled:opacity-70"
   >
     <span
       id="__home-page__launch-label"
@@ -172,19 +172,21 @@ useIntervalFn((): void => {
     </span>
     <MaterialRipple
       :colors="{ ripple: '#00000010', sparkles: '0 0 0' }"
-      :disabled="statuses?.launching === 1 || statuses?.launching === 2"
     />
   </button>
   <button
+    v-else
     @click="handleClose"
     id="__home-page__launch-abort-button"
     :disabled="!isDownloading && statuses?.launching !== 2 || killing"
-    class="relative w-fit rounded-sm bg-white px-1 py-2 text-black transition-[opacity] disabled:opacity-70"
+    class="relative min-w-24 rounded-l-md rounded-r-sm bg-white px-4 py-2 text-black transition-[opacity] disabled:opacity-70"
   >
     <span
-      id="__home-page__launch-abort-icon"
-      class="i-lucide-x block"
-    ></span>
+      id="__home-page__launch-label"
+      class="block"
+    >
+      Close
+    </span>
     <MaterialRipple
       :colors="{ ripple: '#00000010', sparkles: '0 0 0' }"
       :disabled="!isDownloading && statuses?.launching !== 2 || killing"

@@ -127,7 +127,7 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
       name="fade"
       tag="div"
       id="__sidebar__inner"
-      class="thin-scrollbar scroll-gutter-stable-both h-fit w-full flex flex-col items-center gap-2 overflow-y-auto rounded-md p-2"
+      class="thin-scrollbar scroll-gutter-stable-both h-fit w-full flex flex-col items-center gap-2 overflow-y-auto rounded-md py-2"
       :style="styles.widget"
     >
       <template

@@ -18,13 +18,13 @@
 
 import { LogInfo } from "@/constants/browser.ts";
 import EnglishTranslations from "@/constants/english.json";
+import { FamousAndOldJavaMajorVersion } from "@/constants/launcher";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { handleBodyRead } from "@/lib/browser/scopes/handle-body-read.ts";
 import { listStores } from "@/lib/browser/scopes/list-stores.ts";
 import { readStoragePath } from "@/lib/browser/scopes/read-storage-path.ts";
 import { writeToStoragePath } from "@/lib/browser/scopes/write-to-storage-path.ts";
 import Configs from "@/lib/configs";
-import { FamousAndOldJavaMajorVersion } from "@/constants/launcher";
 import Instances from "@/lib/instances";
 
 export async function placeholderInvoke(

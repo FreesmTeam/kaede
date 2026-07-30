@@ -31,5 +31,5 @@ export let instanceStates: ShallowReactive<InstanceStatesType>;
  * This function is called in 'main.ts'
  */
 export function declareInstanceStates(): void {
-  instanceStates = shallowReactive<InstanceStatesType>(GlobalInternals.initialInstances);
+  instanceStates = shallowReactive<InstanceStatesType>({ ...GlobalInternals.initialInstances });
 }

@@ -47,9 +47,25 @@ function transformInput(input: string): string {
     .toDateString()
     .split(" ");
 
-  return input.replace("%date%", (
-    currentDate[0] + ", " + currentDate[1] + " " + currentDate[2]
-  ));
+  return input
+    .replace(/%date%/g, (
+      currentDate[0] + ", " + currentDate[1] + " " + currentDate[2]
+    ))
+    .replace(/%.*?%/g, (value: string): string => {
+      // Only allow evaluation of custom placeholders if user has enabled unrestricted extensions
+      if (!globalStates.extensions.allowUnrestrictedUntrusted) {
+        return value;
+      }
+
+      try {
+        const clean: string = value.slice(1, -1);
+        const evaluate = new Function(`return ${clean};`);
+
+        return evaluate();
+      } catch {
+        return value;
+      }
+    });
 }
 </script>
 
@@ -74,7 +90,7 @@ function transformInput(input: string): string {
           :value="currentGlance.title"
           autocomplete="off"
           id="__home-page__header-title-editor-wrapper"
-          class="absolute left-0 top-13 z-10 rounded-md bg-neutral-950 p-1 text-lg leading-none outline-none focus:outline-none"
+          class="absolute left-0 top-13 z-10 min-w-96 rounded-md bg-neutral-950 p-1 text-lg leading-none outline-none focus:outline-none"
       />
       </Transition>
     </div>
@@ -93,7 +109,7 @@ function transformInput(input: string): string {
           :value="currentGlance.subtitle"
           autocomplete="off"
           id="__home-page__header-subtitle-editor-wrapper"
-          class="absolute left-0 top-10 z-10 rounded-md bg-neutral-950 p-1 text-lg leading-none outline-none focus:outline-none"
+          class="absolute left-0 top-10 z-10 min-w-96 rounded-md bg-neutral-950 p-1 text-lg leading-none outline-none focus:outline-none"
         />
       </Transition>
     </div>

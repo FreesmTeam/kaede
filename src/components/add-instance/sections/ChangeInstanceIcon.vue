@@ -22,10 +22,7 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { computed } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
-import FileStructure from "@/constants/file-structure.ts";
 import { DefaultInstanceSettings } from "@/constants/launcher.ts";
-import { GlobalInternals } from "@/extendable/global-internals.ts";
-import FileManager from "@/lib/file-manager";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
@@ -59,14 +56,17 @@ async function handleIconPick(): Promise<void> {
     return;
   }
 
-  const delimiter = GlobalInternals.joinDelimiter;
-  const splitPath: Array<string> = selectedIconPath.split(delimiter);
-  const fileName: string = splitPath[splitPath.length - 1];
-  const copyDestination: string = FileManager.join(
-    FileManager.getBaseDirectory(),
-    FileStructure.Folders.Resources.Path,
-    fileName,
-  );
+  /*
+   * ---
+   * const delimiter = GlobalInternals.joinDelimiter;
+   * const splitPath: Array<string> = selectedIconPath.split(delimiter);
+   * const fileName: string = splitPath[splitPath.length - 1];
+   * const copyDestination: string = FileManager.join(
+   *   FileManager.getBaseDirectory(),
+   *   FileStructure.Folders.Resources.Path,
+   *   fileName,
+   * );
+   */
 
   /*
    * If the file was selected from the path to where Kaede usually does not have
@@ -80,7 +80,7 @@ async function handleIconPick(): Promise<void> {
 
   globalStates.pages["add-instance"].instance = {
     ...currentInstance.value,
-    "icon": convertFileSrc(copyDestination),
+    "icon": convertFileSrc(selectedIconPath),
   };
 }
 </script>

@@ -105,7 +105,7 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
     </div>
     <CustomInput
       icon="i-lucide-chevron-down"
-      placeholder="Minimum amount of RAM to allocate, in megabytes (MB)"
+      placeholder="Minimum amount of RAM to allocate"
       id-root="__add-instance-page__instance-other-min-memory"
       type="number"
       tooltip="Minimum amount of RAM to allocate, in megabytes (MB)"
@@ -128,7 +128,7 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
     </div>
     <CustomInput
       icon="i-lucide-chevron-up"
-      placeholder="Maximum amount of RAM to allocate, in megabytes (MB)"
+      placeholder="Maximum amount of RAM to allocate"
       id-root="__add-instance-page__instance-other-max-memory"
       type="number"
       tooltip="Maximum amount of RAM to allocate, in megabytes (MB)"

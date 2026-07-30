@@ -73,7 +73,7 @@ test(testName, async () => {
       "filtering" : "",
       "lineHeight": 20,
       "partsShown": { "time": true, "level": true, "target": true, "message": true },
-      "partsSize" : { "time": 64, "level": 64, "target": 128 },
+      "partsSize" : { "time": 12, "level": 5, "target": 32 },
     },
     "minecraft": {
       "windowHeight": 480,

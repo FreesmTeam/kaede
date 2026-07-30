@@ -20,7 +20,7 @@ import type { LogSearchState } from "@/types/logging/log-searching.type.ts";
 
 export type LogRenderSegmentType = {
   "text" : string;
-  "kind" : "separator" | "time" | "level" | "target" | "message";
+  "kind" : "time" | "level" | "target" | "message";
   "state": LogSearchState;
   "index": number;
 };

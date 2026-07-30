@@ -81,6 +81,7 @@ function onNavigation(event: KeyboardEvent): void {
     </button>
     <CustomInput
       focus-on-key-f
+      listen-to-events
       blur-on-escape
       icon="i-lucide-search"
       placeholder="Search logs..."

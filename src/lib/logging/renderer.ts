@@ -30,8 +30,17 @@ type RawToken = {
   "renderEnd"  : number;
 };
 
+function fitToWidth(text: string, width: number): string {
+  if (text.length <= width) {
+    return text.padEnd(width);
+  }
+
+  return text.slice(0, width - 3) + "...";
+}
+
 export function tokenize(parsed: LogParsedLineType): Array<RawToken> {
   const partsShown = globalStates.logs.partsShown;
+  const partsSize = globalStates.logs.partsSize;
 
   if (parsed.kind === "plain") {
     return [{
@@ -65,21 +74,23 @@ export function tokenize(parsed: LogParsedLineType): Array<RawToken> {
   };
 
   const offsets = parsed.offsets;
-  const separate = (anchor: number): void => push(" │ ", anchor, anchor, "separator");
 
   if (partsShown.time) {
-    push(parsed.time, offsets.time[0], offsets.time[1], "time");
-    separate(offsets.time[1]);
+    const compressed: string = fitToWidth(parsed.time, partsSize.time);
+
+    push(compressed, offsets.time[0], offsets.time[1], "time");
   }
 
   if (partsShown.level) {
-    push(parsed.level, offsets.level[0], offsets.level[1], "level");
-    separate(offsets.level[1]);
+    const compressed: string = fitToWidth(parsed.level, partsSize.level);
+
+    push(compressed, offsets.level[0], offsets.level[1], "level");
   }
 
   if (partsShown.target) {
-    push(parsed.target, offsets.target[0], offsets.target[1], "target");
-    separate(offsets.target[1]);
+    const compressed: string = fitToWidth(parsed.target, partsSize.target);
+
+    push(compressed, offsets.target[0], offsets.target[1], "target");
   }
 
   if (partsShown.message) {

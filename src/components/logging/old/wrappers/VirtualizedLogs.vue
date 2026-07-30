@@ -22,7 +22,7 @@ import { useTemplateRef } from "vue";
 // @ts-expect-error Later
 import { VirtualisedList } from "vue-virtualised";
 
-import LogEntry from "@/components/logging/lines/LogEntry.vue";
+import LogEntry from "@/components/logging/old/lines/LogEntry.vue";
 import { globalStates } from "@/states/global.ts";
 
 const { logs, filteredLogs, filtering, mountedKey, searching, currentTextSelection } = defineProps<{

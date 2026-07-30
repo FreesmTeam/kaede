@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import LogHighlighter from "@/components/logging/lines/LogHighlighter.vue";
+import LogHighlighter from "@/components/logging/old/lines/LogHighlighter.vue";
 import Errors from "@/lib/errors";
 import Logging from "@/lib/logging";
 import { log } from "@/lib/logging/log.ts";

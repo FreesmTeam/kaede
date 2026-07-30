@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
 
-import LogEntry from "@/components/logging/lines/LogEntry.vue";
+import LogEntry from "@/components/logging/old/lines/LogEntry.vue";
 import type { LogControlsType } from "@/types/logging/log-controls.type.ts";
 
 const target = useTemplateRef("target");

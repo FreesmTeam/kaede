@@ -199,6 +199,10 @@ export async function placeholderInvoke(
         payload.message;
 
       for (const line of message.split("\n")) {
+        if (line.trim() === "") {
+          continue;
+        }
+
         GlobalInternals.logsInBrowser?.push?.(line);
       }
 

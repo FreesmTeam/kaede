@@ -61,10 +61,10 @@ export function watchDevelopmentStates(): CleanupType<GlobalStatesType["developm
   return cleanup;
 }
 
+/**
+ * Updates translations on locale change.
+ */
 export function watchLocaleStates(): () => void {
-  /**
-   * Updates translations on locale change.
-   */
   return watchEffect(async () => {
     const baseDirectory: string = FileManager.getBaseDirectory();
     const locale: string = globalStates.locale;

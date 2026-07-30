@@ -22,12 +22,12 @@ import { watch } from "vue";
 import Instances from "@/lib/instances";
 import { instanceStates } from "@/states/instance.ts";
 
+/**
+ * Updates instances file on any instance states changes.
+ */
 export function watchInstancesSync(): () => void {
   const debouncedWrite = useDebounceFn(Instances.sync, 300);
 
-  /**
-   * Updates translations on locale change.
-   */
   return watch(
     () => instanceStates,
     debouncedWrite,

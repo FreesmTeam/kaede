@@ -22,12 +22,12 @@ import { watch } from "vue";
 import Configs from "@/lib/configs";
 import { globalStates } from "@/states/global.ts";
 
+/**
+ * Updates config file on any config-related global states changes.
+ */
 export function watchConfigSync(): () => void {
   const debouncedWrite = useDebounceFn(Configs.sync, 300);
 
-  /**
-   * Updates translations on locale change.
-   */
   return watch(
     // Only watch config-related fields
     () => [

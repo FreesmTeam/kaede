@@ -198,7 +198,9 @@ export async function placeholderInvoke(
         `webview:${payload.location}` + LogInfo.delimiter +
         payload.message;
 
-      GlobalInternals.logsInBrowser?.push?.(message);
+      for (const line of message.split("\n")) {
+        GlobalInternals.logsInBrowser?.push?.(line);
+      }
 
       return;
     }

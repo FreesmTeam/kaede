@@ -106,7 +106,7 @@ const dropdownItems = computed((): Array<DropdownItemType> => {
     <span
       v-else
       id="__home-page__current-instance-missing-logo"
-      class="m-1 block size-10 rounded-md bg-neutral-500"
+      class="m-1 block size-10 shrink-0 rounded-md bg-neutral-500"
     ></span>
     <span
       id="__home-page__current-instance-information-wrapper"

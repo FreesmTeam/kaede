@@ -7,7 +7,7 @@ import PageError from "@/components/general/errors/PageError.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { ContextMenu } from "@/constants/application.ts";
-import { getComponents } from "@/extendable/component-registry.ts";
+import { C } from "@/extendable/component-registry.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import { globalStates } from "@/states/global.ts";
 
@@ -67,8 +67,6 @@ useEventListener(window, "pointerdown", (event: PointerEvent) => {
 
   closeContextMenu();
 });
-
-const C = getComponents();
 </script>
 
 <template>

@@ -37,7 +37,9 @@ import type {
 } from "@/types/launcher/launch/launch-status.type.ts";
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 
-// 'fetchAccounts' breaks HMR
+/**
+ * 'fetchAccounts' breaks HMR
+ */
 const fetchAccounts = inject<() => Array<AccountType>>(AuthOneTimeFetchContextKey)
   ?? ((): Array<AccountType> => []);
 

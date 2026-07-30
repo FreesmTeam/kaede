@@ -19,59 +19,85 @@
 import { type Component, defineAsyncComponent, shallowReactive } from "vue";
 
 // /*
-import AddInstance from "@/components/add-instance/AddInstance.vue";
-import CleanInstance from "@/components/add-instance/tabs/CleanInstance.vue";
 import ContextMenu from "@/components/general/layout/ContextMenu.vue";
 import GlobalBackground from "@/components/general/layout/GlobalBackground.vue";
 import LaunchProgress from "@/components/general/layout/LaunchProgress.vue";
+import Layout from "@/components/general/layout/Layout.vue";
 import PagesSelector from "@/components/general/layout/PagesSelector.vue";
+import PageWrapper from "@/components/general/layout/PageWrapper.vue";
 import Sidebar from "@/components/general/layout/Sidebar.vue";
+import Tabs from "@/components/general/layout/Tabs.vue";
 // */
+import { GlobalInternals } from "@/extendable/global-internals.ts";
+import { log } from "@/lib/logging/log.ts";
+import IsKeyInObject from "@/types/utils/is-key-in-object.ts";
 
 interface ComponentRegistryType {
-  [key: string]         : Component;
-  "Sidebar"             : Component;
-  "ContextMenu"         : Component;
-  "LaunchProgress"      : Component;
-  "GlobalBackground"    : Component;
-  "PagesSelector"       : Component;
-  "LazyPluginPlayground": Component;
+  [key: string]     : Component;
+  "ContextMenu"     : Component;
+  "GlobalBackground": Component;
+  "LaunchProgress"  : Component;
+  "Layout"          : Component;
+  "PagesSelector"   : Component;
+  "PageWrapper"     : Component;
+  "Sidebar"         : Component;
+  "Tabs"            : Component;
 }
 
+// /*
 export const LazyExtensionLoader = defineAsyncComponent(() => (
   import("@/components/general/extensions/ExtensionLoader.vue")
 ));
+export const LazyPluginPlayground = defineAsyncComponent(() => (
+  import("@/components/settings/tabs/PluginPlayground.vue")
+));
+// */
 
 /*
  * Extensions can use this registry to replace existing components with their own ones.
  * When generating types using 'dts-bundle-generator', make sure to remove any Vue components
  */
-// // @ts-expect-error The registry is missing required properties only for 'dts-bundle-generator'
-export const C: ComponentRegistryType = shallowReactive({
+const ComponentStorage = {
   // /*
-
-  // 'add-instance/'
-  AddInstance,
-  CleanInstance,
-
-  // 'general/'
-  Sidebar,
   ContextMenu,
-  LaunchProgress,
   GlobalBackground,
+  LaunchProgress,
+  Layout,
   PagesSelector,
-
-  // 'settings/'
-  "LazyPluginPlayground": defineAsyncComponent(() => (
-    import("@/components/settings/tabs/PluginPlayground.vue")
-  )),
+  PageWrapper,
+  Sidebar,
+  Tabs,
   // */
-});
+} as const;
 
-export function getComponents(): ComponentRegistryType {
-  return C;
-}
+/**
+ * HMR might break this
+ */
+const PreservedForRestoring = { ...ComponentStorage };
+
+// // @ts-expect-error The registry is missing required properties only for 'dts-bundle-generator'
+export const C: ComponentRegistryType = shallowReactive(ComponentStorage);
 
 export function __registerComponent(name: string, component: Component): void {
-  C[name] = component;
+  if (name in C) {
+    log.warn(__PRE_BUNDLED_FILENAME__, `Overriding application-side '${name}' component`);
+    C[name] = component;
+
+    return;
+  }
+
+  GlobalInternals.appInstance?.component?.(name, component);
+}
+
+export function __restoreComponent(name: string): boolean {
+  if (IsKeyInObject(name, C) && IsKeyInObject(name, PreservedForRestoring)) {
+    log.debug(__PRE_BUNDLED_FILENAME__, `Restoring a component '${name}'...`);
+    C[name] = PreservedForRestoring[name];
+
+    log.info(__PRE_BUNDLED_FILENAME__, `The component '${name}' was restored`);
+
+    return true;
+  }
+
+  return false;
 }

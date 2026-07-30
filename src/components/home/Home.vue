@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import PageWrapper from "@/components/general/layout/PageWrapper.vue";
 import AtAGlance from "@/components/home/glance/AtAGlance.vue";
 import CurrentInstance from "@/components/home/instance/CurrentInstance.vue";
 import CurrentPlaytime from "@/components/home/instance/CurrentPlaytime.vue";
 import LastPlayed from "@/components/home/instance/LastPlayed.vue";
 import Launch from "@/components/home/instance/Launch.vue";
 import LaunchOptions from "@/components/home/instance/LaunchOptions.vue";
+import { C } from "@/extendable/component-registry.ts";
 import { globalStates } from "@/states/global.ts";
 </script>
 
 <template>
-  <PageWrapper>
+  <C.PageWrapper>
     <div id="__home-page__wrapper" class="h-full flex flex-col justify-between gap-2">
       <AtAGlance v-if="globalStates.ui.atAGlance.length > 0" />
       <div
@@ -31,5 +31,5 @@ import { globalStates } from "@/states/global.ts";
         </div>
       </div>
     </div>
-  </PageWrapper>
+  </C.PageWrapper>
 </template>

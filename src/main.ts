@@ -114,7 +114,9 @@ const [
         return accounts;
       }
 
-      // HMR might trigger this branch
+      /**
+       * HMR might trigger this branch
+       */
       log.error(__PRE_BUNDLED_FILENAME__, "You cannot load accounts once more");
 
       return [];

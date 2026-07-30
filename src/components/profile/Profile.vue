@@ -3,8 +3,8 @@ import { createSkinViewer, use } from "@daidr/minecraft-skin-renderer";
 import { WebGLRendererPlugin } from "@daidr/minecraft-skin-renderer/webgl";
 import { inject, onMounted, ref, useTemplateRef } from "vue";
 
-import PageWrapper from "@/components/general/layout/PageWrapper.vue";
 import { AuthStatesContextKey } from "@/constants/application.ts";
+import { C } from "@/extendable/component-registry.ts";
 import type { WrappedAccountsType } from "@/types/configs/account.type.ts";
 
 const canvas = useTemplateRef("canvas");
@@ -33,7 +33,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <PageWrapper>
+  <C.PageWrapper>
     {{ accounts }}
     <div>
       {{ status }}
@@ -41,5 +41,5 @@ onMounted(async () => {
     <div class="flex">
       <canvas ref="canvas" width="300" height="400" />
     </div>
-  </PageWrapper>
+  </C.PageWrapper>
 </template>

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import PageWrapper from "@/components/general/layout/PageWrapper.vue";
+import { C } from "@/extendable/component-registry.ts";
 </script>
 
 <template>
-  <PageWrapper>
+  <C.PageWrapper>
     Library
-  </PageWrapper>
+  </C.PageWrapper>
 </template>

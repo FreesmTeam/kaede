@@ -24,12 +24,11 @@ import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import ExtensionsError from "@/components/general/errors/ExtensionsError.vue";
 import GlobalError from "@/components/general/errors/GlobalError.vue";
 import CssThemeLoader from "@/components/general/extensions/CssThemeLoader.vue";
-import Layout from "@/components/general/layout/Layout.vue";
 import Router from "@/components/general/layout/Router.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
-import { LazyExtensionLoader } from "@/extendable/component-registry.ts";
+import { C, LazyExtensionLoader } from "@/extendable/component-registry.ts";
 import { globalStates } from "@/states/global.ts";
 import type {
   TranslationsStateType,
@@ -52,7 +51,7 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
   <!-- Global error boundary -->
   <ErrorBoundary>
     <template #default>
-      <Layout>
+      <C.Layout>
         <Router />
 
         <Transition name="pop">
@@ -61,7 +60,7 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
 
         <DevelopmentMode />
         <NonBundledClasses />
-      </Layout>
+      </C.Layout>
     </template>
 
     <template #error="{ currentError }">

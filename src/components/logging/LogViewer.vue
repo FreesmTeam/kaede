@@ -17,28 +17,76 @@
   -->
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 
-import DisplayLogs from "@/components/logging/wrappers/DisplayLogs.vue";
 import { useLogStream } from "@/composables/use-log-stream.ts";
 import { globalStates } from "@/states/global.ts";
 
-const { "lines": raw } = useLogStream();
+const { lines } = useLogStream();
 
-const logs = computed((): Array<string> => {
+const filtered = computed((): { "list": Array<string> } => {
   const filtering: string = globalStates.logs.filtering;
 
-  if (filtering === "") {
-    return raw.value.list;
+  if (!filtering) {
+    return lines.value;
   }
 
   const filtered: Array<string> = [];
 
-  for (const line of raw.value.list) {
+  for (const line of lines.value.list) {
     filtered.push(line);
   }
 
-  return filtered;
+  return { "list": filtered };
+});
+
+const position = ref<number>(0);
+
+const container = useTemplateRef("container");
+
+function updateView(event: Event): void {
+  const target = event.target as HTMLDivElement | null;
+
+  if (!target) {
+    return;
+  }
+
+  position.value = Math.round(target.scrollTop / globalStates.logs.lineHeight);
+}
+
+watch(
+  () => lines.value,
+  async () => {
+    if (!container.value) {
+      return;
+    }
+
+    const viewer = container.value;
+    const twoLinesHeight = globalStates.logs.lineHeight * 2;
+    const toCatchRange = viewer.scrollTop + twoLinesHeight + 1;
+    const isAtTheBottom = viewer.scrollHeight - viewer.clientHeight <= toCatchRange;
+
+    await nextTick();
+
+    if (isAtTheBottom) {
+      viewer.scrollTo({ "top": viewer.scrollHeight - viewer.clientHeight });
+    }
+  },
+);
+
+onMounted(() => {
+  if (!container.value) {
+    return;
+  }
+
+  container.value.addEventListener("scroll", updateView, { "passive": true });
+});
+onUnmounted(() => {
+  if (!container.value) {
+    return;
+  }
+
+  container.value.removeEventListener("scroll", updateView);
 });
 </script>
 
@@ -47,13 +95,36 @@ const logs = computed((): Array<string> => {
     @contextmenu.prevent
     id="__log-viewer__wrapper"
     class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex items-start p-16 text-start text-sm bg-[theme(colors.black/.5)]"
-    v-show="logs.length > 0"
+    v-show="lines.list.length > 0"
   >
     <div
       id="__log-viewer__inner"
       class="w-full flex-1 select-text"
     >
-      <DisplayLogs :logs="logs" />
+      <div
+        id="__log-viewer__bound"
+        class="relative w-full select-text overflow-y-auto"
+        ref="container"
+        :style="{ 'height': 16 * globalStates.logs.lineHeight + 'px' }"
+      >
+        <div
+          id="__log-viewer__scroll-placeholder"
+          class="font-mono"
+          :style="{
+            'height': lines.list.length * globalStates.logs.lineHeight + 'px',
+          }"
+        >
+          <div
+            v-for="(_, index) in Array.from({ length: 16 })"
+            :key="index"
+            :id="`${index}-log-line`"
+            class="__log-viewer__log-line"
+            :style="{ 'top': index * globalStates.logs.lineHeight + 'px' }"
+          >
+            {{ position + index }} {{ filtered.list?.[position + index] }}
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

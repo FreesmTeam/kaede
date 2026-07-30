@@ -20,8 +20,14 @@
 import { useWindowSize } from "@vueuse/core";
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 
+import LogHeader from "@/components/logging/LogHeader.vue";
+import { useLogSearch } from "@/composables/use-log-search.ts";
 import { useLogStream } from "@/composables/use-log-stream.ts";
+import { parseLine } from "@/lib/logging/parser.ts";
+import { overlaySearch, tokenize } from "@/lib/logging/renderer.ts";
 import { globalStates } from "@/states/global.ts";
+import type { LogLineType } from "@/types/logging/log-line.type.ts";
+import type { LogRenderSegmentType } from "@/types/logging/log-render.type.ts";
 
 const { lines } = useLogStream();
 const { "height": innerHeight } = useWindowSize();
@@ -30,31 +36,40 @@ const scrollBarSize = 17;
 
 const position = ref<number>(0);
 
-const filtered = computed((): { "list": Array<string> } => {
-  const filtering: string = globalStates.logs.filtering;
+const filtered = computed((): { "list": Array<LogLineType> } => {
+  const filtering: string = globalStates.logs.filtering.trim().toLowerCase();
+  const original: Array<string> = lines.value.list;
 
-  if (!filtering) {
-    return lines.value;
+  if (filtering === "") {
+    return {
+      "list": original.map((line: string, index: number) => ({ "raw": line, index })),
+    };
   }
 
-  const filtered: Array<string> = [];
+  const result: Array<LogLineType> = [];
 
-  for (const line of lines.value.list) {
-    filtered.push(line);
+  for (const [index, line] of original.entries()) {
+    if (line.toLowerCase().includes(filtering)) {
+      result.push({ "raw": line, index });
+    }
   }
 
-  return { "list": filtered };
+  return { "list": result };
 });
-const elements = computed((): Array<number> => {
+
+const { status, matchesByLine, utils } = useLogSearch(filtered);
+
+const elements = computed((): number[] => {
   const region: number = innerHeight.value - 280;
   const boundary: number = Math.ceil(region / globalStates.logs.lineHeight);
   const size: number = Math.min(boundary, filtered.value.list.length);
 
-  return Array.from({ "length": size }).map((_, index) => index);
+  return Array.from({ "length": size }, (_, index) => index);
 });
 
 const container = useTemplateRef("container");
 
+// Update the logs array index (called on scroll)
 function updateView(event: Event): void {
   const target = event.target as HTMLDivElement | null;
 
@@ -65,10 +80,11 @@ function updateView(event: Event): void {
   position.value = Math.round(target.scrollTop / globalStates.logs.lineHeight);
 }
 
+// Stick to the bottom of the log viewer unless
 watch(
   () => [
-    lines.value,
-    elements.value,
+    lines.value.list.length,
+    elements.value.length,
   ],
   async () => {
     if (!container.value) {
@@ -88,6 +104,56 @@ watch(
   },
 );
 
+function getSegments(filteredIndex: number): Array<LogRenderSegmentType> {
+  const entry = filtered.value.list[filteredIndex];
+
+  if (!entry) {
+    return [];
+  }
+
+  const matches = matchesByLine.value.get(filteredIndex);
+  const hasMatches = matches && matches.length > 0;
+
+  const parsed = parseLine(entry);
+  const tokens = tokenize(parsed);
+
+  return hasMatches
+    ? overlaySearch(tokens, matches, status.index)
+    : tokens.map((rawToken, index) => ({
+      "text" : rawToken.text,
+      "kind" : rawToken.kind,
+      "state": "none",
+      index,
+    }));
+}
+
+function scrollToMatch(match: { "lineIndex": number } | undefined): void {
+  if (!match || !container.value) {
+    return;
+  }
+
+  const targetTop =
+    (match.lineIndex * globalStates.logs.lineHeight) -
+    (container.value.clientHeight / 2) +
+    globalStates.logs.lineHeight;
+
+  container.value.scrollTo({ "top": Math.max(0, targetTop), "behavior": "instant" });
+}
+
+const searcher: {
+  "back"  : () => void;
+  "next"  : () => void;
+  "reset" : () => void;
+  "search": (input: string) => void;
+} = {
+  "back"  : (): void => scrollToMatch(utils.previous()),
+  "next"  : (): void => scrollToMatch(utils.next()),
+  "reset" : utils.reset,
+  "search": (input: string): void => {
+    status.searching = input;
+  },
+};
+
 onMounted(() => container?.value?.addEventListener?.("scroll", updateView, { "passive": true }));
 onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView));
 </script>
@@ -99,9 +165,7 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
     class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex flex-col justify-center gap-2 px-16 text-start text-sm bg-[theme(colors.black/.5)]"
     v-show="lines.list.length > 0"
   >
-    <div>
-      asd ayo
-    </div>
+    <LogHeader :searcher="searcher" :status="status" />
     <div
       id="__log-viewer__inner"
       class="w-full select-text"
@@ -112,21 +176,44 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
         ref="container"
         :style="{ 'height': elements.length * globalStates.logs.lineHeight + scrollBarSize + 'px' }"
       >
+        <!-- eslint-disable @vue-require-id/require-id -->
         <div
           id="__log-viewer__scroll-placeholder"
           class="w-fit font-mono"
           :style="{
-            'height': lines.list.length * globalStates.logs.lineHeight + 'px',
+            'height': filtered.list.length * globalStates.logs.lineHeight + 'px',
           }"
         >
-          <!-- eslint-disable-next-line @vue-require-id/require-id -->
           <div
             v-for="index in elements"
             :key="index"
             class="__log-viewer__log-line"
             :style="{ 'top': index * globalStates.logs.lineHeight + 'px' }"
           >
-            {{ position + index }} {{ filtered.list?.[position + index] }}
+            <template
+              v-for="segment in getSegments(position + index)"
+              :key="`${index}-${segment.index}`"
+            >
+              {{ filtered?.list?.[position + index]?.index }}
+              <mark
+                v-if="segment.state !== 'none'"
+                :class="[
+                  segment.kind,
+                  'rounded-[2px]',
+                  segment.state === 'current'
+                    ? 'bg-orange-500/80 text-white'
+                    : 'bg-yellow-400/25 text-inherit',
+                ]"
+              >
+                {{ segment.text }}
+              </mark>
+              <span
+                v-else
+                :class="segment.kind"
+              >
+                {{ segment.text }}
+              </span>
+            </template>
           </div>
         </div>
       </div>

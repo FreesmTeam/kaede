@@ -15,6 +15,7 @@ import FTBIcon from "@/resources/FTBIcon.svg";
 import ModrinthIcon from "@/resources/ModrinthIcon.webp";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
+import type { LogLevelType } from "@/types/logging/log-level.type.ts";
 import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 
 export const ApplicationName = "Kaede";
@@ -279,6 +280,14 @@ export const ExtraHookResponseStatus = {
   "ContinueLoop": "continue-hooks-loop",
 } as const;
 
+export const LogLevelColors: Record<LogLevelType, string> = {
+  "TRACE": "bg-neutral-700",
+  "DEBUG": "bg-black",
+  "INFO" : "bg-blue-600",
+  "WARN" : "bg-yellow-600",
+  "ERROR": "bg-red-600",
+};
+
 export default {
   AsyncFunction,
   ApplicationName,
@@ -299,4 +308,5 @@ export default {
   ContextMenuItems,
   HookResponseStatus,
   ExtraHookResponseStatus,
+  LogLevelColors,
 } as const;

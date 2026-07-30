@@ -1035,11 +1035,13 @@ declare const _default$15: {
 	readonly gcd: typeof gcd;
 	readonly getRelativeDate: typeof getRelativeDate;
 };
-declare function registerComponent(name: string, component: Component): void;
+declare function __registerComponent(name: string, component: Component): void;
+declare function __restoreComponent(name: string): boolean;
 declare function declareGlobals(): void;
 declare const _default$16: {
 	readonly declareGlobals: typeof declareGlobals;
-	readonly registerComponent: typeof registerComponent;
+	readonly registerComponent: typeof __registerComponent;
+	readonly restoreComponent: typeof __restoreComponent;
 };
 declare function hashFileContents(image: Uint8Array): Promise<string>;
 declare function hashOfflineNickname(input: string): Promise<string>;

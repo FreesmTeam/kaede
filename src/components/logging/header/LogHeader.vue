@@ -36,7 +36,7 @@ async function handleModeSelect(event: Event): Promise<void> {
     return;
   }
 
-  // GlobalStateHelpers.Logs.selectMode(newValue);
+  globalStates.logs.mode = newValue;
 
   return Configs.sync();
 }

@@ -68,13 +68,16 @@ input::-webkit-inner-spin-button {
 }
 
 .__log-viewer__log-line {
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
-  display: -webkit-box;
+  /*
+   * -webkit-box-orient: vertical;
+   * -webkit-line-clamp: 1;
+   * display: -webkit-box;
+   * line-clamp: 1;
+   * word-break: break-all;
+   * white-space: pre-wrap;v
+   */
 
-  white-space: pre-wrap;
-  word-break: break-all;
-  line-clamp: 1;
+  white-space: pre;
   overflow: hidden;
   position: sticky;
   width: 100%;

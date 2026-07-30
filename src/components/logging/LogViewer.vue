@@ -17,12 +17,18 @@
   -->
 
 <script setup lang="ts">
+import { useWindowSize } from "@vueuse/core";
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 
 import { useLogStream } from "@/composables/use-log-stream.ts";
 import { globalStates } from "@/states/global.ts";
 
 const { lines } = useLogStream();
+const { "height": innerHeight } = useWindowSize();
+
+const scrollBarSize = 17;
+
+const position = ref<number>(0);
 
 const filtered = computed((): { "list": Array<string> } => {
   const filtering: string = globalStates.logs.filtering;
@@ -39,8 +45,13 @@ const filtered = computed((): { "list": Array<string> } => {
 
   return { "list": filtered };
 });
+const elements = computed((): Array<number> => {
+  const region: number = innerHeight.value - 280;
+  const boundary: number = Math.ceil(region / globalStates.logs.lineHeight);
+  const size: number = Math.min(boundary, filtered.value.list.length);
 
-const position = ref<number>(0);
+  return Array.from({ "length": size }).map((_, index) => index);
+});
 
 const container = useTemplateRef("container");
 
@@ -55,7 +66,10 @@ function updateView(event: Event): void {
 }
 
 watch(
-  () => lines.value,
+  () => [
+    lines.value,
+    elements.value,
+  ],
   async () => {
     if (!container.value) {
       return;
@@ -74,50 +88,41 @@ watch(
   },
 );
 
-onMounted(() => {
-  if (!container.value) {
-    return;
-  }
-
-  container.value.addEventListener("scroll", updateView, { "passive": true });
-});
-onUnmounted(() => {
-  if (!container.value) {
-    return;
-  }
-
-  container.value.removeEventListener("scroll", updateView);
-});
+onMounted(() => container?.value?.addEventListener?.("scroll", updateView, { "passive": true }));
+onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView));
 </script>
 
 <template>
   <div
     @contextmenu.prevent
     id="__log-viewer__wrapper"
-    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex items-start p-16 text-start text-sm bg-[theme(colors.black/.5)]"
+    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex flex-col justify-center gap-2 px-16 text-start text-sm bg-[theme(colors.black/.5)]"
     v-show="lines.list.length > 0"
   >
+    <div>
+      asd ayo
+    </div>
     <div
       id="__log-viewer__inner"
-      class="w-full flex-1 select-text"
+      class="w-full select-text"
     >
       <div
         id="__log-viewer__bound"
-        class="relative w-full select-text overflow-y-auto"
+        class="relative w-full select-text overflow-scroll"
         ref="container"
-        :style="{ 'height': 16 * globalStates.logs.lineHeight + 'px' }"
+        :style="{ 'height': elements.length * globalStates.logs.lineHeight + scrollBarSize + 'px' }"
       >
         <div
           id="__log-viewer__scroll-placeholder"
-          class="font-mono"
+          class="w-fit font-mono"
           :style="{
             'height': lines.list.length * globalStates.logs.lineHeight + 'px',
           }"
         >
+          <!-- eslint-disable-next-line @vue-require-id/require-id -->
           <div
-            v-for="(_, index) in Array.from({ length: 16 })"
+            v-for="index in elements"
             :key="index"
-            :id="`${index}-log-line`"
             class="__log-viewer__log-line"
             :style="{ 'top': index * globalStates.logs.lineHeight + 'px' }"
           >

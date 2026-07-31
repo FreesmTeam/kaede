@@ -186,7 +186,7 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
     v-show="lines.list.length > 0"
     @contextmenu.prevent
     id="__log-viewer__wrapper"
-    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex items-center px-20 text-start text-sm bg-[theme(colors.black/.5)]"
+    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex px-20 pt-20 text-start text-sm bg-[theme(colors.black/.5)]"
   >
     <div
       id="__log-viewer__inner"
@@ -196,7 +196,7 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
       <LogHeader :searcher="searcher" :status="status" />
       <div
         id="__log-viewer__bound-wrapper"
-        class="w-full bg-[theme(colors.black/.2)]"
+        class="w-full bg-[theme(colors.black/.2)] border-b border-x border-neutral-500"
       >
         <div
           id="__log-viewer__bound"

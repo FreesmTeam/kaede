@@ -8,8 +8,16 @@
   "permissions": [
     "core:app:allow-app-hide",
     "core:app:allow-app-show",
+    "core:app:allow-bundle-type",
     "core:app:allow-default-window-icon",
+    "core:app:allow-fetch-data-store-identifiers",
+    "core:app:allow-identifier",
     "core:app:allow-name",
+    "core:app:allow-register-listener",
+    "core:app:allow-remove-data-store",
+    "core:app:allow-remove-listener",
+    "core:app:allow-set-dock-visibility",
+    "core:app:allow-supports-multiple-windows",
     "core:app:allow-set-app-theme",
     "core:app:allow-tauri-version",
     "core:app:allow-version"

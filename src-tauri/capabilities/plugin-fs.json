@@ -9,7 +9,7 @@
     {
       "identifier": "fs:scope",
       "allow": [
-        { "path": "**/*" }
+        { "path": "/**/*" }
       ]
     },
     "fs:allow-copy-file",

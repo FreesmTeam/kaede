@@ -13,6 +13,8 @@
     "core:webview:allow-internal-toggle-devtools",
     "core:webview:allow-print",
     "core:webview:allow-reparent",
+    "core:webview:allow-set-webview-auto-resize",
+    "core:webview:allow-set-webview-background-color",
     "core:webview:allow-set-webview-focus",
     "core:webview:allow-set-webview-position",
     "core:webview:allow-set-webview-size",

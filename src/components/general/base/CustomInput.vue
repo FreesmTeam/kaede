@@ -36,7 +36,7 @@ const {
   "onKeyboardEvent"?: (event: KeyboardEvent) => void;
   "onBlur"         ?: (value: string) => void;
   "classNames"     ?: {
-    "wrapper" : string;
+    "wrapper"?: string;
     "icon"   ?: string;
     "input"  ?: string;
   };

@@ -79,7 +79,6 @@ input::-webkit-inner-spin-button {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  gap: 8px;
 
   white-space: pre;
   overflow: hidden;

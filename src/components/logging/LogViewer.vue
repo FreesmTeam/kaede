@@ -66,6 +66,33 @@ const elements = computed((): number[] => {
 
   return Array.from({ "length": size }, (_, index) => index);
 });
+const segments = computed((): Array<Array<LogRenderSegmentType & { "gap": boolean }>> => {
+  return elements.value.map(index => {
+    return getSegments(position.value + index)
+      // We need to carefully introduce the gap between log line sections...
+      .map((currentSegment, currentIndex, currentArray) => {
+        const nextSegment = currentArray[currentIndex + 1];
+        const toReturn = {
+          "index": currentSegment.index,
+          "state": currentSegment.state,
+          "text" : currentSegment.text,
+          "kind" : currentSegment.kind,
+          "gap"  : false,
+        };
+
+        if (nextSegment === undefined) {
+          return toReturn;
+        }
+
+        // Is next section? If yes, then add a gap
+        toReturn.gap =
+          nextSegment?.state === "none" ||
+          currentSegment.kind !== nextSegment?.kind;
+
+        return toReturn;
+      });
+  });
+});
 
 const container = useTemplateRef("container");
 
@@ -80,7 +107,7 @@ function updateView(event: Event): void {
   position.value = Math.round(target.scrollTop / globalStates.logs.lineHeight);
 }
 
-// Stick to the bottom of the log viewer unless
+// Stick to the bottom of the log viewer
 watch(
   () => [
     lines.value.list.length,
@@ -143,11 +170,13 @@ function scrollToMatch(match: { "lineIndex": number } | undefined): void {
 const searcher: {
   "back"  : () => void;
   "next"  : () => void;
+  "to"    : (index: number) => void;
   "reset" : () => void;
   "search": (input: string) => void;
 } = {
   "back"  : (): void => scrollToMatch(utils.previous()),
   "next"  : (): void => scrollToMatch(utils.next()),
+  "to"    : (index: number): void => scrollToMatch(utils.goTo(index)),
   "reset" : utils.reset,
   "search": (input: string): void => {
     status.searching = input;
@@ -196,7 +225,7 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
               {{ filtered?.list?.[position + index]?.index }}
             </div>
             <template
-              v-for="segment in getSegments(position + index)"
+              v-for="segment in segments[index]"
               :key="`${index}-${segment.index}`"
             >
               <mark
@@ -210,7 +239,10 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
               >
                 {{ segment.text }}
               </mark>
-              <div v-else>
+              <div
+                v-else
+                :class="[segment.gap ? 'pr-4' : '']"
+              >
                 {{ segment.text }}
               </div>
             </template>

@@ -20,6 +20,7 @@
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
+import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import FileStructure from "@/constants/file-structure.ts";
 import FileManager from "@/lib/file-manager";
 import { globalStates } from "@/states/global.ts";
@@ -29,6 +30,7 @@ const { searcher, status } = defineProps<{
   "searcher": {
     "back"  : () => void;
     "next"  : () => void;
+    "to"    : (index: number) => void;
     "reset" : () => void;
     "search": (input: string) => void;
   };
@@ -69,10 +71,30 @@ function onNavigation(event: KeyboardEvent): void {
     searcher.reset();
   }
 }
+
+function handleIndex(event: Event): void {
+  const target = event?.target as HTMLInputElement | null;
+  const value: string | undefined = target?.value;
+
+  if (!value) {
+    return;
+  }
+
+  const newValue = Number(value) - 1;
+  const relativePosition = Math.min(
+    Math.max(0, status.matches.length),
+    Math.max(
+      0,
+      newValue,
+    ),
+  );
+
+  searcher.to(relativePosition);
+}
 </script>
 
 <template>
-  <div id="__log-viewer__header-wrapper" class="flex flex-wrap gap-2">
+  <div id="__log-viewer__header-wrapper" class="h-8 flex flex-wrap gap-2">
     <button
       id="__log-viewer__header-view-in-explorer"
       @click="viewInExplorer"
@@ -84,18 +106,66 @@ function onNavigation(event: KeyboardEvent): void {
       listen-to-events
       blur-on-escape
       icon="i-lucide-search"
-      placeholder="Search logs..."
+      placeholder="Search... (regex)"
       id-root="__log-viewer__header-search"
       :debounce-time="300"
       :default-value="status.searching"
       :on-input="searcher.search"
       :on-escape="searcher.reset"
       :on-key-down="onNavigation"
+      :class-names="status.searching === '' ? undefined : {
+        'wrapper': status.valid ? '' : 'border border-red',
+      }"
     />
+    <div
+      id="__log-viewer__header-matches-wrapper"
+      :class="[
+        status.searching === '' ? 'hidden' : 'flex',
+        'h-full shrink-0 flex-nowrap items-center',
+        'rounded-md bg-neutral-800 text-sm text-neutral-400',
+      ]"
+    >
+      <button
+        id="__log-viewer__header-matches-increment-button"
+        @click="searcher.back"
+        class="relative grid ml-1 size-6 place-items-center rounded-md transition-[color] hover:text-white"
+      >
+        <span id="__log-viewer__header-matches-increment-icon" class="i-lucide-chevron-up block size-4"></span>
+        <MaterialRipple />
+      </button>
+      <button
+        id="__log-viewer__header-matches-decrement-button"
+        @click="searcher.next"
+        class="relative grid ml-1 size-6 place-items-center rounded-md transition-[color] hover:text-white"
+      >
+        <span id="__log-viewer__header-matches-decrement-icon" class="i-lucide-chevron-down block size-4"></span>
+        <MaterialRipple />
+      </button>
+      <input
+        v-if="status.matches.length > 0"
+        id="__log-viewer__header-matches-input"
+        class="w-8 bg-transparent pr-4 text-end outline-none sm:w-12 md:pr-0 focus:outline-none"
+        type="number"
+        :min="1"
+        :max="Math.max(1, status.matches.length)"
+        :value="status.index + 1"
+        @input="handleIndex"
+      />
+      <span
+        v-else
+        id="__log-viewer__header-matches-placeholder"
+        class="w-8 bg-transparent pr-4 text-end outline-none sm:w-12 md:pr-0 focus:outline-none"
+      >
+        0
+      </span>
+      <p id="__log-controls__matches-text" class="hidden px-2 md:block">
+        of {{ status.matches.length }} matches
+      </p>
+    </div>
     <CustomInput
       blur-on-escape
       icon="i-lucide-list-filter"
-      placeholder="Filter logs..."
+      placeholder="Filter..."
       id-root="__log-viewer__header-filter"
       :debounce-time="200"
       :default-value="globalStates.logs.filtering"

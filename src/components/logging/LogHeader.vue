@@ -18,9 +18,11 @@
 
 <script setup lang="ts">
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { useTemplateRef } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useLogResizer } from "@/composables/use-log-resizer.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import FileManager from "@/lib/file-manager";
 import { globalStates } from "@/states/global.ts";
@@ -36,6 +38,10 @@ const { searcher, status } = defineProps<{
   };
   "status": LogSearchComposableType["status"];
 }>();
+
+const characterElement = useTemplateRef<HTMLDivElement>("characterElement");
+
+const { resizeSection, toggleSection } = useLogResizer(characterElement);
 
 const filterer = {
   "filter": (input: string): void => {
@@ -97,9 +103,7 @@ function handleIndex(event: Event): void {
   <div
     id="__log-viewer__header-wrapper"
     class="h-8 flex flex-wrap gap-2"
-    :style="{
-      'color': globalStates.ui.widget.textColor ?? '#FFFFFF',
-    }"
+    :style="{ 'color': globalStates.ui.widget.textColor ?? '#FFFFFF' }"
   >
     <button
       id="__log-viewer__header-view-in-explorer"
@@ -182,44 +186,81 @@ function handleIndex(event: Event): void {
   <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
   <div
     id="__log-viewer__tab-sections"
-    class="flex flex-nowrap items-center font-mono bg-[theme(colors.black/.3)]"
+    class="flex flex-nowrap items-center overflow-x-auto font-mono bg-[theme(colors.black/.3)]"
     :style="{
       'color': globalStates.ui.widget.secondaryColor ?? '#D4D4D4',
     }"
   >
+    <div ref="characterElement" id="__log-viewer__font-calculation" class="invisible absolute shrink-0 select-none font-mono">
+      .
+    </div>
     <div
       id="__log-viewer__tab-section-line-number"
       class="w-12 shrink-0 whitespace-pre text-center"
     >
       #
     </div>
-    <div id="__log-viewer__tab-section-separator-1" class="mr-1 h-3 w-[1px] bg-neutral-500"></div>
-    <div
+    <div id="__log-viewer__tab-section-separator-1" class="mr-2 h-3 w-[1px] bg-neutral-500"></div>
+    <button
+      @click="() => toggleSection('time')"
       id="__log-viewer__tab-section-time"
-      class="shrink-0 whitespace-pre pr-[7px]"
+      :class="[
+        globalStates.logs.partsShown.time ? '' : 'opacity-70',
+        'shrink-0 whitespace-pre pr-[3px]',
+      ]"
     >
       {{ "time".padEnd(globalStates.logs.partsSize.time) }}
-    </div>
-    <div id="__log-viewer__tab-section-separator-2" class="mx-1 h-3 w-[1px] bg-neutral-500"></div>
-    <div
+    </button>
+    <button
+      id="__log-viewer__tab-section-separator-2"
+      class="h-3 cursor-col-resize pl-1 pr-2"
+      @pointerdown="event => resizeSection(event, 'time')"
+    >
+      <span id="__log-viewer__tab-section-separator-inner-2" class="block h-3 w-[1px] bg-neutral-500"></span>
+    </button>
+    <button
+      @click="() => toggleSection('level')"
       id="__log-viewer__tab-section-level"
-      class="shrink-0 whitespace-pre pr-[7px]"
+      :class="[
+        globalStates.logs.partsShown.level ? '' : 'opacity-70',
+        'shrink-0 whitespace-pre pr-[3px]',
+      ]"
     >
       {{ "level".padEnd(globalStates.logs.partsSize.level) }}
-    </div>
-    <div id="__log-viewer__tab-section-separator-3" class="mx-1 h-3 w-[1px] bg-neutral-500"></div>
-    <div
+    </button>
+    <button
+      id="__log-viewer__tab-section-separator-3"
+      class="h-3 cursor-col-resize pl-1 pr-2"
+      @pointerdown="event => resizeSection(event, 'level')"
+    >
+      <span id="__log-viewer__tab-section-separator-inner-3" class="block h-3 w-[1px] bg-neutral-500"></span>
+    </button>
+    <button
+      @click="() => toggleSection('target')"
       id="__log-viewer__tab-section-target"
-      class="shrink-0 whitespace-pre pr-[7px]"
+      :class="[
+        globalStates.logs.partsShown.target ? '' : 'opacity-70',
+        'shrink-0 whitespace-pre pr-[3px]',
+      ]"
     >
       {{ "target".padEnd(globalStates.logs.partsSize.target) }}
-    </div>
-    <div id="__log-viewer__tab-section-separator-4" class="mx-1 h-3 w-[1px] bg-neutral-500"></div>
-    <div
+    </button>
+    <button
+      id="__log-viewer__tab-section-separator-4"
+      class="h-3 cursor-col-resize pl-1 pr-2"
+      @pointerdown="event => resizeSection(event, 'target')"
+    >
+      <span id="__log-viewer__tab-section-separator-inner-4" class="block h-3 w-[1px] bg-neutral-500"></span>
+    </button>
+    <button
+      @click="() => toggleSection('message')"
       id="__log-viewer__tab-section-message"
-      class="shrink-0"
+      :class="[
+        globalStates.logs.partsShown.message ? '' : 'opacity-70',
+        'shrink-0',
+      ]"
     >
       message
-    </div>
+    </button>
   </div>
 </template>

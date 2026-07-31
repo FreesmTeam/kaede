@@ -43,6 +43,10 @@ export function tokenize(parsed: LogParsedLineType): Array<RawToken> {
   const partsSize = globalStates.logs.partsSize;
 
   if (parsed.kind === "plain") {
+    if (!partsShown.message) {
+      return [];
+    }
+
     return [{
       "text"       : parsed.text,
       "kind"       : "message",

@@ -24,9 +24,12 @@ import LogHeader from "@/components/logging/LogHeader.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { useLogSearch } from "@/composables/use-log-search.ts";
 import { useLogStream } from "@/composables/use-log-stream.ts";
+import { LogKindColors, LogLevelColors } from "@/constants/application.ts";
+import Logging from "@/lib/logging";
 import { parseLine } from "@/lib/logging/parser.ts";
 import { overlaySearch, tokenize } from "@/lib/logging/renderer.ts";
 import { globalStates } from "@/states/global.ts";
+import type { LogLevelType } from "@/types/logging/log-level.type.ts";
 import type { LogLineType } from "@/types/logging/log-line.type.ts";
 import type { LogRenderSegmentType } from "@/types/logging/log-render.type.ts";
 
@@ -68,12 +71,39 @@ const elements = computed((): number[] => {
 
   return Array.from({ "length": size }, (_, index) => index);
 });
-const segments = computed((): Array<Array<LogRenderSegmentType & { "gap": boolean }>> => {
+const segments = computed((): Array<Array<LogRenderSegmentType & {
+  "gap"  : boolean;
+  "class": string;
+}>> => {
   return elements.value.map(index => {
     return getSegments(position.value + index)
       // We need to carefully introduce the gap between log line sections...
       .map((currentSegment, currentIndex, currentArray) => {
         const nextSegment = currentArray[currentIndex + 1];
+        let colorClass: string;
+
+        switch (currentSegment.kind) {
+          case "time": {
+            colorClass = LogKindColors.time;
+
+            break;
+          }
+          case "level": {
+            colorClass = LogLevelColors[currentSegment.text.trim() as LogLevelType];
+
+            break;
+          }
+          case "target": {
+            colorClass = Logging.getLogTargetColor(currentSegment.text);
+
+            break;
+          }
+          case "message": {
+            colorClass = LogKindColors.message;
+
+            break;
+          }
+        }
 
         return {
           "index": currentSegment.index,
@@ -82,6 +112,7 @@ const segments = computed((): Array<Array<LogRenderSegmentType & { "gap": boolea
           "kind" : currentSegment.kind,
           // Is next section? If yes, then add a gap
           "gap"  : nextSegment !== undefined && currentSegment.kind !== nextSegment.kind,
+          "class": colorClass,
         };
       });
   });
@@ -196,22 +227,20 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
       <LogHeader :searcher="searcher" :status="status" />
       <div
         id="__log-viewer__bound-wrapper"
-        class="w-full bg-[theme(colors.black/.2)] border-b border-x border-neutral-500"
+        class="w-full border-x border-b border-neutral-500 bg-[theme(colors.black/.2)]"
       >
         <div
           id="__log-viewer__bound"
           class="relative w-full select-text overflow-scroll"
           ref="container"
           :style="{
-          'height': elements.length * globalStates.logs.lineHeight + scrollBarSize + 'px',
-        }"
+            'height': elements.length * globalStates.logs.lineHeight + scrollBarSize + 'px',
+          }"
         >
           <div
             id="__log-viewer__scroll-placeholder"
             class="w-fit font-mono"
-            :style="{
-              'height': filtered.list.length * globalStates.logs.lineHeight + 'px',
-            }"
+            :style="{ 'height': filtered.list.length * globalStates.logs.lineHeight + 'px' }"
           >
             <div
               v-for="index in elements"
@@ -237,12 +266,10 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
                   v-if="segment.state !== 'none'"
                   :id="`__log-viewer__log-line-segment-${index}-${segment.index}`"
                   :class="[
-                    'rounded-sm',
+                    'rounded-sm text-white',
                     // Here we use 'mr-4' instead of 'pr-4' to not expand background yet have a gap
                     segment.gap ? 'mr-4' : '',
-                    segment.state === 'current'
-                      ? 'bg-orange-500/80 text-white'
-                      : 'bg-yellow-400/25 text-inherit',
+                    segment.state === 'current' ? 'bg-blue-500/80' : 'bg-blue-400/25',
                   ]"
                 >
                   {{ segment.text }}
@@ -250,7 +277,7 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
                 <div
                   v-else
                   :id="`__log-viewer__log-line-segment-${index}-${segment.index}`"
-                  :class="[segment.gap ? 'pr-4' : '']"
+                  :class="[segment.class, segment.gap ? 'pr-4' : '']"
                 >
                   {{ segment.text }}
                 </div>

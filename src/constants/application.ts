@@ -280,12 +280,16 @@ export const ExtraHookResponseStatus = {
   "ContinueLoop": "continue-hooks-loop",
 } as const;
 
+export const LogKindColors: Record<"time" | "message", string> = {
+  "time"   : "text-neutral-400",
+  "message": "text-neutral-300",
+};
 export const LogLevelColors: Record<LogLevelType, string> = {
-  "TRACE": "bg-neutral-700",
-  "DEBUG": "bg-black",
-  "INFO" : "bg-blue-600",
-  "WARN" : "bg-yellow-600",
-  "ERROR": "bg-red-600",
+  "TRACE": "text-neutral-500",
+  "DEBUG": "text-neutral-300",
+  "INFO" : "text-blue-300",
+  "WARN" : "text-orange-300",
+  "ERROR": "text-red-300",
 };
 
 export default {
@@ -308,5 +312,6 @@ export default {
   ContextMenuItems,
   HookResponseStatus,
   ExtraHookResponseStatus,
+  LogKindColors,
   LogLevelColors,
 } as const;

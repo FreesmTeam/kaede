@@ -21,6 +21,7 @@ import { useWindowSize } from "@vueuse/core";
 import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
 
 import LogHeader from "@/components/logging/LogHeader.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { useLogSearch } from "@/composables/use-log-search.ts";
 import { useLogStream } from "@/composables/use-log-stream.ts";
 import { parseLine } from "@/lib/logging/parser.ts";
@@ -29,6 +30,7 @@ import { globalStates } from "@/states/global.ts";
 import type { LogLineType } from "@/types/logging/log-line.type.ts";
 import type { LogRenderSegmentType } from "@/types/logging/log-render.type.ts";
 
+const { styles } = useConfigColors();
 const { lines } = useLogStream();
 const { "height": innerHeight } = useWindowSize();
 
@@ -72,24 +74,15 @@ const segments = computed((): Array<Array<LogRenderSegmentType & { "gap": boolea
       // We need to carefully introduce the gap between log line sections...
       .map((currentSegment, currentIndex, currentArray) => {
         const nextSegment = currentArray[currentIndex + 1];
-        const toReturn = {
+
+        return {
           "index": currentSegment.index,
           "state": currentSegment.state,
           "text" : currentSegment.text,
           "kind" : currentSegment.kind,
-          "gap"  : false,
+          // Is next section? If yes, then add a gap
+          "gap"  : nextSegment !== undefined && currentSegment.kind !== nextSegment.kind,
         };
-
-        if (nextSegment === undefined) {
-          return toReturn;
-        }
-
-        // Is next section? If yes, then add a gap
-        toReturn.gap =
-          nextSegment?.state === "none" ||
-          currentSegment.kind !== nextSegment?.kind;
-
-        return toReturn;
       });
   });
 });
@@ -188,64 +181,81 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
 </script>
 
 <template>
+  <!-- For some reason, 'grid place-items-center' breaks layout, so we use 'flex items-center' -->
   <div
+    v-show="lines.list.length > 0"
     @contextmenu.prevent
     id="__log-viewer__wrapper"
-    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex flex-col justify-center gap-2 px-16 text-start text-sm bg-[theme(colors.black/.5)]"
-    v-show="lines.list.length > 0"
+    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex items-center px-20 text-start text-sm bg-[theme(colors.black/.5)]"
   >
-    <LogHeader :searcher="searcher" :status="status" />
     <div
       id="__log-viewer__inner"
-      class="w-full select-text"
+      class="h-fit w-full flex flex-col rounded-md p-4"
+      :style="styles.widget"
     >
+      <LogHeader :searcher="searcher" :status="status" />
       <div
-        id="__log-viewer__bound"
-        class="relative w-full select-text overflow-scroll"
-        ref="container"
-        :style="{ 'height': elements.length * globalStates.logs.lineHeight + scrollBarSize + 'px' }"
+        id="__log-viewer__bound-wrapper"
+        class="w-full bg-[theme(colors.black/.2)]"
       >
-        <!-- eslint-disable @vue-require-id/require-id -->
         <div
-          id="__log-viewer__scroll-placeholder"
-          class="w-fit font-mono"
+          id="__log-viewer__bound"
+          class="relative w-full select-text overflow-scroll"
+          ref="container"
           :style="{
-            'height': filtered.list.length * globalStates.logs.lineHeight + 'px',
-          }"
+          'height': elements.length * globalStates.logs.lineHeight + scrollBarSize + 'px',
+        }"
         >
           <div
-            v-for="index in elements"
-            :key="index"
-            class="__log-viewer__log-line"
-            :style="{ 'top': index * globalStates.logs.lineHeight + 'px' }"
+            id="__log-viewer__scroll-placeholder"
+            class="w-fit font-mono"
+            :style="{
+              'height': filtered.list.length * globalStates.logs.lineHeight + 'px',
+            }"
           >
             <div
-              class="w-12 shrink-0 text-center text-neutral-300"
+              v-for="index in elements"
+              :key="index"
+              :id="`__log-viewer__log-line-${index}`"
+              :style="{ 'top': index * globalStates.logs.lineHeight + 'px' }"
+              class="__log-viewer__log-line"
             >
-              {{ filtered?.list?.[position + index]?.index }}
-            </div>
-            <template
-              v-for="segment in segments[index]"
-              :key="`${index}-${segment.index}`"
-            >
-              <mark
-                v-if="segment.state !== 'none'"
-                :class="[
-                  'rounded-[2px]',
-                  segment.state === 'current'
-                    ? 'bg-orange-500/80 text-white'
-                    : 'bg-yellow-400/25 text-inherit',
-                ]"
-              >
-                {{ segment.text }}
-              </mark>
               <div
-                v-else
-                :class="[segment.gap ? 'pr-4' : '']"
+                :id="`__log-viewer__log-line-number-${index}`"
+                class="w-12 shrink-0 select-none text-center"
+                :style="{
+                  'color': globalStates.ui.widget.secondaryColor ?? '#D4D4D4',
+                }"
               >
-                {{ segment.text }}
+                {{ filtered?.list?.[position + index]?.index }}
               </div>
-            </template>
+              <template
+                v-for="segment in segments[index]"
+                :key="`${index}-${segment.index}`"
+              >
+                <mark
+                  v-if="segment.state !== 'none'"
+                  :id="`__log-viewer__log-line-segment-${index}-${segment.index}`"
+                  :class="[
+                    'rounded-sm',
+                    // Here we use 'mr-4' instead of 'pr-4' to not expand background yet have a gap
+                    segment.gap ? 'mr-4' : '',
+                    segment.state === 'current'
+                      ? 'bg-orange-500/80 text-white'
+                      : 'bg-yellow-400/25 text-inherit',
+                  ]"
+                >
+                  {{ segment.text }}
+                </mark>
+                <div
+                  v-else
+                  :id="`__log-viewer__log-line-segment-${index}-${segment.index}`"
+                  :class="[segment.gap ? 'pr-4' : '']"
+                >
+                  {{ segment.text }}
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </div>

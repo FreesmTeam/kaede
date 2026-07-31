@@ -94,7 +94,13 @@ function handleIndex(event: Event): void {
 </script>
 
 <template>
-  <div id="__log-viewer__header-wrapper" class="h-8 flex flex-wrap gap-2">
+  <div
+    id="__log-viewer__header-wrapper"
+    class="h-8 flex flex-wrap gap-2"
+    :style="{
+      'color': globalStates.ui.widget.textColor ?? '#FFFFFF',
+    }"
+  >
     <button
       id="__log-viewer__header-view-in-explorer"
       @click="viewInExplorer"
@@ -172,5 +178,48 @@ function handleIndex(event: Event): void {
       :on-input="filterer.filter"
       :on-escape="filterer.reset"
     />
+  </div>
+  <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
+  <div
+    id="__log-viewer__tab-sections"
+    class="flex flex-nowrap items-center font-mono bg-[theme(colors.black/.3)]"
+    :style="{
+      'color': globalStates.ui.widget.secondaryColor ?? '#D4D4D4',
+    }"
+  >
+    <div
+      id="__log-viewer__tab-section-line-number"
+      class="w-12 shrink-0 whitespace-pre text-center"
+    >
+      #
+    </div>
+    <div id="__log-viewer__tab-section-separator-1" class="mr-1 h-3 w-[1px] bg-neutral-500"></div>
+    <div
+      id="__log-viewer__tab-section-time"
+      class="shrink-0 whitespace-pre pr-[7px]"
+    >
+      {{ "time".padEnd(globalStates.logs.partsSize.time) }}
+    </div>
+    <div id="__log-viewer__tab-section-separator-2" class="mx-1 h-3 w-[1px] bg-neutral-500"></div>
+    <div
+      id="__log-viewer__tab-section-level"
+      class="shrink-0 whitespace-pre pr-[7px]"
+    >
+      {{ "level".padEnd(globalStates.logs.partsSize.level) }}
+    </div>
+    <div id="__log-viewer__tab-section-separator-3" class="mx-1 h-3 w-[1px] bg-neutral-500"></div>
+    <div
+      id="__log-viewer__tab-section-target"
+      class="shrink-0 whitespace-pre pr-[7px]"
+    >
+      {{ "target".padEnd(globalStates.logs.partsSize.target) }}
+    </div>
+    <div id="__log-viewer__tab-section-separator-4" class="mx-1 h-3 w-[1px] bg-neutral-500"></div>
+    <div
+      id="__log-viewer__tab-section-message"
+      class="shrink-0"
+    >
+      message
+    </div>
   </div>
 </template>

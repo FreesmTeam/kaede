@@ -54,7 +54,7 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
       <C.Layout>
         <Router />
 
-        <Transition name="pop">
+        <Transition name="fade">
           <LogViewer v-if="globalStates.logs.show" />
         </Transition>
 

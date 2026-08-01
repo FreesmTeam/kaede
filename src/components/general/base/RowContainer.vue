@@ -16,13 +16,11 @@
   - along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
-<script setup lang="ts">
+<script setup="setup" lang="ts">
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 
-const { idRoot, title, subtitle } = defineProps<{
-  "idRoot"   : string;
-  "title"    : string;
-  "subtitle"?: string;
+const { id } = defineProps<{
+  "id": string;
 }>();
 
 const { styles } = useConfigColors();
@@ -30,33 +28,10 @@ const { styles } = useConfigColors();
 
 <template>
   <div
-    :id="`${idRoot}-wrapper`"
-    class="relative w-full flex flex-nowrap items-center justify-between gap-4 rounded-md p-2"
+    :id="id"
+    class="flex flex-col gap-2 rounded-md p-2"
     :style="styles.widget"
   >
-    <div
-      :id="`${idRoot}-information`"
-      class="flex flex-col gap-1 pl-2"
-    >
-      <span
-        :id="`${idRoot}-title`"
-        class="leading-none"
-      >
-        {{ title }}
-      </span>
-      <span
-        v-if="subtitle"
-        :id="`${idRoot}-subtitle`"
-        class="text-sm text-neutral-400 leading-none"
-      >
-        {{ subtitle }}
-      </span>
-    </div>
-    <div
-      :id="`${idRoot}-control`"
-      class="flex shrink-0 flex-nowrap items-center gap-2"
-    >
-      <slot />
-    </div>
+    <slot />
   </div>
 </template>

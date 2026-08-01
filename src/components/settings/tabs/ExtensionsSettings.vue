@@ -17,72 +17,150 @@
   -->
 
 <script setup lang="ts">
-import { computed } from "vue";
-
-import SettingsRow from "@/components/settings/base/SettingsRow.vue";
-import SettingsToggle from "@/components/settings/base/SettingsToggle.vue";
+import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import Row from "@/components/general/base/Row.vue";
+import RowContainer from "@/components/general/base/RowContainer.vue";
+import Toggle from "@/components/general/base/Toggle.vue";
 import { globalStates } from "@/states/global.ts";
 
-const idRoot = "__settings-page__extensions";
-
-const enabled = computed((): boolean => (
-  globalStates.extensions.enabled
-));
-const allowUntrusted = computed((): boolean => (
-  globalStates.extensions.allowUnrestrictedUntrusted
-));
-const showAfterInitialization = computed((): boolean => (
-  globalStates.extensions.showAppAfterExtensionsLoad
-));
-
-function handleEnabledToggle(value: boolean): void {
-  globalStates.extensions.enabled = value;
-}
-function handleAllowUntrustedToggle(value: boolean): void {
-  globalStates.extensions.allowUnrestrictedUntrusted = value;
-}
-function handleShowAfterInitializationToggle(value: boolean): void {
-  globalStates.extensions.showAppAfterExtensionsLoad = value;
-}
+const toggle = {
+  "enabled": (): boolean => (
+    globalStates.extensions.enabled = !globalStates.extensions.enabled
+  ),
+  "allowUnrestrictedUntrusted": (): boolean => (
+    globalStates.extensions.allowUnrestrictedUntrusted =
+      !globalStates.extensions.allowUnrestrictedUntrusted
+  ),
+  "showAppAfterExtensionsLoad": (): boolean => (
+    globalStates.extensions.showAppAfterExtensionsLoad =
+      !globalStates.extensions.showAppAfterExtensionsLoad
+  ),
+  "extension": (index: number): void => {
+    // TODO: first show a custom modal with a 3-sec delay
+    globalStates.extensions.list[index].enabled =
+      !globalStates.extensions.list[index].enabled;
+  },
+};
+// TODO: show trusted unrestricted first, then sandboxed, then untrusted unrestricted
 </script>
 
 <template>
   <div
-    :id="`${idRoot}-wrapper`"
-    class="h-fit w-full flex flex-col gap-2"
+    id="__settings-page__extensions-wrapper"
+    class="h-fit w-full flex flex-col gap-2 pb-2"
   >
-    <SettingsRow
-      :id-root="`${idRoot}-enabled`"
-      title="Enable extensions"
-      subtitle="Load installed extensions when the launcher starts"
-    >
-      <SettingsToggle
-        :id="`${idRoot}-enabled-toggle`"
-        :model-value="enabled"
-        :on-toggle="handleEnabledToggle"
+    <RowContainer id="__settings-page__extensions-inner">
+      <Row
+        class="relative cursor-pointer"
+        icon="i-lucide-blocks"
+        id-root="__settings-page__extensions-enabled"
+        title="Enable extensions"
+        subtitle="Load trusted or community-made extensions"
+        @click="toggle.enabled"
+      >
+        <Toggle
+          id="__settings-page__extensions-enabled-toggle"
+          class="pointer-events-none"
+          :model-value="globalStates.extensions.enabled"
+        />
+        <MaterialRipple />
+      </Row>
+      <Row
+        class="relative cursor-pointer"
+        icon="i-lucide-door-open"
+        id-root="__settings-page__extensions-allow-untrusted"
+        title="Allow unrestricted untrusted extensions"
+        subtitle="Allow untrusted extensions to run outside of the sandbox"
+        @click="toggle.allowUnrestrictedUntrusted"
+      >
+        <Toggle
+          id="__settings-page__extensions-allow-untrusted-toggle"
+          class="pointer-events-none"
+          :model-value="globalStates.extensions.allowUnrestrictedUntrusted"
+        />
+        <MaterialRipple />
+      </Row>
+      <Row
+        class="relative cursor-pointer"
+        icon="i-lucide-clock"
+        id-root="__settings-page__extensions-show-after-initialization"
+        title="Show window after extensions load"
+        subtitle="Wait for extensions to initialize before showing the launcher window"
+        @click="toggle.showAppAfterExtensionsLoad"
+      >
+        <Toggle
+          id="__settings-page__extensions-show-after-initialization-toggle"
+          class="pointer-events-none"
+          :model-value="globalStates.extensions.showAppAfterExtensionsLoad"
+        />
+        <MaterialRipple />
+      </Row>
+      <Row
+        icon="i-lucide-shield-check"
+        id-root="__settings-page__extensions-list"
+        title="Trusted extensions"
+        subtitle="Enable or disable safe extensions"
       />
-    </SettingsRow>
-    <SettingsRow
-      :id-root="`${idRoot}-allow-untrusted`"
-      title="Allow unrestricted untrusted extensions"
-      subtitle="Run untrusted extensions outside of the sandbox. Only enable this if you trust them"
-    >
-      <SettingsToggle
-        :id="`${idRoot}-allow-untrusted-toggle`"
-        :model-value="allowUntrusted"
-        :on-toggle="handleAllowUntrustedToggle"
+      <Row
+        v-for="(entry, index) in globalStates.extensions.list"
+        :key="entry.id"
+        :id-root="`__settings-page__extensions-list-${entry.id}`"
+        class="relative cursor-pointer"
+        :title="`${entry.id}`"
+        subtitle="Wait for extensions to initialize before showing the launcher window"
+        @click="() => toggle.extension(index)"
+      >
+        <Toggle
+          id="__settings-page__extensions-show-after-initialization-toggle"
+          class="pointer-events-none"
+          :model-value="globalStates.extensions.list[index].enabled"
+        />
+        <MaterialRipple />
+      </Row>
+      <Row
+        icon="i-lucide-box"
+        id-root="__settings-page__extensions-list"
+        title="Community extensions (sandboxed)"
+        subtitle="Enable or disable community extensions running in a sandbox"
       />
-    </SettingsRow>
-    <SettingsRow
-      :id-root="`${idRoot}-show-after-initialization`"
-      title="Show window after extensions load"
-      subtitle="Wait for extensions to initialize before revealing the launcher window"
-    >
-      <SettingsToggle
-        :id="`${idRoot}-show-after-initialization-toggle`"
-        :model-value="showAfterInitialization"
-        :on-toggle="handleShowAfterInitializationToggle"
+      <Row
+        v-for="(entry, index) in globalStates.extensions.list"
+        :key="entry.id"
+        :id-root="`__settings-page__extensions-list-${entry.id}`"
+        class="relative cursor-pointer"
+        :title="`${entry.id}`"
+        subtitle="Wait for extensions to initialize before showing the launcher window"
+        @click="() => toggle.extension(index)"
+      >
+        <Toggle
+          id="__settings-page__extensions-show-after-initialization-toggle"
+          class="pointer-events-none"
+          :model-value="globalStates.extensions.list[index].enabled"
+        />
+        <MaterialRipple />
+      </Row>
+      <Row
+        icon="i-lucide-triangle-alert"
+        id-root="__settings-page__extensions-list"
+        title="Community extensions (unrestricted)"
+        subtitle="Enable or disable unsafe extensions"
       />
-    </SettingsRow>
+      <Row
+        v-for="(entry, index) in globalStates.extensions.list"
+        :key="entry.id"
+        :id-root="`__settings-page__extensions-list-${entry.id}`"
+        class="relative cursor-pointer"
+        :title="`${entry.id}`"
+        subtitle="Wait for extensions to initialize before showing the launcher window"
+        @click="() => toggle.extension(index)"
+      >
+        <Toggle
+          id="__settings-page__extensions-show-after-initialization-toggle"
+          class="pointer-events-none"
+          :model-value="globalStates.extensions.list[index].enabled"
+        />
+        <MaterialRipple />
+      </Row>
+    </RowContainer>
   </div>
 </template>

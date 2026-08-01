@@ -9,7 +9,7 @@ const { onClick } = defineProps<{
 }>();
 
 // No one wants to accidentally allow an extension permission
-const timeout = ref<number>(15);
+const timeout = ref<number>(30);
 
 const { pause } = useIntervalFn(() => {
   if (timeout.value <= 0) {

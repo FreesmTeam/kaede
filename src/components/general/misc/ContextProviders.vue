@@ -25,6 +25,7 @@ import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/log.ts";
 import { rehydrateProcesses } from "@/lib/processes/core.ts";
+import Watchers from "@/lib/watchers";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
 import type {
   LaunchResponseType,
@@ -64,23 +65,26 @@ function onClose(instanceId: string): void {
 }
 
 function createLogSink(instanceId: string): (lines: Array<string>) => void {
+  const stored: Array<string> = [];
+
   // Overwrite the previous launch logs
-  logs[instanceId] = { "list": [] };
+  logs[instanceId] = { "list": stored };
 
   const lineLimit: number = GeneralSettings.Logs.LineLimit;
 
   return (lines: Array<string>): void => {
-    const stored: Array<string> = logs[instanceId].list;
-
-    if (stored.length > lineLimit) {
-      const halfLength: number = Math.floor(stored.length / 2);
-
-      // Clear half the array if the line count exceeded the limit
-      stored.splice(0, halfLength);
+    // A relaunch replaced the bucket — drop the old process's late flushes
+    if (logs[instanceId]?.list !== stored) {
+      return;
     }
 
     for (const line of lines) {
       stored.push(line);
+    }
+
+    // Keeps the newest half of logs
+    if (stored.length > lineLimit) {
+      stored.splice(0, stored.length - Math.ceil(lineLimit / 2));
     }
 
     logs[instanceId] = { "list": stored };
@@ -202,6 +206,12 @@ async function closeInstance(instanceId: string): Promise<void> {
 
 async function rehydrateLaunchedInstances(): Promise<void> {
   try {
+    /*
+     * 'watchProcesses' that is run in 'main.ts' might still be in a Promise state,
+     * so we ensure it is awaited here
+     */
+    await Watchers.watchProcesses();
+
     const handles = await rehydrateProcesses(handle => {
       if (handle.kind !== "minecraft") {
         return;

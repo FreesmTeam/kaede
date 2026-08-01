@@ -84,7 +84,6 @@ input::-webkit-inner-spin-button {
   overflow: hidden;
   position: sticky;
   width: 100%;
-  cursor: pointer;
 }
 
 /**

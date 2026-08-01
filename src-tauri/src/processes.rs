@@ -1,4 +1,4 @@
-use std::{collections::HashMap, path::PathBuf, sync::Mutex};
+use std::{collections::HashMap, path::PathBuf, sync::Mutex, time::Duration};
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -7,6 +7,8 @@ use tauri_plugin_shellx::{
     process::{CommandChild, CommandEvent},
     ShellExt,
 };
+
+const TICK: Duration = Duration::from_millis(100);
 
 #[derive(Deserialize)]
 #[serde(tag = "type", content = "value", rename_all = "camelCase")]
@@ -58,7 +60,7 @@ struct OutputPayload {
     token: String,
     pid: u32,
     stream: &'static str,
-    line: String,
+    lines: Vec<String>,
 }
 
 #[derive(Serialize, Clone)]
@@ -77,6 +79,33 @@ struct ExitPayload {
     kind: String,
     code: Option<i32>,
     signal: Option<i32>,
+}
+
+fn into_line(bytes: &[u8]) -> String {
+    let mut line = String::from_utf8_lossy(bytes).into_owned();
+    line.truncate(line.trim_end_matches(|c| c == '\r' || c == '\n').len());
+    line
+}
+
+fn flush_output(
+    app: &AppHandle,
+    token: &str,
+    pid: u32,
+    stdout: &mut Vec<String>,
+    stderr: &mut Vec<String>,
+) {
+    for (stream, pending) in [("stdout", stdout), ("stderr", stderr)] {
+        if pending.is_empty() {
+            continue;
+        }
+
+        let _ = app.emit("process-output", OutputPayload {
+            token: token.to_owned(),
+            pid,
+            stream,
+            lines: std::mem::take(pending),
+        });
+    }
 }
 
 #[tauri::command]
@@ -112,31 +141,44 @@ pub async fn spawn_process(
 
     let (token, kind, app) = (spec.token, dto.kind.clone(), app.clone());
     tauri::async_runtime::spawn(async move {
-        while let Some(event) = rx.recv().await {
-            match event {
-                CommandEvent::Stdout(bytes) => {
-                    let _ = app.emit("process-output", OutputPayload {
-                        token: token.clone(), pid, stream: "stdout",
-                        line: String::from_utf8_lossy(&bytes).into_owned(),
-                    });
+        let mut stdout_pending: Vec<String> = Vec::new();
+        let mut stderr_pending: Vec<String> = Vec::new();
+
+        let mut interval = tokio::time::interval(TICK);
+        interval.set_missed_tick_behavior(tokio::time::MissedTickBehavior::Skip);
+
+        loop {
+            tokio::select! {
+                event = rx.recv() => match event {
+                    Some(CommandEvent::Stdout(bytes)) => stdout_pending.push(into_line(&bytes)),
+                    Some(CommandEvent::Stderr(bytes)) => stderr_pending.push(into_line(&bytes)),
+                    Some(CommandEvent::Error(message)) => {
+                        // Anything printed before the failure arrives before it
+                        flush_output(&app, &token, pid, &mut stdout_pending, &mut stderr_pending);
+                        let _ = app.emit("process-error", ErrorPayload { token: token.clone(), pid, message });
+                    }
+                    Some(CommandEvent::Terminated(payload)) => {
+                        // shellx sends Terminated only after both pipes hit EOF,
+                        // so this flush drains every remaining line before the exit event
+                        flush_output(&app, &token, pid, &mut stdout_pending, &mut stderr_pending);
+                        app.state::<ProcessRegistry>().0.lock().unwrap().remove(&pid);
+                        let _ = app.emit("process-exited", ExitPayload {
+                            token: token.clone(), pid, kind: kind.clone(),
+                            code: payload.code, signal: payload.signal,
+                        });
+                    }
+                    Some(_) => {} // #[non_exhaustive]
+                    None => {
+                        // Channel closed — normally nothing is pending by now, but drain defensively
+                        flush_output(&app, &token, pid, &mut stdout_pending, &mut stderr_pending);
+                        break;
+                    }
+                },
+                // Armed only while something is buffered: an idle process costs zero
+                // wakeups, and exit/error events are never delayed by the throttle
+                _ = interval.tick(), if !stdout_pending.is_empty() || !stderr_pending.is_empty() => {
+                    flush_output(&app, &token, pid, &mut stdout_pending, &mut stderr_pending);
                 }
-                CommandEvent::Stderr(bytes) => {
-                    let _ = app.emit("process-output", OutputPayload {
-                        token: token.clone(), pid, stream: "stderr",
-                        line: String::from_utf8_lossy(&bytes).into_owned(),
-                    });
-                }
-                CommandEvent::Error(message) => {
-                    let _ = app.emit("process-error", ErrorPayload { token: token.clone(), pid, message });
-                }
-                CommandEvent::Terminated(payload) => {
-                    app.state::<ProcessRegistry>().0.lock().unwrap().remove(&pid);
-                    let _ = app.emit("process-exited", ExitPayload {
-                        token: token.clone(), pid, kind: kind.clone(),
-                        code: payload.code, signal: payload.signal,
-                    });
-                }
-                _ => {} // #[non_exhaustive]
             }
         }
     });

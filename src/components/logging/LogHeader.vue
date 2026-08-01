@@ -42,7 +42,10 @@ const { searcher, status } = defineProps<{
   "status": LogSearchComposableType["status"];
 }>();
 
-const instanceLogs = inject<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey);
+const instanceLogs = inject<ShallowReactive<Record<
+  string,
+  { "list": Array<string> }
+>>>(InstanceLogsContextKey);
 
 const filterer = {
   "filter": (input: string): void => {

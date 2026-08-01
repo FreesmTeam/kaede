@@ -45,8 +45,8 @@ export async function declareServerProcesses(): Promise<void> {
       "onExit": (): void => {
         serverProcesses.value = serverProcesses.value.filter(item => item.name !== meta.name);
       },
-      "onOutput": (line, stream): void => (stream === "stdout" ? log.debug : log.error)(
-        __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", line,
+      "onOutput": (lines, stream): void => (stream === "stdout" ? log.debug : log.error)(
+        __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", lines.join("\n"),
       ),
     };
   });

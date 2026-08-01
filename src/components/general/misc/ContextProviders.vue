@@ -45,7 +45,7 @@ const fetchAccounts = inject<() => Array<AccountType>>(AuthOneTimeFetchContextKe
 
 const accounts = ref<Array<AccountType>>(fetchAccounts());
 const launches = reactive<Record<string, LauncherStatusesType>>({});
-const logs = shallowReactive<Record<string, Array<string>>>({});
+const logs = shallowReactive<Record<string, { "list": Array<string> }>>({});
 
 const childProcesses: Record<string, MinecraftProcessType> = {};
 
@@ -63,21 +63,27 @@ function onClose(instanceId: string): void {
   statuses.current = LaunchStatus.General.Aborted;
 }
 
-function createLogSink(instanceId: string): (line: string) => void {
+function createLogSink(instanceId: string): (lines: Array<string>) => void {
   // Overwrite the previous launch logs
-  logs[instanceId] = [];
+  logs[instanceId] = { "list": [] };
 
-  // Retrieving a reference to the logs array by using computed properties is quite expensive
-  const currentLogsArray: Array<string> = logs[instanceId];
   const lineLimit: number = GeneralSettings.Logs.LineLimit;
 
-  return (line: string): void => {
-    if (currentLogsArray.length > lineLimit) {
-      // Clear the array if the line count exceeded the limit
-      currentLogsArray.length = 0;
+  return (lines: Array<string>): void => {
+    const stored: Array<string> = logs[instanceId].list;
+
+    if (stored.length > lineLimit) {
+      const halfLength: number = Math.floor(stored.length / 2);
+
+      // Clear half the array if the line count exceeded the limit
+      stored.splice(0, halfLength);
     }
 
-    currentLogsArray.push(line);
+    for (const line of lines) {
+      stored.push(line);
+    }
+
+    logs[instanceId] = { "list": stored };
   };
 }
 
@@ -269,7 +275,7 @@ provide<WrappedAccountsType>(AuthStatesContextKey, accounts);
  */
 provide<WrappedInstanceLauncherStatusesType>(LaunchStatesContextKey, launches);
 
-provide<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey, logs);
+provide<ShallowReactive<Record<string, { "list": Array<string> }>>>(InstanceLogsContextKey, logs);
 provide<(instanceId?: string) => Promise<void>>(LaunchInstanceContextKey, launchInstance);
 provide<(instanceId: string) => Promise<void>>(CloseInstanceContextKey, closeInstance);
 </script>

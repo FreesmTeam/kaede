@@ -43,7 +43,7 @@ export async function spawnMinecraft({
   "instanceId" : string;
   "necessaries": PreLaunchInformationType;
   "onClose"    : (instanceId: string) => void;
-  "onInput"    : (line: string) => void;
+  "onInput"    : (lines: Array<string>) => void;
 }): Promise<LaunchResponseType> {
   const beforeHooksResult: "continue" | LaunchResponseType | undefined =
     await Hooks.catchAsyncResponseHooks<LaunchResponseType>({

@@ -30,9 +30,13 @@ export function watchProcesses(): Promise<() => void> {
 
 async function attachListeners(): Promise<() => void> {
   const unlistenFunctions = await Promise.all([
-    listen<{ "token": string; "pid": number; "stream": "stdout" | "stderr"; "line": string }>(
+    listen<
+      { "token": string; "pid": number; "stream": "stdout" | "stderr"; "lines": Array<string> }
+    >(
       "process-output",
-      ({ payload }) => ProcessHandlers.get(payload.token)?.onOutput?.(payload.line, payload.stream),
+      ({ payload }) => (
+        ProcessHandlers.get(payload.token)?.onOutput?.(payload.lines, payload.stream)
+      ),
     ),
     listen<{
       "token" : string;

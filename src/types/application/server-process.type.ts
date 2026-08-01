@@ -35,7 +35,7 @@ export type ProgramSpecType =
   | { "type": "sidecar"; "value": string };
 
 export type ProcessHandlersType = {
-  "onOutput"?: (line: string, stream: "stdout" | "stderr") => void;
+  "onOutput"?: (lines: Array<string>, stream: "stdout" | "stderr") => void;
   "onExit"?  : (payload: { "pid": number; "code": number | null; "signal": number | null }) => void;
   "onError"? : (payload: { "pid": number; "message": string }) => void;
 };

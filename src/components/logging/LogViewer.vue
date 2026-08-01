@@ -39,7 +39,10 @@ import { InstanceLogsContextKey } from "@/constants/application.ts";
 import { globalStates } from "@/states/global.ts";
 import type { LogLineType } from "@/types/logging/log-line.type.ts";
 
-const instanceLogs = inject<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey);
+const instanceLogs = inject<ShallowReactive<Record<
+  string,
+  { "list": Array<string> }
+>>>(InstanceLogsContextKey);
 
 const { styles } = useConfigColors();
 const { lines } = useLogStream();
@@ -53,7 +56,7 @@ const filtered = computed((): { "list": Array<LogLineType> } => {
   const filtering: string = globalStates.logs.filtering.trim().toLowerCase();
   const original: Array<string> = globalStates.logs.mode === "kaede-launcher"
     ? lines.value.list
-    : instanceLogs?.[globalStates.logs.mode] ?? [];
+    : instanceLogs?.[globalStates.logs.mode]?.list ?? [];
 
   if (filtering === "") {
     return {

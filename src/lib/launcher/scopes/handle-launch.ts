@@ -50,7 +50,7 @@ export async function handleLaunch({
   "statuses"       : LauncherStatusesType;
   "userPreferences": PreLaunchInformationType["user"];
   "onClose"        : (instanceId: string) => void;
-  "onInput"        : (line: string) => void;
+  "onInput"        : (lines: Array<string>) => void;
 }): Promise<LaunchResponseType> {
   const logPrefix: string = `${instanceId}:${__PRE_BUNDLED_FILENAME__}`;
   const necessaries: PreLaunchInformationType | false = Extractors.getNecessaries({

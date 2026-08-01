@@ -37,8 +37,8 @@ export async function spawnServer({ name, program, args, port }: {
     "kind": "extension-server",
     "meta": { name, port },
   }, {
-    "onOutput": (line, stream) => (stream === "stdout" ? log.debug : log.error)(
-      __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", line,
+    "onOutput": (lines, stream) => (stream === "stdout" ? log.debug : log.error)(
+      __PRE_BUNDLED_FILENAME__, "txiki server output:" + "\n", lines.join("\n"),
     ),
     "onExit": () => {
       serverProcesses.value = serverProcesses.value.filter(item => item.name !== name);

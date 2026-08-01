@@ -165,14 +165,14 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
   <div
     @contextmenu.prevent
     id="__log-viewer__wrapper"
-    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex px-20 pt-20 text-start text-sm bg-[theme(colors.black/.5)]"
+    class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex px-20 pt-11 text-start text-sm bg-[theme(colors.black/.5)]"
   >
     <div
       id="__log-viewer__inner"
       class="h-fit w-full flex flex-col rounded-md p-4"
       :style="styles.widget"
     >
-      <LogHeader :searcher="searcher" :status="status" />
+      <LogHeader :size="filtered.list.length" :searcher="searcher" :status="status" />
       <div
         id="__log-viewer__bound-wrapper"
         class="w-full border-x border-b border-neutral-500 bg-[theme(colors.black/.2)]"

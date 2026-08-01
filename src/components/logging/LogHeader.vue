@@ -31,7 +31,8 @@ import FileManager from "@/lib/file-manager";
 import { globalStates } from "@/states/global.ts";
 import type { LogSearchComposableType } from "@/types/logging/log-searching.type.ts";
 
-const { searcher, status } = defineProps<{
+const { size, searcher, status } = defineProps<{
+  "size"    : number;
   "searcher": {
     "back"  : () => void;
     "next"  : () => void;
@@ -104,11 +105,24 @@ function handleIndex(event: Event): void {
 </script>
 
 <template>
-  <div
-    id="__log-viewer__header-wrapper"
-    class="h-8 flex flex-wrap gap-2"
-    :style="{ 'color': globalStates.ui.widget.textColor ?? '#FFFFFF' }"
-  >
+  <div id="__log-viewer__inner-title-wrapper" class="flex flex-nowrap justify-between gap-2">
+    <div id="__log-viewer__inner-title" class="text-xl font-semibold leading-none">
+      Logs
+    </div>
+    <button
+      id="__log-viewer__inner-close-button"
+      class="relative rounded-md p-1 transition-[background-color] hover:bg-[theme(colors.white/.05)]"
+      @click="() => globalStates.logs.show = false"
+    >
+      <span id="__log-viewer__inner-close-button-icon" class="i-lucide-x block size-5"></span>
+      <MaterialRipple />
+    </button>
+  </div>
+  <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
+  <div id="__log-viewer__inner-subtitle-wrapper" class="flex flex-nowrap items-center gap-2">
+    <div id="__log-viewer__inner-subtitle-part-left" class="text-neutral-300">
+      View
+    </div>
     <CustomSelect
       tooltip="Select mode..."
       id-root="__log-viewer__header-select-mode"
@@ -116,7 +130,21 @@ function handleIndex(event: Event): void {
       :on-select="value => globalStates.logs.mode = value"
       :options="['kaede-launcher', ...Object.keys(instanceLogs ?? {})]"
     />
+    <div id="__log-viewer__inner-subtitle-part-right" class="text-neutral-300">
+      logs
+    </div>
+    <div id="__log-viewer__inner-subtitle-part-additional" class="text-neutral-400">
+      ({{ size }} lines)
+    </div>
+  </div>
+  <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
+  <div
+    id="__log-viewer__header-wrapper"
+    class="h-8 flex flex-wrap gap-2"
+    :style="{ 'color': globalStates.ui.widget.textColor ?? '#FFFFFF' }"
+  >
     <CustomButton
+      hide="md"
       id-root="__log-viewer__header-view-in-explorer"
       label="View in Explorer"
       tooltip="View the log file in Explorer"
@@ -130,7 +158,7 @@ function handleIndex(event: Event): void {
       icon="i-lucide-search"
       placeholder="Search... (regex)"
       id-root="__log-viewer__header-search"
-      :debounce-time="0"
+      :debounce-time="300"
       :default-value="status.searching"
       :on-input="searcher.search"
       :on-escape="searcher.reset"
@@ -189,12 +217,11 @@ function handleIndex(event: Event): void {
       icon="i-lucide-list-filter"
       placeholder="Filter..."
       id-root="__log-viewer__header-filter"
-      :debounce-time="0"
+      :debounce-time="300"
       :default-value="globalStates.logs.filtering"
       :on-input="filterer.filter"
       :on-escape="filterer.reset"
     />
-    <button id="__log-viewer__inner-close-button" @click="() => globalStates.logs.show = false">x</button>
   </div>
   <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
   <LogSections />

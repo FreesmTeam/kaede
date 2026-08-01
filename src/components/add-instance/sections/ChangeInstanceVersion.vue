@@ -92,8 +92,8 @@ onClickOutside(target, () => handleDropdown(false));
     </div>
     <div
       v-if="currentPatch !== Patches.Minecraft && currentInstance?.patchVersions?.[currentPatch]"
-      id="__add-instance-page__instance-version-selected-badge"
-      class="grid h-full place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
+      id="__add-instance-page__instance-version-selected-badge-modloader"
+      class="grid place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
       :title="`Selected version of '${currentPatch}'`"
     >
       {{ currentInstance.patchVersions[currentPatch] }}

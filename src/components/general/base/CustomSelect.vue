@@ -63,7 +63,7 @@ onClickOutside(target, () => handleDropdown(false));
   <div
     ref="target"
     :id="`${idRoot}-wrapper`"
-    :class="[classNames?.wrapper, 'relative shrink-0 w-28 sm:w-40']"
+    :class="[classNames?.wrapper, 'z-50 relative shrink-0 w-28 sm:w-40']"
     :title="tooltip"
   >
     <button
@@ -75,7 +75,7 @@ onClickOutside(target, () => handleDropdown(false));
         classNames?.button,
         opened ? 'text-white' : 'text-neutral-400',
         'h-8 w-full flex flex-nowrap items-center gap-2 rounded-md',
-        'relative pl-2 bg-neutral-800 outline-none',
+        'relative overflow-x-hidden pl-2 bg-neutral-800 outline-none',
       ]"
     >
       <span
@@ -83,10 +83,10 @@ onClickOutside(target, () => handleDropdown(false));
         :class="[
           opened ? 'rotate-180' : '',
           'i-lucide-chevron-down',
-          'block pointer-events-none size-4 transition-[color,transform]',
+          'shrink-0 block pointer-events-none size-4 transition-[color,transform]',
         ]"
       ></span>
-      <span :id="`${idRoot}-label`" class="transition-[color]">
+      <span :id="`${idRoot}-label`" class="line-clamp-1 text-ellipsis text-start transition-[color]">
         {{ value }}
       </span>
       <MaterialRipple />
@@ -96,7 +96,7 @@ onClickOutside(target, () => handleDropdown(false));
       <div
         v-if="opened"
         :id="`${idRoot}-dropdown-wrapper`"
-        class="absolute left-0 right-0 top-10 z-10 flex flex-col rounded-md bg-neutral-800 py-1"
+        class="absolute left-0 top-10 z-50 flex flex-col rounded-md bg-neutral-900 py-1"
       >
         <button
           v-for="option in options"

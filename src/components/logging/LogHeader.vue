@@ -136,13 +136,6 @@ function handleIndex(event: Event): void {
     <div id="__log-viewer__inner-subtitle-part-additional" class="text-neutral-400">
       ({{ size }} lines)
     </div>
-  </div>
-  <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
-  <div
-    id="__log-viewer__header-wrapper"
-    class="h-8 flex flex-wrap gap-2"
-    :style="{ 'color': globalStates.ui.widget.textColor ?? '#FFFFFF' }"
-  >
     <CustomButton
       hide="md"
       id-root="__log-viewer__header-view-in-explorer"
@@ -150,7 +143,15 @@ function handleIndex(event: Event): void {
       tooltip="View the log file in Explorer"
       icon="i-lucide-external-link"
       :on-click="viewInExplorer"
+      class="min-h-8"
     />
+  </div>
+  <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
+  <div
+    id="__log-viewer__header-wrapper"
+    class="h-8 flex flex-nowrap gap-2"
+    :style="{ 'color': globalStates.ui.widget.textColor ?? '#FFFFFF' }"
+  >
     <CustomInput
       focus-on-key-f
       listen-to-events

@@ -20,15 +20,25 @@ import { AsyncFunction } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
 import ExtensionAPI from "@/lib/extension-api";
 import { log } from "@/lib/logging/log.ts";
+import { globalStates } from "@/states/global.ts";
+import { instanceStates } from "@/states/instance.ts";
 
 export async function runInUnrestricted(id: string, code: string): Promise<ExtensionAPI | void> {
   const startTime = performance.now();
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${id}' extension code`);
 
-  const compiled = new AsyncFunction("scopedThis", "Kaede", code);
+  const compiled = new AsyncFunction(
+    "scopedThis",
+    "Kaede",
+    "globalStates",
+    "instanceStates",
+    code,
+  );
   const scopedThis = {
     "Kaede": new ExtensionAPI(id),
+    globalStates,
+    instanceStates,
   };
 
   log.debug(
@@ -36,7 +46,12 @@ export async function runInUnrestricted(id: string, code: string): Promise<Exten
     `Executing the '${id}' extension code in the unrestricted environment`,
   );
   try {
-    await compiled(scopedThis, scopedThis.Kaede);
+    await compiled(
+      scopedThis,
+      scopedThis.Kaede,
+      scopedThis.globalStates,
+      scopedThis.instanceStates,
+    );
   } catch (error: unknown) {
     return log.error(
       __PRE_BUNDLED_FILENAME__,

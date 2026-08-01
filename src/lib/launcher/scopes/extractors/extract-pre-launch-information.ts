@@ -63,7 +63,7 @@ export function extractPreLaunchInformation({
   let compatibleArch: PreLaunchInformationType["arch"];
 
   const baseDirectory: string = FileManager.getBaseDirectory();
-  const instanceDirectory: string = Instances.getMinecraftDirectory({
+  const { instanceDirectory, instanceRootDirectory } = Instances.getMinecraftDirectory({
     baseDirectory,
     instanceId,
   });
@@ -149,6 +149,7 @@ export function extractPreLaunchInformation({
     "cancelId"   : downloadTaskCancelId,
     "directories": {
       "base"        : baseDirectory,
+      "instanceRoot": instanceRootDirectory,
       "instance"    : instanceDirectory,
       "assets"      : assetsDirectory,
       "logging"     : loggingDirectory,

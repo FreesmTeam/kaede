@@ -254,7 +254,7 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
         return;
       }
 
-      const minecraftDirectory: string = Instances.getMinecraftDirectory({
+      const { "instanceDirectory": minecraftDirectory } = Instances.getMinecraftDirectory({
         "baseDirectory": baseDirectory,
         "instanceId"   : currentInstanceId,
       });

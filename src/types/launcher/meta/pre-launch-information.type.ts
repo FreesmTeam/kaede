@@ -16,6 +16,7 @@ export type PreLaunchInformationType = {
   };
   "directories": {
     "base"        : string;
+    "instanceRoot": string;
     "instance"    : string;
     "assets"      : string;
     "logging"     : string;

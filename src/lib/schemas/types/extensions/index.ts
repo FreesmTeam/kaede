@@ -19,7 +19,7 @@ export const ExtensionMetadataSchema = Type.Intersect([
     "categories": Type.Array(Type.String()),
   }),
   Type.Partial(Type.Object({
-    "description": Type.Array(Type.String()),
+    "description": Type.String(),
     "permissions": Type.Array(
       Type.Union(
         PermissionsList.map((permission: PermissionType) => Type.Literal(permission)),

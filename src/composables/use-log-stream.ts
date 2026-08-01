@@ -16,13 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Channel, invoke } from "@tauri-apps/api/core";
+import { Channel } from "@tauri-apps/api/core";
 import { onMounted, onUnmounted, type ShallowRef, shallowRef } from "vue";
 
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Browser from "@/lib/browser";
-import Errors from "@/lib/errors";
-import { log } from "@/lib/logging/log.ts";
+import Logging from "@/lib/logging";
 
 type LogStreamEventType =
   | { "type": "snapshot"; "data": Array<string> }
@@ -76,14 +75,10 @@ export function useLogStream(): {
       }
     };
 
-    await invoke("stream_logs", { "onEvent": channel }).catch((error: unknown) => {
-      log.error(__PRE_BUNDLED_FILENAME__, "The log stream failed:", Errors.prettify(error));
-    });
+    await Logging.streamLogs<LogStreamEventType>(channel);
   });
 
-  onUnmounted(async (): Promise<void> => {
-    await invoke("stop_log_stream");
-  });
+  onUnmounted(Logging.stopStreamingLogs);
 
   return { lines };
 }

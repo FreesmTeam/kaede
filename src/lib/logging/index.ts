@@ -6,8 +6,12 @@ import {
 } from "@/lib/logging/scopes/handle-virtual-list-text-selection.ts";
 import { handleVirtualTextCopy } from "@/lib/logging/scopes/handle-virtual-text-copy.ts";
 import { selectAllText } from "@/lib/logging/scopes/select-all-text.ts";
+import { stopStreamingLogs } from "@/lib/logging/stop-streaming-logs.ts";
+import { streamLogs } from "@/lib/logging/stream-logs.ts";
 
 export default {
+  streamLogs,
+  stopStreamingLogs,
   getLogLevelColor,
   getLogTargetColor,
   handleVirtualListTextSelection,

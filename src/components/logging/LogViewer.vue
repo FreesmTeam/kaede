@@ -36,6 +36,7 @@ import { useLogSearch } from "@/composables/use-log-search.ts";
 import { useLogSegmentation } from "@/composables/use-log-segmentation.ts";
 import { useLogStream } from "@/composables/use-log-stream.ts";
 import { InstanceLogsContextKey } from "@/constants/application.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { globalStates } from "@/states/global.ts";
 import type { LogLineType } from "@/types/logging/log-line.type.ts";
 
@@ -158,6 +159,12 @@ const searcher: {
 
 onMounted(() => container?.value?.addEventListener?.("scroll", updateView, { "passive": true }));
 onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView));
+
+// Expose log arrays for plugins
+GlobalInternals.logs = {
+  "raw"     : lines,
+  "filtered": filtered,
+};
 </script>
 
 <template>

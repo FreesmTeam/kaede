@@ -29,7 +29,7 @@ import type * as TauriOs from "@tauri-apps/plugin-os";
 import type * as TauriProcess from "@tauri-apps/plugin-process";
 import type * as TauriUpload from "@tauri-apps/plugin-upload";
 import type DevelopmentMode from "src/lib/development-mode";
-import type { App } from "vue";
+import type { App, ComputedRef, ShallowReactive, ShallowRef } from "vue";
 
 import type _Application from "@/constants/application.ts";
 import type _ASCIIArt from "@/constants/ascii-art.ts";
@@ -80,6 +80,7 @@ import type {
   SpecificPatchLibraryType,
   SpecificPatchMetaType,
 } from "@/types/launcher/meta/specific-patch-meta.type.ts";
+import type { LogLineType } from "@/types/logging/log-line.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
 /* Expand the globals with Kaede and Tauri namespaces */
@@ -148,7 +149,20 @@ declare global {
         "launchCount"         : number;
         // A Java major version (for example, 8, 11, or 17)
         "javaMajor"          ?: number;
+
         "appInstance"        ?: App<Element>;
+        "logs"               ?: {
+          "raw"     : ShallowRef<{ "list": Array<string> }>;
+          "filtered": ComputedRef<{ "list": Array<LogLineType> }>;
+        };
+        "instanceContext"    ?: {
+          "launches": Record<string, LauncherStatusesType>;
+          "logs"    : ShallowReactive<Record<string, {
+            "list": string[];
+          }>>;
+          "launchInstance": (instanceId?: string) => Promise<void>;
+          "closeInstance" : (instanceId: string) => Promise<void>;
+        };
 
         /* Needed for browser environments (non-application) */
         "logsInBrowser"       : Array<string>;

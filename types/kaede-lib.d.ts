@@ -11,7 +11,7 @@ import * as TauriOpener from '@tauri-apps/plugin-opener';
 import * as TauriOs from '@tauri-apps/plugin-os';
 import * as TauriProcess from '@tauri-apps/plugin-process';
 import * as TauriUpload from '@tauri-apps/plugin-upload';
-import { App } from 'vue';
+import { App, ComputedRef, ShallowReactive, ShallowRef } from 'vue';
 
 declare function getCpuUsage(): Promise<string>;
 declare function getMemoryUsage(): Promise<{
@@ -1690,7 +1690,11 @@ declare function handleVirtualTextCopy(copied: boolean, range: [
 	string
 ]>, setCopied: (state: boolean) => void): Promise<void>;
 declare function selectAllText(container: HTMLDivElement | null | undefined): void;
+declare function stopStreamingLogs(): Promise<void>;
+declare function streamLogs<T>(channel: Channel<T>): Promise<void>;
 declare const _default$22: {
+	readonly streamLogs: typeof streamLogs;
+	readonly stopStreamingLogs: typeof stopStreamingLogs;
 	readonly getLogLevelColor: typeof getLogLevelColor;
 	readonly getLogTargetColor: typeof getLogTargetColor;
 	readonly handleVirtualListTextSelection: typeof handleVirtualListTextSelection;
@@ -2021,6 +2025,10 @@ export type ArgumentAuthReplacementsType = {
 	"auth_uuid": string;
 	"auth_xuid": string;
 };
+export type LogLineType = {
+	"index": number;
+	"raw": string;
+};
 declare global {
 	const __PRE_BUNDLED_FILENAME__: string;
 	interface Window {
@@ -2062,6 +2070,22 @@ declare global {
 				"launchCount": number;
 				"javaMajor"?: number;
 				"appInstance"?: App<Element>;
+				"logs"?: {
+					"raw": ShallowRef<{
+						"list": Array<string>;
+					}>;
+					"filtered": ComputedRef<{
+						"list": Array<LogLineType>;
+					}>;
+				};
+				"instanceContext"?: {
+					"launches": Record<string, LauncherStatusesType>;
+					"logs": ShallowReactive<Record<string, {
+						"list": string[];
+					}>>;
+					"launchInstance": (instanceId?: string) => Promise<void>;
+					"closeInstance": (instanceId: string) => Promise<void>;
+				};
 				"logsInBrowser": Array<string>;
 				"indexedDB"?: IDBDatabase;
 			};

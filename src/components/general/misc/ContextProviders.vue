@@ -288,6 +288,8 @@ provide<WrappedInstanceLauncherStatusesType>(LaunchStatesContextKey, launches);
 provide<ShallowReactive<Record<string, { "list": Array<string> }>>>(InstanceLogsContextKey, logs);
 provide<(instanceId?: string) => Promise<void>>(LaunchInstanceContextKey, launchInstance);
 provide<(instanceId: string) => Promise<void>>(CloseInstanceContextKey, closeInstance);
+
+GlobalInternals.instanceContext = { launches, logs, launchInstance, closeInstance };
 </script>
 
 <template>

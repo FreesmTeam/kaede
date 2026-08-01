@@ -82,7 +82,7 @@ const defaultConfig: ConfigType = {
   "locale": "en",
   "logs"  : {
     "show"      : false,
-    "mode"      : "launcher",
+    "mode"      : "kaede-launcher",
     "filtering" : "",
     "lineHeight": 20,
     "partsShown": { "time": true, "level": true, "target": true, "message": true },

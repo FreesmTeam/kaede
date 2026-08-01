@@ -60,12 +60,15 @@ function unFocus(event: Event): void {
   focused.value = false;
 }
 
-const handleInput = useDebounceFn((event: Event): void => {
+const rawInputHandler = (event: Event): void => {
   const target = event?.target as HTMLInputElement;
   const targetValue = target?.value ?? "";
 
   onInput?.(targetValue);
-}, debounceTime);
+};
+const handleInput = debounceTime === 0
+  ? rawInputHandler
+  : useDebounceFn(rawInputHandler, debounceTime);
 
 function handleKeyDown(event: KeyboardEvent): void {
   if (event.key === "Escape" && blurOnEscape) {

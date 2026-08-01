@@ -43,7 +43,7 @@ const regExpMatcher = (line: string, regex: RegExp): Array<[number, number]> => 
 };
 const rawMatcher = (line: string, matching: string, raw: string): Array<[number, number]> => {
   const results: Array<[number, number]> = [];
-  const indexing = line.toLowerCase();
+  const indexing = line;
   let position = indexing.indexOf(matching);
 
   while (position !== -1) {
@@ -73,7 +73,7 @@ function compileMatcher(raw: string): {
     };
   } catch {
     // Fall back to literal indexOf
-    const matching: string = raw.toLowerCase();
+    const matching: string = raw;
 
     return {
       "matcher": (line: string) => rawMatcher(line, matching, raw),

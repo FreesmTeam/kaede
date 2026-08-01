@@ -18,20 +18,28 @@
 
 <script setup lang="ts">
 import { useWindowSize } from "@vueuse/core";
-import { computed, nextTick, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
+import {
+  computed,
+  inject,
+  nextTick,
+  onMounted,
+  onUnmounted,
+  ref,
+  type ShallowReactive,
+  useTemplateRef,
+  watch,
+} from "vue";
 
 import LogHeader from "@/components/logging/LogHeader.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { useLogSearch } from "@/composables/use-log-search.ts";
+import { useLogSegmentation } from "@/composables/use-log-segmentation.ts";
 import { useLogStream } from "@/composables/use-log-stream.ts";
-import { LogKindColors, LogLevelColors } from "@/constants/application.ts";
-import Logging from "@/lib/logging";
-import { parseLine } from "@/lib/logging/parser.ts";
-import { overlaySearch, tokenize } from "@/lib/logging/renderer.ts";
+import { InstanceLogsContextKey } from "@/constants/application.ts";
 import { globalStates } from "@/states/global.ts";
-import type { LogLevelType } from "@/types/logging/log-level.type.ts";
 import type { LogLineType } from "@/types/logging/log-line.type.ts";
-import type { LogRenderSegmentType } from "@/types/logging/log-render.type.ts";
+
+const instanceLogs = inject<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey);
 
 const { styles } = useConfigColors();
 const { lines } = useLogStream();
@@ -43,7 +51,9 @@ const position = ref<number>(0);
 
 const filtered = computed((): { "list": Array<LogLineType> } => {
   const filtering: string = globalStates.logs.filtering.trim().toLowerCase();
-  const original: Array<string> = lines.value.list;
+  const original: Array<string> = globalStates.logs.mode === "kaede-launcher"
+    ? lines.value.list
+    : instanceLogs?.[globalStates.logs.mode] ?? [];
 
   if (filtering === "") {
     return {
@@ -64,59 +74,18 @@ const filtered = computed((): { "list": Array<LogLineType> } => {
 
 const { status, matchesByLine, utils } = useLogSearch(filtered);
 
-const elements = computed((): number[] => {
+const boundary = computed((): number => {
   const region: number = innerHeight.value - 280;
-  const boundary: number = Math.ceil(region / globalStates.logs.lineHeight);
-  const size: number = Math.min(boundary, filtered.value.list.length);
+
+  return Math.ceil(region / globalStates.logs.lineHeight);
+});
+const elements = computed((): number[] => {
+  const size: number = Math.min(boundary.value, filtered.value.list.length);
 
   return Array.from({ "length": size }, (_, index) => index);
 });
-const segments = computed((): Array<Array<LogRenderSegmentType & {
-  "gap"  : boolean;
-  "class": string;
-}>> => {
-  return elements.value.map(index => {
-    return getSegments(position.value + index)
-      // We need to carefully introduce the gap between log line sections...
-      .map((currentSegment, currentIndex, currentArray) => {
-        const nextSegment = currentArray[currentIndex + 1];
-        let colorClass: string;
 
-        switch (currentSegment.kind) {
-          case "time": {
-            colorClass = LogKindColors.time;
-
-            break;
-          }
-          case "level": {
-            colorClass = LogLevelColors[currentSegment.text.trim() as LogLevelType];
-
-            break;
-          }
-          case "target": {
-            colorClass = Logging.getLogTargetColor(currentSegment.text);
-
-            break;
-          }
-          case "message": {
-            colorClass = LogKindColors.message;
-
-            break;
-          }
-        }
-
-        return {
-          "index": currentSegment.index,
-          "state": currentSegment.state,
-          "text" : currentSegment.text,
-          "kind" : currentSegment.kind,
-          // Is next section? If yes, then add a gap
-          "gap"  : nextSegment !== undefined && currentSegment.kind !== nextSegment.kind,
-          "class": colorClass,
-        };
-      });
-  });
-});
+const { segments } = useLogSegmentation({ filtered, matchesByLine, elements, status, position });
 
 const container = useTemplateRef("container");
 
@@ -134,7 +103,7 @@ function updateView(event: Event): void {
 // Stick to the bottom of the log viewer
 watch(
   () => [
-    lines.value.list.length,
+    filtered.value.list.length,
     elements.value.length,
   ],
   async () => {
@@ -154,29 +123,6 @@ watch(
     }
   },
 );
-
-function getSegments(filteredIndex: number): Array<LogRenderSegmentType> {
-  const entry = filtered.value.list[filteredIndex];
-
-  if (!entry) {
-    return [];
-  }
-
-  const matches = matchesByLine.value.get(filteredIndex);
-  const hasMatches = matches && matches.length > 0;
-
-  const parsed = parseLine(entry);
-  const tokens = tokenize(parsed);
-
-  return hasMatches
-    ? overlaySearch(tokens, matches, status.index)
-    : tokens.map((rawToken, index) => ({
-      "text" : rawToken.text,
-      "kind" : rawToken.kind,
-      "state": "none",
-      index,
-    }));
-}
 
 function scrollToMatch(match: { "lineIndex": number } | undefined): void {
   if (!match || !container.value) {
@@ -214,7 +160,6 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
 <template>
   <!-- For some reason, 'grid place-items-center' breaks layout, so we use 'flex items-center' -->
   <div
-    v-show="lines.list.length > 0"
     @contextmenu.prevent
     id="__log-viewer__wrapper"
     class="absolute bottom-0 left-0 right-0 top-0 z-6000 flex px-20 pt-20 text-start text-sm bg-[theme(colors.black/.5)]"
@@ -234,7 +179,7 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
           class="relative w-full select-text overflow-scroll"
           ref="container"
           :style="{
-            'height': elements.length * globalStates.logs.lineHeight + scrollBarSize + 'px',
+            'height': boundary * globalStates.logs.lineHeight + scrollBarSize + 'px',
           }"
         >
           <div

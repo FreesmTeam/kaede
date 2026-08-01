@@ -18,16 +18,18 @@
 
 <script setup lang="ts">
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { inject, type ShallowReactive } from "vue";
 
+import CustomButton from "@/components/general/base/CustomButton.vue";
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import CustomSelect from "@/components/general/base/CustomSelect.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import LogSections from "@/components/logging/header/LogSections.vue";
+import { InstanceLogsContextKey } from "@/constants/application.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import FileManager from "@/lib/file-manager";
 import { globalStates } from "@/states/global.ts";
 import type { LogSearchComposableType } from "@/types/logging/log-searching.type.ts";
-import CustomButton from "@/components/general/base/CustomButton.vue";
 
 const { searcher, status } = defineProps<{
   "searcher": {
@@ -39,6 +41,8 @@ const { searcher, status } = defineProps<{
   };
   "status": LogSearchComposableType["status"];
 }>();
+
+const instanceLogs = inject<ShallowReactive<Record<string, string[]>>>(InstanceLogsContextKey);
 
 const filterer = {
   "filter": (input: string): void => {
@@ -103,10 +107,11 @@ function handleIndex(event: Event): void {
     :style="{ 'color': globalStates.ui.widget.textColor ?? '#FFFFFF' }"
   >
     <CustomSelect
-      icon="i-lucide-search"
-      placeholder="Select..."
-      id-root="hii"
-      :options="['Kaede', 'instance-ds']"
+      tooltip="Select mode..."
+      id-root="__log-viewer__header-select-mode"
+      :value="globalStates.logs.mode"
+      :on-select="value => globalStates.logs.mode = value"
+      :options="['kaede-launcher', ...Object.keys(instanceLogs ?? {})]"
     />
     <CustomButton
       id-root="__log-viewer__header-view-in-explorer"
@@ -122,7 +127,7 @@ function handleIndex(event: Event): void {
       icon="i-lucide-search"
       placeholder="Search... (regex)"
       id-root="__log-viewer__header-search"
-      :debounce-time="300"
+      :debounce-time="0"
       :default-value="status.searching"
       :on-input="searcher.search"
       :on-escape="searcher.reset"
@@ -181,11 +186,12 @@ function handleIndex(event: Event): void {
       icon="i-lucide-list-filter"
       placeholder="Filter..."
       id-root="__log-viewer__header-filter"
-      :debounce-time="200"
+      :debounce-time="0"
       :default-value="globalStates.logs.filtering"
       :on-input="filterer.filter"
       :on-escape="filterer.reset"
     />
+    <button id="__log-viewer__inner-close-button" @click="() => globalStates.logs.show = false">x</button>
   </div>
   <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
   <LogSections />

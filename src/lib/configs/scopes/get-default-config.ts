@@ -76,7 +76,7 @@ export async function getDefaultConfig(): Promise<ConfigType> {
     "locale": DefaultLocale,
     "logs"  : {
       "show"      : false,
-      "mode"      : "launcher",
+      "mode"      : "kaede-launcher",
       "filtering" : "",
       "lineHeight": 20,
       "partsShown": { "time": true, "level": true, "target": true, "message": true },

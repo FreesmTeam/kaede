@@ -281,6 +281,7 @@ export type GlobalStatesType = {
 	"contextMenuItems": ContextMenuItemsType;
 	"pages": PagesType;
 };
+export type LogLevelType = "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR";
 export type TabSectionType = {
 	"id": string;
 	"name": string;
@@ -377,6 +378,8 @@ declare const _default$3: {
 	readonly ExtraHookResponseStatus: {
 		readonly ContinueLoop: "continue-hooks-loop";
 	};
+	readonly LogKindColors: Record<"time" | "message", string>;
+	readonly LogLevelColors: Record<LogLevelType, string>;
 };
 declare function getASCIIArt(portable: boolean, launchCount: number): string;
 declare const _default$4: {
@@ -1136,7 +1139,10 @@ declare function findCurrent(id: string | null | undefined): CurrentInstanceType
 declare function getMinecraftDirectory({ baseDirectory, instanceId, }: {
 	"baseDirectory": string;
 	"instanceId": string;
-}): string;
+}): {
+	"instanceDirectory": string;
+	"instanceRootDirectory": string;
+};
 declare function readInstances(properties?: Partial<{
 	"baseDirectory": string;
 	"parsedFile": ParsedFile;
@@ -1184,6 +1190,7 @@ export type PreLaunchInformationType = {
 	};
 	"directories": {
 		"base": string;
+		"instanceRoot": string;
 		"instance": string;
 		"assets": string;
 		"logging": string;
@@ -1383,7 +1390,7 @@ export type ProgramSpecType = {
 	"value": string;
 };
 export type ProcessHandlersType = {
-	"onOutput"?: (line: string, stream: "stdout" | "stderr") => void;
+	"onOutput"?: (lines: Array<string>, stream: "stdout" | "stderr") => void;
 	"onExit"?: (payload: {
 		"pid": number;
 		"code": number | null;
@@ -1422,7 +1429,7 @@ declare function handleLaunch({ instanceId, instance, statuses, userPreferences,
 	"statuses": LauncherStatusesType;
 	"userPreferences": PreLaunchInformationType["user"];
 	"onClose": (instanceId: string) => void;
-	"onInput": (line: string) => void;
+	"onInput": (lines: Array<string>) => void;
 }): Promise<LaunchResponseType>;
 declare function spawnMinecraft({ command, instanceId, necessaries, onClose, onInput, }: {
 	"command": {
@@ -1432,7 +1439,7 @@ declare function spawnMinecraft({ command, instanceId, necessaries, onClose, onI
 	"instanceId": string;
 	"necessaries": PreLaunchInformationType;
 	"onClose": (instanceId: string) => void;
-	"onInput": (line: string) => void;
+	"onInput": (lines: Array<string>) => void;
 }): Promise<LaunchResponseType>;
 declare function getAdditionalStartArguments({ necessaries, finalizedPatch, }: {
 	"necessaries": PreLaunchInformationType;
@@ -1666,21 +1673,6 @@ declare const _default$21: {
 	readonly handleLaunch: typeof handleLaunch;
 	readonly spawnMinecraft: typeof spawnMinecraft;
 };
-export type LogEntryInformationType = {
-	"time": string;
-	"level": string;
-	"target": string;
-	"message": string;
-};
-declare function getLogEntryInformation(line: string | [
-	number,
-	string
-]): LogEntryInformationType;
-export type FieldTextType = {
-	"extractions": Array<string>;
-	"fields": Array<string>;
-};
-declare function getLogFieldText(input: string, toSearch: string): string | FieldTextType;
 declare function getLogLevelColor(level: string): string;
 declare function getLogTargetColor(target: string): string;
 declare function handleVirtualListTextSelection(event: MouseEvent, isSelection: boolean, currentSelectionRange: [
@@ -1699,8 +1691,6 @@ declare function handleVirtualTextCopy(copied: boolean, range: [
 ]>, setCopied: (state: boolean) => void): Promise<void>;
 declare function selectAllText(container: HTMLDivElement | null | undefined): void;
 declare const _default$22: {
-	readonly getLogEntryInformation: typeof getLogEntryInformation;
-	readonly getLogFieldText: typeof getLogFieldText;
 	readonly getLogLevelColor: typeof getLogLevelColor;
 	readonly getLogTargetColor: typeof getLogTargetColor;
 	readonly handleVirtualListTextSelection: typeof handleVirtualListTextSelection;

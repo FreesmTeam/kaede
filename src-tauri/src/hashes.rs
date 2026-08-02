@@ -23,11 +23,15 @@ fn get_raw_body<'a>(request: &'a Request<'_>) -> Result<&'a [u8], String> {
     }
 }
 
+pub fn sha256_hex(bytes: &[u8]) -> String {
+    to_hex(&Sha256::digest(bytes))
+}
+
 #[tauri::command]
 pub fn hash_sha256(request: Request<'_>) -> Result<String, String> {
     let bytes = get_raw_body(&request)?;
 
-    Ok(to_hex(&Sha256::digest(bytes)))
+    Ok(sha256_hex(bytes))
 }
 
 #[tauri::command]

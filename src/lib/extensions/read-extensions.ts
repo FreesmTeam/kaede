@@ -27,9 +27,10 @@ import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 
 type ReadExtensionsType = {
   "extensions": Array<{
-    "fileName": string;
-    "metadata": unknown;
-    "code"    : string;
+    "fileName"  : string;
+    "metadata"  : unknown;
+    "codeSha256": string;
+    "code"      : string;
   }>;
   "failures": Array<{
     "fileName": string;
@@ -92,7 +93,12 @@ export async function readExtensions(): Promise<{
     });
 
     if (valid) {
-      validated.push({ id, "code": extension.code, "metadata": valid });
+      validated.push({
+        id,
+        "code"    : extension.code,
+        "sha256"  : extension.codeSha256,
+        "metadata": valid,
+      });
     } else {
       invalid.push({
         id,

@@ -5,7 +5,6 @@ import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
 export const ExtensionMetadataSchema = Type.Intersect([
   Type.Object({
-    "id"  : Type.String(),
     "logo": Type.String(),
     "name": Type.String(),
     "type": Type.Union([

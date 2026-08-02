@@ -17,7 +17,7 @@
  */
 
 import type { DeepPartial } from "unocss";
-import { type Reactive, reactive } from "vue";
+import { type Reactive, reactive, shallowRef } from "vue";
 
 import type ExtensionAPI from "@/lib/extension-api";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
@@ -31,3 +31,10 @@ export const extensionStates: Reactive<{
   "invalid" : [],
   "executed": [],
 });
+
+// Updated on successful fetch of trusted hashes from GitHub
+export const trustedExtensionHashes = shallowRef<Set<string>>(
+  new Set([
+    "455cf7502f56262694606107c239fcd954037aee774947815e693a44e5f618e1",
+  ]),
+);

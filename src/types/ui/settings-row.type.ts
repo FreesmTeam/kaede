@@ -16,27 +16,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { PermissionType } from "@/types/extensions/permission.type.ts";
+import type { ComputedRef } from "vue";
 
-type MetadataType = {
-  "logo"      : string;
-  "name"      : string;
-  "type"      : "sandbox" | "unrestricted";
-  "source"    : string;
-  "version"   : string;
-  "authors"   : Array<string>;
-  // Use ISO 639-1 two-letter language codes
-  "languages" : Array<string>;
-  "categories": Array<string>;
-} & Partial<{
-  "description": string;
-  "permissions": Array<PermissionType>;
-  "enabled"    : boolean;
-}>;
-
-export type ExtensionType = {
-  "id"      : string;
-  "code"    : string;
-  "sha256"  : string;
-  "metadata": MetadataType;
+export type SettingsRowType = {
+  "idRoot"   : string;
+  "title"    : string;
+  "onClick" ?: (event: MouseEvent) => void;
+  "image"   ?: string;
+  "icon"    ?: string;
+  "subtitle"?: string;
+  "inner"   ?: {
+    "kind" : "toggle";
+    "value": boolean;
+  } | {
+    "kind"     : "select";
+    "options"  : Array<string>;
+    "value"   ?: string;
+    "onSelect"?: (value: string) => void;
+  } | {
+    "icon"         : string;
+    "placeholder"  : string;
+    "kind"         : "input";
+    "debounceTime" : number;
+    "defaultValue"?: string | number;
+    "onInput"     ?: (value: string) => void;
+  } | Array<SettingsRowType>;
 };
+export type SettingsRowCollectionType = Array<ComputedRef<SettingsRowType>>;

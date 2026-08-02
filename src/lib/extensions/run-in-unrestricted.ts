@@ -20,10 +20,17 @@ import { AsyncFunction } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
 import ExtensionAPI from "@/lib/extension-api";
 import { log } from "@/lib/logging/log.ts";
+import { extensionStates } from "@/states/extension.ts";
 import { globalStates } from "@/states/global.ts";
 import { instanceStates } from "@/states/instance.ts";
+import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 
-export async function runInUnrestricted(id: string, code: string): Promise<ExtensionAPI | void> {
+export async function runInUnrestricted(
+  id: string,
+  code: string,
+  metadata: ExtensionType["metadata"],
+  sha256: string,
+): Promise<ExtensionAPI | void> {
   const startTime = performance.now();
 
   log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${id}' extension code`);
@@ -33,12 +40,14 @@ export async function runInUnrestricted(id: string, code: string): Promise<Exten
     "Kaede",
     "globalStates",
     "instanceStates",
+    "extensionStates",
     code,
   );
   const scopedThis = {
     "Kaede": new ExtensionAPI(id),
     globalStates,
     instanceStates,
+    extensionStates,
   };
 
   log.debug(
@@ -51,6 +60,7 @@ export async function runInUnrestricted(id: string, code: string): Promise<Exten
       scopedThis.Kaede,
       scopedThis.globalStates,
       scopedThis.instanceStates,
+      scopedThis.extensionStates,
     );
   } catch (error: unknown) {
     return log.error(
@@ -65,7 +75,11 @@ export async function runInUnrestricted(id: string, code: string): Promise<Exten
 
   log.info(
     __PRE_BUNDLED_FILENAME__,
-    `The '${id}' plugin was successfully executed in ${timeDifference} ms`,
+    log.templates.json.contents(
+      `The '${id}' plugin was successfully executed in ${timeDifference} ms`,
+      { sha256, "type": metadata.type },
+      true,
+    ),
   );
 
   return scopedThis.Kaede;

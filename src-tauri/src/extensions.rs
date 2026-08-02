@@ -5,6 +5,8 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 use zip::ZipArchive;
 
+use crate::hashes::sha256_hex;
+
 const METADATA_ENTRY: &str = "metadata.json";
 const CODE_ENTRY: &str = "index.js";
 
@@ -17,6 +19,7 @@ pub struct ExtensionFile {
     pub file_name: String,
     pub metadata: serde_json::Value,
     pub code: String,
+    pub code_sha256: String,
 }
 
 #[derive(Serialize)]
@@ -130,11 +133,16 @@ pub async fn read_extensions(extensions_dir_path: String) -> Result<ExtensionsRe
                 .unwrap_or_default();
 
             match read_archive(&path) {
-                Ok((metadata, code)) => extensions.push(ExtensionFile {
-                    file_name,
-                    metadata,
-                    code,
-                }),
+                Ok((metadata, code)) => {
+                    let code_sha256 = sha256_hex(code.as_bytes());
+
+                    extensions.push(ExtensionFile {
+                        file_name,
+                        metadata,
+                        code,
+                        code_sha256,
+                    })
+                }
                 Err(error) => failures.push(ExtensionFailure { file_name, error }),
             }
         }

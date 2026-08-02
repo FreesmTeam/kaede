@@ -53,8 +53,8 @@ onMounted(async () => {
   };
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Initializing all enabled unrestricted extensions");
-  for (const { id, code } of toExecute.unrestricted) {
-    const result = await Extensions.runInUnrestricted(id, code);
+  for (const { id, code, metadata, sha256 } of toExecute.unrestricted) {
+    const result = await Extensions.runInUnrestricted(id, code, metadata, sha256);
 
     if (!result) {
       continue;

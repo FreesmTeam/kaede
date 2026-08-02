@@ -17,8 +17,6 @@
   -->
 
 <script setup lang="ts">
-import type { ComputedRef } from "vue";
-
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import Row from "@/components/general/base/Row.vue";
 import RowContainer from "@/components/general/base/RowContainer.vue";
@@ -43,31 +41,6 @@ const toggle = {
       !globalStates.extensions.list[index].enabled;
   },
 };
-// TODO: show trusted unrestricted first, then sandboxed, then untrusted unrestricted
-
-const rows: Array<{
-  "idRoot"   : string;
-  "title"    : string;
-  "onClick"  : (event: MouseEvent) => void;
-  "icon"    ?: string;
-  "subtitle"?: string;
-  "inner"   ?: {
-    "kind"      : "toggle";
-    "modelValue": ComputedRef<boolean>;
-  } | {
-    "kind"     : "select";
-    "options"  : Array<string>;
-    "value"   ?: string;
-    "onSelect"?: (value: string) => void;
-  } | {
-    "icon"         : string;
-    "placeholder"  : string;
-    "kind"         : "input";
-    "debounceTime" : number;
-    "defaultValue"?: string | number;
-    "onInput"     ?: (value: string) => void;
-  };
-}> = [];
 </script>
 
 <template>

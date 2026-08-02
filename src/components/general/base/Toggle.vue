@@ -19,11 +19,11 @@
 <script setup lang="ts">
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 
-const { id, modelValue, onToggle, ripples = false } = defineProps<{
-  "id"        : string;
-  "modelValue": boolean;
-  "onToggle" ?: (value: boolean) => void;
-  "ripples"  ?: boolean;
+const { id, value, onToggle, ripples = false } = defineProps<{
+  "id"       : string;
+  "value"    : boolean;
+  "onToggle"?: (value: boolean) => void;
+  "ripples" ?: boolean;
 }>();
 </script>
 
@@ -31,14 +31,14 @@ const { id, modelValue, onToggle, ripples = false } = defineProps<{
   <button
     :id="id"
     role="switch"
-    :aria-checked="modelValue"
-    @click="() => onToggle?.(!modelValue)"
+    :aria-checked="value"
+    @click="() => onToggle?.(!value)"
     class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-neutral-800"
   >
     <span
       :id="`${id}-thumb`"
       :class="[
-        modelValue
+        value
           ? 'translate-x-6 bg-white'
           : 'translate-x-1 bg-neutral-500',
         'block size-4 rounded-full transition-[transform,background-color] duration-150',

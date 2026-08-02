@@ -17,6 +17,8 @@
   -->
 
 <script setup lang="ts">
+import type { ComputedRef } from "vue";
+
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import Row from "@/components/general/base/Row.vue";
 import RowContainer from "@/components/general/base/RowContainer.vue";
@@ -42,6 +44,30 @@ const toggle = {
   },
 };
 // TODO: show trusted unrestricted first, then sandboxed, then untrusted unrestricted
+
+const rows: Array<{
+  "idRoot"   : string;
+  "title"    : string;
+  "onClick"  : (event: MouseEvent) => void;
+  "icon"    ?: string;
+  "subtitle"?: string;
+  "inner"   ?: {
+    "kind"      : "toggle";
+    "modelValue": ComputedRef<boolean>;
+  } | {
+    "kind"     : "select";
+    "options"  : Array<string>;
+    "value"   ?: string;
+    "onSelect"?: (value: string) => void;
+  } | {
+    "icon"         : string;
+    "placeholder"  : string;
+    "kind"         : "input";
+    "debounceTime" : number;
+    "defaultValue"?: string | number;
+    "onInput"     ?: (value: string) => void;
+  };
+}> = [];
 </script>
 
 <template>
@@ -61,7 +87,7 @@ const toggle = {
         <Toggle
           id="__settings-page__extensions-enabled-toggle"
           class="pointer-events-none"
-          :model-value="globalStates.extensions.enabled"
+          :value="globalStates.extensions.enabled"
         />
         <MaterialRipple />
       </Row>
@@ -76,7 +102,7 @@ const toggle = {
         <Toggle
           id="__settings-page__extensions-allow-untrusted-toggle"
           class="pointer-events-none"
-          :model-value="globalStates.extensions.allowUnrestrictedUntrusted"
+          :value="globalStates.extensions.allowUnrestrictedUntrusted"
         />
         <MaterialRipple />
       </Row>
@@ -91,7 +117,7 @@ const toggle = {
         <Toggle
           id="__settings-page__extensions-show-after-initialization-toggle"
           class="pointer-events-none"
-          :model-value="globalStates.extensions.showAppAfterExtensionsLoad"
+          :value="globalStates.extensions.showAppAfterExtensionsLoad"
         />
         <MaterialRipple />
       </Row>
@@ -113,7 +139,7 @@ const toggle = {
         <Toggle
           id="__settings-page__extensions-show-after-initialization-toggle"
           class="pointer-events-none"
-          :model-value="globalStates.extensions.list[index].enabled"
+          :value="globalStates.extensions.list[index].enabled"
         />
         <MaterialRipple />
       </Row>
@@ -135,7 +161,7 @@ const toggle = {
         <Toggle
           id="__settings-page__extensions-show-after-initialization-toggle"
           class="pointer-events-none"
-          :model-value="globalStates.extensions.list[index].enabled"
+          :value="globalStates.extensions.list[index].enabled"
         />
         <MaterialRipple />
       </Row>
@@ -157,7 +183,7 @@ const toggle = {
         <Toggle
           id="__settings-page__extensions-show-after-initialization-toggle"
           class="pointer-events-none"
-          :model-value="globalStates.extensions.list[index].enabled"
+          :value="globalStates.extensions.list[index].enabled"
         />
         <MaterialRipple />
       </Row>

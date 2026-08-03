@@ -23,7 +23,7 @@ A Tauri-based Minecraft launcher written in TypeScript with a permission-based p
 
 ## Reason
 
-The idea of applications ([Tachiyomi](https://github.com/tachiyomiorg)) and games ([Mindustry](https://github.com/Anuken/Mindustry)) having addons always fascinated me. The addition of features at runtime with one's own code, the modification of UI to one's own liking, and the ability to use others' plugins - sounds so awesome to me!
+I always loved the idea of applications ([Tachiyomi](https://github.com/tachiyomiorg)) and games ([Mindustry](https://github.com/Anuken/Mindustry)) having addons. The addition of features at runtime with one's own code, the modification of UI to one's own liking, and the ability to use community-made plugins is so cool...
 
 However, the existing Minecraft Launchers lack a user plugin system. While it is debatable whether extensible launchers for Minecraft are even needed, I still decided to make this project, primarily for myself.
 
@@ -47,9 +47,9 @@ Home page with expanded version dropdown
 
 ---
 
-Default state of the launcher with no plugins or themes
+Kaede launched in Windows 7
 
-<img src="./demos/kaede_home-page_default.webp" alt="Home page with the default config and no plugins or themes">
+<img src="./demos/kaede_vmware_windows-7.webp" alt="Home page of Kaede in Windows 7 with a Live2D of Kei-chan">
 
 </div>
 
@@ -60,6 +60,12 @@ More screenshots >>>
 <details>
 
 <div align="center">
+
+---
+
+Default state of the launcher with no plugins or themes
+
+<img src="./demos/kaede_home-page_default.webp" alt="Home page with the default config and no plugins or themes">
 
 ---
 
@@ -108,7 +114,7 @@ A custom plugin for the Multi-Window experience (each window adds 30 MB of RAM u
 ## Features
 
 - Plugin system
-- Cross-platform (launching part is not tested on Linux and macOS yet)
+- Cross-platform (launching part is not tested on macOS yet)
 - Fast startup
 - Uses just 150 MBs of RAM (without plugins)
 - MultiMC patch system
@@ -151,7 +157,8 @@ Kaede is in early stages of development. Look at the [plan](./PLAN.md) to see mo
 
 No prior Rust knowledge is needed to contribute to this project. Most of the code was written in TypeScript using the Tauri API. These files will help in contributing:
 
-- [README for TypeScript-related code](../src/README.md) (the most important one)
+- [Introduction to Kaede Architecture](./INTRODUCTION.md) (the most important one)
+- [README for TypeScript-related code](../src/README.md) (the second most important one)
 - [README for Rust-related code](../src-tauri/README.md)
 - [Contributing Guidelines](./CONTRIBUTING.md)
 - [MultiMC Patch System](./MULTIMC.md)

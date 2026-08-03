@@ -103,6 +103,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
       }),
     "empty": {
       "idRoot"  : "__settings-page__extensions-list-trusted-empty",
+      "icon"    : "__kaede-do-not-render",
       "subtitle": "No trusted extensions loaded",
     },
   })),
@@ -145,6 +146,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
       }),
     "empty": {
       "idRoot"  : "__settings-page__extensions-list-sandboxed-empty",
+      "icon"    : "__kaede-do-not-render",
       "subtitle": "No community (sandboxed) extensions loaded",
     },
   })),
@@ -190,6 +192,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
       }),
     "empty": {
       "idRoot"  : "__settings-page__extensions-list-unrestricted-empty",
+      "icon"    : "__kaede-do-not-render",
       "subtitle": "No community (unrestricted) extensions loaded",
     },
   })),
@@ -208,6 +211,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
       })),
     "empty": {
       "idRoot"  : "__settings-page__extensions-list-invalid-empty",
+      "icon"    : "__kaede-do-not-render",
       "subtitle": "No invalid extensions loaded",
     },
   })),

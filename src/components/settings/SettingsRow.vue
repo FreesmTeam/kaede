@@ -54,8 +54,9 @@ const { row } = defineProps<{
       v-for="childRow in row.inner"
       :key="childRow.idRoot"
       :id="`${childRow.idRoot}-padding`"
-      class="pl-12"
+      class="flex flex-nowrap items-center gap-6 pl-6"
     >
+      <div :id="`${childRow.idRoot}-divider`" class="h-8 w-[1px] bg-neutral-400"></div>
       <SettingsRow
         :row="childRow"
       />

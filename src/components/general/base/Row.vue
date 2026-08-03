@@ -34,7 +34,7 @@ const { idRoot, image, icon, title, subtitle } = defineProps<{
     :id="`${idRoot}-wrapper`"
     class="relative w-full flex flex-nowrap items-center gap-4 rounded-md p-2"
   >
-    <div v-if="image !== undefined" :id="`${idRoot}-image-wrapper`" class="grid size-8 shrink-0 place-items-center">
+    <div v-if="image" :id="`${idRoot}-image-wrapper`" class="grid size-8 shrink-0 place-items-center">
       <Image
         :id="`${idRoot}-image`"
         :src="image"
@@ -42,8 +42,8 @@ const { idRoot, image, icon, title, subtitle } = defineProps<{
         class-names="size-8 object-cover rounded-md"
       />
     </div>
-    <div v-else-if="icon !== undefined" :id="`${idRoot}-icon-wrapper`" class="grid size-8 shrink-0 place-items-center">
-      <div :id="`${idRoot}-icon`" :class="[icon, 'size-6']"></div>
+    <div v-else-if="icon !== '__kaede-do-not-render'" :id="`${idRoot}-icon-wrapper`" class="grid size-8 shrink-0 place-items-center">
+      <div :id="`${idRoot}-icon`" :class="[icon || 'i-lucide-toy-brick', 'size-6']"></div>
     </div>
     <div v-else :id="`${idRoot}-no-icon-padding`" class="size-8 shrink-0"></div>
     <div

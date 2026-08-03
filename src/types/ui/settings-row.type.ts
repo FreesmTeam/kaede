@@ -24,7 +24,7 @@ export type SettingsRowType = {
   "empty"   ?: Omit<SettingsRowType, "inner">;
   "onClick" ?: (event: MouseEvent) => void;
   "image"   ?: string;
-  "icon"    ?: string;
+  "icon"    ?: string | "__kaede-do-not-render";
   "subtitle"?: string;
   "inner"   ?: {
     "kind" : "toggle";

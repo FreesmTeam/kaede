@@ -20,7 +20,8 @@ import type { ComputedRef } from "vue";
 
 export type SettingsRowType = {
   "idRoot"   : string;
-  "title"    : string;
+  "title"   ?: string;
+  "empty"   ?: Omit<SettingsRowType, "inner">;
   "onClick" ?: (event: MouseEvent) => void;
   "image"   ?: string;
   "icon"    ?: string;

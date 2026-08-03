@@ -17,11 +17,13 @@
   -->
 
 <script setup lang="ts">
+import Image from "@/components/general/base/Image.vue";
 import { globalStates } from "@/states/global.ts";
 
-const { idRoot, icon, title, subtitle } = defineProps<{
+const { idRoot, image, icon, title, subtitle } = defineProps<{
   "idRoot"   : string;
-  "title"    : string;
+  "title"   ?: string;
+  "image"   ?: string;
   "icon"    ?: string;
   "subtitle"?: string;
 }>();
@@ -32,14 +34,24 @@ const { idRoot, icon, title, subtitle } = defineProps<{
     :id="`${idRoot}-wrapper`"
     class="relative w-full flex flex-nowrap items-center gap-4 rounded-md p-2"
   >
-    <div :id="`${idRoot}-icon-wrapper`" class="grid place-items-center size-8 shrink-0">
+    <div v-if="image !== undefined" :id="`${idRoot}-image-wrapper`" class="grid size-8 shrink-0 place-items-center">
+      <Image
+        :id="`${idRoot}-image`"
+        :src="image"
+        :alt="`Image for the row '${title}'`"
+        class-names="size-8 object-cover rounded-md"
+      />
+    </div>
+    <div v-else-if="icon !== undefined" :id="`${idRoot}-icon-wrapper`" class="grid size-8 shrink-0 place-items-center">
       <div :id="`${idRoot}-icon`" :class="[icon, 'size-6']"></div>
     </div>
+    <div v-else :id="`${idRoot}-no-icon-padding`" class="size-8 shrink-0"></div>
     <div
       :id="`${idRoot}-information`"
       class="w-full flex flex-col gap-1"
     >
       <span
+        v-if="title"
         :id="`${idRoot}-title`"
         class="leading-none"
         :style="{ 'color': globalStates.ui.text.mainColor ?? '#FFFFFF' }"

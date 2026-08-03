@@ -72,8 +72,19 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "inner"   : extensionStates
       .valid
       .filter(({ sha256 }) => trustedExtensionHashes.value.has(sha256))
-      .map(({ id, metadata }) => {
-        const index = globalStates.extensions.list.findIndex(searching => searching.id === id);
+      .map(({ id, metadata, sha256 }) => {
+        const index = globalStates.extensions.list.findIndex(searching => (
+          searching.sha256 === sha256
+        ));
+
+        if (index === -1) {
+          return {
+            "idRoot"  : `__settings-page__extensions-list-trusted-entry-${id}`,
+            "image"   : metadata.logo,
+            "title"   : `${metadata.name} (unknown)`,
+            "subtitle": metadata?.description,
+          };
+        }
 
         return {
           "idRoot"  : `__settings-page__extensions-list-trusted-entry-${id}`,
@@ -90,6 +101,10 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           },
         };
       }),
+    "empty": {
+      "idRoot"  : "__settings-page__extensions-list-trusted-empty",
+      "subtitle": "No trusted extensions loaded",
+    },
   })),
   computed(() => ({
     "idRoot"  : "__settings-page__extensions-list-sandboxed",
@@ -99,8 +114,19 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "inner"   : extensionStates
       .valid
       .filter(({ metadata }) => metadata.type === "sandbox")
-      .map(({ id, metadata }) => {
-        const index = globalStates.extensions.list.findIndex(searching => searching.id === id);
+      .map(({ id, metadata, sha256 }) => {
+        const index = globalStates.extensions.list.findIndex(searching => (
+          searching.sha256 === sha256
+        ));
+
+        if (index === -1) {
+          return {
+            "idRoot"  : `__settings-page__extensions-list-sandboxed-entry-${id}`,
+            "image"   : metadata.logo,
+            "title"   : `${metadata.name} (unknown)`,
+            "subtitle": metadata?.description,
+          };
+        }
 
         return {
           "idRoot"  : `__settings-page__extensions-list-sandboxed-entry-${id}`,
@@ -117,6 +143,10 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           },
         };
       }),
+    "empty": {
+      "idRoot"  : "__settings-page__extensions-list-sandboxed-empty",
+      "subtitle": "No community (sandboxed) extensions loaded",
+    },
   })),
   computed(() => ({
     "idRoot"  : "__settings-page__extensions-list-unrestricted",
@@ -129,8 +159,19 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
         metadata.type === "unrestricted" &&
         !trustedExtensionHashes.value.has(sha256)
       ))
-      .map(({ id, metadata }) => {
-        const index = globalStates.extensions.list.findIndex(searching => searching.id === id);
+      .map(({ id, metadata, sha256 }) => {
+        const index = globalStates.extensions.list.findIndex(searching => (
+          searching.sha256 === sha256
+        ));
+
+        if (index === -1) {
+          return {
+            "idRoot"  : `__settings-page__extensions-list-unrestricted-entry-${id}`,
+            "image"   : metadata.logo,
+            "title"   : `${metadata.name} (unknown)`,
+            "subtitle": metadata?.description,
+          };
+        }
 
         return {
           "idRoot"  : `__settings-page__extensions-list-unrestricted-entry-${id}`,
@@ -147,10 +188,14 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           },
         };
       }),
+    "empty": {
+      "idRoot"  : "__settings-page__extensions-list-unrestricted-empty",
+      "subtitle": "No community (unrestricted) extensions loaded",
+    },
   })),
   computed(() => ({
     "idRoot"  : "__settings-page__extensions-list-invalid",
-    "icon"    : "i-lucide-file-exclamation-point",
+    "icon"    : "i-lucide-file-question-mark",
     "title"   : "Invalid extensions",
     "subtitle": "See what extensions did not load properly",
     "inner"   : extensionStates
@@ -161,6 +206,10 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
         "title"   : entry?.metadata?.name ?? entry?.id ?? "unknown",
         "subtitle": entry?.metadata?.description,
       })),
+    "empty": {
+      "idRoot"  : "__settings-page__extensions-list-invalid-empty",
+      "subtitle": "No invalid extensions loaded",
+    },
   })),
 ];
 

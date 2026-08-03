@@ -27,14 +27,14 @@ onMounted(async () => {
 
   const list = globalStates.extensions.list;
   const storage = new Map<string, boolean>(
-    list.map(({ id, enabled }) => [id, enabled]),
+    list.map(({ sha256, enabled }) => [sha256, enabled]),
   );
 
   // Add missing valid extensions
   for (const extension of valid) {
-    if (!storage.has(extension.id)) {
-      list.push({ "id": extension.id, "enabled": false });
-      storage.set(extension.id, false);
+    if (!storage.has(extension.sha256)) {
+      list.push({ "sha256": extension.sha256, "enabled": false });
+      storage.set(extension.sha256, false);
     }
   }
 

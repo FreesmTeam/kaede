@@ -17,15 +17,21 @@ I have also installed these updates, but they shouldn't be necessary:
 - [KB3033929](https://www.microsoft.com/en-us/download/details.aspx?id=46148)
 - [Visual C++ Redistributable Runtimes All-in-One 2005-2013 (both x86 and x64)](https://www.techpowerup.com/download/visual-c-redistributable-runtime-package-all-in-one/). Run `install_all.bat`. I had errors for `vcredist_v14.x64` and `vcredist_v14.x86`
 
-> `ADVAPI32.dll`
+## Troubleshooting
+
+> Errors related to `combase.dll` or `icu.dll`
+
+You shouldn't really see these errors... Make sure you have chose the correct build (should be Windows 7-specific).
+
+> Error related to `ADVAPI32.dll`
 
 - Make sure you have installed the `KB3080149` update.
 
-> `MSVCP140.dll`
+> Error related to `MSVCP140.dll`
 
 - Make sure you have installed Microsoft Visual C++ 2015 Redistributable (both x86 and x64).
 
-> `MSVCP140_1.dll`
+> Error related to `MSVCP140_1.dll`
 
 - Make sure you have installed Microsoft Visual C++ 2015-2022 Redistributable (both x86 and x64)
 

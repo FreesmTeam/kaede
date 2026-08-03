@@ -1,8 +1,6 @@
-
-
 /*
  * Kaede, a Minecraft Launcher
- * Copyright (C) 2026  windstone <[email protected]> and contributors
+ * Copyright (C) 2026  windstone <notwindstone@gmail.com> and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

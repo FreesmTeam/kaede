@@ -42,12 +42,12 @@ onMounted(async () => {
     ExtensionType["metadata"]["type"],
     Array<ExtensionType>
   > = {
-    "sandbox": valid.filter(({ id, metadata }) => (
-      storage.get(id) &&
+    "sandbox": valid.filter(({ sha256, metadata }) => (
+      storage.get(sha256) &&
       metadata.type === "sandbox"
     )),
-    "unrestricted": valid.filter(({ id, metadata }) => (
-      storage.get(id) &&
+    "unrestricted": valid.filter(({ sha256, metadata }) => (
+      storage.get(sha256) &&
       metadata.type === "unrestricted"
     )),
   };

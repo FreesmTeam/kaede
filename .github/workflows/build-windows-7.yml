@@ -86,7 +86,7 @@ jobs:
       - name: Compile Tauri app for the Win7 target
         shell: pwsh
         run: |
-          $env:TAURI_CONFIG = Get-Content -LiteralPath "src-tauri/tauri.win7.conf.json" -Raw
+          $env:TAURI_CONFIG = Get-Content -LiteralPath "src-tauri/tauri.conf.json" -Raw
           $cargoArgs = @(
             "build"
             "--manifest-path", "src-tauri/Cargo.toml"

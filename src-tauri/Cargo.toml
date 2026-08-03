@@ -17,6 +17,15 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2.4.0", features = [] }
 
+[features]
+default = ["notifications"]
+# Desktop notifications.
+#
+# On Windows, notifications require modern WinRT (related to combase.dll),
+# which does not exist on Windows 7, so we target that ancient platform with '--no-default-features'
+# while defining here what exactly are 'default' features
+notifications = ["dep:tauri-plugin-notification"]
+
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
@@ -38,7 +47,8 @@ reqwest = { version = "0.13" }
 tauri-plugin-fs = { version = "2", features = ["watch"] }
 tauri-plugin-dialog = "2"
 tauri-plugin-http = "2"
-tauri-plugin-notification = "2"
+# See '[features]' section above to know why this is optional
+tauri-plugin-notification = { version = "2", optional = true }
 tauri-plugin-os = "2"
 tauri-plugin-process = "2"
 tauri-plugin-upload = "2"
@@ -61,5 +71,7 @@ lto = true
 # remove debug symbols from the binary
 strip = true
 
+# Regular 'tauri-utils' uses ctor 0.8 that fails on Windows 7,
+# but this revision uses ctor 1.0 that works on Windows 7
 [patch.crates-io]
 tauri-utils = { git = "https://github.com/tauri-apps/tauri", rev = "8a97d387a3a1a52f7c501762517e294d8c94e119" }

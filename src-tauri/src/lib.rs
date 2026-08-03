@@ -16,7 +16,13 @@ const APP_NAME: &str = "kaede";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    let builder = tauri::Builder::default();
+
+    // The "notifications" feature is disabled for Windows 7 builds
+    #[cfg(feature = "notifications")]
+    let builder = builder.plugin(tauri_plugin_notification::init());
+
+    builder
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_upload::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
@@ -30,7 +36,6 @@ pub fn run() {
         .plugin(tauri_plugin_shellx::init(true))
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_oauth::init())

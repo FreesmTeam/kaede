@@ -24,6 +24,14 @@ const Pe32PlusMagic = 0x02_0B;
 const MaximumSubsystemMajor = 6;
 const MaximumSubsystemMinor = 1;
 
+// DLLs that do not exist on Windows 7. Importing any of these makes the
+// loader fail with a "missing DLL" dialog before the process even starts.
+const ForbiddenImportNames = new Set(["combase.dll"]);
+const ForbiddenImportPrefixes = [
+  // WinRT API sets (Windows 8+)
+  "api-ms-win-core-winrt",
+];
+
 function requireRange(
   byteLength: number,
   offset: number,
@@ -38,6 +46,96 @@ function requireRange(
 function isNewerThanWindows7(major: number, minor: number): boolean {
   return major > MaximumSubsystemMajor
     || (major === MaximumSubsystemMajor && minor > MaximumSubsystemMinor);
+}
+
+interface Section {
+  virtualAddress: number;
+  virtualSize: number;
+  rawDataOffset: number;
+  rawDataSize: number;
+}
+
+function rvaToFileOffset(sections: Section[], rva: number): number {
+  for (const section of sections) {
+    const sectionSpan = Math.max(section.virtualSize, section.rawDataSize);
+
+    if (rva >= section.virtualAddress && rva < section.virtualAddress + sectionSpan) {
+      return rva - section.virtualAddress + section.rawDataOffset;
+    }
+  }
+
+  throw new Error(`RVA 0x${rva.toString(16)} is not mapped by any section`);
+}
+
+function readCString(bytes: Uint8Array, offset: number): string {
+  let end = offset;
+
+  while (end < bytes.byteLength && bytes[end] !== 0) {
+    end += 1;
+  }
+
+  return new TextDecoder("ascii").decode(bytes.subarray(offset, end));
+}
+
+function collectImportedDlls(
+  bytes: Uint8Array,
+  view: DataView,
+  peOffset: number,
+  optionalHeaderOffset: number,
+  optionalHeaderSize: number,
+): string[] {
+  const sectionCount = view.getUint16(peOffset + 6, true);
+  const sectionTableOffset = optionalHeaderOffset + optionalHeaderSize;
+  const sections: Section[] = [];
+
+  for (let index = 0; index < sectionCount; index += 1) {
+    const entryOffset = sectionTableOffset + index * 40;
+
+    requireRange(bytes.byteLength, entryOffset, 40, `section header ${index}`);
+    sections.push({
+      virtualSize: view.getUint32(entryOffset + 8, true),
+      virtualAddress: view.getUint32(entryOffset + 12, true),
+      rawDataSize: view.getUint32(entryOffset + 16, true),
+      rawDataOffset: view.getUint32(entryOffset + 20, true),
+    });
+  }
+
+  // Import table is data directory 1; for PE32+ the directories start
+  // 112 bytes into the optional header.
+  const importDirectoryOffset = optionalHeaderOffset + 112 + 8;
+
+  requireRange(bytes.byteLength, importDirectoryOffset, 8, "import data directory");
+
+  const importTableRva = view.getUint32(importDirectoryOffset, true);
+  const dllNames: string[] = [];
+
+  if (importTableRva === 0) {
+    return dllNames;
+  }
+
+  let descriptorOffset = rvaToFileOffset(sections, importTableRva);
+
+  for (;;) {
+    requireRange(bytes.byteLength, descriptorOffset, 20, "import descriptor");
+
+    const nameRva = view.getUint32(descriptorOffset + 12, true);
+
+    if (nameRva === 0) {
+      break;
+    }
+
+    dllNames.push(readCString(bytes, rvaToFileOffset(sections, nameRva)));
+    descriptorOffset += 20;
+  }
+
+  return dllNames;
+}
+
+function isForbiddenOnWindows7(dllName: string): boolean {
+  const normalized = dllName.toLowerCase();
+
+  return ForbiddenImportNames.has(normalized)
+    || ForbiddenImportPrefixes.some((prefix) => normalized.startsWith(prefix));
 }
 
 async function checkWindows7Pe(filePath: string): Promise<void> {
@@ -103,8 +201,25 @@ async function checkWindows7Pe(filePath: string): Promise<void> {
     );
   }
 
+  const importedDlls = collectImportedDlls(
+    bytes,
+    view,
+    peOffset,
+    optionalHeaderOffset,
+    optionalHeaderSize,
+  );
+  const forbiddenImports = importedDlls.filter(isForbiddenOnWindows7);
+
+  if (forbiddenImports.length > 0) {
+    throw new Error(
+      `${filePath} imports DLLs that do not exist on Windows 7: `
+      + `${forbiddenImports.join(", ")}`,
+    );
+  }
+
   process.stdout.write(
-    `Verified ${filePath}: AMD64 PE subsystem ${subsystemMajor}.${subsystemMinor} <= 6.1\n`,
+    `Verified ${filePath}: AMD64 PE subsystem ${subsystemMajor}.${subsystemMinor} <= 6.1, `
+    + `${importedDlls.length} imported DLLs, none Win8+-only\n`,
   );
 }
 

@@ -83,6 +83,15 @@ jobs:
       - name: Build frontend for WebView2 109
         run: bun run build:frontend
 
+      - name: Exclude Win8+-only plugins from the Win7 build
+        shell: pwsh
+        run: |
+          # tauri-plugin-notification uses WinRT toasts (combase.dll, Windows 8+).
+          # The plugin is behind the default "notifications" cargo feature, which
+          # the compile step disables; the capability file must go with it or the
+          # ACL build step fails on unknown notification:* permissions.
+          Remove-Item -LiteralPath "src-tauri/capabilities/plugin-notification.json"
+
       - name: Compile Tauri app for the Win7 target
         shell: pwsh
         run: |
@@ -91,6 +100,7 @@ jobs:
             "build"
             "--manifest-path", "src-tauri/Cargo.toml"
             "--bins"
+            "--no-default-features"
             "--features", "tauri/custom-protocol"
             "--target", $env:WIN7_TARGET
             "--release"

@@ -287,3 +287,8 @@ jobs:
           if-no-files-found: "warn"
           name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"
+
+  windows7-build:
+    name: "Windows 7 build"
+    uses: build-windows-7.yml
+    secrets: inherit

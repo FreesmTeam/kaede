@@ -78,7 +78,9 @@ const ForbiddenFunctions = new Map<string, Set<string>>([
 // prerequisite. (e.g. the WebView2 loader's TraceLogging usage.)
 const UpdateGatedFunctions = new Map<string, Map<string, string>>([
   ["advapi32.dll", new Map([
-    ["EventSetInformation", "KB2882822 (TraceLogging support)"],
+    // Imported by Microsoft's WebView2 loader (TraceLogging); the function is
+    // Windows 8+ but was backported to Windows 7 by this telemetry update.
+    ["EventSetInformation", "KB3080149 (backports EventSetInformation)"],
   ])],
 ]);
 

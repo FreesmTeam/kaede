@@ -122,6 +122,8 @@ A custom plugin for the Multi-Window experience (each window adds 30 MB of RAM u
 
 Download Kaede from the [GitHub Releases](https://github.com/kaede-basement/kaede/releases) page. Packages are available for Linux, Windows, and macOS.
 
+For Windows 7, see [this file](./WINDOWS-7.md).
+
 ### Development builds
 
 Please understand that these builds are not intended for most users. There may be bugs and other instabilities.

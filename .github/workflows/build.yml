@@ -290,5 +290,5 @@ jobs:
 
   windows7-build:
     name: "Windows 7 build"
-    uses: build-windows-7.yml
+    uses: ./.github/workflows/build-windows-7.yml
     secrets: inherit

@@ -26,11 +26,49 @@ const MaximumSubsystemMinor = 1;
 
 // DLLs that do not exist on Windows 7. Importing any of these makes the
 // loader fail with a "missing DLL" dialog before the process even starts.
-const ForbiddenImportNames = new Set(["combase.dll"]);
+const ForbiddenImportNames = new Set([
+  // WinRT / COM base (Windows 8+)
+  "combase.dll",
+  // OS-bundled ICU internationalization libraries (Windows 10 1703+);
+  // often pulled in by localization or collation code
+  "icu.dll",
+  "icuuc.dll",
+  "icuin.dll",
+]);
 const ForbiddenImportPrefixes = [
   // WinRT API sets (Windows 8+)
   "api-ms-win-core-winrt",
+  // Path API set (Windows 8+); famously broke Python 3.9 on Windows 7
+  "api-ms-win-core-path",
 ];
+
+// Functions that exist on Windows 8+ but are missing from the Windows 7
+// builds of these DLLs. The DLL loads fine, but the loader fails with
+// "procedure entry point ... could not be located" before main() runs.
+const ForbiddenFunctions = new Map<string, Set<string>>([
+  ["kernel32.dll", new Set([
+    "CreateFile2",
+    "CopyFile2",
+    "GetSystemTimePreciseAsFileTime",
+    "GetOverlappedResultEx",
+    "WaitOnAddress",
+    "WakeByAddressSingle",
+    "WakeByAddressAll",
+    "PrefetchVirtualMemory",
+    "GetProcessMitigationPolicy",
+    "SetProcessMitigationPolicy",
+    "GetProcessInformation",
+    "SetProcessInformation",
+    "GetThreadInformation",
+    "SetThreadInformation",
+    "CreateFileMappingFromApp",
+    "MapViewOfFileFromApp",
+  ])],
+  ["ole32.dll", new Set([
+    "CoIncrementMTAUsage",
+    "CoDecrementMTAUsage",
+  ])],
+]);
 
 function requireRange(
   byteLength: number,
@@ -77,13 +115,18 @@ function readCString(bytes: Uint8Array, offset: number): string {
   return new TextDecoder("ascii").decode(bytes.subarray(offset, end));
 }
 
+interface DllImport {
+  dllName: string;
+  functionNames: string[];
+}
+
 function collectImportedDlls(
   bytes: Uint8Array,
   view: DataView,
   peOffset: number,
   optionalHeaderOffset: number,
   optionalHeaderSize: number,
-): string[] {
+): DllImport[] {
   const sectionCount = view.getUint16(peOffset + 6, true);
   const sectionTableOffset = optionalHeaderOffset + optionalHeaderSize;
   const sections: Section[] = [];
@@ -107,10 +150,10 @@ function collectImportedDlls(
   requireRange(bytes.byteLength, importDirectoryOffset, 8, "import data directory");
 
   const importTableRva = view.getUint32(importDirectoryOffset, true);
-  const dllNames: string[] = [];
+  const dllImports: DllImport[] = [];
 
   if (importTableRva === 0) {
-    return dllNames;
+    return dllImports;
   }
 
   let descriptorOffset = rvaToFileOffset(sections, importTableRva);
@@ -118,17 +161,45 @@ function collectImportedDlls(
   for (;;) {
     requireRange(bytes.byteLength, descriptorOffset, 20, "import descriptor");
 
+    const importLookupTableRva = view.getUint32(descriptorOffset, true);
     const nameRva = view.getUint32(descriptorOffset + 12, true);
+    const importAddressTableRva = view.getUint32(descriptorOffset + 16, true);
 
     if (nameRva === 0) {
       break;
     }
 
-    dllNames.push(readCString(bytes, rvaToFileOffset(sections, nameRva)));
+    const dllName = readCString(bytes, rvaToFileOffset(sections, nameRva));
+    const functionNames: string[] = [];
+    let thunkOffset = rvaToFileOffset(
+      sections,
+      importLookupTableRva || importAddressTableRva,
+    );
+
+    // 64-bit thunks: high bit set means import-by-ordinal, otherwise the
+    // low 31 bits are an RVA to a hint/name entry (name starts at +2).
+    for (;;) {
+      requireRange(bytes.byteLength, thunkOffset, 8, `import thunk of ${dllName}`);
+
+      const thunkLow = view.getUint32(thunkOffset, true);
+      const thunkHigh = view.getUint32(thunkOffset + 4, true);
+
+      if (thunkLow === 0 && thunkHigh === 0) {
+        break;
+      }
+
+      if ((thunkHigh & 0x80_00_00_00) === 0) {
+        functionNames.push(readCString(bytes, rvaToFileOffset(sections, thunkLow) + 2));
+      }
+
+      thunkOffset += 8;
+    }
+
+    dllImports.push({ dllName, functionNames });
     descriptorOffset += 20;
   }
 
-  return dllNames;
+  return dllImports;
 }
 
 function isForbiddenOnWindows7(dllName: string): boolean {
@@ -138,7 +209,7 @@ function isForbiddenOnWindows7(dllName: string): boolean {
     || ForbiddenImportPrefixes.some((prefix) => normalized.startsWith(prefix));
 }
 
-async function checkWindows7Pe(filePath: string): Promise<void> {
+async function checkWindows7Pe(filePath: string, lenient: boolean): Promise<void> {
   const file = Bun.file(filePath);
 
   if (!(await file.exists())) {
@@ -208,28 +279,68 @@ async function checkWindows7Pe(filePath: string): Promise<void> {
     optionalHeaderOffset,
     optionalHeaderSize,
   );
-  const forbiddenImports = importedDlls.filter(element => isForbiddenOnWindows7(element));
+  const problems: string[] = [];
 
-  if (forbiddenImports.length > 0) {
-    throw new Error(
-      `${filePath} imports DLLs that do not exist on Windows 7: `
-      + `${forbiddenImports.join(", ")}`,
+  for (const { dllName, functionNames } of importedDlls) {
+    if (isForbiddenOnWindows7(dllName)) {
+      problems.push(
+        `${dllName} does not exist on Windows 7 `
+        + `(imported: ${functionNames.slice(0, 8).join(", ")}`
+        + `${functionNames.length > 8 ? ", ..." : ""})`,
+      );
+      continue;
+    }
+
+    const forbiddenFunctions = ForbiddenFunctions.get(dllName.toLowerCase());
+
+    if (forbiddenFunctions === undefined) {
+      continue;
+    }
+
+    const missingOnWindows7 = functionNames.filter(
+      (functionName) => forbiddenFunctions.has(functionName),
     );
+
+    if (missingOnWindows7.length > 0) {
+      problems.push(
+        `${dllName} lacks these functions on Windows 7: `
+        + missingOnWindows7.join(", "),
+      );
+    }
   }
+
+  if (problems.length > 0) {
+    const report = `${filePath} is not Windows 7 compatible:\n  - ${problems.join("\n  - ")}`;
+
+    if (!lenient) {
+      throw new Error(report);
+    }
+
+    process.stderr.write(`WARNING (lenient mode): ${report}\n`);
+    return;
+  }
+
+  const importedFunctionCount = importedDlls
+    .reduce((total, { functionNames }) => total + functionNames.length, 0);
 
   process.stdout.write(
     `Verified ${filePath}: AMD64 PE subsystem ${subsystemMajor}.${subsystemMinor} <= 6.1, `
-    + `${importedDlls.length} imported DLLs, none Win8+-only\n`,
+    + `${importedDlls.length} DLLs / ${importedFunctionCount} functions imported, `
+    + "none Windows 8+-only\n",
   );
 }
 
-const filePaths = process.argv.slice(2);
+const cliArguments = process.argv.slice(2);
+const lenient = cliArguments.includes("--lenient");
+const filePaths = cliArguments.filter((argument) => argument !== "--lenient");
 
 if (filePaths.length === 0) {
-  throw new Error("Usage: bun scripts/check-windows7-pe.ts <file.exe> [file.exe ...]");
+  throw new Error(
+    "Usage: bun scripts/check-windows-7-pe.ts [--lenient] <file.exe> [file.exe ...]",
+  );
 }
 
 for (const filePath of filePaths) {
   // @ts-expect-error It works
-  await checkWindows7Pe(filePath);
+  await checkWindows7Pe(filePath, lenient);
 }

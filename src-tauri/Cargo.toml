@@ -75,3 +75,6 @@ strip = true
 # but this revision uses ctor 1.0 that works on Windows 7
 [patch.crates-io]
 tauri-utils = { git = "https://github.com/tauri-apps/tauri", rev = "8a97d387a3a1a52f7c501762517e294d8c94e119" }
+# Cap 'windows-sys' at 0.60 so that 'windows-sys' uses 'ole32.dll' instead of 'combase.dll'.
+# 'combase.dll' is unavailable on Windows 7
+dirs-sys = { path = "vendor/dirs-sys" }

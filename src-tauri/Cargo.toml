@@ -23,6 +23,7 @@ serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 tauri = { version = "2.8.4", features = ["protocol-asset", "macos-private-api", "image-ico", "image-png", "tray-icon"] }
 tauri-plugin-log = "2"
+tauri-utils = "2.9.3"
 
 time = "0.3"
 sha1 = "0.10.6"
@@ -60,7 +61,3 @@ codegen-units = 1
 lto = true
 # remove debug symbols from the binary
 strip = true
-
-[patch.crates-io]
-# For Windows 7 builds
-tauri-utils = { git = "https://github.com/tauri-apps/tauri", rev = "8a97d387a3a1a52f7c501762517e294d8c94e119" }

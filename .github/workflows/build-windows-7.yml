@@ -127,7 +127,7 @@ jobs:
             throw "Built Win7-target sidecar differs from the verified source sidecar"
           }
 
-          bun ./scripts/check-windows7-pe.ts $appBinary $builtSidecar
+          bun ./scripts/check-windows-7-pe.ts $appBinary $builtSidecar
 
       - name: Bundle Win7 portable build
         shell: pwsh

@@ -68,7 +68,7 @@ jobs:
           $sourceSidecar = "src-tauri/binaries/txiki-server-x86_64-pc-windows-msvc.exe"
           $targetSidecar = "src-tauri/binaries/txiki-server-$env:WIN7_TARGET.exe"
 
-          bun ./scripts/check-windows7-pe.ts $sourceSidecar
+          bun ./scripts/check-windows-7-pe.ts $sourceSidecar
           Copy-Item -LiteralPath $sourceSidecar -Destination $targetSidecar
 
           $sourceHash = (Get-FileHash -LiteralPath $sourceSidecar -Algorithm SHA256).Hash

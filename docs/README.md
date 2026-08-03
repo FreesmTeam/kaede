@@ -81,6 +81,12 @@ Instance creation page
 
 ---
 
+Settings page (extensions tab)
+
+<img src="./demos/kaede_settings-page_extensions-tabb.webp" alt="Settings page (extensions tab)">
+
+---
+
 The log viewer
 
 <img src="./demos/kaede_logging-screen_launcher-logs.webp" alt="Logging screen">

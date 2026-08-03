@@ -60,3 +60,7 @@ codegen-units = 1
 lto = true
 # remove debug symbols from the binary
 strip = true
+
+[patch.crates-io]
+# For Windows 7 builds
+tauri-utils = { git = "https://github.com/tauri-apps/tauri", rev = "8a97d387a3a1a52f7c501762517e294d8c94e119" }

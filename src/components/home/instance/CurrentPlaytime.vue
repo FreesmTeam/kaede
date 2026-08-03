@@ -75,7 +75,7 @@ function handleSwitch(): void {
       </span>
       <span
         id="__home-page__current-playtime-information-time"
-        class="relative block w-full whitespace-pre-wrap text-sm text-neutral-400"
+        class="relative block w-full whitespace-pre text-sm text-neutral-400"
       >
         {{ " " }}
         <Transition name="fade-both-long">

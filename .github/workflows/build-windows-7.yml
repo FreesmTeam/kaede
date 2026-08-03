@@ -16,6 +16,12 @@ env:
   RUSTUP_TOOLCHAIN: "nightly-2026-06-28"
   VITE_BUILD_TARGET: "chrome109"
   WIN7_TARGET: "x86_64-win7-windows-msvc"
+  # Edge/WebView2 109.0.1518.140 (the last Win7-compatible version), as the
+  # Microsoft Edge standalone installer re-hosted in a Kaede-adjacent
+  # repository. Used to produce the "full" portable artifact with a bundled
+  # runtime. Leave WEBVIEW2_RUNTIME_URL empty to skip the full artifact.
+  WEBVIEW2_RUNTIME_URL: "https://github.com/kaede-basement/webview-109-cab/raw/refs/heads/main/microsoftedgestandaloneinstallerx64_1c890b4b8dd6b7c93da98ebdc08ecdc5e30e50cb.exe"
+  WEBVIEW2_RUNTIME_SHA256: "EAC95C8095EC5F9971EADE9827D8FB67FD251F5C16E702B5312D31067E39119B"
 
 jobs:
   compile:
@@ -158,6 +164,78 @@ jobs:
         with:
           if-no-files-found: "warn"
           name: "${{ steps.json_properties.outputs.productName }}-win7-portable-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}"
+          path: "portable-build/"
+
+      - name: Bundle the WebView2 fixed runtime for Win7
+        if: env.WEBVIEW2_RUNTIME_URL != ''
+        shell: pwsh
+        run: |
+          # Download the runtime package (Update Catalog .cab or the Edge 109
+          # standalone installer .exe) and verify its integrity.
+          $package = "webview2-package.bin"
+          curl.exe --fail --location --output $package "$env:WEBVIEW2_RUNTIME_URL"
+
+          $hash = (Get-FileHash -LiteralPath $package -Algorithm SHA256).Hash
+          if ($hash -ne $env:WEBVIEW2_RUNTIME_SHA256) {
+            throw "WebView2 runtime package hash mismatch: got $hash, expected $env:WEBVIEW2_RUNTIME_SHA256"
+          }
+
+          if ($env:WEBVIEW2_RUNTIME_URL -match '\.cab$') {
+            # The cab contains the Edge Update machinery plus the real
+            # installer payload named like 'MicrosoftEdge*_109....exe.{GUID}'.
+            New-Item -ItemType Directory -Force -Path webview2-cab | Out-Null
+            expand.exe -F:* $package webview2-cab | Out-Null
+
+            $payload = Get-ChildItem -Path "webview2-cab" -File |
+              Where-Object { $_.Name -match '109\.0\.1518\.140\.exe' } |
+              Select-Object -First 1
+            if ($null -eq $payload) {
+              throw "Installer payload not found inside the WebView2 runtime cab"
+            }
+
+            Copy-Item -LiteralPath $payload.FullName -Destination "webview2-installer.exe"
+          } else {
+            # A standalone installer exe was provided directly.
+            Copy-Item -LiteralPath $package -Destination "webview2-installer.exe"
+          }
+
+          # The installer is a self-extracting archive; 7-Zip unpacks it
+          # without running it. Nested archives (MSEDGE.7z) hold the browser
+          # files under Chrome-bin/<version>/.
+          7z x webview2-installer.exe -owebview2-payload -y | Out-Null
+
+          # Peel nested archives: the payload may contain a GUID-suffixed
+          # inner installer exe, which in turn contains MSEDGE.7z.
+          for ($pass = 0; $pass -lt 3; $pass += 1) {
+            $nested = Get-ChildItem -Path "webview2-payload" -Recurse -File |
+              Where-Object { $_.Name -match '\.7z$|\.exe\.\{[0-9A-Fa-f-]+\}$' }
+
+            foreach ($archive in $nested) {
+              $destination = "$($archive.DirectoryName)/$($archive.BaseName)-extracted"
+              if (-not (Test-Path -LiteralPath $destination)) {
+                7z x $archive.FullName -o"$destination" -y | Out-Null
+              }
+            }
+          }
+
+          $webviewExe = Get-ChildItem -Path "webview2-payload" -Recurse -Filter "msedgewebview2.exe" |
+            Select-Object -First 1
+          if ($null -eq $webviewExe) {
+            throw "msedgewebview2.exe not found in the extracted runtime payload"
+          }
+
+          # The folder containing msedgewebview2.exe becomes 'WebView2' next to
+          # the launcher; kaede auto-detects it at startup on Windows.
+          Copy-Item -Path $webviewExe.DirectoryName -Destination "portable-build/WebView2" -Recurse
+
+          bun ./scripts/check-windows-7-pe.ts --lenient "portable-build/WebView2/msedgewebview2.exe"
+
+      - name: Upload Win7 portable build with bundled WebView2
+        if: env.WEBVIEW2_RUNTIME_URL != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          if-no-files-found: "warn"
+          name: "${{ steps.json_properties.outputs.productName }}-win7-portable-full-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}"
           path: "portable-build/"
 
       - name: Record the compatibility boundary

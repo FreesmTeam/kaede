@@ -16,6 +16,18 @@ const APP_NAME: &str = "kaede";
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
+    // A portable fixed-version WebView2 runtime for Windows builds
+    #[cfg(windows)]
+    if std::env::var_os("WEBVIEW2_BROWSER_EXECUTABLE_FOLDER").is_none() {
+        if let Some(runtime_dir) = std::env::current_exe()
+            .ok()
+            .and_then(|exe| exe.parent().map(|dir| dir.join("WebView2")))
+            .filter(|dir| dir.join("msedgewebview2.exe").is_file())
+        {
+            std::env::set_var("WEBVIEW2_BROWSER_EXECUTABLE_FOLDER", &runtime_dir);
+        }
+    }
+
     let builder = tauri::Builder::default();
 
     // The "notifications" feature is disabled for Windows 7 builds

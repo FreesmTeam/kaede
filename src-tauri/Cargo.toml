@@ -60,7 +60,3 @@ codegen-units = 1
 lto = true
 # remove debug symbols from the binary
 strip = true
-
-# For Windows 7 builds
-[patch.crates-io]
-tauri-utils = "2.9.3"

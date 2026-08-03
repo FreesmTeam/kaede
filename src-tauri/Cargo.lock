@@ -115,7 +115,7 @@ dependencies = [
  "objc2-foundation 0.3.1",
  "parking_lot",
  "percent-encoding",
- "windows-sys 0.60.2",
+ "windows-sys 0.52.0",
  "wl-clipboard-rs",
  "x11rb",
 ]
@@ -2476,7 +2476,6 @@ dependencies = [
  "tauri-plugin-shellx",
  "tauri-plugin-single-instance",
  "tauri-plugin-upload",
- "tauri-utils",
  "time",
  "tokio",
  "zip",
@@ -3637,7 +3636,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.60.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]
@@ -5302,7 +5301,7 @@ dependencies = [
  "serde_with",
  "swift-rs",
  "thiserror 2.0.16",
- "toml 1.1.2+spec-1.1.0",
+ "toml 0.9.5",
  "url",
  "urlpattern",
  "uuid",
@@ -6284,7 +6283,7 @@ version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0978bf7171b3d90bac376700cb56d606feb40f251a475a5d6634613564460b22"
 dependencies = [
- "windows-sys 0.60.2",
+ "windows-sys 0.52.0",
 ]
 
 [[package]]

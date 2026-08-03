@@ -1,6 +1,8 @@
+
+
 /*
  * Kaede, a Minecraft Launcher
- * Copyright (C) 2026  windstone <notwindstone@gmail.com> and contributors
+ * Copyright (C) 2026  windstone <[email protected]> and contributors
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,6 +69,16 @@ const ForbiddenFunctions = new Map<string, Set<string>>([
   ["ole32.dll", new Set([
     "CoIncrementMTAUsage",
     "CoDecrementMTAUsage",
+  ])],
+]);
+
+// Functions that are missing from a stock Windows 7 SP1 install but are
+// added by a specific optional update. Importing these does not fail the
+// check; the required update is reported so it can be documented as a
+// prerequisite. (e.g. the WebView2 loader's TraceLogging usage.)
+const UpdateGatedFunctions = new Map<string, Map<string, string>>([
+  ["advapi32.dll", new Map([
+    ["EventSetInformation", "KB2882822 (TraceLogging support)"],
   ])],
 ]);
 
@@ -280,8 +292,21 @@ async function checkWindows7Pe(filePath: string, lenient: boolean): Promise<void
     optionalHeaderSize,
   );
   const problems: string[] = [];
+  const requiredUpdates: string[] = [];
 
   for (const { dllName, functionNames } of importedDlls) {
+    const updateGated = UpdateGatedFunctions.get(dllName.toLowerCase());
+
+    if (updateGated !== undefined) {
+      for (const functionName of functionNames) {
+        const update = updateGated.get(functionName);
+
+        if (update !== undefined) {
+          requiredUpdates.push(`${dllName}!${functionName} requires ${update}`);
+        }
+      }
+    }
+
     if (isForbiddenOnWindows7(dllName)) {
       problems.push(
         `${dllName} does not exist on Windows 7 `
@@ -318,6 +343,12 @@ async function checkWindows7Pe(filePath: string, lenient: boolean): Promise<void
 
     process.stderr.write(`WARNING (lenient mode): ${report}\n`);
     return;
+  }
+
+  for (const requiredUpdate of requiredUpdates) {
+    process.stdout.write(
+      `NOTE: ${filePath} needs a Windows 7 update: ${requiredUpdate}\n`,
+    );
   }
 
   const importedFunctionCount = importedDlls

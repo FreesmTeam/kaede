@@ -208,7 +208,7 @@ async function checkWindows7Pe(filePath: string): Promise<void> {
     optionalHeaderOffset,
     optionalHeaderSize,
   );
-  const forbiddenImports = importedDlls.filter(isForbiddenOnWindows7);
+  const forbiddenImports = importedDlls.filter(element => isForbiddenOnWindows7(element));
 
   if (forbiddenImports.length > 0) {
     throw new Error(

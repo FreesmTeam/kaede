@@ -16,16 +16,13 @@ env:
   RUSTUP_TOOLCHAIN: "nightly-2026-06-28"
   VITE_BUILD_TARGET: "chrome109"
   WIN7_TARGET: "x86_64-win7-windows-msvc"
-  # Edge/WebView2 109.0.1518.140 (the last Win7-compatible version), as the
-  # Microsoft Edge standalone installer re-hosted in a Kaede-adjacent
-  # repository. Used to produce the "full" portable artifact with a bundled
-  # runtime. Leave WEBVIEW2_RUNTIME_URL empty to skip the full artifact.
+  # Edge/WebView2 109.0.1518.140 (the last Windows 7-compatible version)
   WEBVIEW2_RUNTIME_URL: "https://github.com/kaede-basement/webview-109-cab/raw/refs/heads/main/microsoftedgestandaloneinstallerx64_1c890b4b8dd6b7c93da98ebdc08ecdc5e30e50cb.exe"
   WEBVIEW2_RUNTIME_SHA256: "EAC95C8095EC5F9971EADE9827D8FB67FD251F5C16E702B5312D31067E39119B"
 
 jobs:
   compile:
-    name: "Compile Tauri app for Windows 7"
+    name: "Compile the launcher for Windows 7"
     runs-on: windows-2022
     timeout-minutes: 60
 
@@ -46,7 +43,7 @@ jobs:
           toolchain: ${{ env.RUSTUP_TOOLCHAIN }}
           components: rust-src
 
-      - name: Verify the Rust Win7 build contract
+      - name: Verify the Rust build
         shell: pwsh
         run: |
           rustc --version --verbose
@@ -68,7 +65,7 @@ jobs:
             throw "Pinned Cargo does not expose -Z build-std"
           }
 
-      - name: Prepare the Win7-target txiki sidecar
+      - name: Prepare the txiki sidecar
         shell: pwsh
         run: |
           $sourceSidecar = "src-tauri/binaries/txiki-server-x86_64-pc-windows-msvc.exe"
@@ -88,10 +85,10 @@ jobs:
       - name: Install frontend dependencies
         run: bun install --frozen-lockfile
 
-      - name: Build frontend for WebView2 109
+      - name: Build frontend
         run: bun run build:frontend
 
-      - name: Exclude Win8+-only plugins from the Win7 build
+      - name: Exclude Windows 8 and newer only plugins from the build
         shell: pwsh
         run: |
           # tauri-plugin-notification uses WinRT toasts (combase.dll, Windows 8+).
@@ -100,7 +97,7 @@ jobs:
           # ACL build step fails on unknown notification:* permissions.
           Remove-Item -LiteralPath "src-tauri/capabilities/plugin-notification.json"
 
-      - name: Compile Tauri app for the Win7 target
+      - name: Compile the application
         shell: pwsh
         run: |
           $env:TAURI_CONFIG = Get-Content -LiteralPath "src-tauri/tauri.conf.json" -Raw
@@ -124,7 +121,7 @@ jobs:
         with:
           file_path: "./src-tauri/tauri.conf.json"
 
-      - name: Verify Win7-target PE binaries
+      - name: Verify PE binaries
         shell: pwsh
         run: |
           $productName = "${{ steps.json_properties.outputs.productName }}"
@@ -150,7 +147,7 @@ jobs:
           bun ./scripts/check-windows-7-pe.ts $appBinary
           bun ./scripts/check-windows-7-pe.ts --lenient $builtSidecar
 
-      - name: Bundle Win7 portable build
+      - name: Bundle the portable build
         shell: pwsh
         run: |
           $productName = "${{ steps.json_properties.outputs.productName }}"
@@ -159,14 +156,14 @@ jobs:
           Copy-Item "./src-tauri/binaries/txiki-server-$env:WIN7_TARGET.exe" -Destination "portable-build/txiki-server.exe"
           Set-Content -Path "portable-build/portable.txt" -Value "This file is required here to enable portable mode in Kaede."
 
-      - name: Upload Win7 portable build
+      - name: Upload the portable build
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
           name: "${{ steps.json_properties.outputs.productName }}-win7-portable-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}"
           path: "portable-build/"
 
-      - name: Bundle the WebView2 fixed runtime for Win7
+      - name: Bundle the WebView2 fixed runtime
         if: env.WEBVIEW2_RUNTIME_URL != ''
         shell: pwsh
         run: |
@@ -230,7 +227,7 @@ jobs:
 
           bun ./scripts/check-windows-7-pe.ts --lenient "portable-build/WebView2/msedgewebview2.exe"
 
-      - name: Upload Win7 portable build with bundled WebView2
+      - name: Upload the portable build with bundled WebView2
         if: env.WEBVIEW2_RUNTIME_URL != ''
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -238,11 +235,11 @@ jobs:
           name: "${{ steps.json_properties.outputs.productName }}-win7-portable-full-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}"
           path: "portable-build/"
 
-      - name: Record the compatibility boundary
+      - name: Log a message about compatibility
         shell: pwsh
         run: |
           @'
-          ## Windows 7 compatibility gate
+          ## Windows 7 compatibility
 
-          See `docs/WINDOWS7-COMPATIBILITY.md` before distributing a Win7 build.
+          See `docs/WINDOWS7-COMPATIBILITY.md` before distributing the build.
           '@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY

@@ -25,7 +25,7 @@ import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 export const extensionStates: Reactive<{
   "valid"   : Array<ExtensionType>;
   "invalid" : Array<DeepPartial<ExtensionType>>;
-  "executed": Array<ExtensionAPI>;
+  "executed": Array<{ "id": string; "api": ExtensionAPI; "sha256": string }>;
 }> = reactive({
   "valid"   : [],
   "invalid" : [],
@@ -35,6 +35,6 @@ export const extensionStates: Reactive<{
 // Updated on successful fetch of trusted hashes from GitHub
 export const trustedExtensionHashes = shallowRef<Set<string>>(
   new Set([
-    "455cf7502f56262694606107c239fcd954037aee774947815e693a44e5f618e1",
+    "cf7b2186a639ea1d80d5908b7653d8fd49aa0848aae94f2bcb781edc6a1362ea",
   ]),
 );

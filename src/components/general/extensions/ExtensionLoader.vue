@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 
 import PermissionsHandler from "@/components/general/extensions/PermissionsHandler.vue";
 import PageTeleports from "@/components/general/layout/PageTeleports.vue";
 import { GlobalObject } from "@/extendable/global-object.ts";
+import Errors from "@/lib/errors";
 import ExtensionAPI from "@/lib/extension-api";
 import Extensions from "@/lib/extensions";
 import { log } from "@/lib/logging/log.ts";
@@ -54,13 +55,33 @@ onMounted(async () => {
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Initializing all enabled unrestricted extensions");
   for (const { id, code, metadata, sha256 } of toExecute.unrestricted) {
+    const existing = extensionStates.executed.find(searching => searching.sha256 === sha256);
+
+    if (existing !== undefined) {
+      try {
+        log.debug(
+          __PRE_BUNDLED_FILENAME__,
+          `Re-enabling extension '${id}' (sha256: ${sha256})`,
+        );
+        await existing.api.enable();
+      } catch (error: unknown) {
+        log.error(
+          __PRE_BUNDLED_FILENAME__,
+          `Error while re-enabling extension '${id}' (sha256: ${sha256})`,
+          Errors.prettify(error),
+        );
+      }
+
+      continue;
+    }
+
     const result = await Extensions.runInUnrestricted(id, code, metadata, sha256);
 
     if (!result) {
       continue;
     }
 
-    extensionStates.executed.push(result);
+    extensionStates.executed.push({ id, sha256, "api": result });
   }
 
   const hasSandboxedPlugins = toExecute.sandbox.length > 0;
@@ -88,6 +109,32 @@ onMounted(async () => {
   }
 
   await Extensions.showWebviewWindow();
+});
+
+onUnmounted(async () => {
+  log.debug(
+    __PRE_BUNDLED_FILENAME__,
+    `Disabling ${extensionStates.executed.length} enabled unrestricted extensions`,
+  );
+  for (const { id, sha256, api } of extensionStates.executed) {
+    try {
+      log.debug(
+        __PRE_BUNDLED_FILENAME__,
+        `Disabling extension '${id}' (sha256: ${sha256})`,
+      );
+      await api.disable();
+    } catch (error: unknown) {
+      log.error(
+        __PRE_BUNDLED_FILENAME__,
+        `Error while disabling extensions '${id}' (sha256: ${sha256})`,
+        Errors.prettify(error),
+      );
+    }
+  }
+  log.info(
+    __PRE_BUNDLED_FILENAME__,
+    `Disabled ${extensionStates.executed.length} enabled unrestricted extensions`,
+  );
 });
 </script>
 

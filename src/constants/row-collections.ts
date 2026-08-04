@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/* eslint-disable max-lines */
+import { confirm } from "@tauri-apps/plugin-dialog";
 import { computed } from "vue";
 
 import { extensionStates, trustedExtensionHashes } from "@/states/extension.ts";
@@ -28,7 +30,21 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "icon"    : "i-lucide-blocks",
     "title"   : "Enable extensions",
     "subtitle": "Load trusted or community-made extensions",
-    "onClick" : (): void => {
+    "onClick" : async (): Promise<void> => {
+      const toToggle: boolean = await confirm(
+        globalStates.extensions.enabled
+          ? (
+            "Do you really want to disable all executed extensions?" +
+            "\n" +
+            "Note that you need to reload the UI to fully disable all extensions."
+          )
+          : "Do you really want to enable the extension system?",
+      );
+
+      if (!toToggle) {
+        return;
+      }
+
       globalStates.extensions.enabled = !globalStates.extensions.enabled;
     },
     "inner": {
@@ -40,7 +56,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__extensions-allow-untrusted",
     "icon"    : "i-lucide-door-open",
     "title"   : "Allow unrestricted untrusted extensions",
-    "subtitle": "Allow untrusted extensions to run outside of the sandbox",
+    "subtitle": "Allow community extensions to run outside of the sandbox",
     "onClick" : (): void => {
       globalStates.extensions.allowUnrestrictedUntrusted =
         !globalStates.extensions.allowUnrestrictedUntrusted;

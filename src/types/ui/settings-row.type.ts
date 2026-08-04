@@ -22,7 +22,8 @@ export type SettingsRowType = {
   "idRoot"   : string;
   "title"   ?: string;
   "empty"   ?: Omit<SettingsRowType, "inner">;
-  "onClick" ?: (event: MouseEvent) => void;
+  "disabled"?: boolean;
+  "onClick" ?: (event: MouseEvent) => void | Promise<void>;
   "image"   ?: string;
   "icon"    ?: string | "__kaede-do-not-render";
   "subtitle"?: string;

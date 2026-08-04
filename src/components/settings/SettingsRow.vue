@@ -17,6 +17,8 @@
   -->
 
 <script setup lang="ts">
+import { computed } from "vue";
+
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import Row from "@/components/general/base/Row.vue";
 import Toggle from "@/components/general/base/Toggle.vue";
@@ -25,17 +27,38 @@ import type { SettingsRowType } from "@/types/ui/settings-row.type.ts";
 const { row } = defineProps<{
   "row": SettingsRowType;
 }>();
+
+const classNames = computed((): string | undefined => {
+  if (row.disabled) {
+    return "opacity-50";
+  }
+
+  if (row.onClick) {
+    return "relative cursor-pointer";
+  }
+
+  return undefined;
+});
+const handler = computed((): {
+  "callback": (event: MouseEvent) => void;
+} => {
+  if (row.disabled || row.onClick === undefined) {
+    return { "callback": (): void => {} };
+  }
+
+  return { "callback": row.onClick };
+});
 </script>
 
 <template>
   <Row
     :id-root="row.idRoot"
-    :class="row.onClick ? 'relative cursor-pointer' : undefined"
+    :class="classNames"
     :icon="row.icon"
     :image="row.image"
     :title="row.title"
     :subtitle="row.subtitle"
-    @click="row.onClick"
+    @click="handler.callback"
   >
     <!-- leaf controls -->
     <Toggle
@@ -44,7 +67,7 @@ const { row } = defineProps<{
       class="pointer-events-none"
       :value="row.inner.value"
     />
-    <MaterialRipple v-if="row.onClick" />
+    <MaterialRipple v-if="!row.disabled && row.onClick" />
   </Row>
 
   <!-- nested child rows -->

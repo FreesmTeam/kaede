@@ -26,6 +26,7 @@ import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/log.ts";
 import { rehydrateProcesses } from "@/lib/processes/core.ts";
 import Watchers from "@/lib/watchers";
+import { globalStates } from "@/states/global.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
 import type {
   LaunchResponseType,
@@ -62,6 +63,10 @@ function onClose(instanceId: string): void {
 
   statuses.launching = 0;
   statuses.current = LaunchStatus.General.Aborted;
+
+  // Open instance logs since the instance was closed
+  globalStates.logs.show = true;
+  globalStates.logs.mode = instanceId;
 }
 
 function createLogSink(instanceId: string): (lines: Array<string>) => void {
@@ -290,6 +295,8 @@ provide<(instanceId?: string) => Promise<void>>(LaunchInstanceContextKey, launch
 provide<(instanceId: string) => Promise<void>>(CloseInstanceContextKey, closeInstance);
 
 GlobalInternals.instanceContext = { launches, logs, launchInstance, closeInstance };
+
+Watchers.watchLogModeStates(logs);
 </script>
 
 <template>

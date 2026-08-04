@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchEffect } from "vue";
+import { type ShallowReactive, watchEffect } from "vue";
 
 import Configs from "@/lib/configs";
 import FileManager from "@/lib/file-manager";
@@ -75,5 +75,27 @@ export function watchLocaleStates(): () => void {
       "selected": locale,
     });
     log.info(__PRE_BUNDLED_FILENAME__, `Successfully set translations to '${locale}'`);
+  });
+}
+
+export function watchLogModeStates(logs: ShallowReactive<Record<string, {
+  "list": Array<string>;
+}>>): () => void {
+  // We want to display only defined logs
+  return watchEffect(() => {
+    const currentMode: string = globalStates.logs.mode;
+
+    // So we exclude 'kaede-launcher' as it is always defined
+    if (currentMode === "kaede-launcher") {
+      return;
+    }
+
+    // If the currently displayed logs are defined, then we do not care
+    if (logs[currentMode] !== undefined) {
+      return;
+    }
+
+    // If they are undefined, we fall back to launcher logs
+    globalStates.logs.mode = "kaede-launcher";
   });
 }

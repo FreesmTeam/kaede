@@ -20,7 +20,11 @@ import { watchConfigSync } from "@/lib/watchers/watch-config-sync.ts";
 import { watchErrors } from "@/lib/watchers/watch-errors.ts";
 import { watchInstancesSync } from "@/lib/watchers/watch-instances-sync.ts";
 import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import { watchDevelopmentStates, watchLocaleStates } from "@/lib/watchers/watch-states.ts";
+import {
+  watchDevelopmentStates,
+  watchLocaleStates,
+  watchLogModeStates,
+} from "@/lib/watchers/watch-states.ts";
 
 export default {
   watchConfigSync,
@@ -29,4 +33,5 @@ export default {
   watchProcesses,
   watchDevelopmentStates,
   watchLocaleStates,
+  watchLogModeStates,
 } as const;

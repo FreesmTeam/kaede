@@ -20,9 +20,105 @@
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { computed } from "vue";
 
+import Errors from "@/lib/errors";
+import Extensions from "@/lib/extensions";
+import { log } from "@/lib/logging/log.ts";
 import { extensionStates, trustedExtensionHashes } from "@/states/extension.ts";
 import { globalStates } from "@/states/global.ts";
+import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 import type { SettingsRowCollectionType } from "@/types/ui/settings-row.type.ts";
+
+type ExecutedExtension = (typeof extensionStates)["executed"][number];
+
+const extensionHandler = {
+  "generic": async (
+    index: number,
+    extension: ExtensionType,
+    cleanEnable: () => Promise<void>,
+  ): Promise<void> => {
+    const executed: ExecutedExtension | undefined = extensionStates.executed.find(searching => (
+      searching.sha256 === extension.sha256
+    ));
+    const enabled: boolean = globalStates.extensions.list[index].enabled;
+
+    if (enabled) {
+      try {
+        if (executed === undefined) {
+          throw new Error("Tried to disable an extension that does not have Extension API");
+        }
+
+        await executed.api.disable();
+
+        globalStates.extensions.list[index].enabled = false;
+      } catch (error: unknown) {
+        log.error(
+          __PRE_BUNDLED_FILENAME__,
+          `Error while disabling extensions '${extension.id}' (sha256: ${extension.sha256})`,
+          Errors.prettify(error),
+        );
+      }
+
+      return;
+    }
+
+    try {
+      await (
+        executed === undefined
+          ? cleanEnable()
+          : executed.api.enable()
+      );
+
+      globalStates.extensions.list[index].enabled = true;
+    } catch (error: unknown) {
+      log.error(
+        __PRE_BUNDLED_FILENAME__,
+        `Error while re-enabling extension '${extension.id}' (sha256: ${extension.sha256}):`,
+        Errors.prettify(error),
+      );
+    }
+  },
+  "trusted": (index: number, extension: ExtensionType): Promise<void> => {
+    return extensionHandler.generic(
+      index,
+      extension,
+      async (): Promise<void> => {
+        const result = await Extensions.runInUnrestricted(
+          extension.id,
+          extension.code,
+          extension.metadata,
+          extension.sha256,
+        );
+
+        if (!result) {
+          return;
+        }
+
+        extensionStates.executed.push(
+          { "id": extension.id, "sha256": extension.sha256, "api": result },
+        );
+      },
+    );
+  },
+  "communityUnrestricted": (index: number, extension: ExtensionType): Promise<void> => {
+    // TODO: confirm user choice for community unrestricted
+
+    return extensionHandler.trusted(index, extension);
+  },
+  "communitySandboxed": (index: number, extension: ExtensionType): Promise<void> => {
+    // TODO: confirm user choice for community sandboxed (with static permissions)
+
+    return extensionHandler.generic(
+      index,
+      extension,
+      async (): Promise<void> => {
+        const permissions = extension.metadata.permissions ?? [];
+
+        // This is a sync function
+        Extensions.runInSandbox({ "id": extension.id, permissions, "code": extension.code });
+      },
+    );
+  },
+} as const;
 
 export const ExtensionsSettingsRows: SettingsRowCollectionType = [
   computed(() => ({
@@ -57,7 +153,24 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "icon"    : "i-lucide-door-open",
     "title"   : "Allow unrestricted untrusted extensions",
     "subtitle": "Allow community extensions to run outside of the sandbox",
-    "onClick" : (): void => {
+    "onClick" : async (): Promise<void> => {
+      if (!globalStates.extensions.allowUnrestrictedUntrusted) {
+        const toEnable: boolean = await confirm(
+          "By enabling this option, you are allowing" +
+          " " +
+          "community-made extensions to run with all permissions." +
+          "\n" +
+          "They will be able to access internet and your file system." +
+          "\n" +
+          "\n" +
+          "Are you sure?",
+        );
+
+        if (!toEnable) {
+          return;
+        }
+      }
+
       globalStates.extensions.allowUnrestrictedUntrusted =
         !globalStates.extensions.allowUnrestrictedUntrusted;
     },
@@ -88,7 +201,8 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "inner"   : extensionStates
       .valid
       .filter(({ sha256 }) => trustedExtensionHashes.value.has(sha256))
-      .map(({ id, metadata, sha256 }) => {
+      .map(currentExtension => {
+        const { id, metadata, sha256 } = currentExtension;
         const index = globalStates.extensions.list.findIndex(searching => (
           searching.sha256 === sha256
         ));
@@ -107,11 +221,8 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           "image"   : metadata.logo,
           "title"   : metadata.name,
           "subtitle": metadata?.description,
-          "onClick" : (): void => {
-            globalStates.extensions.list[index].enabled =
-              !globalStates.extensions.list[index].enabled;
-          },
-          "inner": {
+          "onClick" : (): Promise<void> => extensionHandler.trusted(index, currentExtension),
+          "inner"   : {
             "kind" : "toggle",
             "value": globalStates.extensions.list[index].enabled,
           },
@@ -131,7 +242,8 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "inner"   : extensionStates
       .valid
       .filter(({ metadata }) => metadata.type === "sandbox")
-      .map(({ id, metadata, sha256 }) => {
+      .map(currentExtension => {
+        const { id, metadata, sha256 } = currentExtension;
         const index = globalStates.extensions.list.findIndex(searching => (
           searching.sha256 === sha256
         ));
@@ -150,10 +262,9 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           "image"   : metadata.logo,
           "title"   : metadata.name,
           "subtitle": metadata?.description,
-          "onClick" : (): void => {
-            globalStates.extensions.list[index].enabled =
-              !globalStates.extensions.list[index].enabled;
-          },
+          "onClick" : (): Promise<void> => (
+            extensionHandler.communitySandboxed(index, currentExtension)
+          ),
           "inner": {
             "kind" : "toggle",
             "value": globalStates.extensions.list[index].enabled,
@@ -177,7 +288,8 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
         metadata.type === "unrestricted" &&
         !trustedExtensionHashes.value.has(sha256)
       ))
-      .map(({ id, metadata, sha256 }) => {
+      .map(currentExtension => {
+        const { id, metadata, sha256 } = currentExtension;
         const index = globalStates.extensions.list.findIndex(searching => (
           searching.sha256 === sha256
         ));
@@ -196,10 +308,10 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           "image"   : metadata.logo,
           "title"   : metadata.name,
           "subtitle": metadata?.description,
-          "onClick" : (): void => {
-            globalStates.extensions.list[index].enabled =
-              !globalStates.extensions.list[index].enabled;
-          },
+          "disabled": !globalStates.extensions.allowUnrestrictedUntrusted,
+          "onClick" : (): Promise<void> => (
+            extensionHandler.communityUnrestricted(index, currentExtension)
+          ),
           "inner": {
             "kind" : "toggle",
             "value": globalStates.extensions.list[index].enabled,

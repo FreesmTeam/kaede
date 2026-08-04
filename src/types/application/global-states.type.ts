@@ -13,7 +13,7 @@ type DevelopmentType = {
   "enableNativeReloadKeyBinds": boolean;
 };
 type ExtensionsType = {
-  "list"                      : Array<{ "enabled": boolean; "sha256": string }>;
+  "list"                      : Array<{ "enabled": boolean; "sha256": string; "label": string }>;
   "permissions"               : Record<string, Record<string, boolean>>;
   "enabled"                   : boolean;
   "allowUnrestrictedUntrusted": boolean;

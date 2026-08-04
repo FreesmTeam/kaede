@@ -5,6 +5,7 @@ export const ExtensionsSchema = Type.Object({
     Type.Object({
       "enabled": Type.Boolean(),
       "sha256" : Type.String(),
+      "label"  : Type.String(),
     }),
   ),
 

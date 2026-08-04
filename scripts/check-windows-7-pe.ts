@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/* eslint-disable */
+
 const DosSignature = 0x5A_4D;
 const PeSignature = 0x45_50;
 const Amd64Machine = 0x86_64;

@@ -34,7 +34,9 @@ onMounted(async () => {
   // Add missing valid extensions
   for (const extension of valid) {
     if (!storage.has(extension.sha256)) {
-      list.push({ "sha256": extension.sha256, "enabled": false });
+      const label: string = `${extension.metadata.name} (${extension.id})`;
+
+      list.push({ "sha256": extension.sha256, "enabled": false, label });
       storage.set(extension.sha256, false);
     }
   }
@@ -67,7 +69,7 @@ onMounted(async () => {
       } catch (error: unknown) {
         log.error(
           __PRE_BUNDLED_FILENAME__,
-          `Error while re-enabling extension '${id}' (sha256: ${sha256})`,
+          `Error while re-enabling extension '${id}' (sha256: ${sha256}):`,
           Errors.prettify(error),
         );
       }
@@ -126,7 +128,7 @@ onUnmounted(async () => {
     } catch (error: unknown) {
       log.error(
         __PRE_BUNDLED_FILENAME__,
-        `Error while disabling extensions '${id}' (sha256: ${sha256})`,
+        `Error while disabling extensions '${id}' (sha256: ${sha256}):`,
         Errors.prettify(error),
       );
     }

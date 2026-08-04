@@ -17,9 +17,29 @@
   -->
 
 <script setup lang="ts">
+import { useIntervalFn } from "@vueuse/core";
+import { ref } from "vue";
 
+import DevelopmentMode from "@/lib/development-mode";
+
+const usage = ref<string>("...");
+
+useIntervalFn(async () => {
+  usage.value = await DevelopmentMode.getCpuUsage();
+}, 1000);
 </script>
 
 <template>
-  <div id="__dev-cpu-usage__wrapper"></div>
+  <div
+    id="__dev-cpu-usage__wrapper"
+    class="flex flex-1 flex-col items-end gap-2 bg-black p-2 opacity-50"
+  >
+    <div
+      id="__dev-cpu-usage__inner"
+      class="w-full flex flex-nowrap items-center justify-start gap-2 text-sm text-white font-mono"
+    >
+      <span id="__dev-cpu-usage__icon" class="i-lucide-cpu block size-4"></span>
+      {{ usage }}%
+    </div>
+  </div>
 </template>

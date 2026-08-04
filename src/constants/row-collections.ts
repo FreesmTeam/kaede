@@ -37,8 +37,9 @@ const extensionHandler = {
     const enabled: boolean = globalStates.extensions.list[index].enabled;
 
     /*
-     * If extensions are disabled, we are just forcing any toggling to be a 'disable' action.
-     * 'ExtensionLoader.vue' handles the disabling of all executed extensions
+     * If extensions are disabled, we are allowing free-toggling.
+     * 'ExtensionLoader.vue' handles the disabling of all executed extensions,
+     * so no worries here
      */
     if (!globalStates.extensions.enabled) {
       globalStates.extensions.list[index].enabled = !enabled;
@@ -103,6 +104,10 @@ const extensionHandler = {
      * Alright, I tried handling this scenario, so this branch is essentially useless,
      * but let it stay as a memorial. Holy shit why all of this is so complex,
      * I try to code everything as simple as possible...
+     *
+     * Wait, this branch is not useless if user played around with enabling extensions feature
+     * and 'allowUnrestrictedUntrusted' while having the toggle for an unrestricted extension,
+     * which leads to dirty lifecycle handlers being undefined
      */
     if (enabled) {
       globalStates.extensions.list[index].enabled = !enabled;

@@ -34,8 +34,6 @@ export function runInSandbox({
   "enable" : () => void | Promise<void>;
   "disable": () => void | Promise<void>;
 } {
-  Extensions.lockdownEnvironment();
-
   const scopedThis = Permissions.grantStaticPermissions({ id, permissions });
 
   /*
@@ -53,6 +51,9 @@ export function runInSandbox({
   } = { "enable": (): void => {}, "disable": (): void => {} };
 
   try {
+    // It will not lock down more than once
+    Extensions.lockdownEnvironment();
+
     const compartment = new Compartment({
       "globals": harden({
         "requestPermissions": wrappedPermissionsRequest,

@@ -23,7 +23,7 @@ const { style } = useDraggable(container, {
   <div
     ref="container"
     id="__dev-mode__wrapper"
-    class="fixed z-9500 flex flex-col"
+    class="fixed z-9500 flex flex-col cursor-move"
     :style="style"
   >
     <FramesPerSecond v-if="development.showFPS" />

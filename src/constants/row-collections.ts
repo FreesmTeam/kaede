@@ -100,7 +100,7 @@ const extensionHandler = {
         );
 
         if (!result) {
-          return;
+          throw new Error("Failed to run extension");
         }
 
         extensionStates.executed.push(
@@ -122,6 +122,9 @@ const extensionHandler = {
       extension,
       async (): Promise<void> => {
         const permissions = extension.metadata.permissions ?? [];
+
+        // Make sure to lock down the environment...
+        Extensions.lockdownEnvironment();
 
         // This is a sync function
         Extensions.runInSandbox({ "id": extension.id, permissions, "code": extension.code });
@@ -228,7 +231,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
 
         const status: string = extensionStates.executed.some(searching => (
           searching.sha256 === sha256
-        )) ? " (executed)" : "";
+        )) ? " (executed this session)" : "";
 
         return {
           "idRoot"  : `__settings-page__extensions-list-trusted-entry-${id}`,
@@ -273,7 +276,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
 
         const status: string = extensionStates.executed.some(searching => (
           searching.sha256 === sha256
-        )) ? " (executed)" : "";
+        )) ? " (executed this session)" : "";
 
         return {
           "idRoot"  : `__settings-page__extensions-list-sandboxed-entry-${id}`,
@@ -323,7 +326,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
 
         const status: string = extensionStates.executed.some(searching => (
           searching.sha256 === sha256
-        )) ? " (executed)" : "";
+        )) ? " (executed this session)" : "";
 
         return {
           "idRoot"  : `__settings-page__extensions-list-unrestricted-entry-${id}`,

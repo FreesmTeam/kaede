@@ -20,11 +20,12 @@ import { fetch } from "@tauri-apps/plugin-http";
 
 import { AsyncFunction } from "@/constants/application.ts";
 
-export async function loadEruda(): Promise<void> {
+export async function loadEruda(): Promise<() => void> {
   const url: string = "https://cdn.jsdelivr.net/npm/eruda";
   const response: Response = await fetch(url);
   const code: string = await response.text();
   const loader = new AsyncFunction(code);
+  let destroy: () => void;
 
   await loader();
 
@@ -35,5 +36,22 @@ export async function loadEruda(): Promise<void> {
   ) {
     window.eruda.init();
     window.eruda.show();
+
+    destroy = (): void => {
+      if (
+        "eruda" in window && typeof window.eruda === "object" && window.eruda !== null &&
+        "destroy" in window.eruda && typeof window.eruda.destroy === "function"
+      ) {
+        window.eruda.destroy();
+      }
+    };
   }
+
+  /*
+   * If the function wasn't defined, then the Eruda wasn't loaded,
+   * so we can assign a placeholder that will do nothing
+   */
+  destroy ??= (): void => {};
+
+  return destroy;
 }

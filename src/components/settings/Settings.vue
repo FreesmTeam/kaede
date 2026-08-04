@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
+import DevelopmentSettings from "@/components/settings/tabs/DevelopmentSettings.vue";
 import ExtensionsSettings from "@/components/settings/tabs/ExtensionsSettings.vue";
 import GeneralSettings from "@/components/settings/tabs/GeneralSettings.vue";
 import { SettingsSections } from "@/constants/application.ts";
@@ -34,6 +35,7 @@ const sections = computed((): Array<TabSectionType> => {
       />
       <GeneralSettings v-if="selected === 'general'" />
       <ExtensionsSettings v-else-if="selected === 'extensions'" />
+      <DevelopmentSettings v-else-if="selected === 'development'" />
       <LazyPluginPlayground v-else-if="selected === 'plugin-playground'" />
     </div>
   </C.PageWrapper>

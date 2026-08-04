@@ -149,6 +149,11 @@ export const SettingsSections: Array<TabSectionType> = [
     "icon": "i-lucide-blocks",
   },
   {
+    "id"  : "development",
+    "name": "Development",
+    "icon": "i-lucide-construction",
+  },
+  {
     "id"  : "plugin-playground",
     "name": "Plugin Playground",
     "icon": "i-lucide-square-terminal",

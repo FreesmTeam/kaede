@@ -19,6 +19,7 @@
 import { type ShallowReactive, watchEffect } from "vue";
 
 import Configs from "@/lib/configs";
+import DevelopmentMode from "@/lib/development-mode";
 import FileManager from "@/lib/file-manager";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
@@ -47,12 +48,22 @@ const reload = (event: KeyboardEvent): void => {
 
 export function watchDevelopmentStates(): CleanupType<GlobalStatesType["development"]> {
   const cleanup: CleanupType<GlobalStatesType["development"]> = {};
+  let unloadEruda: () => void;
 
   cleanup.enableDebugMode = watchEffect(() => {
     const enabled: boolean = globalStates.development.enableDebugMode;
     const field = enabled ? "__debug-defined" : "__debug-undefined";
 
     log.debug = log[field];
+  });
+  cleanup.loadErudaDevTools = watchEffect(async () => {
+    const enabled: boolean = globalStates.development.loadErudaDevTools;
+
+    if (enabled) {
+      unloadEruda = await DevelopmentMode.loadEruda();
+    } else {
+      unloadEruda();
+    }
   });
 
   window.addEventListener("keydown", reload);

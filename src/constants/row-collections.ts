@@ -434,6 +434,103 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
   })),
 ];
 
+export const DevelopmentSettingsRows: SettingsRowCollectionType = [
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-load-eruda-dev-tools",
+    "icon"    : "i-lucide-tool-case",
+    "title"   : "Enable DevTools",
+    "subtitle": "Load the Eruda console for debugging",
+    "onClick" : (): void => {
+      globalStates.development.loadErudaDevTools = !globalStates.development.loadErudaDevTools;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.loadErudaDevTools,
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-show-fps",
+    "icon"    : "i-lucide-gauge",
+    "title"   : "Show FPS",
+    "subtitle": "Display the current frames per second",
+    "onClick" : (): void => {
+      globalStates.development.showFPS = !globalStates.development.showFPS;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.showFPS,
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-show-cpu-usage",
+    "icon"    : "i-lucide-cpu",
+    "title"   : "Show CPU usage",
+    "subtitle": "Display current CPU usage in percents",
+    "onClick" : (): void => {
+      globalStates.development.showCPUUsage = !globalStates.development.showCPUUsage;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.showCPUUsage,
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-show-memory-usage",
+    "icon"    : "i-lucide-memory-stick",
+    "title"   : "Show RAM usage",
+    "subtitle": "Display current RAM consumption",
+    "onClick" : (): void => {
+      globalStates.development.showMemoryUsage = !globalStates.development.showMemoryUsage;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.showMemoryUsage,
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-enable-debug-mode",
+    "icon"    : "i-lucide-bug",
+    "title"   : "Enable debug mode",
+    "subtitle": "Start logging debug messages",
+    "onClick" : (): void => {
+      globalStates.development.enableDebugMode = !globalStates.development.enableDebugMode;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.enableDebugMode,
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-enable-native-context-menu",
+    "icon"    : "i-lucide-mouse-pointer-click",
+    "title"   : "Native context menu",
+    "subtitle": "Display the OS right‑click menu alongside the custom one",
+    "onClick" : (): void => {
+      globalStates.development.enableNativeContextMenu =
+        !globalStates.development.enableNativeContextMenu;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.enableNativeContextMenu,
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-enable-native-reload-key-binds",
+    "icon"    : "i-lucide-refresh-cw",
+    "title"   : "Native reload keybinds",
+    "subtitle": "Allow Ctrl+R / F5 to reload the window",
+    "onClick" : (): void => {
+      globalStates.development.enableNativeReloadKeyBinds =
+        !globalStates.development.enableNativeReloadKeyBinds;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.enableNativeReloadKeyBinds,
+    },
+  })),
+];
+
 export default {
+  DevelopmentSettingsRows,
   ExtensionsSettingsRows,
 } as const;

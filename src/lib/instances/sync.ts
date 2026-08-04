@@ -43,7 +43,7 @@ export async function sync(): Promise<void> {
     );
   }
 
-  log.info(
+  log.debug(
     __PRE_BUNDLED_FILENAME__,
     "Instance metadata file successfully synced in:",
     (performance.now() - startTime).toFixed(1),

@@ -80,7 +80,10 @@ function handleLaunch(): void {
         ));
       }
 
-      instanceStates[instanceId].lastLaunch = Date.now();
+      instanceStates[instanceId] = {
+        ...instanceStates[instanceId],
+        "lastLaunch": Date.now(),
+      };
     });
 }
 async function handleClose(): Promise<void> {
@@ -150,7 +153,10 @@ useIntervalFn((): void => {
     const previousAbsoluteTime: number = previousIntervalTime.value;
     const timeToAdd: number = currentAbsoluteTime - previousAbsoluteTime;
 
-    instanceStates[currentId].playTime = currentPlayTime + timeToAdd;
+    instanceStates[currentId] = {
+      ...instanceStates[currentId],
+      "playTime": currentPlayTime + timeToAdd,
+    };
 
     previousIntervalTime.value = currentAbsoluteTime;
   }

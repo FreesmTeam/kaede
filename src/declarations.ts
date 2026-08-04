@@ -40,6 +40,7 @@ import type _Launcher from "@/constants/launcher.ts";
 import type _Meta from "@/constants/meta.ts";
 import type _Permissions from "@/constants/permissions.ts";
 import type _Routes from "@/constants/routes.ts";
+import type _RowCollections from "@/constants/row-collections.ts";
 import type Browser from "@/lib/browser";
 import type Configs from "@/lib/configs";
 import type Errors from "@/lib/errors";
@@ -239,6 +240,11 @@ declare global {
          * Constants related to the application pages
          */
         "Routes": typeof _Routes;
+
+        /**
+         * Constants related to the settings rows
+         */
+        "RowCollections": typeof _RowCollections;
       };
 
       /**

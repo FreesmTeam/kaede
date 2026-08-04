@@ -10,11 +10,13 @@ import _Launcher from "@/constants/launcher.ts";
 import _Meta from "@/constants/meta.ts";
 import _Permissions from "@/constants/permissions.ts";
 import _Routes from "@/constants/routes.ts";
+import _RowCollections from "@/constants/row-collections.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Browser from "@/lib/browser";
 import Configs from "@/lib/configs";
 import DevelopmentMode from "@/lib/development-mode";
 import Errors from "@/lib/errors";
+// We are importing as types to avoid bundling these objects into the index sources
 import type ExtensionAPI from "@/lib/extension-api";
 import type Extensions from "@/lib/extensions";
 import FileManager from "@/lib/file-manager";
@@ -55,6 +57,7 @@ export function declareGlobals(): void {
     "Meta"          : _Meta,
     "Permissions"   : _Permissions,
     "Routes"        : _Routes,
+    "RowCollections": _RowCollections,
   };
   GlobalObject.libs = {
     Browser,

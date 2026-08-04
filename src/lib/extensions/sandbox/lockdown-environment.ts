@@ -1,6 +1,12 @@
 import "ses";
 
+let locked: boolean = false;
+
 export function lockdownEnvironment(): void {
+  if (locked) {
+    return;
+  }
+
   /*
    * Can throw an error, which is a desirable behavior
    * since we do NOT want to execute sandboxed plugins without environment lockdown
@@ -17,4 +23,6 @@ export function lockdownEnvironment(): void {
      */
     "evalTaming": "unsafeEval",
   });
+
+  locked = true;
 }

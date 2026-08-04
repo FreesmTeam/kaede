@@ -17,7 +17,7 @@
  */
 
 /* eslint-disable max-lines */
-import { confirm } from "@tauri-apps/plugin-dialog";
+import { confirm, message } from "@tauri-apps/plugin-dialog";
 import { computed } from "vue";
 
 import Errors from "@/lib/errors";
@@ -43,6 +43,16 @@ const extensionHandler = {
 
     if (enabled) {
       try {
+        if (extension.metadata.type === "sandbox") {
+          await message(
+            `The extension '${extension.id}' will be fully disabled with the next UI reload`,
+          );
+
+          globalStates.extensions.list[index].enabled = false;
+
+          return;
+        }
+
         if (executed === undefined) {
           throw new Error("Tried to disable an extension that does not have Extension API");
         }
@@ -216,10 +226,14 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           };
         }
 
+        const status: string = extensionStates.executed.some(searching => (
+          searching.sha256 === sha256
+        )) ? " (executed)" : "";
+
         return {
           "idRoot"  : `__settings-page__extensions-list-trusted-entry-${id}`,
           "image"   : metadata.logo,
-          "title"   : metadata.name,
+          "title"   : `${metadata.name}${status}`,
           "subtitle": metadata?.description,
           "onClick" : (): Promise<void> => extensionHandler.trusted(index, currentExtension),
           "inner"   : {
@@ -257,10 +271,14 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           };
         }
 
+        const status: string = extensionStates.executed.some(searching => (
+          searching.sha256 === sha256
+        )) ? " (executed)" : "";
+
         return {
           "idRoot"  : `__settings-page__extensions-list-sandboxed-entry-${id}`,
           "image"   : metadata.logo,
-          "title"   : metadata.name,
+          "title"   : `${metadata.name}${status}`,
           "subtitle": metadata?.description,
           "onClick" : (): Promise<void> => (
             extensionHandler.communitySandboxed(index, currentExtension)
@@ -303,10 +321,14 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           };
         }
 
+        const status: string = extensionStates.executed.some(searching => (
+          searching.sha256 === sha256
+        )) ? " (executed)" : "";
+
         return {
           "idRoot"  : `__settings-page__extensions-list-unrestricted-entry-${id}`,
           "image"   : metadata.logo,
-          "title"   : metadata.name,
+          "title"   : `${metadata.name}${status}`,
           "subtitle": metadata?.description,
           "disabled": !globalStates.extensions.allowUnrestrictedUntrusted,
           "onClick" : (): Promise<void> => (

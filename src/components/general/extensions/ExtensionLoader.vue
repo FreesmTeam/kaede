@@ -10,7 +10,7 @@ import Extensions from "@/lib/extensions";
 import { log } from "@/lib/logging/log.ts";
 import Permissions from "@/lib/permissions";
 import Txiki from "@/lib/txiki";
-import { extensionStates } from "@/states/extension.ts";
+import { extensionStates, trustedExtensionHashes } from "@/states/extension.ts";
 import { globalStates } from "@/states/global.ts";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 
@@ -51,7 +51,10 @@ onMounted(async () => {
     )),
     "unrestricted": valid.filter(({ sha256, metadata }) => (
       storage.get(sha256) &&
-      metadata.type === "unrestricted"
+      metadata.type === "unrestricted" && (
+        trustedExtensionHashes.value.has(sha256) ||
+        globalStates.extensions.allowUnrestrictedUntrusted
+      )
     )),
   };
 

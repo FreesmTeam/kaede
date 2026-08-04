@@ -30,7 +30,12 @@ export function runInSandbox({
   "id"          : string;
   "code"        : string;
   "permissions"?: Array<PermissionType>;
-}): void {
+}): void | {
+  "enable" : () => void | Promise<void>;
+  "disable": () => void | Promise<void>;
+} {
+  Extensions.lockdownEnvironment();
+
   const scopedThis = Permissions.grantStaticPermissions({ id, permissions });
 
   /*
@@ -42,6 +47,10 @@ export function runInSandbox({
   ): Promise<Array<unknown>> => {
     return await Extensions.requestPermissions(permissions, id);
   };
+  const api: {
+    "enable" : () => void | Promise<void>;
+    "disable": () => void | Promise<void>;
+  } = { "enable": (): void => {}, "disable": (): void => {} };
 
   try {
     const compartment = new Compartment({
@@ -72,12 +81,30 @@ export function runInSandbox({
      * Compartments run using the same JavaScript interpreter as the WebView uses itself,
      * so the performance of sandboxed plugins vs. unrestricted should equal
      */
-    compartment.evaluate(code);
+    const result: unknown | {
+      "enable" : () => void | Promise<void>;
+      "disable": () => void | Promise<void>;
+    } = compartment.evaluate(code);
+
+    if (typeof result !== "object" || result === null) {
+      // Lifecycle handlers are optional, so we can safely return placeholder handlers
+      return api;
+    }
+
+    if (("enable" in result) && typeof result.enable === "function") {
+      api.enable = result.enable as () => void | Promise<void>;
+    }
+
+    if (("disable" in result) && typeof result.disable === "function") {
+      api.disable = result.disable as () => void | Promise<void>;
+    }
   } catch (error: unknown) {
-    log.error(
+    return log.error(
       __PRE_BUNDLED_FILENAME__,
       `An error occurred while running the '${id}' extension in the compartment:`,
       Errors.prettify(error),
     );
   }
+
+  return api;
 }

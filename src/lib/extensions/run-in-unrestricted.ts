@@ -32,29 +32,31 @@ export async function runInUnrestricted(
   sha256: string,
 ): Promise<ExtensionAPI | void> {
   const startTime = performance.now();
+  let scopedThis;
 
-  log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${id}' extension code`);
-
-  const compiled = new AsyncFunction(
-    "scopedThis",
-    "Kaede",
-    "globalStates",
-    "instanceStates",
-    "extensionStates",
-    code,
-  );
-  const scopedThis = {
-    "Kaede": new ExtensionAPI(id),
-    globalStates,
-    instanceStates,
-    extensionStates,
-  };
-
-  log.debug(
-    __PRE_BUNDLED_FILENAME__,
-    `Executing the '${id}' extension code in the unrestricted environment`,
-  );
   try {
+    log.debug(__PRE_BUNDLED_FILENAME__, `Initializing the '${id}' extension code`);
+
+    const compiled = new AsyncFunction(
+      "scopedThis",
+      "Kaede",
+      "globalStates",
+      "instanceStates",
+      "extensionStates",
+      code,
+    );
+
+    scopedThis = {
+      "Kaede": new ExtensionAPI(id),
+      globalStates,
+      instanceStates,
+      extensionStates,
+    };
+
+    log.debug(
+      __PRE_BUNDLED_FILENAME__,
+      `Executing the '${id}' extension code in the unrestricted environment`,
+    );
     await compiled(
       scopedThis,
       scopedThis.Kaede,
@@ -63,6 +65,7 @@ export async function runInUnrestricted(
       scopedThis.extensionStates,
     );
   } catch (error: unknown) {
+    // Treat the error as fatal
     return log.error(
       __PRE_BUNDLED_FILENAME__,
       `Failed to execute the '${id}' extension code in the unrestricted environment:`,

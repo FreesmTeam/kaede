@@ -60,33 +60,38 @@ onMounted(async () => {
 
   log.debug(__PRE_BUNDLED_FILENAME__, "Initializing all enabled unrestricted extensions");
   for (const { id, code, metadata, sha256 } of toExecute.unrestricted) {
-    const existing = extensionStates.executed.find(searching => searching.sha256 === sha256);
+    const needsCleanRun: boolean = await Extensions.dirtyLifecycle(
+      extensionStates.executed,
+      { id, code, metadata, sha256 },
+      true,
+    );
 
-    if (existing !== undefined) {
-      try {
-        log.debug(
-          __PRE_BUNDLED_FILENAME__,
-          `Re-enabling extension '${id}' (sha256: ${sha256})`,
-        );
-        await existing.api.enable();
-      } catch (error: unknown) {
-        log.error(
-          __PRE_BUNDLED_FILENAME__,
-          `Error while re-enabling extension '${id}' (sha256: ${sha256}):`,
-          Errors.prettify(error),
-        );
-      }
+    if (!needsCleanRun) {
+      continue;
+    }
+
+    const api = await Extensions.runInUnrestricted(id, code, metadata, sha256);
+
+    // If 'api' is missing, then the extension did not load
+    if (!api) {
+      const index = globalStates.extensions.list.findIndex(searching => (
+        searching.sha256 === sha256
+      ));
+
+      // We need to show that the extension was not enabled
+      globalStates.extensions.list[index].enabled = false;
 
       continue;
     }
 
-    const result = await Extensions.runInUnrestricted(id, code, metadata, sha256);
-
-    if (!result) {
-      continue;
-    }
-
-    extensionStates.executed.push({ id, sha256, "api": result });
+    /*
+     * 'needsCleanRun' simply represents if the extension is in 'extensionStates.executed',
+     * so here we know that it is not in 'extensionStates.executed', yet
+     */
+    extensionStates.executed = [
+      ...extensionStates.executed,
+      { "extension": { id, code, metadata, sha256 }, api },
+    ];
   }
 
   const hasSandboxedPlugins = toExecute.sandbox.length > 0;
@@ -97,20 +102,45 @@ onMounted(async () => {
       "User does not have sandboxed plugins. Environment lockdown is not needed",
     );
 
-    await Extensions.showWebviewWindow();
-
-    return;
+    return await Extensions.showWebviewWindow();
   }
 
-  log.debug(__PRE_BUNDLED_FILENAME__, "Locking down the JavaScript environment");
-  Extensions.lockdownEnvironment();
-  log.info(__PRE_BUNDLED_FILENAME__, "The JavaScript environment was locked down");
-
   log.debug(__PRE_BUNDLED_FILENAME__, "Initializing all enabled sandboxed extensions");
-  for (const { id, code, metadata } of toExecute.sandbox) {
+  for (const { id, code, metadata, sha256 } of toExecute.sandbox) {
+    const needsCleanRun: boolean = await Extensions.dirtyLifecycle(
+      extensionStates.executed,
+      { id, code, metadata, sha256 },
+      true,
+    );
+
+    if (!needsCleanRun) {
+      continue;
+    }
+
     const permissions = metadata.permissions ?? [];
 
-    Extensions.runInSandbox({ id, permissions, code });
+    const api = Extensions.runInSandbox({ id, permissions, code });
+
+    // If 'api' is missing, then the extension did not load
+    if (!api) {
+      const index = globalStates.extensions.list.findIndex(searching => (
+        searching.sha256 === sha256
+      ));
+
+      // We need to show that the extension was not enabled
+      globalStates.extensions.list[index].enabled = false;
+
+      continue;
+    }
+
+    /*
+     * 'needsCleanRun' simply represents if the extension is in 'extensionStates.executed',
+     * so here we know that it is not in 'extensionStates.executed', yet
+     */
+    extensionStates.executed = [
+      ...extensionStates.executed,
+      { "extension": { id, code, metadata, sha256 }, api },
+    ];
   }
 
   await Extensions.showWebviewWindow();
@@ -119,26 +149,37 @@ onMounted(async () => {
 onUnmounted(async () => {
   log.debug(
     __PRE_BUNDLED_FILENAME__,
-    `Disabling ${extensionStates.executed.length} enabled unrestricted extensions`,
+    `Disabling ${extensionStates.executed.length} enabled extensions`,
   );
-  for (const { id, sha256, api } of extensionStates.executed) {
+  for (const { extension, api } of extensionStates.executed) {
     try {
       log.debug(
         __PRE_BUNDLED_FILENAME__,
-        `Disabling extension '${id}' (sha256: ${sha256})`,
+        `Disabling extension '${extension.id}' (sha256: ${extension.sha256})`,
       );
-      await api.disable();
+      const currentStatus: boolean = globalStates.extensions.list.find(searching => (
+        searching.sha256 === extension.sha256
+      ))?.enabled ?? false;
+
+      if (currentStatus) {
+        await api.disable();
+      } else {
+        log.warn(
+          __PRE_BUNDLED_FILENAME__,
+          `Extension '${extension.id}' seems to be already disabled`,
+        );
+      }
     } catch (error: unknown) {
       log.error(
         __PRE_BUNDLED_FILENAME__,
-        `Error while disabling extensions '${id}' (sha256: ${sha256}):`,
+        `Error while disabling extensions '${extension.id}' (sha256: ${extension.sha256}):`,
         Errors.prettify(error),
       );
     }
   }
   log.info(
     __PRE_BUNDLED_FILENAME__,
-    `Disabled ${extensionStates.executed.length} enabled unrestricted extensions`,
+    `Disabled ${extensionStates.executed.length} enabled extensions`,
   );
 });
 </script>

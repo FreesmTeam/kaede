@@ -17,16 +17,25 @@
  */
 
 import type { DeepPartial } from "unocss";
-import { type Reactive, reactive, shallowRef } from "vue";
+import { type ShallowReactive, shallowReactive, shallowRef } from "vue";
 
 import type ExtensionAPI from "@/lib/extension-api";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 
-export const extensionStates: Reactive<{
+type SandboxedAPI = {
+  "enable" : () => void | Promise<void>;
+  "disable": () => void | Promise<void>;
+};
+
+export const extensionStates: ShallowReactive<{
   "valid"   : Array<ExtensionType>;
   "invalid" : Array<DeepPartial<ExtensionType>>;
-  "executed": Array<{ "id": string; "api": ExtensionAPI; "sha256": string }>;
-}> = reactive({
+  "executed": Array<{
+    "extension": ExtensionType;
+    // Contains lifecycle handlers
+    "api"      : ExtensionAPI | SandboxedAPI;
+  }>;
+}> = shallowReactive({
   "valid"   : [],
   "invalid" : [],
   "executed": [],

@@ -1,11 +1,15 @@
 import "ses";
 
+import { log } from "@/lib/logging/log.ts";
+
 let locked: boolean = false;
 
 export function lockdownEnvironment(): void {
   if (locked) {
     return;
   }
+
+  log.debug(__PRE_BUNDLED_FILENAME__, "Locking down the JavaScript environment");
 
   /*
    * Can throw an error, which is a desirable behavior
@@ -25,4 +29,6 @@ export function lockdownEnvironment(): void {
   });
 
   locked = true;
+
+  return log.info(__PRE_BUNDLED_FILENAME__, "The JavaScript environment was locked down");
 }

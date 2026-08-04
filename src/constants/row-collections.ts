@@ -41,6 +41,13 @@ const extensionHandler = {
     ));
     const enabled: boolean = globalStates.extensions.list[index].enabled;
 
+    // If extensions are disabled, we are just forcing any toggling to be a 'disable' action
+    if (!globalStates.extensions.enabled) {
+      globalStates.extensions.list[index].enabled = false;
+
+      return;
+    }
+
     if (enabled) {
       try {
         if (extension.metadata.type === "sandbox") {
@@ -231,12 +238,12 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
 
         const status: string = extensionStates.executed.some(searching => (
           searching.sha256 === sha256
-        )) ? " (executed this session)" : "";
+        )) ? "<executed> " : "";
 
         return {
           "idRoot"  : `__settings-page__extensions-list-trusted-entry-${id}`,
           "image"   : metadata.logo,
-          "title"   : `${metadata.name}${status}`,
+          "title"   : `${status}${metadata.name}`,
           "subtitle": metadata?.description,
           "onClick" : (): Promise<void> => extensionHandler.trusted(index, currentExtension),
           "inner"   : {
@@ -276,12 +283,12 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
 
         const status: string = extensionStates.executed.some(searching => (
           searching.sha256 === sha256
-        )) ? " (executed this session)" : "";
+        )) ? "<executed> " : "";
 
         return {
           "idRoot"  : `__settings-page__extensions-list-sandboxed-entry-${id}`,
           "image"   : metadata.logo,
-          "title"   : `${metadata.name}${status}`,
+          "title"   : `${status}${metadata.name}`,
           "subtitle": metadata?.description,
           "onClick" : (): Promise<void> => (
             extensionHandler.communitySandboxed(index, currentExtension)
@@ -326,12 +333,12 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
 
         const status: string = extensionStates.executed.some(searching => (
           searching.sha256 === sha256
-        )) ? " (executed this session)" : "";
+        )) ? "<executed> " : "";
 
         return {
           "idRoot"  : `__settings-page__extensions-list-unrestricted-entry-${id}`,
           "image"   : metadata.logo,
-          "title"   : `${metadata.name}${status}`,
+          "title"   : `${status}${metadata.name}`,
           "subtitle": metadata?.description,
           "disabled": !globalStates.extensions.allowUnrestrictedUntrusted,
           "onClick" : (): Promise<void> => (

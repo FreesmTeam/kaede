@@ -58,6 +58,22 @@ const extensionHandler = {
      * disabled extensions while still having these functions accessible. In such case,
      * everything will still work as 'ExtensionLoader' was already loaded, making 'Extensions'
      * and the rest of the libs exposed to globals
+     *
+     * UPD: Yeah, I have tested the output. With direct imports:
+     * ```
+     * dist/assets/ExtensionLoader-DeFIFzDe.js       14.43 kB │ gzip:   5.70 kB
+     * dist/assets/PluginPlayground-C6G2CMXN.js      30.28 kB │ gzip:  13.36 kB
+     * dist/assets/index-CD2zf8AX.js                 73.45 kB │ gzip:  20.75 kB
+     * dist/assets/index-CKXFTzdX.js                518.37 kB │ gzip: 164.68 kB
+     * ```
+     *
+     * Without direct imports (via 'GlobalObject.libs.Extensions'):
+     * ```
+     * dist/assets/PluginPlayground-CCMrxMdk.js      30.28 kB │ gzip:  13.36 kB
+     * dist/assets/index-CC3e8Kpc.js                 73.45 kB │ gzip:  20.75 kB
+     * dist/assets/ExtensionLoader-BJ6kEj8G.js      116.04 kB │ gzip:  37.97 kB
+     * dist/assets/index-Co3Wt_c7.js                416.64 kB │ gzip: 131.89 kB
+     * ```
      */
     const Extensions = GlobalObject.libs.Extensions;
     const needsCleanRun: boolean = await Extensions.dirtyLifecycle(

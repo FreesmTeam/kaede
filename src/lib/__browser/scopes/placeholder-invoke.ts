@@ -61,6 +61,13 @@ export async function placeholderInvoke(
         payload?.message,
       );
     }
+    case "plugin:dialog|confirm": {
+      return confirm(
+        `${payload?.title} (${payload?.kind})` +
+        "\n" + "\n" +
+        payload?.message,
+      );
+    }
     case "plugin:upload|download": {
       const response: Response = await fetch(payload.url);
       const body: string = await response.text();

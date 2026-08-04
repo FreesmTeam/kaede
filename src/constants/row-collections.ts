@@ -221,7 +221,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           return {
             "idRoot"  : `__settings-page__extensions-list-trusted-entry-${id}`,
             "image"   : metadata.logo,
-            "title"   : `${metadata.name} (unknown)`,
+            "title"   : `${metadata.name} / unknown`,
             "subtitle": metadata?.description,
           };
         }
@@ -251,7 +251,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
   computed(() => ({
     "idRoot"  : "__settings-page__extensions-list-sandboxed",
     "icon"    : "i-lucide-brick-wall",
-    "title"   : "Community extensions (sandboxed)",
+    "title"   : "Sandboxed community extensions",
     "subtitle": "Enable or disable community extensions running in a sandbox",
     "inner"   : extensionStates
       .valid
@@ -266,7 +266,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           return {
             "idRoot"  : `__settings-page__extensions-list-sandboxed-entry-${id}`,
             "image"   : metadata.logo,
-            "title"   : `${metadata.name} (unknown)`,
+            "title"   : `${metadata.name} / unknown`,
             "subtitle": metadata?.description,
           };
         }
@@ -292,13 +292,13 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "empty": {
       "idRoot"  : "__settings-page__extensions-list-sandboxed-empty",
       "icon"    : "__kaede-do-not-render",
-      "subtitle": "No community (sandboxed) extensions loaded",
+      "subtitle": "No sandboxed community extensions loaded",
     },
   })),
   computed(() => ({
     "idRoot"  : "__settings-page__extensions-list-unrestricted",
     "icon"    : "i-lucide-triangle-alert",
-    "title"   : "Community extensions (unrestricted)",
+    "title"   : "Unrestricted community extensions",
     "subtitle": "Enable or disable unsafe extensions",
     "inner"   : extensionStates
       .valid
@@ -316,7 +316,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           return {
             "idRoot"  : `__settings-page__extensions-list-unrestricted-entry-${id}`,
             "image"   : metadata.logo,
-            "title"   : `${metadata.name} (unknown)`,
+            "title"   : `${metadata.name} / unknown`,
             "subtitle": metadata?.description,
           };
         }
@@ -343,7 +343,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "empty": {
       "idRoot"  : "__settings-page__extensions-list-unrestricted-empty",
       "icon"    : "__kaede-do-not-render",
-      "subtitle": "No community (unrestricted) extensions loaded",
+      "subtitle": "No unrestricted community extensions loaded",
     },
   })),
   computed(() => ({

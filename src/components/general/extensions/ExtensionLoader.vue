@@ -172,7 +172,7 @@ onUnmounted(async () => {
     } catch (error: unknown) {
       log.error(
         __PRE_BUNDLED_FILENAME__,
-        `Error while disabling extensions '${extension.id}' (sha256: ${extension.sha256}):`,
+        `Error while disabling extension '${extension.id}' (sha256: ${extension.sha256}):`,
         Errors.prettify(error),
       );
     }

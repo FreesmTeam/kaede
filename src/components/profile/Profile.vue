@@ -131,7 +131,12 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  viewer?.dispose();
+  if (canvas.value) {
+    // Otherwise, the canvas becomes white for a split second on page navigation
+    canvas.value.className = "opacity-0";
+  }
+
+  viewer?.dispose?.();
   viewer = undefined;
 });
 

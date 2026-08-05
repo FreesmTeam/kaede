@@ -87,7 +87,10 @@ function handleLaunch(): void {
     });
 }
 async function handleClose(): Promise<void> {
-  const toClose: boolean = await ask("Do you really want to cancel Minecraft launch?");
+  const toClose: boolean = await ask(
+    "Do you really want to cancel the Minecraft launch?",
+    "Minecraft",
+  );
 
   if (!toClose) {
     return;

@@ -150,7 +150,7 @@ function handleIndex(event: Event): void {
   <div
     id="__log-viewer__header-wrapper"
     class="h-8 flex flex-nowrap gap-2"
-    :style="{ 'color': globalStates.ui.widget.textColor ?? '#FFFFFF' }"
+    :style="{ 'color': globalStates.ui.widget.textColor || '#FFFFFF' }"
   >
     <CustomInput
       focus-on-key-f

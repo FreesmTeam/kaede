@@ -15,7 +15,7 @@ const image = computed((): DeepNonNullable<GlobalStatesType["ui"]["background"]>
     "key"    : background?.key ?? background?.image ?? "",
     "image"  : background?.image ?? "",
     "blur"   : background?.blur ?? 0,
-    "color"  : background?.color ?? "rgba(28, 28, 28, 0.6)",
+    "color"  : background?.color || "rgba(28, 28, 28, 0.6)",
     "isVideo": background?.isVideo ?? false,
   };
 });

@@ -16,8 +16,23 @@
   - along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import RowContainer from "@/components/general/base/RowContainer.vue";
+import SettingsRow from "@/components/settings/SettingsRow.vue";
+import { MinecraftSettingsRows } from "@/constants/row-collections.ts";
+</script>
 
 <template>
-  <div id="__settings-page__general-settings-wrapper"></div>
+  <div
+    id="__settings-page__minecraft-wrapper"
+    class="h-fit w-full flex flex-col gap-2 pb-2"
+  >
+    <RowContainer id="__settings-page__minecraft-inner">
+      <SettingsRow
+        v-for="row in MinecraftSettingsRows"
+        :row="row.value"
+        :key="row.value.idRoot"
+      />
+    </RowContainer>
+  </div>
 </template>

@@ -20,8 +20,9 @@
 import Image from "@/components/general/base/Image.vue";
 import { globalStates } from "@/states/global.ts";
 
-const { idRoot, image, icon, title, subtitle } = defineProps<{
+const { idRoot, separate, image, icon, title, subtitle } = defineProps<{
   "idRoot"   : string;
+  "separate"?: string;
   "title"   ?: string;
   "image"   ?: string;
   "icon"    ?: string;
@@ -31,6 +32,19 @@ const { idRoot, image, icon, title, subtitle } = defineProps<{
 
 <template>
   <div
+    v-if="separate !== undefined"
+    :id="idRoot"
+  >
+    <div
+      :id="`${idRoot}-label`"
+      class="pl-14 text-sm leading-none"
+      :style="{ 'color': globalStates.ui.text.secondaryColor || '#A3A3A3' }"
+    >
+      {{ separate }}
+    </div>
+  </div>
+  <div
+    v-else
     :id="`${idRoot}-wrapper`"
     class="relative w-full flex flex-nowrap items-center gap-4 rounded-md p-2"
   >
@@ -54,15 +68,15 @@ const { idRoot, image, icon, title, subtitle } = defineProps<{
         v-if="title"
         :id="`${idRoot}-title`"
         class="leading-none"
-        :style="{ 'color': globalStates.ui.text.mainColor ?? '#FFFFFF' }"
+        :style="{ 'color': globalStates.ui.text.mainColor || '#FFFFFF' }"
       >
         {{ title }}
       </span>
       <span
         v-if="subtitle"
         :id="`${idRoot}-subtitle`"
-        class="text-sm text-neutral-400 leading-none"
-        :style="{ 'color': globalStates.ui.text.secondaryColor ?? '#A3A3A3' }"
+        class="text-sm leading-none"
+        :style="{ 'color': globalStates.ui.text.secondaryColor || '#A3A3A3' }"
       >
         {{ subtitle }}
       </span>

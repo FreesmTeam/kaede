@@ -120,7 +120,7 @@ const dropdownItems = computed((): Array<DropdownItemType> => {
       </span>
       <span
         id="__home-page__current-instance-information-version"
-        class="block text-neutral-400"
+        class="block text-start text-neutral-400"
       >
         {{
           currentInstance?.instance?.patchVersions?.[Patches.Minecraft]

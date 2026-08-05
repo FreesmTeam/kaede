@@ -8,4 +8,5 @@ export const DevelopmentSchema = Type.Object({
   "enableDebugMode"           : Type.Boolean(),
   "enableNativeContextMenu"   : Type.Boolean(),
   "enableNativeReloadKeyBinds": Type.Boolean(),
+  "useNativeColorPicker"      : Type.Boolean(),
 });

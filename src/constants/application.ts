@@ -21,6 +21,8 @@ import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 export const ApplicationName = "Kaede";
 export const ApplicationRootID = "#app";
 
+export const CustomFontFamily = "kaede-custom-font";
+
 export const DefaultLocale = "en";
 
 export const TranslationsContextKey = Symbol();
@@ -55,7 +57,7 @@ export const ContextMenu: {
 export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
   "home"        : {},
   "library"     : {},
-  "settings"    : { "tab": "general" },
+  "settings"    : { "tab": "user-interface" },
   "add-instance": {
 
     /*
@@ -123,11 +125,6 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
   "none": {},
 };
 export const SettingsSections: Array<TabSectionType> = [
-  {
-    "id"  : "general",
-    "name": "General",
-    "icon": "i-lucide-sliders-horizontal",
-  },
   {
     "id"  : "user-interface",
     "name": "User Interface",
@@ -301,6 +298,7 @@ export default {
   AsyncFunction,
   ApplicationName,
   ApplicationRootID,
+  CustomFontFamily,
   DefaultLocale,
   TranslationsContextKey,
   AuthOneTimeFetchContextKey,

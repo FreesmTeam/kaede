@@ -208,7 +208,7 @@ GlobalInternals.logs = {
                 :id="`__log-viewer__log-line-number-${index}`"
                 class="w-12 shrink-0 select-none text-center"
                 :style="{
-                  'color': globalStates.ui.widget.secondaryColor ?? '#D4D4D4',
+                  'color': globalStates.ui.widget.secondaryColor || '#D4D4D4',
                 }"
               >
                 {{ filtered?.list?.[position + index]?.index }}

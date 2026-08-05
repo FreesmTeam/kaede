@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { convertFileSrc } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import { useDebounceFn, useEventListener } from "@vueuse/core";
 import { ref, useTemplateRef } from "vue";
 
@@ -21,6 +23,7 @@ const {
   classNames,
   type,
   tooltip,
+  filePicker,
 } = defineProps<{
   "icon"            : string;
   "placeholder"     : string;
@@ -40,13 +43,42 @@ const {
     "icon"   ?: string;
     "input"  ?: string;
   };
-  "type"   ?: "text" | "number";
-  "tooltip"?: string;
+  "type"       ?: "text" | "number";
+  "tooltip"    ?: string;
+  "filePicker" ?: {
+    "icon"     : string;
+    "title"   ?: string;
+    "filters" ?: Array<{ "name": string; "extensions": Array<string> }>;
+    "onPick"   : (value: string) => void;
+  };
 }>();
 
 const target = useTemplateRef("target");
 
 const focused = ref<boolean>(false);
+
+async function handleFilePickerClick(event: Event): Promise<void> {
+  event.stopPropagation();
+
+  if (!filePicker) {
+    return;
+  }
+
+  const selectedPath: string | null = await open({
+    "multiple" : false,
+    "directory": false,
+    "title"    : filePicker.title ?? "Select a file",
+    "filters"  : filePicker.filters,
+  });
+
+  if (!selectedPath) {
+    return;
+  }
+
+  const assetUrl: string = convertFileSrc(selectedPath);
+
+  filePicker.onPick(assetUrl);
+}
 
 function unFocus(event: Event): void {
   const target = event?.target as HTMLInputElement;
@@ -82,6 +114,11 @@ function handleWrapperClick(): void {
   target.value?.focus?.();
   focused.value = true;
 }
+
+defineExpose({
+  "focus": handleWrapperClick,
+  "pick" : handleFilePickerClick,
+});
 
 if (listenToEvents) {
   useEventListener("keydown", (event: KeyboardEvent) => {

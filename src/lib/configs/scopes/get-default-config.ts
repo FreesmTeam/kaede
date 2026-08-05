@@ -23,6 +23,7 @@ export async function getDefaultConfig(): Promise<ConfigType> {
       "enableDebugMode"           : false,
       "enableNativeContextMenu"   : false,
       "enableNativeReloadKeyBinds": false,
+      "useNativeColorPicker"      : false,
     },
     "extensions": {
       "list"                      : [],

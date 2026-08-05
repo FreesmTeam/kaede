@@ -32,7 +32,7 @@ const { resizeSection, toggleSection } = useLogResizer(characterElement);
     id="__log-viewer__tab-sections"
     class="flex flex-nowrap items-center overflow-x-auto border-x border-t border-neutral-500 font-mono bg-[theme(colors.black/.3)]"
     :style="{
-      'color': globalStates.ui.widget.secondaryColor ?? '#D4D4D4',
+      'color': globalStates.ui.widget.secondaryColor || '#D4D4D4',
     }"
   >
     <div ref="characterElement" id="__log-viewer__font-calculation" class="invisible absolute shrink-0 select-none font-mono">

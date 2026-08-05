@@ -16,6 +16,7 @@ test(testName, async () => {
       "enableDebugMode"           : false,
       "enableNativeContextMenu"   : false,
       "enableNativeReloadKeyBinds": false,
+      "useNativeColorPicker"      : false,
     },
     "extensions": {
       "list"                      : [],

@@ -20,8 +20,10 @@
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { computed } from "vue";
 
+import { DefaultLocale } from "@/constants/application.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
+import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/log.ts";
 import { extensionStates, trustedExtensionHashes } from "@/states/extension.ts";
 import { globalStates } from "@/states/global.ts";
@@ -205,6 +207,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
             "Note that you need to reload the UI to fully disable all extensions."
           )
           : "Do you really want to enable the extension system?",
+        "Extensions",
       );
 
       if (!toToggle) {
@@ -234,6 +237,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
           "\n" +
           "\n" +
           "Are you sure?",
+          "Extensions",
         );
 
         if (!toEnable) {
@@ -262,6 +266,11 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
       "kind" : "toggle",
       "value": globalStates.extensions.showAppAfterExtensionsLoad,
     },
+  })),
+
+  computed(() => ({
+    "idRoot"  : "__settings-page__extensions-separator-1",
+    "separate": "~",
   })),
   computed(() => ({
     "idRoot"  : "__settings-page__extensions-list-trusted",
@@ -436,10 +445,23 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
 
 export const DevelopmentSettingsRows: SettingsRowCollectionType = [
   computed(() => ({
+    "idRoot"  : "__settings-page__development-enable-debug-mode",
+    "icon"    : "i-lucide-bug",
+    "title"   : "Enable debug mode",
+    "subtitle": "Start logging debug messages",
+    "onClick" : (): void => {
+      globalStates.development.enableDebugMode = !globalStates.development.enableDebugMode;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.enableDebugMode,
+    },
+  })),
+  computed(() => ({
     "idRoot"  : "__settings-page__development-load-eruda-dev-tools",
     "icon"    : "i-lucide-tool-case",
     "title"   : "Enable DevTools",
-    "subtitle": "Load the Eruda console for debugging",
+    "subtitle": "Fetch and load the Eruda console for debugging",
     "onClick" : (): void => {
       globalStates.development.loadErudaDevTools = !globalStates.development.loadErudaDevTools;
     },
@@ -447,6 +469,10 @@ export const DevelopmentSettingsRows: SettingsRowCollectionType = [
       "kind" : "toggle",
       "value": globalStates.development.loadErudaDevTools,
     },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-separator-1",
+    "separate": "~",
   })),
   computed(() => ({
     "idRoot"  : "__settings-page__development-show-fps",
@@ -488,17 +514,8 @@ export const DevelopmentSettingsRows: SettingsRowCollectionType = [
     },
   })),
   computed(() => ({
-    "idRoot"  : "__settings-page__development-enable-debug-mode",
-    "icon"    : "i-lucide-bug",
-    "title"   : "Enable debug mode",
-    "subtitle": "Start logging debug messages",
-    "onClick" : (): void => {
-      globalStates.development.enableDebugMode = !globalStates.development.enableDebugMode;
-    },
-    "inner": {
-      "kind" : "toggle",
-      "value": globalStates.development.enableDebugMode,
-    },
+    "idRoot"  : "__settings-page__development-separator-2",
+    "separate": "~",
   })),
   computed(() => ({
     "idRoot"  : "__settings-page__development-enable-native-context-menu",
@@ -528,9 +545,450 @@ export const DevelopmentSettingsRows: SettingsRowCollectionType = [
       "value": globalStates.development.enableNativeReloadKeyBinds,
     },
   })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__development-use-native-color-picker",
+    "icon"    : "i-lucide-pipette",
+    "title"   : "Native color picker",
+    "subtitle": "Use the OS color picker instead of the custom one",
+    "onClick" : (): void => {
+      globalStates.development.useNativeColorPicker =
+        !globalStates.development.useNativeColorPicker;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.development.useNativeColorPicker,
+    },
+  })),
+];
+
+export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-locale",
+    "icon"    : "i-lucide-languages",
+    "title"   : "Language",
+    "subtitle": "Change the launcher language",
+    "inner"   : {
+      "kind": "select",
+
+      /*
+       * Available translations are loaded from disk at runtime, so we cannot
+       * statically enumerate them here. We only expose the bundled default,
+       * with the currently selected locale kept as-is
+       */
+      "options" : [DefaultLocale],
+      "value"   : globalStates.locale,
+      "onSelect": (value: string): void => {
+        globalStates.locale = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-logs-line-height",
+    "icon"    : "i-lucide-unfold-vertical",
+    "title"   : "Log line height",
+    "subtitle": "Adjust the height of log lines in the log viewer",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-unfold-vertical",
+      "placeholder" : "Line height",
+      "debounceTime": 300,
+      "defaultValue": globalStates.logs.lineHeight,
+      "onInput"     : (value: string): void => {
+        const parsed: number = Number(value);
+
+        if (Number.isNaN(parsed)) {
+          return;
+        }
+
+        globalStates.logs.lineHeight = parsed;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-separator-1",
+    "separate": "~",
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-ripple-color",
+    "icon"    : "i-lucide-droplet",
+    "title"   : "Ripple color",
+    "subtitle": "Color of the Material You ripple",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.ripple.color,
+      "onColor": (value: string): void => {
+        globalStates.ui.ripple.color = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-ripple-sparkles",
+    "icon"    : "i-lucide-sparkles",
+    "title"   : "Sparkles color",
+    "subtitle": "Color of the Material You sparkles",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.ripple.sparkles,
+      "onColor": (value: string): void => {
+        globalStates.ui.ripple.sparkles = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-separator-2",
+    "separate": "~",
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-background-image",
+    "icon"    : "i-lucide-image",
+    "title"   : "Background",
+    "subtitle": "Display a custom background image or video",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-image",
+      "placeholder" : "Background image",
+      "debounceTime": 300,
+      "defaultValue": globalStates.ui.background.image ?? undefined,
+      "onInput"     : (value: string): void => {
+        globalStates.ui.background.image = value === "" ? null : value;
+      },
+      "filePicker": {
+        "icon"   : "i-lucide-folder-open",
+        "title"  : "Select a background image",
+        "filters": [{
+          "name"      : "Media",
+          "extensions": ["png", "jpg", "jpeg", "webp", "gif", "svg", "avif", "apng", "mp4", "webm"],
+        }],
+        "onPick": (value: string): void => {
+          globalStates.ui.background.image = value;
+        },
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-background-blur",
+    "icon"    : "i-lucide-square-dashed",
+    "title"   : "Background blur",
+    "subtitle": "Amount of blur applied to the background",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-square-dashed",
+      "placeholder" : "Background blur",
+      "debounceTime": 300,
+      "defaultValue": globalStates.ui.background.blur ?? undefined,
+      "onInput"     : (value: string): void => {
+        if (value === "") {
+          globalStates.ui.background.blur = null;
+
+          return;
+        }
+
+        const parsed: number = Number(value);
+
+        if (Number.isNaN(parsed)) {
+          return;
+        }
+
+        globalStates.ui.background.blur = parsed;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-background-color",
+    "icon"    : "i-lucide-palette",
+    "title"   : "Overlay color",
+    "subtitle": "Overlay color shown on top of the background",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.background.color,
+      "default": "#1c1c1c99",
+      "onColor": (value: string): void => {
+        globalStates.ui.background.color = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-background-is-video",
+    "icon"    : "i-lucide-film",
+    "title"   : "Background video",
+    "subtitle": "Render the background as a video",
+    "onClick" : (): void => {
+      globalStates.ui.background.isVideo = !globalStates.ui.background.isVideo;
+    },
+    "inner": {
+      "kind" : "toggle",
+      "value": globalStates.ui.background.isVideo ?? false,
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-separator-3",
+    "separate": "~",
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-text-font",
+    "icon"    : "i-lucide-type",
+    "title"   : "Font",
+    "subtitle": "Font family used across the launcher",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-type",
+      "placeholder" : "Font family",
+      "debounceTime": 300,
+      "defaultValue": globalStates.ui.text.font ?? undefined,
+      "onInput"     : (value: string): void => {
+        globalStates.ui.text.font = value === "" ? null : value;
+      },
+      "filePicker": {
+        "icon"   : "i-lucide-folder-open",
+        "title"  : "Select a font file",
+        "filters": [{
+          "name"      : "Font",
+          "extensions": ["ttf", "otf", "woff", "woff2"],
+        }],
+        "onPick": (value: string): void => {
+          globalStates.ui.text.font = value;
+        },
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-text-main-color",
+    "icon"    : "i-lucide-baseline",
+    "title"   : "Main color",
+    "subtitle": "Select the main text color",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.text.mainColor,
+      "default": "#FFFFFF",
+      "onColor": (value: string): void => {
+        globalStates.ui.text.mainColor = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-text-secondary-color",
+    "icon"    : "i-lucide-baseline",
+    "title"   : "Secondary color",
+    "subtitle": "Select the secondary text color",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.text.secondaryColor,
+      "default": "#A3A3A3",
+      "onColor": (value: string): void => {
+        globalStates.ui.text.secondaryColor = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-separator-4",
+    "separate": "~",
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-widget-background",
+    "icon"    : "i-lucide-square",
+    "title"   : "Widget background color",
+    "subtitle": "Select the background color of widgets",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.widget.background,
+      "default": "#0a0a0a",
+      "onColor": (value: string): void => {
+        globalStates.ui.widget.background = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-widget-blur",
+    "icon"    : "i-lucide-square-dashed",
+    "title"   : "Widget blur",
+    "subtitle": "Apply blur to widget backgrounds",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-square-dashed",
+      "placeholder" : "Widget blur",
+      "debounceTime": 300,
+      "defaultValue": globalStates.ui.widget.blur ?? undefined,
+      "onInput"     : (value: string): void => {
+        if (value === "") {
+          globalStates.ui.widget.blur = null;
+
+          return;
+        }
+
+        const parsed: number = Number(value);
+
+        if (Number.isNaN(parsed)) {
+          return;
+        }
+
+        globalStates.ui.widget.blur = parsed;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-widget-text-color",
+    "icon"    : "i-lucide-baseline",
+    "title"   : "Widget text color",
+    "subtitle": "Select the main text color of widgets",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.widget.textColor,
+      "default": "#FFFFFF",
+      "onColor": (value: string): void => {
+        globalStates.ui.widget.textColor = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__ui-widget-secondary-color",
+    "icon"    : "i-lucide-baseline",
+    "title"   : "Widget secondary color",
+    "subtitle": "Select the secondary text color of widgets",
+    "inner"   : {
+      "kind"   : "color",
+      "value"  : globalStates.ui.widget.secondaryColor,
+      "default": "#D4D4D4",
+      "onColor": (value: string): void => {
+        globalStates.ui.widget.secondaryColor = value;
+      },
+    },
+  })),
+];
+
+export const MinecraftSettingsRows: SettingsRowCollectionType = [
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-window-width",
+    "icon"    : "i-lucide-move-horizontal",
+    "title"   : "Window width",
+    "subtitle": "Default game window width in pixels",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-move-horizontal",
+      "placeholder" : "Window width",
+      "debounceTime": 300,
+      "defaultValue": globalStates.minecraft.windowWidth,
+      "onInput"     : (value: string): void => {
+        const parsed: number = Number(value);
+
+        if (Number.isNaN(parsed)) {
+          return;
+        }
+
+        globalStates.minecraft.windowWidth = parsed;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-window-height",
+    "icon"    : "i-lucide-move-vertical",
+    "title"   : "Window height",
+    "subtitle": "Default game window height in pixels",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-move-vertical",
+      "placeholder" : "Window height",
+      "debounceTime": 300,
+      "defaultValue": globalStates.minecraft.windowHeight,
+      "onInput"     : (value: string): void => {
+        const parsed: number = Number(value);
+
+        if (Number.isNaN(parsed)) {
+          return;
+        }
+
+        globalStates.minecraft.windowHeight = parsed;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-icon",
+    "icon"    : "i-lucide-image",
+    "title"   : "Instance icon",
+    "subtitle": "Default icon used for new instances",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-image",
+      "placeholder" : "Instance icon",
+      "debounceTime": 300,
+      "defaultValue": globalStates.minecraft.icon,
+      "onInput"     : (value: string): void => {
+        globalStates.minecraft.icon = value;
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-separator-1",
+    "separate": "~",
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-add-jvm-arguments",
+    "icon"    : "i-lucide-plus",
+    "title"   : "Additional JVM arguments",
+    "subtitle": "Extra JVM arguments appended on launch",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-plus",
+      "placeholder" : "Additional JVM arguments",
+      "debounceTime": 300,
+      "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.add.jvmArguments),
+      "onInput"     : (value: string): void => {
+        globalStates.minecraft.add.jvmArguments = Launcher.Arguments.splitArguments(value);
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-add-game-arguments",
+    "icon"    : "i-lucide-plus",
+    "title"   : "Additional game arguments",
+    "subtitle": "Extra game arguments appended on launch",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-plus",
+      "placeholder" : "Additional game arguments",
+      "debounceTime": 300,
+      "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.add.gameArguments),
+      "onInput"     : (value: string): void => {
+        globalStates.minecraft.add.gameArguments = Launcher.Arguments.splitArguments(value);
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-remove-jvm-arguments",
+    "icon"    : "i-lucide-minus",
+    "title"   : "Removed JVM arguments",
+    "subtitle": "JVM arguments stripped out on launch",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-minus",
+      "placeholder" : "Removed JVM arguments",
+      "debounceTime": 300,
+      "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.remove.jvmArguments),
+      "onInput"     : (value: string): void => {
+        globalStates.minecraft.remove.jvmArguments = Launcher.Arguments.splitArguments(value);
+      },
+    },
+  })),
+  computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-remove-game-arguments",
+    "icon"    : "i-lucide-minus",
+    "title"   : "Removed game arguments",
+    "subtitle": "Game arguments stripped out on launch",
+    "inner"   : {
+      "kind"        : "input",
+      "icon"        : "i-lucide-minus",
+      "placeholder" : "Removed game arguments",
+      "debounceTime": 300,
+      "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.remove.gameArguments),
+      "onInput"     : (value: string): void => {
+        globalStates.minecraft.remove.gameArguments = Launcher.Arguments.splitArguments(value);
+      },
+    },
+  })),
 ];
 
 export default {
   DevelopmentSettingsRows,
   ExtensionsSettingsRows,
+  UserInterfaceSettingsRows,
+  MinecraftSettingsRows,
 } as const;

@@ -18,6 +18,8 @@
 
 import { computed, type ComputedRef } from "vue";
 
+import { CustomFontFamily } from "@/constants/application.ts";
+import General from "@/lib/general";
 import { globalStates } from "@/states/global.ts";
 import type { UIColorsType } from "@/types/ui/ui-colors.type.ts";
 
@@ -27,7 +29,7 @@ export function useConfigColors(): {
   const styles = computed((): UIColorsType => {
     const current: UIColorsType = {
       "overlay": {
-        "background": globalStates.ui.background.color || "rgb(17, 17, 17)",
+        "background": globalStates.ui.background.color || "rgba(28, 28, 28, 0.6)",
       },
       "widget": {
         "background": globalStates.ui.widget.background || "rgb(10, 10, 10)",
@@ -36,8 +38,14 @@ export function useConfigColors(): {
     };
 
     if (globalStates.ui.text.font !== null) {
+      /*
+       * A picked font file is stored as a URL and registered via '@font-face'
+       * (see 'watchCustomFont'), so we reference its family name here instead
+       */
       current.root = {
-        "fontFamily": globalStates.ui.text.font,
+        "fontFamily": General.isFontSourceUrl(globalStates.ui.text.font)
+          ? CustomFontFamily
+          : globalStates.ui.text.font,
       };
     }
 

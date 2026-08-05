@@ -38,4 +38,13 @@ const defaultColors = computed((): {
     :ripple-color="colors?.ripple ?? defaultColors.color"
     :sparkles-color-r-g-b="colors?.sparkles ?? defaultColors.sparkles"
   />
+  <span
+    v-else
+    :id="id"
+    :class="[
+      disabled ? 'pointer-events-none' : '',
+      'absolute bottom-0 left-0 right-0 top-0 block overflow-hidden',
+      'rounded-inherit active:bg-[theme(colors.neutral.100/.1)]',
+    ]"
+  ></span>
 </template>

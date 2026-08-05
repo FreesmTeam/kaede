@@ -17,8 +17,11 @@
   -->
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, useTemplateRef } from "vue";
 
+import ColorPicker from "@/components/general/base/ColorPicker.vue";
+import CustomInput from "@/components/general/base/CustomInput.vue";
+import CustomSelect from "@/components/general/base/CustomSelect.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import Row from "@/components/general/base/Row.vue";
 import Toggle from "@/components/general/base/Toggle.vue";
@@ -28,49 +31,141 @@ const { row } = defineProps<{
   "row": SettingsRowType;
 }>();
 
+const selectReference = useTemplateRef<{ "open": () => void }>("select");
+const inputReference = useTemplateRef<{
+  "focus": () => void;
+  "pick" : (event: Event) => void;
+}>("input");
+const colorReference = useTemplateRef<{ "open": () => void }>("color");
+
+const interactiveKind = computed((): string | undefined => {
+  if (!row.inner || Array.isArray(row.inner)) {
+    return undefined;
+  }
+
+  return row.inner.kind;
+});
 const classNames = computed((): string | undefined => {
   if (row.disabled) {
     return "opacity-50";
   }
 
-  if (row.onClick) {
+  if (row.onClick || interactiveKind.value !== undefined) {
     return "relative cursor-pointer";
   }
 
   return undefined;
 });
-const handler = computed((): {
-  "callback": (event: MouseEvent) => void;
-} => {
-  if (row.disabled || row.onClick === undefined) {
-    return { "callback": (): void => {} };
+
+function handleRowClick(event: MouseEvent): void {
+  if (row.disabled) {
+    return;
   }
 
-  return { "callback": row.onClick };
-});
+  if (row.onClick !== undefined) {
+    row.onClick(event);
+
+    return;
+  }
+
+  switch (interactiveKind.value) {
+    case "select": {
+      selectReference.value?.open();
+
+      break;
+    }
+    case "input": {
+      inputReference.value?.focus();
+
+      break;
+    }
+    case "color": {
+      colorReference.value?.open();
+
+      break;
+    }
+  }
+}
 </script>
 
 <template>
   <Row
     :id-root="row.idRoot"
     :class="classNames"
+    :separate="row.separate"
     :icon="row.icon"
     :image="row.image"
     :title="row.title"
     :subtitle="row.subtitle"
-    @click="handler.callback"
+    @click="handleRowClick"
   >
-    <!-- leaf controls -->
     <Toggle
       v-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'toggle'"
       :id="`${row.idRoot}-toggle`"
       class="pointer-events-none"
       :value="row.inner.value"
     />
-    <MaterialRipple v-if="!row.disabled && row.onClick" />
+    <CustomSelect
+      v-else-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'select'"
+      ref="select"
+      @click.stop
+      :id-root="`${row.idRoot}-select`"
+      :options="row.inner.options"
+      :value="row.inner.value"
+      :on-select="row.inner.onSelect"
+      :class-names="{ 'wrapper': '!w-40 sm:!w-58' }"
+    />
+    <div
+      :id="`${row.idRoot}-input-wrapper`"
+      v-else-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'input'"
+      class="flex shrink-0 flex-nowrap gap-2 !w-40 sm:!w-58"
+    >
+      <CustomInput
+        ref="input"
+        @click.stop
+        :id-root="`${row.idRoot}-input`"
+        :icon="row.inner.icon"
+        :placeholder="row.inner.placeholder"
+        :debounce-time="row.inner.debounceTime"
+        :default-value="row.inner.defaultValue"
+        :on-input="row.inner.onInput"
+        :file-picker="row.inner.filePicker"
+        :class-names="{
+          'wrapper': row.inner.filePicker === undefined
+            ? 'h-8 !w-full'
+            : 'h-8 !w-30 sm:!w-48',
+        }"
+      />
+      <button
+        v-if="row.inner.filePicker"
+        :id="`${row.idRoot}-input-file-picker-button`"
+        :title="row.inner.filePicker.title ?? 'Pick a file'"
+        class="relative z-10 grid size-8 shrink-0 place-items-center rounded-md transition-colors bg-[theme(colors.neutral.100/.1)] hover:bg-[theme(colors.neutral.100/.15)]"
+        @click="inputReference?.pick"
+      >
+        <span
+          :id="`${row.idRoot}-input-file-picker-icon`"
+          :class="[row.inner.filePicker.icon, 'block size-4 text-neutral-400']"
+        ></span>
+        <MaterialRipple />
+      </button>
+    </div>
+    <ColorPicker
+      v-else-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'color'"
+      ref="color"
+      @click.stop
+      :id-root="`${row.idRoot}-color`"
+      :value="row.inner.value"
+      :default-color="row.inner.default"
+      :on-color="row.inner.onColor"
+      :class-names="{ 'wrapper': 'w-full sm:!w-58' }"
+    />
+    <MaterialRipple
+      ref="rippleReference"
+      v-if="!row.disabled && (row.onClick || interactiveKind !== undefined)"
+    />
   </Row>
 
-  <!-- nested child rows -->
   <template v-if="Array.isArray(row.inner)">
     <SettingsRow v-if="row.empty && row.inner.length === 0" :row="row.empty" />
     <div

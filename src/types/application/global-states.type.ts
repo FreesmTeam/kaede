@@ -11,6 +11,7 @@ type DevelopmentType = {
   "enableDebugMode"           : boolean;
   "enableNativeContextMenu"   : boolean;
   "enableNativeReloadKeyBinds": boolean;
+  "useNativeColorPicker"      : boolean;
 };
 type ExtensionsType = {
   "list"                      : Array<{ "enabled": boolean; "sha256": string; "label": string }>;

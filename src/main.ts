@@ -144,6 +144,7 @@ Watchers.watchConfigSync();
 Watchers.watchInstancesSync();
 Watchers.watchDevelopmentStates();
 Watchers.watchLocaleStates();
+Watchers.watchCustomFont();
 Watchers.watchProcesses()
   .then(() => declareServerProcesses())
   .then(() => {

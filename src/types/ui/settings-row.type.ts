@@ -20,6 +20,7 @@ import type { ComputedRef } from "vue";
 
 export type SettingsRowType = {
   "idRoot"   : string;
+  "separate"?: string;
   "title"   ?: string;
   "empty"   ?: Omit<SettingsRowType, "inner">;
   "disabled"?: boolean;
@@ -42,6 +43,18 @@ export type SettingsRowType = {
     "debounceTime" : number;
     "defaultValue"?: string | number;
     "onInput"     ?: (value: string) => void;
+    "filePicker"  ?: {
+      "icon"     : string;
+      "onPick"   : (value: string) => void;
+      "title"   ?: string;
+      "filters" ?: Array<{ "name": string; "extensions": Array<string> }>;
+    };
+  } | {
+    "kind"    : "color";
+    // Since this takes a JSON value, the value can also be 'null'
+    "value"  ?: string | null;
+    "default"?: string;
+    "onColor"?: (value: string) => void;
   } | Array<SettingsRowType>;
 };
 export type SettingsRowCollectionType = Array<ComputedRef<SettingsRowType>>;

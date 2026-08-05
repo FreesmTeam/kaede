@@ -16,24 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { watchConfigSync } from "@/lib/watchers/watch-config-sync.ts";
-import { watchCustomFont } from "@/lib/watchers/watch-custom-font.ts";
-import { watchErrors } from "@/lib/watchers/watch-errors.ts";
-import { watchInstancesSync } from "@/lib/watchers/watch-instances-sync.ts";
-import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
-import {
-  watchDevelopmentStates,
-  watchLocaleStates,
-  watchLogModeStates,
-} from "@/lib/watchers/watch-states.ts";
+/*
+ * A picked font file arrives as a URL (a Tauri asset URL, or a remote one),
+ * which cannot be used as a 'font-family' directly. We detect those values so
+ * they can be registered through '@font-face' instead of naming a family
+ */
+export function isFontSourceUrl(font: string | null | undefined): boolean {
+  if (!font) {
+    return false;
+  }
 
-export default {
-  watchConfigSync,
-  watchCustomFont,
-  watchErrors,
-  watchInstancesSync,
-  watchProcesses,
-  watchDevelopmentStates,
-  watchLocaleStates,
-  watchLogModeStates,
-} as const;
+  return font.startsWith("http://") ||
+    font.startsWith("https://") ||
+    font.startsWith("blob:") ||
+    font.startsWith("data:");
+}

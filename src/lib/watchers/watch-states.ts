@@ -46,9 +46,10 @@ const reload = (event: KeyboardEvent): void => {
   }
 };
 
+let unloadEruda: () => void = (): void => {};
+
 export function watchDevelopmentStates(): CleanupType<GlobalStatesType["development"]> {
   const cleanup: CleanupType<GlobalStatesType["development"]> = {};
-  let unloadEruda: () => void;
 
   cleanup.enableDebugMode = watchEffect(() => {
     const enabled: boolean = globalStates.development.enableDebugMode;

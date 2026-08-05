@@ -29,6 +29,7 @@ const defaultConfig: ConfigType = {
     "enableDebugMode"           : false,
     "enableNativeContextMenu"   : false,
     "enableNativeReloadKeyBinds": false,
+    "useNativeColorPicker"      : false,
   },
   "extensions": {
     "list"                      : [],

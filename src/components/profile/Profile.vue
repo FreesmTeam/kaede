@@ -11,6 +11,8 @@ import {
 import { C } from "@/extendable/component-registry.ts";
 import Auth from "@/lib/auth";
 import Configs from "@/lib/configs";
+import Errors from "@/lib/errors";
+import { log } from "@/lib/logging/log.ts";
 import type {
   SignInResultType,
   SignInStatusType,
@@ -107,15 +109,23 @@ onMounted(async () => {
     return;
   }
 
-  use(WebGLRendererPlugin);
+  try {
+    use(WebGLRendererPlugin);
 
-  viewer = await createSkinViewer({
-    "canvas": canvas.value,
-    "skin"  : getSkinSource(accounts?.value[0]),
-    "slim"  : accounts?.value[0]?.skin.variant === "slim",
-  });
+    viewer = await createSkinViewer({
+      "canvas": canvas.value,
+      "skin"  : getSkinSource(accounts?.value[0]),
+      "slim"  : accounts?.value[0]?.skin.variant === "slim",
+    });
 
-  viewer.startRenderLoop();
+    viewer.startRenderLoop();
+  } catch (error: unknown) {
+    log.error(
+      __PRE_BUNDLED_FILENAME__,
+      "Error while rendering the 3D skin:",
+      Errors.prettify(error),
+    );
+  }
 
   status.value = "done";
 });

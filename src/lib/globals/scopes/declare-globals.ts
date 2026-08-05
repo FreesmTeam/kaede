@@ -12,6 +12,7 @@ import _Permissions from "@/constants/permissions.ts";
 import _Routes from "@/constants/routes.ts";
 import _RowCollections from "@/constants/row-collections.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
+import Auth from "@/lib/auth";
 import Browser from "@/lib/browser";
 import Configs from "@/lib/configs";
 import DevelopmentMode from "@/lib/development-mode";
@@ -60,6 +61,7 @@ export function declareGlobals(): void {
     "RowCollections": _RowCollections,
   };
   GlobalObject.libs = {
+    Auth,
     Browser,
     Configs,
     DevelopmentMode,

@@ -19,6 +19,7 @@
 import { Type } from "typebox";
 
 export const SelectedSchema = Type.Object({
+  "account"        : Type.Number(),
   "currentInstance": Type.Union([
     Type.String(),
     Type.Null(),

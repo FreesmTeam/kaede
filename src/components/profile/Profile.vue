@@ -19,11 +19,11 @@ import type { AccountType, WrappedAccountsType } from "@/types/configs/account.t
 import type { TranslationsStateType } from "@/types/translations/translations.type.ts";
 
 /*
- * The classic Steve that is shown when there are no accounts
+ * The Steve that is shown when there are no accounts
  * or the selected account has no skins
  */
 const FallbackSkin: string =
-  "https://textures.minecraft.net/texture/6ac65b1fd2d7b3dbaeeb702fad5932c4117a1e5f7d7db2531662baecdc48923";
+  "https://minecraft.wiki/images/Steve_%28classic_texture%29_JE6.png?8aa86";
 
 const canvas = useTemplateRef("canvas");
 

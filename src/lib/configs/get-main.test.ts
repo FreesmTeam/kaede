@@ -77,6 +77,7 @@ const defaultConfig: ConfigType = {
     ],
   },
   "selected": {
+    "account"        : 0,
     "currentInstance": null,
     "stats"          : "playtime",
   },

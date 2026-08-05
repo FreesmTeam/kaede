@@ -64,6 +64,7 @@ test(testName, async () => {
       ],
     },
     "selected": {
+      "account"        : 0,
       "currentInstance": null,
       "stats"          : "playtime",
     },

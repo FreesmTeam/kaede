@@ -71,6 +71,7 @@ export async function getDefaultConfig(): Promise<ConfigType> {
       ],
     },
     "selected": {
+      "account"        : 0,
       "currentInstance": null,
       "stats"          : "playtime",
     },

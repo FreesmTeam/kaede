@@ -207,6 +207,55 @@ export const GeneralSettings = {
   },
 } as const;
 
+/*
+ * References:
+ * - https://minecraft.wiki/w/Microsoft_authentication
+ * - https://dreta.dev/blog/2023/08/15/how-minecraft-launchers-work/
+ */
+export const MicrosoftAuth = {
+
+  /*
+   * An application ID of a "Personal accounts only" application
+   * registered in the Microsoft Entra admin center that was
+   * approved in https://aka.ms/mce-reviewappid (currently no)
+   */
+  "ClientId": "a9f7486a-d5c3-466f-8fb5-295b7ea892ce",
+
+  /*
+   * - 'XboxLive.signin' is required for the Xbox Live user authentication
+   * - 'offline_access' makes Microsoft return a refresh token
+   */
+  "Scope": "XboxLive.signin offline_access",
+
+  /*
+   * Sign in through the 'consumers' tenant. Xbox Live (and, therefore,
+   * Minecraft) profiles only exist on personal Microsoft accounts,
+   * so 'common' and organization tenants will not work
+   */
+  "Endpoints": {
+    "Authorize"    : "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize",
+    "Token"        : "https://login.microsoftonline.com/consumers/oauth2/v2.0/token",
+    "XboxLiveUser" : "https://user.auth.xboxlive.com/user/authenticate",
+    "Xsts"         : "https://xsts.auth.xboxlive.com/xsts/authorize",
+    "LoginWithXbox": "https://api.minecraftservices.com/authentication/login_with_xbox",
+    "Profile"      : "https://api.minecraftservices.com/minecraft/profile",
+    "Entitlements" : "https://api.minecraftservices.com/entitlements/mcstore",
+  },
+  "RelyingParties": {
+    "XboxLive"         : "http://auth.xboxlive.com",
+    "MinecraftServices": "rp://api.minecraftservices.com/",
+  },
+
+  /*
+   * How long to wait for the user to finish signing in
+   * in their browser before aborting the process
+   */
+  "InteractiveTimeout": 180_000,
+
+  // Refresh the Minecraft token if it expires in less than 300 seconds
+  "ExpirationMargin": 300_000,
+} as const;
+
 export default {
   FamousAndOldJavaMajorVersion,
   DefaultInstanceIcon,
@@ -215,4 +264,5 @@ export default {
   LaunchStatus,
   APIEndpoints,
   GeneralSettings,
+  MicrosoftAuth,
 } as const;

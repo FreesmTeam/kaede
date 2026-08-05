@@ -62,13 +62,17 @@ export async function createCommand({
     ...gameArguments,
   ];
 
+  if (necessaries.user.account === undefined) {
+    /*
+     * This branch will be possible if:
+     * 1. User deleted accounts while instance was still launching
+     * 2. Extension hooks did something stupid to the original 'necessaries' object
+     */
+    throw new Error("Command creation: The passed account info is undefined. What is going on?..");
+  }
+
   const launchArguments: Array<string> = Arguments.replaceLaunchArguments({
-    "auth": {
-      "uuid"    : "0204254bf42f3ceeb58de7d6f7890452",
-      "token"   : "none",
-      "username": "windstone_",
-      "type"    : "mojang",
-    },
+    "auth"                : necessaries.user.account,
     "builtLaunchArguments": {
       toReplace,
       classPaths,

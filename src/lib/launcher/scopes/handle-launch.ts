@@ -78,6 +78,12 @@ export async function handleLaunch({
     return failed;
   }
 
+  if (!necessaries.user.account) {
+    log.error(__PRE_BUNDLED_FILENAME__, "You cannot launch Minecraft without an account");
+
+    return failed;
+  }
+
   await Promise.all([
     Validators.ensurePatchDirectories(necessaries),
     Validators.ensureMinecraftDirectory(necessaries),

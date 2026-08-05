@@ -190,6 +190,7 @@ onClickOutside(container, event => {
           :style="{ 'background-color': backgroundColor }"
         >
           <input
+            autofocus
             autocomplete="off"
             spellcheck="false"
             :id="`${idRoot}-hex-input`"

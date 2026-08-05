@@ -24,6 +24,7 @@ export function replaceLaunchArguments({
     "token"   : string;
     "uuid"    : string;
     "type"    : string;
+    "xuid"    : string;
   };
   "builtLaunchArguments": {
     "toReplace" : Array<string>;
@@ -127,7 +128,7 @@ export function replaceLaunchArguments({
     "auth_session"     : auth.token,
     "auth_uuid"        : auth.uuid,
     // 'Only present in newer versions with Microsoft integration'
-    "auth_xuid"        : auth.uuid,
+    "auth_xuid"        : auth.xuid,
   };
 
   const afterHooksResult: "continue" | Array<string> | undefined =

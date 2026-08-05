@@ -1,4 +1,5 @@
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
+import type { LaunchAuthType } from "@/types/auth/microsoft-auth.type.ts";
 import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";
 
 export type PreLaunchInformationType = {
@@ -13,6 +14,8 @@ export type PreLaunchInformationType = {
     "javaMajor" : number;
     // Selected patch versions
     "versions"  : InstanceStateType["patchVersions"];
+    // Auth values of the selected account
+    "account"  ?: LaunchAuthType;
   };
   "directories": {
     "base"        : string;

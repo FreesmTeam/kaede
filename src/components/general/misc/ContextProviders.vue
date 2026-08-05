@@ -19,6 +19,7 @@ import {
 } from "@/constants/application.ts";
 import { GeneralSettings, LaunchStatus } from "@/constants/launcher.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import Auth from "@/lib/auth";
 import Errors from "@/lib/errors";
 import Hooks from "@/lib/hooks";
 import Instances from "@/lib/instances";
@@ -27,6 +28,7 @@ import { log } from "@/lib/logging/log.ts";
 import { rehydrateProcesses } from "@/lib/processes/core.ts";
 import Watchers from "@/lib/watchers";
 import { globalStates } from "@/states/global.ts";
+import type { LaunchAuthType } from "@/types/auth/microsoft-auth.type.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
 import type {
   LaunchResponseType,
@@ -40,7 +42,7 @@ import type {
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 
 /**
- * 'fetchAccounts' breaks HMR
+ * HMR breaks 'fetchAccounts'
  */
 const fetchAccounts = inject<() => Array<AccountType>>(AuthOneTimeFetchContextKey)
   ?? ((): Array<AccountType> => []);
@@ -96,6 +98,29 @@ function createLogSink(instanceId: string): (lines: Array<string>) => void {
   };
 }
 
+async function resolveLaunchAccount(): Promise<LaunchAuthType | undefined> {
+  const resolved: {
+    "auth"    : LaunchAuthType;
+    "accounts": Array<AccountType>;
+  } | undefined = await Auth.resolveLaunchAccount(accounts.value);
+
+  if (resolved === undefined) {
+    return undefined;
+  }
+
+  accounts.value = resolved.accounts;
+
+  return resolved.auth;
+}
+
+const getJavaMajor = async (): Promise<number> => {
+  if (GlobalInternals.javaMajor) {
+    return GlobalInternals.javaMajor;
+  }
+
+  return Launcher.fetchJavaMajor();
+};
+
 async function launchInstance(instanceId?: string): Promise<void> {
   if (!instanceId) {
     log.error(
@@ -132,8 +157,9 @@ async function launchInstance(instanceId?: string): Promise<void> {
 
   try {
     const onInput = createLogSink(instanceId);
-    const javaMajor: number = GlobalInternals.javaMajor
-      ?? await Launcher.fetchJavaMajor();
+
+    const [javaMajor, account]: [number, LaunchAuthType | undefined] =
+      await Promise.all([getJavaMajor(), resolveLaunchAccount()]);
 
     const { success, process }: LaunchResponseType = await Launcher.handleLaunch({
       "instance"       : currentInstance.instance,
@@ -141,6 +167,7 @@ async function launchInstance(instanceId?: string): Promise<void> {
         "javaBinary": currentInstance.instance.javaBinary,
         "javaMajor" : javaMajor,
         "versions"  : currentInstance.instance.patchVersions,
+        account,
       },
       instanceId,
       statuses,

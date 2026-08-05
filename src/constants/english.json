@@ -50,6 +50,17 @@
     "general.launch-status.errors-incompatible-platform": "Incompatible platform",
     "general.launch-status.errors-incompatible-arch": "Incompatible arch",
     "home.instance.current-playtime.label": "Playtime",
-    "home.instance.last-launch.label": "Last Played"
+    "home.instance.last-launch.label": "Last Played",
+    "profile.accounts.title": "Accounts",
+    "profile.accounts.empty": "No accounts yet. Sign in to play",
+    "profile.accounts.add-microsoft": "Sign in with Microsoft",
+    "profile.accounts.remove": "Remove this account",
+    "profile.sign-in.status.authorizing": "Waiting for the sign-in in your browser...",
+    "profile.sign-in.status.exchanging-code": "Getting the Microsoft tokens...",
+    "profile.sign-in.status.xbox-live": "Signing in to Xbox Live...",
+    "profile.sign-in.status.xsts": "Authorizing with XSTS...",
+    "profile.sign-in.status.minecraft-token": "Signing in to Minecraft Services...",
+    "profile.sign-in.status.profile": "Fetching the Minecraft profile...",
+    "profile.sign-in.status.finalizing": "Finishing everything..."
   }
 }

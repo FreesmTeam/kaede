@@ -2,7 +2,7 @@
 name = "kaede"
 version = "0.0.0"
 description = "An extensible Tauri-based Minecraft launcher written in Vue and Rust"
-authors = ["windstone", "kaeeraa"]
+authors = ["windstone"]
 license = "GPL-3.0"
 repository = "https://github.com/kaede-basement/kaede"
 edition = "2021"
@@ -46,7 +46,10 @@ reqwest = { version = "0.13" }
 # Non-default installed plugins
 tauri-plugin-fs = { version = "2", features = ["watch"] }
 tauri-plugin-dialog = "2"
-tauri-plugin-http = "2"
+# 'unsafe-headers' lets callers override forbidden headers. We need it
+# to send an empty 'Origin' on the Microsoft OAuth2 token request
+# to avoid the 'AADSTS90023' error
+tauri-plugin-http = { version = "2.5.9", features = ["unsafe-headers"] }
 # See '[features]' section above to know why this is optional
 tauri-plugin-notification = { version = "2", optional = true }
 tauri-plugin-os = "2"

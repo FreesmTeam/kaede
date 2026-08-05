@@ -49,6 +49,7 @@ type UIType = {
   }>;
 };
 type SelectedType = {
+  "account"        : number;
   "currentInstance": string | null;
   "stats"          : "playtime" | "last-launch";
 };

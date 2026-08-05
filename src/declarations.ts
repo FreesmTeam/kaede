@@ -41,6 +41,7 @@ import type _Meta from "@/constants/meta.ts";
 import type _Permissions from "@/constants/permissions.ts";
 import type _Routes from "@/constants/routes.ts";
 import type _RowCollections from "@/constants/row-collections.ts";
+import type Auth from "@/lib/auth";
 import type Browser from "@/lib/browser";
 import type Configs from "@/lib/configs";
 import type Errors from "@/lib/errors";
@@ -271,6 +272,11 @@ declare global {
        * ```
        */
       "libs": {
+
+        /**
+         * Launcher account-related collection of utilities
+         */
+        "Auth": typeof Auth;
 
         /**
          * A support for the Browser environment (non-application)
@@ -1169,6 +1175,7 @@ declare global {
                 "token": string;
                 "uuid" : string;
                 "type" : string;
+                "xuid" : string;
               };
               "replacements"        : ArgumentReplacementsType;
               "builtLaunchArguments": {
@@ -1213,6 +1220,7 @@ declare global {
                 "token": string;
                 "uuid" : string;
                 "type" : string;
+                "xuid" : string;
               };
               "replacements"        : ArgumentReplacementsType;
               "authReplacements"    : ArgumentAuthReplacementsType;
@@ -1265,6 +1273,7 @@ declare global {
                 "token": string;
                 "uuid" : string;
                 "type" : string;
+                "xuid" : string;
               };
               "builtLaunchArguments": {
                 "toReplace" : string;
@@ -1307,6 +1316,7 @@ declare global {
                 "token": string;
                 "uuid" : string;
                 "type" : string;
+                "xuid" : string;
               };
               "builtLaunchArguments": {
                 "toReplace" : string;

@@ -25,7 +25,7 @@ A Tauri-based Minecraft launcher written in TypeScript with a permission-based p
 
 I always loved the idea of applications ([Tachiyomi](https://github.com/tachiyomiorg)) and games ([Mindustry](https://github.com/Anuken/Mindustry)) having addons. The addition of features at runtime with one's own code, the modification of UI to one's own liking, and the ability to use community-made plugins is so cool...
 
-However, the existing Minecraft Launchers lack a user plugin system. While it is debatable whether extensible launchers for Minecraft are even needed, I still decided to make this project, primarily for myself.
+However, the existing Minecraft Launchers lack a user plugin system. While it is questionable whether extensible launchers for Minecraft are even needed, I still decided to make this project, primarily for myself.
 
 ## Demonstration
 
@@ -120,6 +120,7 @@ A custom plugin for the Multi-Window experience (each window adds 30 MB of RAM u
 ## Features
 
 - Plugin system
+- Required MSA authentication
 - Cross-platform (launching part is not tested on macOS yet)
 - Fast startup
 - Uses just 150 MBs of RAM (without plugins)

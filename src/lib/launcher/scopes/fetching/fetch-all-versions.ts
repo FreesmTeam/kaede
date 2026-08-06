@@ -26,30 +26,43 @@ import type {
   PatchIndexVersionType,
 } from "@/types/launcher/meta/patch-index.type.ts";
 
+type BMCLAPIOptiFineType = Partial<{
+  "_id"      : string;
+  "mcversion": string;
+  "patch"    : string;
+  "type"     : string;
+  "__v"      : number;
+  "filename" : string;
+  "forge"    : string;
+}>;
+
 export async function fetchAllVersions(
   uid: ExtendedPatchUIDType,
   minecraftPatchVersion?: string,
 ): Promise<Array<PatchIndexVersionType>> {
-  // TODO: write OptiFine fetch as a normal human being (use Github API)
   if (uid === CustomPatches.OptiFine) {
-    if (minecraftPatchVersion !== "1.18.1") {
-      return [];
-    }
+    // Example: 'https://bmclapi2.bangbang93.com/optifine/1.8.9'
+    const versionEndpoint: string =
+      APIEndpoints.BMCLAPI.Base +
+      APIEndpoints.BMCLAPI.Paths.OptiFine.Base +
+      minecraftPatchVersion;
 
-    return [
-      {
-        "version"    : "1.18.1_HD_U_H4",
-        "sha256"     : "ded4bce642d13441f9a5a555963ae57b8e9c03c8f359c321d9387c3693cca05d",
-        "releaseTime": "2021-12-12T00:00:00.000Z",
-        "recommended": false,
-        "requires"   : [
-          {
-            "uid"   : Patches.Minecraft,
-            "equals": "1.18.1",
-          },
-        ],
-      },
-    ];
+    const response: Response = await fetch(versionEndpoint);
+    const data: Array<BMCLAPIOptiFineType> = await response.json();
+
+    // Reverse as it seems like first entries are the oldest ones
+    return data.reverse().map(entry => ({
+      "version"    : `${entry?.mcversion ?? minecraftPatchVersion}_${entry?.type}_${entry?.patch}`,
+      "sha256"     : "",
+      "releaseTime": "1970-01-01T00:00:00Z",
+      "recommended": false,
+      "requires"   : [
+        {
+          "uid"   : Patches.Minecraft,
+          "equals": minecraftPatchVersion,
+        },
+      ],
+    }));
   }
 
   const url: string = APIEndpoints.Meta.Base + uid;

@@ -190,6 +190,15 @@ export const APIEndpoints = {
   "Resources": {
     "Base": "https://resources.download.minecraft.net/",
   },
+  "BMCLAPI": {
+    "Base" : "https://bmclapi2.bangbang93.com/",
+    "Paths": {
+      "OptiFine": {
+        "Id"  : "optifine",
+        "Base": "optifine/",
+      },
+    },
+  },
 
   /*
    * BMCLAPI: https://bmclapi2.bangbang93.com/mc/game/version_manifest_v2.json

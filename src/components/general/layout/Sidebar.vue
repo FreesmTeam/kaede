@@ -165,7 +165,7 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
         <div
           v-else
           :id="`__sidebar__entry-divider-${index}`"
-          class="__sidebar__entry-divider h-[1px] w-[calc(100%-8px)] bg-[theme(colors.neutral.100/.1)]"
+          class="__sidebar__entry-divider h-[1px] w-[calc(100%-24px)] bg-[theme(colors.neutral.100/.1)]"
         ></div>
       </template>
     </TransitionGroup>

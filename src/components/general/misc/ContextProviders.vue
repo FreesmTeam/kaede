@@ -4,9 +4,9 @@ import {
   markRaw,
   provide,
   reactive,
-  ref,
   type ShallowReactive,
   shallowReactive,
+  shallowRef,
 } from "vue";
 
 import {
@@ -47,7 +47,7 @@ import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance
 const fetchAccounts = inject<() => Array<AccountType>>(AuthOneTimeFetchContextKey)
   ?? ((): Array<AccountType> => []);
 
-const accounts = ref<Array<AccountType>>(fetchAccounts());
+const accounts = shallowRef<Array<AccountType>>(fetchAccounts());
 const launches = reactive<Record<string, LauncherStatusesType>>({});
 const logs = shallowReactive<Record<string, { "list": Array<string> }>>({});
 
@@ -309,6 +309,13 @@ void rehydrateLaunchedInstances();
  * AFAIK, even unrestricted extensions should not be able to access this context
  * although they can still just read the 'accounts.json' file
  * or do whatever else they want to do in the system.
+ *
+ * UPD: with the new capability of Vue instance sharing and using our own component registry,
+ * the extensions can simply replace something like 'C.Tabs' to their own
+ * component that also tries to inject 'AuthStatesContextKey', which should succeed
+ * and provide them a valid array of accounts. Scary? Well, use trusted or sandboxed
+ * extensions in such case. Unrestricted untrusted extensions can do way more harm
+ * to your system in contrast to simply stealing your Minecraft tokens.
  */
 provide<WrappedAccountsType>(AuthStatesContextKey, accounts);
 

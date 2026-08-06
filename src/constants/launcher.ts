@@ -241,6 +241,13 @@ export const MicrosoftAuth = {
     "Profile"      : "https://api.minecraftservices.com/minecraft/profile",
     "Entitlements" : "https://api.minecraftservices.com/entitlements/mcstore",
   },
+
+  /*
+   * These are not really endpoints but rather identifiers that are sent in the request body.
+   * They are matched by the authentication services, so the 'http' protocol should not be
+   * changed to 'https' as it will break the authentication chain (Xbox Live
+   * user authentication responds with an error 400)
+   */
   "RelyingParties": {
     "XboxLive"         : "http://auth.xboxlive.com",
     "MinecraftServices": "rp://api.minecraftservices.com/",

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { createSkinViewer, use } from "@daidr/minecraft-skin-renderer";
-import { WebGLRendererPlugin } from "@daidr/minecraft-skin-renderer/webgl";
-import { inject, onMounted, onUnmounted, ref, useTemplateRef, watch } from "vue";
+import { inject, ref } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
+import { useSkinRenderer } from "@/composables/use-skin-renderer.ts";
 import {
   AuthStatesContextKey,
   TranslationsContextKey,
@@ -11,54 +11,22 @@ import {
 import { C } from "@/extendable/component-registry.ts";
 import Auth from "@/lib/auth";
 import Configs from "@/lib/configs";
-import Errors from "@/lib/errors";
-import { log } from "@/lib/logging/log.ts";
 import type {
   SignInResultType,
   SignInStatusType,
 } from "@/types/auth/microsoft-auth.type.ts";
-import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
+import type { WrappedAccountsType } from "@/types/configs/account.type.ts";
 import type { TranslationsStateType } from "@/types/translations/translations.type.ts";
-
-/*
- * The Steve that is shown when there are no accounts
- * or the selected account has no skins
- */
-const FallbackSkin: string =
-  "https://minecraft.wiki/images/Steve_%28classic_texture%29_JE6.png?8aa86";
-
-const canvas = useTemplateRef("canvas");
 
 const Translations = inject<TranslationsStateType>(TranslationsContextKey);
 const accounts = inject<WrappedAccountsType>(AuthStatesContextKey);
 
-const status = ref<string>("loading");
+const { styles } = useConfigColors();
+const { canvas, viewer, shown } = useSkinRenderer({ "render": "3d" });
+
 const signingIn = ref<boolean>(false);
 const signInStatus = ref<SignInStatusType | null>(null);
 const signInError = ref<string | null>(null);
-
-let viewer: Awaited<ReturnType<typeof createSkinViewer>> | undefined;
-
-function getSkinSource(account?: AccountType): string | Blob {
-  if (!account) {
-    return FallbackSkin;
-  }
-
-  if (account.skin.data.length > 0) {
-    const decoded: string = atob(account.skin.data);
-    const bytes: Uint8Array = Uint8Array.from(decoded, character => (
-      character.codePointAt(0) ?? 0
-    ));
-
-    return new Blob([bytes], { "type": "image/png" });
-  }
-
-  if (account.skin.url.length > 0) {
-    return account.skin.url;
-  }
-
-  return FallbackSkin;
-}
 
 async function handleSignIn(): Promise<void> {
   if (signingIn.value) {
@@ -103,67 +71,37 @@ async function removeAccount(uuid: string): Promise<void> {
 
   await Configs.writeAccounts({ "accounts": accounts.value });
 }
-
-onMounted(async () => {
-  if (!canvas.value) {
-    return;
-  }
-
-  try {
-    use(WebGLRendererPlugin);
-
-    viewer = await createSkinViewer({
-      "canvas": canvas.value,
-      "skin"  : getSkinSource(accounts?.value[0]),
-      "slim"  : accounts?.value[0]?.skin.variant === "slim",
-    });
-
-    viewer.startRenderLoop();
-  } catch (error: unknown) {
-    log.error(
-      __PRE_BUNDLED_FILENAME__,
-      "Error while rendering the 3D skin:",
-      Errors.prettify(error),
-    );
-  }
-
-  status.value = "done";
-});
-
-onUnmounted(() => {
-  if (canvas.value) {
-    // Otherwise, the canvas becomes white for a split second on page navigation
-    canvas.value.className = "opacity-0";
-  }
-
-  viewer?.dispose?.();
-  viewer = undefined;
-});
-
-watch(
-  () => accounts?.value[0],
-  async (account?: AccountType): Promise<void> => {
-    if (!viewer) {
-      return;
-    }
-
-    await viewer.setSkin(getSkinSource(account));
-    viewer.setSlim(account?.skin.variant === "slim");
-  },
-);
 </script>
 
 <template>
   <C.PageWrapper>
     <div
       id="__profile-page__wrapper"
-      class="flex flex-wrap gap-8 p-4"
+      class="flex flex-wrap gap-8 py-2"
     >
       <div
         id="__profile-page__skin-wrapper"
-        class="flex shrink-0"
+        class="flex shrink-0 rounded-md"
+        :style="styles.widget"
       >
-        <canvas ref="canvas" id="__profile-page__skin-canvas" width="300" height="400" />
+        <!--
+          -- Transitioning visibility declaratively here just works sluggishly,
+          -- so we do it imperatively in 'use-skin-renderer' to avoid white screen flashing
+          --
+          -- UPD: not anymore, now we simply dispose the previous viewer on the new viewer render
+          -->
+        <canvas
+          ref="canvas"
+          id="__profile-page__skin-canvas"
+          width="150"
+          height="225"
+          @pointerover="() => viewer?.playAnimation?.('walk')"
+          @pointerleave="() => viewer?.stopAnimation?.()"
+          :class="[
+            shown ? 'opacity-100' : 'opacity-0',
+            'cursor-grab duration-300 transition-[opacity] active:cursor-grabbing',
+          ]"
+        />
       </div>
       <div
         id="__profile-page__accounts-wrapper"

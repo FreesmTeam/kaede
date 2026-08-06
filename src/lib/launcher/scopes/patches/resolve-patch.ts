@@ -23,6 +23,7 @@ import Errors from "@/lib/errors";
 import FileManager from "@/lib/file-manager";
 import Hooks from "@/lib/hooks";
 import Fetching from "@/lib/launcher/scopes/fetching";
+import OptiFine from "@/lib/launcher/scopes/optifine";
 import Patches from "@/lib/launcher/scopes/patches/index.ts";
 import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
@@ -63,13 +64,29 @@ export async function resolvePatch({
   statuses.current = LaunchStatus.PatchMetadata.Reading;
   try {
     const refetch = async (): Promise<unknown> => {
-      const url: string = metadata.uid === CustomPatches.OptiFine
-        ? (
-          APIEndpoints.KaedeCache.Base +
-          APIEndpoints.KaedeCache.Paths.OptiFine.Base +
-          fileName
-        )
-        : APIEndpoints.Meta.Base + metadata.uid + "/" + fileName;
+      /*
+       * Meta servers of Prism/MultiMC don't have OptiFine patches,
+       * so we generate them locally by parsing the OptiFine '.jar' files
+       */
+      if (metadata.uid === CustomPatches.OptiFine) {
+        log.warn(descriptiveLogPrefix, "No cache; generating the patch metadata");
+        statuses.current = LaunchStatus.PatchMetadata.Fetching;
+
+        const generated: Record<string, unknown> | false = version === false
+          ? false
+          : await OptiFine.resolveOptiFinePatch({ necessaries, version });
+
+        if (generated !== false) {
+          return generated;
+        }
+
+        log.error(descriptiveLogPrefix, "Could not generate the patch metadata");
+        statuses.current = LaunchStatus.PatchMetadata.FailedToFetch;
+
+        throw new Error(`Could not generate the patch metadata (${metadata.uid})`);
+      }
+
+      const url: string = APIEndpoints.Meta.Base + metadata.uid + "/" + fileName;
 
       log.warn(
         descriptiveLogPrefix,

@@ -48,10 +48,18 @@ export async function fetchAllVersions(
       minecraftPatchVersion;
 
     const response: Response = await fetch(versionEndpoint);
-    const data: Array<BMCLAPIOptiFineType> = await response.json();
+    const data: unknown = await response.json();
+
+    /*
+     * BMCLAPI answers with '{ "msg": "no such optifine" }' when it knows nothing
+     * about a Minecraft version, so this cannot be assumed to be an array
+     */
+    if (!Array.isArray(data)) {
+      throw new TypeError(`No OptiFine versions for Minecraft ${minecraftPatchVersion}`);
+    }
 
     // Reverse as it seems like first entries are the oldest ones
-    return data.reverse().map(entry => ({
+    return (data as Array<BMCLAPIOptiFineType>).reverse().map(entry => ({
       "version"    : `${entry?.mcversion ?? minecraftPatchVersion}_${entry?.type}_${entry?.patch}`,
       "sha256"     : "",
       "releaseTime": "1970-01-01T00:00:00Z",

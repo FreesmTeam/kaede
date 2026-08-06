@@ -55,7 +55,7 @@ export async function fetchSkinAsBase64(
     }
 
     const blob: Blob = await response.blob();
-    // 'readAsDataURL' encodes to base64 natively, avoiding a manual chunked loop
+    // 'readAsDataURL' encodes to base64
     const dataUrl: string = await new Promise<string>((resolve, reject) => {
       const reader: FileReader = new FileReader;
 

@@ -4,6 +4,7 @@ use std::io::{self, Read};
 use std::path::Path;
 
 use md5::Md5;
+use sha1::Sha1;
 use sha2::{Digest, Sha256};
 use tauri::ipc::{InvokeBody, Request};
 
@@ -48,6 +49,40 @@ pub fn sha256_file(path: &Path) -> io::Result<String> {
     }
 
     Ok(to_hex(&hasher.finalize()))
+}
+
+// Streams a file through SHA1 instead of reading it fully into memory
+pub fn sha1_file(path: &Path) -> io::Result<String> {
+    let mut file = File::open(path)?;
+
+    let mut hasher = Sha1::new();
+    let mut buffer = [0u8; 64 * 1024];
+
+    loop {
+        let bytes_read = file.read(&mut buffer)?;
+
+        if bytes_read == 0 {
+            break;
+        }
+
+        hasher.update(&buffer[..bytes_read]);
+    }
+
+    Ok(to_hex(&hasher.finalize()))
+}
+
+/*
+ * Unlike 'hash_sha256' and 'hash_md5' that hash a raw payload from IPC,
+ * this one takes a path so that generated patches can specify
+ * true SHA1 hashes of artifacts that are already on the disk
+ */
+#[tauri::command]
+pub async fn hash_sha1_file(path: String) -> Result<String, String> {
+    tokio::task::spawn_blocking(move || {
+        sha1_file(Path::new(&path)).map_err(|error| format!("Failed to hash {}: {}", path, error))
+    })
+    .await
+    .map_err(|join_error| join_error.to_string())?
 }
 
 #[tauri::command]

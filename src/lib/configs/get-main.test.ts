@@ -222,7 +222,7 @@ test.each(tests)(
     // Imported dynamically so that the 'mock.module' calls above are registered first
     const { getMain } = await import("./get-main.ts");
 
-    // For some reason, these 'expect' tests throw an error on test fail
+    // These 'expect' tests throw an error on test fail which completely destroys next tests
     expect(
       JSON.stringify(await getMain()),
     ).toBe(

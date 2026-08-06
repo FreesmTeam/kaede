@@ -43,6 +43,22 @@ export function parseLibrary({
     file,
   );
 
+  // Libraries hinted as local are not fetched
+  if (library["MMC-hint"] === "local") {
+    return {
+      "id"     : artifactID,
+      "status" : isMaven ? "mavenFile" : "library",
+      "url"    : "",
+      // The hash is still verified though
+      "hash"   : hash ?? "ignore",
+      "first"  : false,
+      "exclude": library?.extract?.exclude ?? [],
+      directory,
+      file,
+      path,
+    };
+  }
+
   // The 'com.mumfrey.liteloader' patch libraries only have the 'name' fields sometimes
   const isEmpty = baseUrl === undefined && library?.downloads === undefined;
 
@@ -69,7 +85,7 @@ export function parseLibrary({
 
       /*
        * Turns out, the empty fields should be filled by yourself.
-       * Seems like other launchers, e.g. HMCL and Prism Launcher,
+       * Seems like other launchers, e.g., HMCL and Prism Launcher,
        * use the 'https://libraries.minecraft.net/' URL as the base URL
        * for empty libraries
        */

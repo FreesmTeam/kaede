@@ -30,7 +30,7 @@ import type {
 } from "@/types/auth/microsoft-auth.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
 
-// An interactive Microsoft sign-in
+// An interactive option
 export async function signInWithMicrosoft({
   onStatus,
 }: {

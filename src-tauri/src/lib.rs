@@ -165,6 +165,7 @@ pub fn run() {
             finalization::finalize_initialization,
             finalization::get_java_major,
             hashes::hash_md5,
+            hashes::hash_sha1_file,
             hashes::hash_sha256,
             launcher::get_initial_state,
             launcher::get_missing_files,
@@ -178,6 +179,7 @@ pub fn run() {
             processes::run_process,
             system::get_system_memory,
             system::get_cpu_usage,
+            zip::read_archive_entry,
             zip::unzip_files,
         ])
         .run(tauri::generate_context!())

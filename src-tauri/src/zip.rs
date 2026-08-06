@@ -1,5 +1,5 @@
 use std::fs::{self, File};
-use std::io;
+use std::io::{self, Read};
 use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
@@ -18,6 +18,55 @@ pub struct ArchiveFile {
 pub enum UnzipOutcome {
     Success(bool), // always `true`
     Error(String),
+}
+
+// Reads a file inside the archive without extracting the whole archive
+#[tauri::command]
+pub async fn read_archive_entry(
+    archive_path: String,
+    entry_path: String,
+) -> Result<Option<Vec<u8>>, String> {
+    tokio::task::spawn_blocking(move || read_entry(Path::new(&archive_path), &entry_path))
+        .await
+        .map_err(|join_error| join_error.to_string())?
+}
+
+fn read_entry(archive_path: &Path, entry_path: &str) -> Result<Option<Vec<u8>>, String> {
+    let file = File::open(archive_path)
+        .map_err(|error| format!("Failed to open {}: {}", archive_path.display(), error))?;
+
+    let mut archive = ZipArchive::new(file)
+        .map_err(|error| format!("Failed to read {} as a zip: {}", archive_path.display(), error))?;
+
+    let mut entry = match archive.by_name(entry_path) {
+        Ok(entry) => entry,
+        Err(zip::result::ZipError::FileNotFound) => return Ok(None),
+        Err(error) => {
+            return Err(format!(
+                "Failed to read the '{}' entry in {}: {}",
+                entry_path,
+                archive_path.display(),
+                error,
+            ));
+        }
+    };
+
+    if entry.is_dir() {
+        return Ok(None);
+    }
+
+    let mut bytes = Vec::with_capacity(entry.size() as usize);
+
+    entry.read_to_end(&mut bytes).map_err(|error| {
+        format!(
+            "Failed to read the '{}' entry in {}: {}",
+            entry_path,
+            archive_path.display(),
+            error,
+        )
+    })?;
+
+    Ok(Some(bytes))
 }
 
 #[tauri::command]

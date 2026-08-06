@@ -1,4 +1,4 @@
-import { CustomPatches, Patches } from "@/constants/meta.ts";
+import { Patches } from "@/constants/meta.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 
 export const FamousAndOldJavaMajorVersion = 8;
@@ -166,15 +166,6 @@ export const _LaunchStatus = {
   },
 } as const;
 export const APIEndpoints = {
-  "KaedeCache": {
-    "Base" : "https://raw.githubusercontent.com/kaede-basement/cache/main/",
-    "Paths": {
-      "OptiFine": {
-        "Id"  : CustomPatches.OptiFine,
-        "Base": `${CustomPatches.OptiFine}/`,
-      },
-    },
-  },
   "Meta": {
     "Base" : "https://meta.prismlauncher.org/v1/",
     "Paths": {

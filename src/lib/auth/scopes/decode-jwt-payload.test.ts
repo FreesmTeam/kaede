@@ -22,7 +22,8 @@ import { decodeJwtPayload } from "@/lib/auth/scopes/decode-jwt-payload.ts";
 
 function encodeAsJwtPayload(payload: unknown): string {
   // JWTs are base64url over the UTF-8 bytes, but 'btoa' is latin1-only
-  const bytes: Uint8Array = (new TextEncoder).encode(JSON.stringify(payload));
+  const encoder = new TextEncoder;
+  const bytes: Uint8Array = encoder.encode(JSON.stringify(payload));
   let binary: string = "";
 
   for (const byte of bytes) {

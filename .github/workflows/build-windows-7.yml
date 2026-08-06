@@ -22,7 +22,7 @@ env:
 
 jobs:
   compile:
-    name: "Compile the launcher for Windows 7"
+    name: "Compile"
     runs-on: windows-2022
     timeout-minutes: 60
 
@@ -241,5 +241,5 @@ jobs:
           @'
           ## Windows 7 compatibility
 
-          See `docs/WINDOWS7-COMPATIBILITY.md` before distributing the build.
+          See `docs/WINDOWS7-COMPATIBILITY.md` before downloading the build
           '@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY

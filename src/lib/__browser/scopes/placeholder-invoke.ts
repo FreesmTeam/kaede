@@ -236,6 +236,7 @@ export async function placeholderInvoke(
       return {
         "basic": {
           "launcherVersion": "0.0.1-browser",
+          "executableHash" : "",
           "baseDirectory"  : "indexed_db",
           "launchCount"    : 0,
           "separator"      : "/",

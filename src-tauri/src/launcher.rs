@@ -77,6 +77,7 @@ pub fn is_portable() -> bool {
 #[serde(rename_all = "camelCase")]
 pub struct InitialStateBasic {
     pub launcher_version: String,
+    pub executable_hash: String,
     pub base_directory: String,
     pub launch_count: i32,
     pub separator: String,
@@ -116,6 +117,12 @@ pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, St
         app.path().app_data_dir().map_err(|e| e.to_string())?
     };
 
+    let executable_hash = tokio::task::spawn_blocking(|| {
+        let exe_path = std::env::current_exe().ok()?;
+
+        crate::hashes::sha256_file(&exe_path).ok()
+    });
+
     let (config, accounts, instances) = tokio::join!(
         load_json_file(base_directory.join("config.json")),
         load_json_file(base_directory.join("accounts.json")),
@@ -132,9 +139,12 @@ pub async fn get_initial_state(app: tauri::AppHandle) -> Result<InitialState, St
     )
     .await?;
 
+    let executable_hash = executable_hash.await.ok().flatten().unwrap_or_default();
+
     Ok(InitialState {
         basic: InitialStateBasic {
             launcher_version,
+            executable_hash,
             base_directory: base_directory.to_string_lossy().to_string(),
             launch_count,
             separator,

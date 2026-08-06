@@ -137,6 +137,8 @@ declare global {
         "joinDelimiter"       : string;
         // Launcher version
         "launcherVersion"     : string;
+        // SHA256 of the launcher executable (empty when unavailable)
+        "executableHash"      : string;
         // Config state before launcher initialization (used for first sync check)
         "initialConfig"       : ConfigType;
         // Translations state before launcher initialization

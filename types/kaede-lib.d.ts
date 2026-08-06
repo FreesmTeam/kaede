@@ -18,7 +18,7 @@ declare function getMemoryUsage(): Promise<{
 	"used": string;
 	"total": string;
 }>;
-declare function loadEruda(): Promise<void>;
+declare function loadEruda(): Promise<() => void>;
 declare const _default: {
 	readonly loadEruda: typeof loadEruda;
 	readonly getCpuUsage: typeof getCpuUsage;
@@ -146,11 +146,13 @@ export type DevelopmentType = {
 	"enableDebugMode": boolean;
 	"enableNativeContextMenu": boolean;
 	"enableNativeReloadKeyBinds": boolean;
+	"useNativeColorPicker": boolean;
 };
 export type ExtensionsType = {
 	"list": Array<{
 		"enabled": boolean;
-		"id": string;
+		"sha256": string;
+		"label": string;
 	}>;
 	"permissions": Record<string, Record<string, boolean>>;
 	"enabled": boolean;
@@ -186,6 +188,7 @@ export type UIType = {
 	}>;
 };
 export type SelectedType = {
+	"account": number;
 	"currentInstance": string | null;
 	"stats": "playtime" | "last-launch";
 };
@@ -304,6 +307,7 @@ declare const _default$3: {
 	readonly AsyncFunction: FunctionConstructor;
 	readonly ApplicationName: "Kaede";
 	readonly ApplicationRootID: "#app";
+	readonly CustomFontFamily: "kaede-custom-font";
 	readonly DefaultLocale: "en";
 	readonly TranslationsContextKey: typeof TranslationsContextKey;
 	readonly AuthOneTimeFetchContextKey: typeof AuthOneTimeFetchContextKey;
@@ -381,7 +385,7 @@ declare const _default$3: {
 	readonly LogKindColors: Record<"time" | "message", string>;
 	readonly LogLevelColors: Record<LogLevelType, string>;
 };
-declare function getASCIIArt(portable: boolean, launchCount: number): string;
+declare function getASCIIArt(portable: boolean, launchCount: number, launcherVersion: string, executableHash: string): string;
 declare const _default$4: {
 	readonly getASCIIArt: typeof getASCIIArt;
 };
@@ -640,6 +644,15 @@ declare const _default$8: {
 		readonly Resources: {
 			readonly Base: "https://resources.download.minecraft.net/";
 		};
+		readonly BMCLAPI: {
+			readonly Base: "https://bmclapi2.bangbang93.com/";
+			readonly Paths: {
+				readonly OptiFine: {
+					readonly Id: "optifine";
+					readonly Base: "optifine/";
+				};
+			};
+		};
 	};
 	readonly GeneralSettings: {
 		readonly ConcurrentDownloads: {
@@ -649,6 +662,25 @@ declare const _default$8: {
 		readonly Logs: {
 			readonly LineLimit: 65536;
 		};
+	};
+	readonly MicrosoftAuth: {
+		readonly ClientId: "a9f7486a-d5c3-466f-8fb5-295b7ea892ce";
+		readonly Scope: "XboxLive.signin offline_access";
+		readonly Endpoints: {
+			readonly Authorize: "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
+			readonly Token: "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+			readonly XboxLiveUser: "https://user.auth.xboxlive.com/user/authenticate";
+			readonly Xsts: "https://xsts.auth.xboxlive.com/xsts/authorize";
+			readonly LoginWithXbox: "https://api.minecraftservices.com/authentication/login_with_xbox";
+			readonly Profile: "https://api.minecraftservices.com/minecraft/profile";
+			readonly Entitlements: "https://api.minecraftservices.com/entitlements/mcstore";
+		};
+		readonly RelyingParties: {
+			readonly XboxLive: "http://auth.xboxlive.com";
+			readonly MinecraftServices: "rp://api.minecraftservices.com/";
+		};
+		readonly InteractiveTimeout: 180000;
+		readonly ExpirationMargin: 300000;
 	};
 };
 export type PermissionsObjectType = typeof Permissions$1;
@@ -701,7 +733,116 @@ declare const _default$9: {
 	};
 	readonly PermissionsList: PermissionType[];
 };
+export type SettingsRowType = {
+	"idRoot": string;
+	"separate"?: string;
+	"title"?: string;
+	"empty"?: Omit<SettingsRowType, "inner">;
+	"disabled"?: boolean;
+	"onClick"?: (event: MouseEvent) => void | Promise<void>;
+	"image"?: string;
+	"icon"?: string | "__kaede-do-not-render";
+	"subtitle"?: string;
+	"inner"?: {
+		"kind": "toggle";
+		"value": boolean;
+	} | {
+		"kind": "select";
+		"options": Array<string>;
+		"value"?: string;
+		"onSelect"?: (value: string) => void;
+	} | {
+		"icon": string;
+		"placeholder": string;
+		"kind": "input";
+		"debounceTime": number;
+		"defaultValue"?: string | number;
+		"onInput"?: (value: string) => void;
+		"filePicker"?: {
+			"icon": string;
+			"onPick": (value: string) => void;
+			"title"?: string;
+			"filters"?: Array<{
+				"name": string;
+				"extensions": Array<string>;
+			}>;
+		};
+	} | {
+		"kind": "color";
+		"value"?: string | null;
+		"default"?: string;
+		"onColor"?: (value: string) => void;
+	} | Array<SettingsRowType>;
+};
+export type SettingsRowCollectionType = Array<ComputedRef<SettingsRowType>>;
 declare const _default$10: {
+	readonly DevelopmentSettingsRows: SettingsRowCollectionType;
+	readonly ExtensionsSettingsRows: SettingsRowCollectionType;
+	readonly UserInterfaceSettingsRows: SettingsRowCollectionType;
+	readonly MinecraftSettingsRows: SettingsRowCollectionType;
+};
+declare const AccountSchema: Type.TObject<{
+	msa: Type.TUnion<[
+		Type.TObject<{
+			token: Type.TString;
+			refreshToken: Type.TString;
+		}>,
+		Type.TNull
+	]>;
+	profile: Type.TObject<{
+		uuid: Type.TString;
+		name: Type.TString;
+		type: Type.TUnion<[
+			Type.TLiteral<"msa">,
+			Type.TLiteral<"offline">
+		]>;
+	}>;
+	skin: Type.TObject<{
+		id: Type.TString;
+		data: Type.TString;
+		url: Type.TString;
+		variant: Type.TUnion<[
+			Type.TLiteral<"classic">,
+			Type.TLiteral<"slim">
+		]>;
+	}>;
+}>;
+export type AccountType = Static<typeof AccountSchema>;
+export type SignInStatusType = "authorizing" | "exchanging-code" | "xbox-live" | "xsts" | "minecraft-token" | "profile" | "finalizing";
+export type SignInResultType = {
+	"success": true;
+	"account": AccountType;
+} | {
+	"success": false;
+	"reason": string;
+};
+export type EnsureFreshResultType = {
+	"account": AccountType;
+	"status": "fresh" | "refreshed" | "failed";
+};
+export type LaunchAuthType = {
+	"username": string;
+	"token": string;
+	"uuid": string;
+	"type": string;
+	"xuid": string;
+};
+declare function buildLaunchAuth(account: AccountType): LaunchAuthType;
+declare function ensureFreshAccount(account: AccountType): Promise<EnsureFreshResultType>;
+declare function resolveLaunchAccount(accounts: Array<AccountType>): Promise<{
+	"auth": LaunchAuthType;
+	"accounts": Array<AccountType>;
+} | undefined>;
+declare function signInWithMicrosoft({ onStatus, }?: {
+	"onStatus"?: (status: SignInStatusType) => void;
+}): Promise<SignInResultType>;
+declare const _default$11: {
+	readonly buildLaunchAuth: typeof buildLaunchAuth;
+	readonly ensureFreshAccount: typeof ensureFreshAccount;
+	readonly resolveLaunchAccount: typeof resolveLaunchAccount;
+	readonly signInWithMicrosoft: typeof signInWithMicrosoft;
+};
+declare const _default$12: {
 	readonly detectIsBrowser: () => boolean;
 	readonly handleTauriEnvironment: () => Promise<void>;
 	readonly readStoragePath: (path: string) => Promise<string>;
@@ -726,11 +867,13 @@ declare const ConfigSchema: Type.TObject<{
 		enableDebugMode: Type.TBoolean;
 		enableNativeContextMenu: Type.TBoolean;
 		enableNativeReloadKeyBinds: Type.TBoolean;
+		useNativeColorPicker: Type.TBoolean;
 	}>;
 	extensions: Type.TObject<{
 		list: Type.TArray<Type.TObject<{
 			enabled: Type.TBoolean;
-			id: Type.TString;
+			sha256: Type.TString;
+			label: Type.TString;
 		}>>;
 		permissions: Type.TAny;
 		enabled: Type.TBoolean;
@@ -809,6 +952,7 @@ declare const ConfigSchema: Type.TObject<{
 		}>>;
 	}>;
 	selected: Type.TObject<{
+		account: Type.TNumber;
 		currentInstance: Type.TUnion<[
 			Type.TString,
 			Type.TNull
@@ -856,33 +1000,6 @@ declare function getMain(properties?: Partial<{
 	"baseDirectory": string;
 	"parsedFile": ParsedFile;
 }>): Promise<ConfigType>;
-declare const AccountSchema: Type.TObject<{
-	msa: Type.TUnion<[
-		Type.TObject<{
-			token: Type.TString;
-			refreshToken: Type.TString;
-		}>,
-		Type.TNull
-	]>;
-	profile: Type.TObject<{
-		uuid: Type.TString;
-		name: Type.TString;
-		type: Type.TUnion<[
-			Type.TLiteral<"msa">,
-			Type.TLiteral<"offline">
-		]>;
-	}>;
-	skin: Type.TObject<{
-		id: Type.TString;
-		data: Type.TString;
-		url: Type.TString;
-		variant: Type.TUnion<[
-			Type.TLiteral<"classic">,
-			Type.TLiteral<"slim">
-		]>;
-	}>;
-}>;
-export type AccountType = Static<typeof AccountSchema>;
 declare function getAccounts(properties?: Partial<{
 	"baseDirectory": string;
 	"parsedFile": ParsedFile;
@@ -903,8 +1020,12 @@ declare function regenerateConfigFile({ baseDirectory, configFileDirectory, }: {
 	"baseDirectory": string;
 	"configFileDirectory": string;
 }): Promise<ConfigType>;
+declare function writeAccounts({ accounts, baseDirectory, }: {
+	"accounts": Array<AccountType>;
+	"baseDirectory"?: string;
+}): Promise<boolean>;
 declare function sync(): Promise<void>;
-declare const _default$11: {
+declare const _default$13: {
 	readonly getMain: typeof getMain;
 	readonly sync: typeof sync;
 	readonly get: typeof getMain;
@@ -914,6 +1035,7 @@ declare const _default$11: {
 	readonly regenerate: typeof regenerateConfigFile;
 	readonly getAccounts: typeof getAccounts;
 	readonly getTranslations: typeof getTranslations;
+	readonly writeAccounts: typeof writeAccounts;
 };
 export type NativeErrorType = {
 	"name": string;
@@ -924,7 +1046,7 @@ declare function extract(error: unknown): NativeErrorType;
 declare function handleCapture(error: Error): NativeErrorType;
 declare function prettify(error: unknown): string;
 declare function stringify(error: unknown): string;
-declare const _default$12: {
+declare const _default$14: {
 	readonly extract: typeof extract;
 	readonly handleCapture: typeof handleCapture;
 	readonly prettify: typeof prettify;
@@ -941,7 +1063,6 @@ declare class ExtensionAPI {
 	unsubscribe(event: unknown, callback: (data: unknown) => Promise<unknown>): ExtensionAPI;
 }
 export type MetadataType = {
-	"id": string;
 	"logo": string;
 	"name": string;
 	"type": "sandbox" | "unrestricted";
@@ -958,13 +1079,28 @@ export type MetadataType = {
 export type ExtensionType = {
 	"id": string;
 	"code": string;
+	"sha256": string;
 	"metadata": MetadataType;
 };
+export type SandboxedAPI = {
+	"enable": () => void | Promise<void>;
+	"disable": () => void | Promise<void>;
+};
+declare const extensionStates: ShallowReactive<{
+	"valid": Array<ExtensionType>;
+	"invalid": Array<DeepPartial<ExtensionType>>;
+	"executed": Array<{
+		"extension": ExtensionType;
+		"api": ExtensionAPI | SandboxedAPI;
+	}>;
+}>;
+export type ExecutedListType = (typeof extensionStates)["executed"];
+declare function dirtyLifecycle(executedList: ExecutedListType, { id, sha256, metadata }: ExtensionType, enable: boolean): Promise<boolean>;
 declare function readExtensions(): Promise<{
 	"valid": Array<ExtensionType>;
 	"invalid": Array<DeepPartial<ExtensionType>>;
 }>;
-declare function runInUnrestricted(id: string, code: string): Promise<ExtensionAPI | void>;
+declare function runInUnrestricted(id: string, code: string, metadata: ExtensionType["metadata"], sha256: string): Promise<ExtensionAPI | void>;
 declare function onGlobalStateChange<Key extends keyof GlobalStatesType>(key: Key, value: unknown): void;
 declare function onInstanceStateChange<Key extends keyof InstanceStatesType>(key: Key, value: InstanceStatesType[Key]): void;
 declare function grantEventListeners({ id, }: {
@@ -975,10 +1111,14 @@ declare function runInSandbox({ id, code, permissions, }: {
 	"id": string;
 	"code": string;
 	"permissions"?: Array<PermissionType>;
-}): void;
+}): void | {
+	"enable": () => void | Promise<void>;
+	"disable": () => void | Promise<void>;
+};
 declare function showWebviewWindow(): Promise<void>;
-declare const _default$13: {
+declare const _default$15: {
 	readonly requestPermissions: (permissions: Array<PermissionType | string> | unknown, extension: string) => Promise<Array<unknown>>;
+	readonly dirtyLifecycle: typeof dirtyLifecycle;
 	readonly readExtensions: typeof readExtensions;
 	readonly runInUnrestricted: typeof runInUnrestricted;
 	readonly onGlobalStateChange: typeof onGlobalStateChange;
@@ -1014,7 +1154,7 @@ declare function verifyPaths({ paths, sha1, }: {
 	}>;
 	"sha1"?: boolean;
 }): Promise<Array<string>>;
-declare const _default$14: {
+declare const _default$16: {
 	readonly getBaseDirectory: typeof getBaseDirectory;
 	readonly handleJsonFile: typeof handleJsonFile;
 	readonly join: typeof join;
@@ -1023,6 +1163,7 @@ declare const _default$14: {
 };
 declare function capitalize(input: string): string;
 declare function checkDaysDifference(from: Date, to: Date): number;
+declare function isFontSourceUrl(font: string | null | undefined): boolean;
 declare function gcd(a: number, b: number): number;
 declare function getRelativeDate({ days, hours, minutes, seconds, milliseconds, from, }: {
 	"days"?: number;
@@ -1032,16 +1173,17 @@ declare function getRelativeDate({ days, hours, minutes, seconds, milliseconds, 
 	"milliseconds"?: number;
 	"from"?: Date;
 }): Date;
-declare const _default$15: {
+declare const _default$17: {
 	readonly capitalize: typeof capitalize;
 	readonly checkDaysDifference: typeof checkDaysDifference;
+	readonly isFontSourceUrl: typeof isFontSourceUrl;
 	readonly gcd: typeof gcd;
 	readonly getRelativeDate: typeof getRelativeDate;
 };
 declare function __registerComponent(name: string, component: Component): void;
 declare function __restoreComponent(name: string): boolean;
 declare function declareGlobals(): void;
-declare const _default$16: {
+declare const _default$18: {
 	readonly declareGlobals: typeof declareGlobals;
 	readonly registerComponent: typeof __registerComponent;
 	readonly restoreComponent: typeof __restoreComponent;
@@ -1050,7 +1192,7 @@ declare function hashFileContents(image: Uint8Array): Promise<string>;
 declare function hashOfflineNickname(input: string): Promise<string>;
 declare function hashString(input: string): number;
 declare function hashStringCrypto(input: string): Promise<string>;
-declare const _default$17: {
+declare const _default$19: {
 	readonly hashFileContents: typeof hashFileContents;
 	readonly hashOfflineNickname: typeof hashOfflineNickname;
 	readonly hashString: typeof hashString;
@@ -1098,7 +1240,7 @@ declare function handleHookResponse<T>({ scope, status, response, timing, index,
 		"hookStart": number;
 	};
 }): "continue-hooks-loop" | T | undefined;
-declare const _default$18: {
+declare const _default$20: {
 	readonly catchAsyncResponseHooks: typeof catchAsyncResponseHooks;
 	readonly catchAsyncVoidHooks: typeof catchAsyncVoidHooks;
 	readonly catchSyncResponseHooks: typeof catchSyncResponseHooks;
@@ -1112,6 +1254,7 @@ declare function finish({ config, baseDirectory, }: {
 export type InitialStateType = {
 	"basic": {
 		"launcherVersion": string;
+		"executableHash": string;
 		"baseDirectory": string;
 		"launchCount": number;
 		"separator": string;
@@ -1125,7 +1268,7 @@ export type InitialStateType = {
 	};
 };
 declare function start(): Promise<InitialStateType>;
-declare const _default$19: {
+declare const _default$21: {
 	readonly finish: typeof finish;
 	readonly start: typeof start;
 };
@@ -1148,7 +1291,7 @@ declare function readInstances(properties?: Partial<{
 	"parsedFile": ParsedFile;
 }>): Promise<InstanceStatesType>;
 declare function sync$1(): Promise<void>;
-declare const _default$20: {
+declare const _default$22: {
 	readonly create: typeof create;
 	readonly extractSavedFromPages: typeof extractSavedFromPages;
 	readonly findCurrent: typeof findCurrent;
@@ -1187,6 +1330,7 @@ export type PreLaunchInformationType = {
 		"javaBinary": string;
 		"javaMajor": number;
 		"versions": InstanceStateType["patchVersions"];
+		"account"?: LaunchAuthType;
 	};
 	"directories": {
 		"base": string;
@@ -1474,6 +1618,7 @@ declare function replaceLaunchArguments({ auth, builtLaunchArguments, necessarie
 		"token": string;
 		"uuid": string;
 		"type": string;
+		"xuid": string;
 	};
 	"builtLaunchArguments": {
 		"toReplace": Array<string>;
@@ -1616,7 +1761,7 @@ export type AssetObjectsType = {
 declare function shallowlyValidateMeta({ meta }: {
 	"meta": unknown;
 }): AssetObjectsType | false;
-declare const _default$21: {
+declare const _default$23: {
 	readonly __unused: {};
 	readonly fetchJavaMajor: typeof fetchJavaMajor;
 	readonly Arguments: {
@@ -1692,7 +1837,7 @@ declare function handleVirtualTextCopy(copied: boolean, range: [
 declare function selectAllText(container: HTMLDivElement | null | undefined): void;
 declare function stopStreamingLogs(): Promise<void>;
 declare function streamLogs<T>(channel: Channel<T>): Promise<void>;
-declare const _default$22: {
+declare const _default$24: {
 	readonly streamLogs: typeof streamLogs;
 	readonly stopStreamingLogs: typeof stopStreamingLogs;
 	readonly getLogLevelColor: typeof getLogLevelColor;
@@ -1744,7 +1889,7 @@ declare function concurrentlyDownload({ concurrency, entries, statuses, label, c
 	"cancelId"?: string;
 	"debug"?: boolean;
 }): Promise<DownloadReportType>;
-declare const _default$23: {
+declare const _default$25: {
 	readonly concurrentlyDownload: typeof concurrentlyDownload;
 };
 declare function grantStaticPermissions({ id, permissions, }: {
@@ -1752,7 +1897,7 @@ declare function grantStaticPermissions({ id, permissions, }: {
 	"permissions"?: Array<PermissionType>;
 }): Record<string, unknown>;
 declare function handlePermission(permission: PermissionType | string, id: string): unknown;
-declare const _default$24: {
+declare const _default$26: {
 	readonly grantStaticPermissions: typeof grantStaticPermissions;
 	readonly handlePermission: typeof handlePermission;
 };
@@ -1778,7 +1923,7 @@ declare function spawnServer({ name, program, args, port }: {
 	"args": Array<string>;
 	"port": number;
 }): Promise<ServerProcessType>;
-declare const _default$25: {
+declare const _default$27: {
 	readonly rehydrateProcesses: typeof rehydrateProcesses;
 	readonly hydrate: typeof hydrate;
 	readonly runProcess: typeof runProcess;
@@ -1787,7 +1932,7 @@ declare const _default$25: {
 };
 declare function getInitialPage(): RouteType;
 declare function navigate(path: RouteType): void;
-declare const _default$26: {
+declare const _default$28: {
 	readonly getInitialPage: typeof getInitialPage;
 	readonly navigate: typeof navigate;
 };
@@ -1803,7 +1948,7 @@ export interface ValidationArgumentsType {
 	};
 	"value": unknown;
 }
-declare const _default$27: {
+declare const _default$29: {
 	readonly validate: {
 		readonly account: (data: ValidationArgumentsType) => false | {
 			profile: {
@@ -1826,7 +1971,8 @@ declare const _default$27: {
 			extensions: {
 				list: {
 					enabled: boolean;
-					id: string;
+					sha256: string;
+					label: string;
 				}[];
 				enabled: boolean;
 				permissions: any;
@@ -1872,6 +2018,7 @@ declare const _default$27: {
 				enableDebugMode: boolean;
 				enableNativeContextMenu: boolean;
 				enableNativeReloadKeyBinds: boolean;
+				useNativeColorPicker: boolean;
 			};
 			ui: {
 				text: {
@@ -1902,6 +2049,7 @@ declare const _default$27: {
 				}[];
 			};
 			selected: {
+				account: number;
 				currentInstance: string | null;
 				stats: "playtime" | "last-launch";
 			};
@@ -1909,7 +2057,6 @@ declare const _default$27: {
 		};
 		readonly instance: (data: ValidationArgumentsType) => false | InstanceStateType;
 		readonly extension: (data: ValidationArgumentsType) => false | ({
-			id: string;
 			logo: string;
 			name: string;
 			type: "sandbox" | "unrestricted";
@@ -1981,19 +2128,25 @@ declare class Txiki {
 	static Socket(port: number, path: string | undefined): TxikiSocket;
 }
 declare function watchConfigSync(): () => void;
+declare function watchCustomFont(): () => void;
 declare function watchErrors(): () => void;
 declare function watchInstancesSync(): () => void;
 declare function watchProcesses(): Promise<() => void>;
 export type CleanupType<T extends GlobalStatesType[keyof GlobalStatesType]> = Partial<Record<keyof T, () => void>>;
 declare function watchDevelopmentStates(): CleanupType<GlobalStatesType["development"]>;
 declare function watchLocaleStates(): () => void;
-declare const _default$28: {
+declare function watchLogModeStates(logs: ShallowReactive<Record<string, {
+	"list": Array<string>;
+}>>): () => void;
+declare const _default$30: {
 	readonly watchConfigSync: typeof watchConfigSync;
+	readonly watchCustomFont: typeof watchCustomFont;
 	readonly watchErrors: typeof watchErrors;
 	readonly watchInstancesSync: typeof watchInstancesSync;
 	readonly watchProcesses: typeof watchProcesses;
 	readonly watchDevelopmentStates: typeof watchDevelopmentStates;
 	readonly watchLocaleStates: typeof watchLocaleStates;
+	readonly watchLogModeStates: typeof watchLogModeStates;
 };
 export type ArgumentReplacementsType = {
 	"assets_index_name": string;
@@ -2062,6 +2215,7 @@ declare global {
 				"requestPermissions": (permissions: Array<PermissionType | string> | unknown, extension: string) => Promise<Array<unknown>>;
 				"joinDelimiter": string;
 				"launcherVersion": string;
+				"executableHash": string;
 				"initialConfig": ConfigType;
 				"initialTranslations": TranslationsType;
 				"initialInstances": InstanceStatesType;
@@ -2149,6 +2303,10 @@ declare global {
 				 * Constants related to the application pages
 				 */
 				"Routes": typeof _default$2;
+				/**
+				 * Constants related to the settings rows
+				 */
+				"RowCollections": typeof _default$10;
 			};
 			/**
 			 * Global utilities.
@@ -2175,13 +2333,17 @@ declare global {
 			 */
 			"libs": {
 				/**
+				 * Launcher account-related collection of utilities
+				 */
+				"Auth": typeof _default$11;
+				/**
 				 * A support for the Browser environment (non-application)
 				 */
-				"Browser": typeof _default$10;
+				"Browser": typeof _default$12;
 				/**
 				 * Launcher configuration-related collection of utilities
 				 */
-				"Configs": typeof _default$11;
+				"Configs": typeof _default$13;
 				/**
 				 * Launcher development mode related collection of utilities
 				 */
@@ -2189,7 +2351,7 @@ declare global {
 				/**
 				 * Launcher errors-related collection of utilities
 				 */
-				"Errors": typeof _default$12;
+				"Errors": typeof _default$14;
 				/**
 				 * Launcher untrusted extensions API
 				 */
@@ -2197,63 +2359,63 @@ declare global {
 				/**
 				 * Launcher extensions-related collection of utilities
 				 */
-				"Extensions": typeof _default$13;
+				"Extensions": typeof _default$15;
 				/**
 				 * Launcher file management related collection of utilities
 				 */
-				"FileManager": typeof _default$14;
+				"FileManager": typeof _default$16;
 				/**
 				 * Launcher general-purpose collection of utilities
 				 */
-				"General": typeof _default$15;
+				"General": typeof _default$17;
 				/**
 				 * Launcher 'window' object related collection of utilities
 				 */
-				"Globals": typeof _default$16;
+				"Globals": typeof _default$18;
 				/**
 				 * Hashing functions
 				 */
-				"Hashing": typeof _default$17;
+				"Hashing": typeof _default$19;
 				/**
 				 * Launcher hook system related collection of utilities
 				 */
-				"Hooks": typeof _default$18;
+				"Hooks": typeof _default$20;
 				/**
 				 * Launcher initialization-related collection of utilities
 				 */
-				"Initialization": typeof _default$19;
+				"Initialization": typeof _default$21;
 				/**
 				 * Launcher Minecraft instances related collection of utilities
 				 */
-				"Instances": typeof _default$20;
+				"Instances": typeof _default$22;
 				/**
 				 * Launcher Minecraft-related collection of utilities
 				 */
-				"Launcher": typeof _default$21;
+				"Launcher": typeof _default$23;
 				/**
 				 * Launcher logging-related collection of utilities
 				 */
-				"Logging": typeof _default$22;
+				"Logging": typeof _default$24;
 				/**
 				 * Launcher network and fetching related collection of utilities
 				 */
-				"Network": typeof _default$23;
+				"Network": typeof _default$25;
 				/**
 				 * Launcher extensions-related collection of permission utilities
 				 */
-				"Permissions": typeof _default$24;
+				"Permissions": typeof _default$26;
 				/**
 				 * Launcher processes and servers related collection of utilities
 				 */
-				"Processes": typeof _default$25;
+				"Processes": typeof _default$27;
 				/**
 				 * Launcher navigation-related collection of utilities
 				 */
-				"Router": typeof _default$26;
+				"Router": typeof _default$28;
 				/**
 				 * Launcher collection of typebox validation schemas
 				 */
-				"Schemas": typeof _default$27;
+				"Schemas": typeof _default$29;
 				/**
 				 * Launcher utils for extensions to conveniently run txiki.js servers
 				 */
@@ -2261,7 +2423,7 @@ declare global {
 				/**
 				 * Launcher watchers for handling various events
 				 */
-				"Watchers": typeof _default$28;
+				"Watchers": typeof _default$30;
 				/**
 				 * Launcher context menu related collection of utilities
 				 */
@@ -2914,6 +3076,7 @@ declare global {
 							"token": string;
 							"uuid": string;
 							"type": string;
+							"xuid": string;
 						};
 						"replacements": ArgumentReplacementsType;
 						"builtLaunchArguments": {
@@ -2952,6 +3115,7 @@ declare global {
 							"token": string;
 							"uuid": string;
 							"type": string;
+							"xuid": string;
 						};
 						"replacements": ArgumentReplacementsType;
 						"authReplacements": ArgumentAuthReplacementsType;
@@ -2999,6 +3163,7 @@ declare global {
 							"token": string;
 							"uuid": string;
 							"type": string;
+							"xuid": string;
 						};
 						"builtLaunchArguments": {
 							"toReplace": string;
@@ -3038,6 +3203,7 @@ declare global {
 							"token": string;
 							"uuid": string;
 							"type": string;
+							"xuid": string;
 						};
 						"builtLaunchArguments": {
 							"toReplace": string;

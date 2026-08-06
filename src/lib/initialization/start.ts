@@ -24,6 +24,7 @@ import type { ParsedFile } from "@/types/application/parsed-file.type.ts";
 type InitialStateType = {
   "basic": {
     "launcherVersion": string;
+    "executableHash" : string;
     "baseDirectory"  : string;
     "launchCount"    : number;
     "separator"      : string;

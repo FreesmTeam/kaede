@@ -74,6 +74,16 @@ lto = true
 # remove debug symbols from the binary
 strip = true
 
+# Unoptimized hashing in dev builds is fucking _slow_
+[profile.dev.package.sha2]
+opt-level = 3
+
+[profile.dev.package.sha1]
+opt-level = 3
+
+[profile.dev.package.md-5]
+opt-level = 3
+
 # Regular 'tauri-utils' uses ctor 0.8 that fails on Windows 7,
 # but this revision uses ctor 1.0 that works on Windows 7
 [patch.crates-io]

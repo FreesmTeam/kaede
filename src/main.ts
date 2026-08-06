@@ -71,12 +71,18 @@ GlobalInternals.baseDirectory = baseDirectory;
 GlobalInternals.portable = basic.portable;
 GlobalInternals.joinDelimiter = basic.separator;
 GlobalInternals.launcherVersion = basic.launcherVersion;
+GlobalInternals.executableHash = basic.executableHash;
 GlobalInternals.launchCount = basic.launchCount;
 
 // Show a pretty ASCII art with the launcher name :3
 log.info(
   __PRE_BUNDLED_FILENAME__,
-  ASCIIArt.getASCIIArt(basic.portable, basic.launchCount),
+  ASCIIArt.getASCIIArt(
+    basic.portable,
+    basic.launchCount,
+    basic.launcherVersion,
+    basic.executableHash,
+  ),
 );
 
 const [

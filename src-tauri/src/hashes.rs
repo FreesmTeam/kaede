@@ -1,4 +1,7 @@
 use std::fmt::Write;
+use std::fs::File;
+use std::io::{self, Read};
+use std::path::Path;
 
 use md5::Md5;
 use sha2::{Digest, Sha256};
@@ -25,6 +28,26 @@ fn get_raw_body<'a>(request: &'a Request<'_>) -> Result<&'a [u8], String> {
 
 pub fn sha256_hex(bytes: &[u8]) -> String {
     to_hex(&Sha256::digest(bytes))
+}
+
+// Streams a file through SHA256 instead of reading it fully into memory
+pub fn sha256_file(path: &Path) -> io::Result<String> {
+    let mut file = File::open(path)?;
+
+    let mut hasher = Sha256::new();
+    let mut buffer = [0u8; 64 * 1024];
+
+    loop {
+        let bytes_read = file.read(&mut buffer)?;
+
+        if bytes_read == 0 {
+            break;
+        }
+
+        hasher.update(&buffer[..bytes_read]);
+    }
+
+    Ok(to_hex(&hasher.finalize()))
 }
 
 #[tauri::command]

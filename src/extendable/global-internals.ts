@@ -27,6 +27,7 @@ export const GlobalInternals: KaedeNamespaceType["internals"] = {
   "requestPermissions" : async (): Promise<Array<unknown>> => [],
   "joinDelimiter"      : "",
   "launcherVersion"    : "",
+  "executableHash"     : "",
   "initialConfig"      : {} as ConfigType,
   "initialTranslations": {} as TranslationsType,
   "initialInstances"   : {} as InstanceStatesType,

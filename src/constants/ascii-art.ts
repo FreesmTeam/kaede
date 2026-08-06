@@ -4,7 +4,12 @@ import { ApplicationName } from "@/constants/application.ts";
 
 const date = (new Date).toISOString();
 
-export function getASCIIArt(portable: boolean, launchCount: number): string {
+export function getASCIIArt(
+  portable: boolean,
+  launchCount: number,
+  launcherVersion: string,
+  executableHash: string,
+): string {
   const launchStatus: string = window.__TAURI__ === undefined ? (
     "browser"
   ) : (
@@ -16,16 +21,16 @@ export function getASCIIArt(portable: boolean, launchCount: number): string {
   return (
     "\n" +
     "\n    __                  __   " +
-    "  me@" + ApplicationName.toLowerCase() +
+    "  me@" + ApplicationName.toLowerCase() + "_" + launcherVersion +
     "\n   / /______ ____  ____/ /__ " +
-    "  os     " + platform() + " " + version() +
+    "  os     " + platform() + " " + version() + " (" + arch() + ")" +
     "\n  / //_/ __ `/ _ \\/ __  / _ \\" +
-    "  arch   " + arch() +
-    "\n / ,< / /_/ /  __/ /_/ /  __/" +
     "  mode   " + (portable ? "portable" : "non-portable") +
-    "\n/_/|_|\\__,_/\\___/\\__,_/\\___/ " +
+    "\n / ,< / /_/ /  __/ /_/ /  __/" +
     "  date   " + date +
-    "\n                             " + "  launch " + launchStatus +
+    "\n/_/|_|\\__,_/\\___/\\__,_/\\___/ " +
+    "  launch " + launchStatus +
+    "\n                             " + "  sha256 " + (executableHash || "unavailable") +
     "\n"
   );
 }

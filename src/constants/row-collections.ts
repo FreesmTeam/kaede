@@ -964,6 +964,10 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     },
   })),
   computed(() => ({
+    "idRoot"  : "__settings-page__minecraft-separator-2",
+    "separate": "~",
+  })),
+  computed(() => ({
     "idRoot"  : "__settings-page__minecraft-remove-jvm-arguments",
     "icon"    : "i-lucide-minus",
     "title"   : "Removed JVM arguments",

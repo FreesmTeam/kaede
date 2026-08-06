@@ -654,7 +654,7 @@ export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
       },
       "filePicker": {
         "icon"   : "i-lucide-folder-open",
-        "title"  : "Select a background image",
+        "title"  : "Select an image/video file",
         "filters": [{
           "name"      : "Media",
           "extensions": ["png", "jpg", "jpeg", "webp", "gif", "svg", "avif", "apng", "mp4", "webm"],
@@ -913,6 +913,17 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
       "defaultValue": globalStates.minecraft.icon,
       "onInput"     : (value: string): void => {
         globalStates.minecraft.icon = value;
+      },
+      "filePicker": {
+        "icon"   : "i-lucide-folder-open",
+        "title"  : "Select an image file",
+        "filters": [{
+          "name"      : "Media",
+          "extensions": ["png", "jpg", "jpeg", "webp", "gif", "svg", "avif", "apng"],
+        }],
+        "onPick": (value: string): void => {
+          globalStates.minecraft.icon = value;
+        },
       },
     },
   })),

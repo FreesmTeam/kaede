@@ -26,17 +26,27 @@ export function extractSavedFromPages(
 
   if (!storedInstance) {
     return {
-      "name"         : DefaultInstanceSettings.name,
-      "entry"        : DefaultInstanceSettings.entry,
-      "checksum"     : DefaultInstanceSettings.checksum,
-      "groups"       : [...DefaultInstanceSettings.groups],
-      "javaBinary"   : DefaultInstanceSettings.javaBinary,
-      "windowHeight" : DefaultInstanceSettings.windowHeight,
-      "windowWidth"  : DefaultInstanceSettings.windowWidth,
+      "icon"        : globalStates?.minecraft?.icon,
+      "name"        : DefaultInstanceSettings.name,
+      "entry"       : DefaultInstanceSettings.entry,
+      "checksum"    : DefaultInstanceSettings.checksum,
+      "groups"      : [...DefaultInstanceSettings.groups],
+      "javaBinary"  : globalStates?.minecraft?.javaBinary || DefaultInstanceSettings.javaBinary,
+      "windowHeight": globalStates?.minecraft?.windowHeight ||
+        DefaultInstanceSettings.windowHeight,
+      "windowWidth"  : globalStates?.minecraft?.windowWidth || DefaultInstanceSettings.windowWidth,
       "patchVersions": { "net.minecraft": "1.16.5" },
       "add"          : {
-        "jvmArguments" : [...(DefaultInstanceSettings.add?.jvmArguments ?? [])],
-        "gameArguments": [...(DefaultInstanceSettings.add?.gameArguments ?? [])],
+        "jvmArguments": [...(
+          globalStates?.minecraft?.add?.jvmArguments ??
+          DefaultInstanceSettings.add?.jvmArguments ??
+          []
+        )],
+        "gameArguments": [...(
+          globalStates?.minecraft?.add?.gameArguments ??
+          DefaultInstanceSettings.add?.gameArguments ??
+          []
+        )],
       },
     };
   }

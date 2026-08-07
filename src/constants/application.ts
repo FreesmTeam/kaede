@@ -141,7 +141,7 @@ export const AccountActions: AccountActionCollectionType = [
 
 export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
   "home"    : {},
-  "library" : {},
+  "library" : { "selected": undefined },
   "settings": { "tab": "user-interface" },
   "profile" : {
     "pending": false,

@@ -90,8 +90,10 @@ type ContextMenuItemsType = Array<{
   "image"?: string;
 }>;
 type PagesType = {
-  "home"    : Partial<object>;
-  "library" : Partial<object>;
+  "home"   : Partial<object>;
+  "library": Partial<{
+    "selected": string;
+  }>;
   "settings": Partial<{
     "tab": string;
   }>;

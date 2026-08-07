@@ -572,13 +572,7 @@ export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
     "title"   : "Language",
     "subtitle": "Change the launcher language",
     "inner"   : {
-      "kind": "select",
-
-      /*
-       * Available translations are loaded from disk at runtime, so we cannot
-       * statically enumerate them here. We only expose the bundled default,
-       * with the currently selected locale kept as-is
-       */
+      "kind"    : "select",
       "options" : [DefaultLocale],
       "value"   : globalStates.locale,
       "onSelect": (value: string): void => {
@@ -841,6 +835,7 @@ export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
       "onColor": (value: string): void => {
         globalStates.ui.widget.textColor = value;
       },
+      "toBottom": false,
     },
   })),
   computed(() => ({
@@ -855,6 +850,7 @@ export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
       "onColor": (value: string): void => {
         globalStates.ui.widget.secondaryColor = value;
       },
+      "toBottom": false,
     },
   })),
 ];
@@ -1022,7 +1018,8 @@ export const JavaSettingsRows: SettingsRowCollectionType = [
           globalStates.minecraft.javaBinary = installation.path;
         },
         "inner": {
-          "kind" : "toggle" as const,
+          // Without 'as const' TypeScript throws errors
+          "kind" : "radio" as const,
           "value": globalStates.minecraft.javaBinary === installation.path,
         },
       }));
@@ -1037,7 +1034,7 @@ export const JavaSettingsRows: SettingsRowCollectionType = [
           globalStates.minecraft.javaBinary = "java";
         },
         "inner": {
-          "kind" : "toggle",
+          "kind" : "radio",
           "value": globalStates.minecraft.javaBinary === "java",
         },
       });

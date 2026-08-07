@@ -92,7 +92,7 @@ onClickOutside(target, event => {
   <div
     ref="target"
     :id="`${idRoot}-wrapper`"
-    :class="[classNames?.wrapper, 'relative shrink-0 w-28 sm:w-40']"
+    :class="[classNames?.wrapper, 'relative z-20 shrink-0 w-28 sm:w-40']"
     :title="tooltip"
   >
     <button

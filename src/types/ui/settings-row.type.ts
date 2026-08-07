@@ -32,6 +32,9 @@ export type SettingsRowType = {
     "kind" : "toggle";
     "value": boolean;
   } | {
+    "kind" : "radio";
+    "value": boolean;
+  } | {
     "kind"     : "select";
     "options"  : Array<string>;
     "value"   ?: string;
@@ -50,11 +53,12 @@ export type SettingsRowType = {
       "filters" ?: Array<{ "name": string; "extensions": Array<string> }>;
     };
   } | {
-    "kind"    : "color";
-    // Since this takes a JSON value, the value can also be 'null'
-    "value"  ?: string | null;
-    "default"?: string;
-    "onColor"?: (value: string) => void;
+    "kind"     : "color";
+    // Since this takes a JSON value from the config, the value can also be 'null'
+    "value"   ?: string | null;
+    "default" ?: string;
+    "onColor" ?: (value: string) => void;
+    "toBottom"?: boolean;
   } | Array<SettingsRowType>;
 };
 export type SettingsRowCollectionType = Array<ComputedRef<SettingsRowType>>;

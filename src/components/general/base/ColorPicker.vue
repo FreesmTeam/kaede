@@ -30,6 +30,7 @@ const {
   tooltip,
   defaultColor = "#000000",
   classNames,
+  toBottom = true,
 } = defineProps<{
   "idRoot"       : string;
   "value"       ?: string | null;
@@ -42,6 +43,7 @@ const {
     "swatch"  ?: string;
     "label"   ?: string;
   };
+  "toBottom"?: boolean;
 }>();
 
 const container = useTemplateRef("container");
@@ -152,7 +154,11 @@ onClickOutside(container, event => {
     v-else
     ref="container"
     :id="`${idRoot}-wrapper`"
-    :class="[classNames?.wrapper, 'relative shrink-0 !w-40']"
+    :class="[
+      classNames?.wrapper,
+      opened ? 'z-25' : 'z-10',
+      'relative shrink-0 !w-40',
+    ]"
     :title="tooltip"
   >
     <button
@@ -182,7 +188,10 @@ onClickOutside(container, event => {
       <div
         v-if="opened"
         :id="`${idRoot}-dropdown-wrapper`"
-        class="absolute left-0 top-10 z-100 w-full flex flex-col cursor-default rounded-md bg-black"
+        :class="[
+          toBottom ? 'top-10' : 'bottom-10',
+          'absolute left-0 z-100 w-full flex flex-col cursor-default rounded-md bg-black',
+        ]"
       >
         <div
           :id="`${idRoot}-preview`"

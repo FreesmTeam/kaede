@@ -36,6 +36,7 @@ import { useLogSearch } from "@/composables/use-log-search.ts";
 import { useLogSegmentation } from "@/composables/use-log-segmentation.ts";
 import { useLogStream } from "@/composables/use-log-stream.ts";
 import { InstanceLogsContextKey } from "@/constants/application.ts";
+import { GeneralSettings } from "@/constants/launcher.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { globalStates } from "@/states/global.ts";
 import type { LogLineType } from "@/types/logging/log-line.type.ts";
@@ -79,7 +80,7 @@ const filtered = computed((): { "list": Array<LogLineType> } => {
 const { status, matchesByLine, utils } = useLogSearch(filtered);
 
 const boundary = computed((): number => {
-  const region: number = innerHeight.value - 280;
+  const region: number = innerHeight.value - GeneralSettings.Logs.OuterRegion;
 
   return Math.ceil(region / globalStates.logs.lineHeight);
 });

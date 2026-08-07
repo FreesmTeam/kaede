@@ -18,31 +18,38 @@
 
 <script setup lang="ts">
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 
-const { id, value, onToggle, ripples = true } = defineProps<{
+const { id, value, onSelect, ripples = true } = defineProps<{
   "id"       : string;
   "value"    : boolean;
-  "onToggle"?: (value: boolean) => void;
+  "onSelect"?: (event: MouseEvent) => void;
   "ripples" ?: boolean;
 }>();
+
+const { styles } = useConfigColors();
 </script>
 
 <template>
   <button
     :id="id"
-    role="switch"
+    role="radio"
     :aria-checked="value"
-    @click="() => onToggle?.(!value)"
-    class="relative z-10 h-6 w-11 shrink-0 cursor-pointer rounded-full bg-[theme(colors.neutral.100/.1)]"
+    @click="onSelect"
+    :disabled="value"
+    :style="{
+      'background-color': styles.widget.background,
+    }"
+    class="relative z-10 grid size-6 shrink-0 cursor-pointer place-items-center rounded-full"
   >
     <span
       :id="`${id}-thumb`"
-      :class="[
-        value
-          ? 'translate-x-6 bg-white'
-          : 'translate-x-1 bg-neutral-500',
-        'block size-4 rounded-full transition-[transform,background-color] duration-150',
-      ]"
+      class="block size-2 rounded-full transition-[background-color]"
+      :style="{
+        'background-color': value
+          ? styles.widget.color
+          : 'rgba(245, 245, 245, 0.1)',
+      }"
     ></span>
     <MaterialRipple :disabled="!ripples" />
   </button>

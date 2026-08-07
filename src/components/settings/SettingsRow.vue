@@ -23,6 +23,7 @@ import ColorPicker from "@/components/general/base/ColorPicker.vue";
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import CustomSelect from "@/components/general/base/CustomSelect.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import Radio from "@/components/general/base/Radio.vue";
 import Row from "@/components/general/base/Row.vue";
 import Toggle from "@/components/general/base/Toggle.vue";
 import type { SettingsRowType } from "@/types/ui/settings-row.type.ts";
@@ -99,10 +100,14 @@ function handleRowClick(event: MouseEvent): void {
     :subtitle="row.subtitle"
     @click="handleRowClick"
   >
+    <Radio
+      v-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'radio'"
+      :id="`${row.idRoot}-radio`"
+      :value="row.inner.value"
+    />
     <Toggle
-      v-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'toggle'"
+      v-else-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'toggle'"
       :id="`${row.idRoot}-toggle`"
-      class="pointer-events-none"
       :value="row.inner.value"
     />
     <CustomSelect
@@ -132,8 +137,8 @@ function handleRowClick(event: MouseEvent): void {
         :file-picker="row.inner.filePicker"
         :class-names="{
           'wrapper': row.inner.filePicker === undefined
-            ? 'h-8 !w-full'
-            : 'h-8 !w-30 sm:!w-48',
+            ? 'z-10 h-8 !w-full'
+            : 'z-10 h-8 !w-30 sm:!w-48',
         }"
       />
       <button
@@ -159,6 +164,7 @@ function handleRowClick(event: MouseEvent): void {
       :default-color="row.inner.default"
       :on-color="row.inner.onColor"
       :class-names="{ 'wrapper': 'w-full sm:!w-58' }"
+      :to-bottom="row.inner.toBottom"
     />
     <MaterialRipple
       ref="rippleReference"

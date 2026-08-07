@@ -3,6 +3,7 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import type { CustomButtonType } from "@/types/ui/custom-button.type.ts";
 
 const {
+  disabled,
   idRoot,
   label,
   icon,
@@ -17,11 +18,13 @@ const {
   <button
     :id="`${idRoot}-wrapper`"
     @click="onClick"
+    :disabled="disabled"
     :class="[
       hide === true ? 'hidden' : 'flex',
       invert ? 'invert' : '',
       'z-10 shrink-0 relative grid px-2 w-fit flex-nowrap gap-2 bg-[theme(colors.neutral.100/.1)]',
-      'items-center h-full place-items-center rounded-md transition-[filter]',
+      'items-center h-8 place-items-center rounded-md transition-[opacity,filter]',
+      'disabled:opacity-70',
     ]"
     :title="tooltip"
   >
@@ -36,6 +39,6 @@ const {
     >
       {{ label }}
     </span>
-    <MaterialRipple />
+    <MaterialRipple :disabled="disabled" />
   </button>
 </template>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { inject, ref } from "vue";
 
-import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import CustomButton from "@/components/general/base/CustomButton.vue";
+import AccountRow from "@/components/profile/AccountRow.vue";
+import Offline from "@/components/profile/Logins/Offline.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { useSkinRenderer } from "@/composables/use-skin-renderer.ts";
 import {
@@ -61,16 +63,6 @@ async function handleSignIn(): Promise<void> {
   signingIn.value = false;
   signInStatus.value = null;
 }
-
-async function removeAccount(uuid: string): Promise<void> {
-  if (accounts === undefined) {
-    return;
-  }
-
-  accounts.value = accounts.value.filter(({ profile }) => profile.uuid !== uuid);
-
-  await Configs.writeAccounts({ "accounts": accounts.value });
-}
 </script>
 
 <template>
@@ -81,12 +73,12 @@ async function removeAccount(uuid: string): Promise<void> {
     >
       <div
         id="__profile-page__inner"
-        class="flex flex-wrap gap-8 rounded-md"
+        class="w-full flex flex-wrap gap-2 rounded-md px-2 md:flex-nowrap md:p-0"
         :style="styles.widget"
       >
         <div
           id="__profile-page__skin-wrapper"
-          class="flex shrink-0"
+          class="flex flex-1 justify-center"
         >
           <!--
             -- Transitioning visibility declaratively here just works sluggishly,
@@ -104,91 +96,69 @@ async function removeAccount(uuid: string): Promise<void> {
             :class="[
               shown ? 'opacity-100' : 'opacity-0',
               'cursor-grab duration-300 transition-[opacity] active:cursor-grabbing',
+              // It's kind of buggy, and 150x225 becomes 187x281,
+              // but the size can grow even more, so we set real limits here
+              'shrink-0 max-h-[281px] max-w-[187px]',
             ]"
           />
         </div>
         <div
           id="__profile-page__accounts-wrapper"
-          class="min-w-64 flex flex-col gap-2"
+          class="w-full flex flex-col gap-2 py-2"
         >
-          <span
+          <div
             id="__profile-page__accounts-title"
-            class="text-lg font-medium"
+            class="h-8 flex flex flex-nowrap items-center gap-2 leading-none"
           >
-            {{ Translations?.Messages?.["profile.accounts.title"] }}
-          </span>
-          <span
+            <span id="__profile-page__accounts-title-label" class="pl-1">
+              {{ Translations?.Messages?.["profile.accounts.title"] }}
+            </span>
+            <span
+              v-if="signingIn && signInStatus !== null"
+              id="__profile-page__sign-in-status"
+              class="text-sm"
+              :style="styles.widgetSecondary"
+            >
+              ({{ Translations?.Messages?.[`profile.sign-in.status.${signInStatus}`] }})
+            </span>
+              <span
+                v-if="signInError !== null"
+                id="__profile-page__sign-in-error"
+                class="text-sm text-red-400"
+              >
+              ({{ signInError }})
+            </span>
+          </div>
+          <div
             v-if="(accounts?.length ?? 0) === 0"
             id="__profile-page__accounts-empty"
             class="text-sm"
             :style="styles.widgetSecondary"
           >
             {{ Translations?.Messages?.["profile.accounts.empty"] }}
-          </span>
-          <div
-            v-for="account of accounts ?? []"
-            :key="account.profile.uuid"
-            :id="`__profile-page__account-${account.profile.uuid}`"
-            class="flex items-center gap-2 rounded-md p-2 bg-[theme(colors.neutral.100/.05)]"
-          >
-            <span
-              :id="`__profile-page__account-${account.profile.uuid}-name`"
-              class="font-medium"
-            >
-              {{ account.profile.name }}
-            </span>
-            <span
-              :id="`__profile-page__account-${account.profile.uuid}-type`"
-              class="text-xs"
-              :style="styles.widgetSecondary"
-            >
-              {{ account.profile.type }}
-            </span>
-            <button
-              :id="`__profile-page__account-${account.profile.uuid}-remove`"
-              @click="removeAccount(account.profile.uuid)"
-              class="relative ml-auto rounded-md p-1 transition-[background-color] hover:bg-[theme(colors.neutral.100/.1)]"
-              :title="Translations?.Messages?.['profile.accounts.remove']"
-            >
-              <span
-                :id="`__profile-page__account-${account.profile.uuid}-remove-icon`"
-                class="i-lucide-trash-2 block size-4"
-              ></span>
-            </button>
           </div>
-          <button
-            id="__profile-page__sign-in-button"
-            @click="handleSignIn"
+          <AccountRow
+            v-for="(account, index) of accounts ?? []"
+            :key="account.profile.uuid"
+            :id-root="`__profile-page__account-${account.profile.uuid}`"
+            :account="account"
+            :index="index"
+          />
+        </div>
+        <div
+          id="__profile-page__sign-in-wrapper"
+          class="min-w-44 flex flex-1 flex-col gap-2 py-2 pr-2"
+        >
+          <div id="__profile-page__sign-in-space" class="h-8 w-full"></div>
+          <CustomButton
+            id-root="__profile-page__sign-in-msa-button"
+            class="w-full"
+            :icon="signingIn ? 'i-lucide-loader-circle animate-spin' : 'i-lucide-grid-2x2'"
             :disabled="signingIn"
-            class="relative w-fit flex flex-nowrap items-center gap-2 rounded-md p-2 transition-[filter] bg-[theme(colors.neutral.100/.1)] disabled:opacity-50"
-          >
-            <span
-              id="__profile-page__sign-in-button-icon"
-              :class="[
-                signingIn ? 'i-lucide-loader-circle animate-spin' : 'i-lucide-user-plus',
-                'block size-4',
-              ]"
-            ></span>
-            <span id="__profile-page__sign-in-button-label" class="block">
-              {{ Translations?.Messages?.["profile.accounts.add-microsoft"] }}
-            </span>
-            <MaterialRipple />
-          </button>
-          <span
-            v-if="signingIn && signInStatus !== null"
-            id="__profile-page__sign-in-status"
-            class="text-sm"
-            :style="styles.widgetSecondary"
-          >
-            {{ Translations?.Messages?.[`profile.sign-in.status.${signInStatus}`] }}
-          </span>
-          <span
-            v-if="signInError !== null"
-            id="__profile-page__sign-in-error"
-            class="text-sm text-red-400"
-          >
-            {{ signInError }}
-          </span>
+            :on-click="handleSignIn"
+            :label="Translations?.Messages?.['profile.accounts.add-microsoft'] ?? 'Microsoft'"
+          />
+          <Offline />
         </div>
       </div>
     </div>

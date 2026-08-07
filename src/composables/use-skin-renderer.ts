@@ -20,23 +20,20 @@ import { createSkinViewer, type SkinViewer, use } from "@daidr/minecraft-skin-re
 import { renderAvatar } from "@daidr/minecraft-skin-renderer/canvas2d";
 import { WebGLRendererPlugin } from "@daidr/minecraft-skin-renderer/webgl";
 import {
-  computed, inject, onMounted, onUnmounted,
-  type Ref, ref, type ShallowRef, shallowRef,
-  type TemplateRef, useTemplateRef, watchEffect,
+  computed, type ComputedRef, inject,
+  onMounted, onUnmounted, type Ref,
+  ref, type ShallowRef, shallowRef,
+  type TemplateRef, useTemplateRef,
+  watchEffect,
 } from "vue";
 
 import { AuthStatesContextKey } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/log.ts";
+// The Steve that is shown when there are no accounts or the selected account has no skins
+import FallbackSteve from "@/resources/steve_classic.png";
 import { globalStates } from "@/states/global.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
-
-/*
- * The Steve that is shown when there are no accounts
- * or the selected account has no skins
- */
-const FallbackSteve: string =
-  "https://minecraft.wiki/images/Steve_%28classic_texture%29_JE6.png?8aa86";
 
 function getSkinSource(account: AccountType): string | Blob {
   if (account.skin.data.length > 0) {
@@ -59,8 +56,10 @@ let cleanPreviousViewer = (): void => {};
 
 export function useSkinRenderer({
   render,
+  account,
 }: {
-  "render": "3d" | "2d-head";
+  "render"  : "3d" | "2d-head";
+  "account"?: ComputedRef<AccountType | undefined>;
 }): {
   "canvas": TemplateRef<HTMLCanvasElement>;
   "shown" : Ref<boolean>;
@@ -74,7 +73,8 @@ export function useSkinRenderer({
     "slim": boolean;
   } => {
     const index: number = globalStates.selected.account;
-    const found: AccountType | undefined = accounts?.value?.[index];
+    const found: AccountType | undefined = account?.value
+      ?? accounts?.value?.[index];
 
     if (!found) {
       return {
@@ -177,10 +177,20 @@ export function useSkinRenderer({
         );
       }
 
-      return renderAvatar(canvas.value, {
-        "skin" : data.value.url,
-        "scale": 4,
-      });
+      try {
+        await renderAvatar(canvas.value, {
+          "skin" : data.value.url,
+          "scale": 4,
+        });
+      } catch (error: unknown) {
+        log.error(
+          __PRE_BUNDLED_FILENAME__,
+          `Error while rendering the '${render}' skin:`,
+          Errors.prettify(error),
+        );
+      }
+
+      return;
     }
 
     if (!viewer.value) {
@@ -198,13 +208,21 @@ export function useSkinRenderer({
      */
     const currentViewer = viewer.value;
 
-    await currentViewer.setSkin(data.value.url);
+    try {
+      await currentViewer.setSkin(data.value.url);
 
-    if (stale) {
-      return;
+      if (stale) {
+        return;
+      }
+
+      currentViewer.setSlim(data.value.slim);
+    } catch (error: unknown) {
+      log.error(
+        __PRE_BUNDLED_FILENAME__,
+        "Error while applying the new skin to the 3D viewer",
+        Errors.prettify(error),
+      );
     }
-
-    currentViewer.setSlim(data.value.slim);
   }, { "flush": "post" });
 
   return { canvas, shown, viewer };

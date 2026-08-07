@@ -91,7 +91,7 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   >
     <p
       id="__add-instance-page__instance-other-memory-title-label"
-      class="h-8 flex items-center pl-2 leading-none"
+      class="h-8 flex items-center pl-1 leading-none"
     >
       Memory allocation
     </p>

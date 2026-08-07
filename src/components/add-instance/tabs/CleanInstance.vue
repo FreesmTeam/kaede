@@ -73,7 +73,7 @@ function toggleOtherOptions(): void {
     >
       <p
         id="__add-instance-page__other-group-expander-label"
-        class="h-8 flex items-center pl-2 leading-none"
+        class="h-8 flex items-center pl-1 leading-none"
       >
         Other options
       </p>

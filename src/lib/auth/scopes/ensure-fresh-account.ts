@@ -32,6 +32,7 @@ import type { AccountType } from "@/types/configs/account.type.ts";
 
 export async function ensureFreshAccount(
   account: AccountType,
+  forceRefresh?: boolean,
 ): Promise<EnsureFreshResultType> {
   if (account.msa === null) {
     return {
@@ -46,7 +47,7 @@ export async function ensureFreshAccount(
     // Just assume it is zero to refresh the token
     : 0;
 
-  if (expiration - MicrosoftAuth.ExpirationMargin > Date.now()) {
+  if (!forceRefresh && expiration - MicrosoftAuth.ExpirationMargin > Date.now()) {
     log.debug(
       __PRE_BUNDLED_FILENAME__,
       `The Minecraft token of '${account.profile.name}' is still fresh`,
@@ -60,7 +61,7 @@ export async function ensureFreshAccount(
 
   log.warn(
     __PRE_BUNDLED_FILENAME__,
-    `The Minecraft token of '${account.profile.name}' has expired, refreshing`,
+    `The Minecraft token of '${account.profile.name}' is now refreshing`,
   );
 
   try {

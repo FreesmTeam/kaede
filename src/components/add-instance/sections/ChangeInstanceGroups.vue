@@ -89,7 +89,7 @@ function handleGroup(group: string): void {
     <template v-else>
       <p
         id="__add-instance-page__no-groups-text"
-        class="h-8 flex items-center pl-2 leading-none"
+        class="h-8 flex items-center pl-1 leading-none"
       >
         No groups to select...
       </p>

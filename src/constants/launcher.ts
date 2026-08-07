@@ -1,8 +1,8 @@
 import { Patches } from "@/constants/meta.ts";
+import DefaultInstanceIcon from "@/resources/dirt_block.png";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 
 export const FamousAndOldJavaMajorVersion = 8;
-export const DefaultInstanceIcon = "https://minecraft.wiki/images/Minecraft_Preview_App_Store_icon_2.png";
 export const DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions"> = {
   "name"        : "Minecraft - Vanilla",
   "icon"        : DefaultInstanceIcon,

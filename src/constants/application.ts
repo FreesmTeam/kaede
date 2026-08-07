@@ -1,5 +1,6 @@
 /* eslint-disable max-lines */
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
+import { confirm } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import FileStructure from "@/constants/file-structure.ts";
@@ -23,7 +24,6 @@ import type { AccountType } from "@/types/configs/account.type.ts";
 import type { LogLevelType } from "@/types/logging/log-level.type.ts";
 import type { AccountActionCollectionType } from "@/types/ui/account-action.type.ts";
 import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
-import { confirm } from "@tauri-apps/plugin-dialog";
 
 export const ApplicationName = "Kaede";
 export const ApplicationRootID = "#app";
@@ -140,9 +140,14 @@ export const AccountActions: AccountActionCollectionType = [
 ];
 
 export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
-  "home"        : {},
-  "library"     : {},
-  "settings"    : { "tab": "user-interface" },
+  "home"    : {},
+  "library" : {},
+  "settings": { "tab": "user-interface" },
+  "profile" : {
+    "pending": false,
+    "step"   : null,
+    "error"  : null,
+  },
   "add-instance": {
 
     /*

@@ -93,7 +93,7 @@ async function handleIconPick(): Promise<void> {
   >
     <Image
       id="__add-instance-page__instance-icon-image"
-      :src="currentInstance?.icon ?? DefaultInstanceSettings.icon"
+      :src="currentInstance?.icon || DefaultInstanceSettings.icon"
       alt="An instance icon"
       class-names="cursor-pointer object-cover rounded-md size-22 hover:opacity-70"
       @click="handleIconPick"

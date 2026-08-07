@@ -1,5 +1,6 @@
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
+import type { SignInStatusType } from "@/types/auth/microsoft-auth.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
@@ -93,6 +94,11 @@ type PagesType = {
   "library" : Partial<object>;
   "settings": Partial<{
     "tab": string;
+  }>;
+  "profile": Partial<{
+    "pending": boolean;
+    "step"   : SignInStatusType | null;
+    "error"  : string | null;
   }>;
   "add-instance": Partial<{
     "instanceVersionSearch": {

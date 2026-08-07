@@ -28,7 +28,7 @@ const {
     ]"
     :title="tooltip"
   >
-    <span v-if="icon" :id="`${idRoot}-icon`" :class="[icon, 'block size-4']"></span>
+    <span v-if="icon" :id="`${idRoot}-icon`" :class="[icon, 'shrink-0 block size-4']"></span>
     <span
       :id="`${idRoot}-label`"
       :class="[

@@ -132,7 +132,7 @@ async function handleSignIn(): Promise<void> {
           <div
             v-if="(accounts?.length ?? 0) === 0"
             id="__profile-page__accounts-empty"
-            class="text-sm"
+            class="pl-1 text-sm"
             :style="styles.widgetSecondary"
           >
             {{ Translations?.Messages?.["profile.accounts.empty"] }}

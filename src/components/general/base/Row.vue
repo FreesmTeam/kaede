@@ -38,7 +38,7 @@ const { idRoot, separate, image, icon, title, subtitle } = defineProps<{
     <div
       :id="`${idRoot}-label`"
       class="pl-14 text-sm leading-none"
-      :style="{ 'color': globalStates.ui.text.secondaryColor || '#A3A3A3' }"
+      :style="{ 'color': globalStates.ui.widget.secondaryColor || '#A3A3A3' }"
     >
       {{ separate }}
     </div>
@@ -68,7 +68,7 @@ const { idRoot, separate, image, icon, title, subtitle } = defineProps<{
         v-if="title"
         :id="`${idRoot}-title`"
         class="leading-none"
-        :style="{ 'color': globalStates.ui.text.mainColor || '#FFFFFF' }"
+        :style="{ 'color': globalStates.ui.widget.textColor || '#FFFFFF' }"
       >
         {{ title }}
       </span>
@@ -76,7 +76,7 @@ const { idRoot, separate, image, icon, title, subtitle } = defineProps<{
         v-if="subtitle"
         :id="`${idRoot}-subtitle`"
         class="text-sm leading-none"
-        :style="{ 'color': globalStates.ui.text.secondaryColor || '#A3A3A3' }"
+        :style="{ 'color': globalStates.ui.widget.secondaryColor || '#A3A3A3' }"
       >
         {{ subtitle }}
       </span>

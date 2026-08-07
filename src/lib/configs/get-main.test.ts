@@ -63,12 +63,12 @@ const defaultConfig: ConfigType = {
     },
     "atAGlance": [
       {
-        "title"   : "A promising future",
-        "subtitle": "without JavaScript",
+        "title"   : "Welcome~",
+        "subtitle": "you can change this text",
       },
       {
         "title"   : "These messages",
-        "subtitle": "were inspired by the \"At a Glance\" android widget",
+        "subtitle": "were inspired by the \"At a Glance\" Android widget",
       },
       {
         "title"   : "%date%",

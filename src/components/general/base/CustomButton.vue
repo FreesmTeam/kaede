@@ -20,7 +20,7 @@ const {
     :class="[
       hide === true ? 'hidden' : 'flex',
       invert ? 'invert' : '',
-      'z-10 shrink-0 relative grid px-2 w-fit flex-nowrap gap-2 bg-neutral-800',
+      'z-10 shrink-0 relative grid px-2 w-fit flex-nowrap gap-2 bg-[theme(colors.neutral.100/.1)]',
       'items-center h-full place-items-center rounded-md transition-[filter]',
     ]"
     :title="tooltip"

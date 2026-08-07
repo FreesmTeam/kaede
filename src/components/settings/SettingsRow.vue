@@ -27,6 +27,7 @@ import Radio from "@/components/general/base/Radio.vue";
 import Row from "@/components/general/base/Row.vue";
 import Toggle from "@/components/general/base/Toggle.vue";
 import type { SettingsRowType } from "@/types/ui/settings-row.type.ts";
+import { globalStates } from "@/states/global.ts";
 
 const { row } = defineProps<{
   "row": SettingsRowType;
@@ -181,7 +182,11 @@ function handleRowClick(event: MouseEvent): void {
       class="flex flex-nowrap items-center gap-5 pl-5"
     >
       <div :id="`${childRow.idRoot}-divider`" class="grid h-8 place-items-center">
-        <div :id="`${childRow.idRoot}-divider`" class="h-[1px] w-2 bg-neutral-300">
+        <div
+          :id="`${childRow.idRoot}-divider`"
+          class="h-[1px] w-2"
+          :style="{ 'background-color': globalStates.ui.widget.secondaryColor || '#d4d4d4' }"
+        >
         </div>
       </div>
       <SettingsRow

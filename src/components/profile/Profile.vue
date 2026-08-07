@@ -77,111 +77,116 @@ async function removeAccount(uuid: string): Promise<void> {
   <C.PageWrapper>
     <div
       id="__profile-page__wrapper"
-      class="flex flex-wrap gap-8 py-2"
+      class="w-full flex flex-col gap-2 py-2 pr-2"
     >
       <div
-        id="__profile-page__skin-wrapper"
-        class="flex shrink-0 rounded-md"
+        id="__profile-page__inner"
+        class="flex flex-wrap gap-8 rounded-md"
         :style="styles.widget"
       >
-        <!--
-          -- Transitioning visibility declaratively here just works sluggishly,
-          -- so we do it imperatively in 'use-skin-renderer' to avoid white screen flashing
-          --
-          -- UPD: not anymore, now we simply dispose the previous viewer on the new viewer render
-          -->
-        <canvas
-          ref="canvas"
-          id="__profile-page__skin-canvas"
-          width="150"
-          height="225"
-          @pointerover="() => viewer?.playAnimation?.('walk')"
-          @pointerleave="() => viewer?.stopAnimation?.()"
-          :class="[
-            shown ? 'opacity-100' : 'opacity-0',
-            'cursor-grab duration-300 transition-[opacity] active:cursor-grabbing',
-          ]"
-        />
-      </div>
-      <div
-        id="__profile-page__accounts-wrapper"
-        class="min-w-64 flex flex-col gap-2"
-      >
-        <span
-          id="__profile-page__accounts-title"
-          class="text-lg font-medium"
-        >
-          {{ Translations?.Messages?.["profile.accounts.title"] }}
-        </span>
-        <span
-          v-if="(accounts?.length ?? 0) === 0"
-          id="__profile-page__accounts-empty"
-          class="text-sm text-neutral-400"
-        >
-          {{ Translations?.Messages?.["profile.accounts.empty"] }}
-        </span>
         <div
-          v-for="account of accounts ?? []"
-          :key="account.profile.uuid"
-          :id="`__profile-page__account-${account.profile.uuid}`"
-          class="flex items-center gap-2 rounded-md p-2 bg-[theme(colors.neutral.100/.05)]"
+          id="__profile-page__skin-wrapper"
+          class="flex shrink-0"
+        >
+          <!--
+            -- Transitioning visibility declaratively here just works sluggishly,
+            -- so we do it imperatively in 'use-skin-renderer' to avoid white screen flashing
+            --
+            -- UPD: not anymore, now we simply dispose the previous viewer on the new viewer render
+            -->
+          <canvas
+            ref="canvas"
+            id="__profile-page__skin-canvas"
+            width="150"
+            height="225"
+            @pointerover="() => viewer?.playAnimation?.('walk')"
+            @pointerleave="() => viewer?.stopAnimation?.()"
+            :class="[
+              shown ? 'opacity-100' : 'opacity-0',
+              'cursor-grab duration-300 transition-[opacity] active:cursor-grabbing',
+            ]"
+          />
+        </div>
+        <div
+          id="__profile-page__accounts-wrapper"
+          class="min-w-64 flex flex-col gap-2"
         >
           <span
-            :id="`__profile-page__account-${account.profile.uuid}-name`"
-            class="font-medium"
+            id="__profile-page__accounts-title"
+            class="text-lg font-medium"
           >
-            {{ account.profile.name }}
+            {{ Translations?.Messages?.["profile.accounts.title"] }}
           </span>
           <span
-            :id="`__profile-page__account-${account.profile.uuid}-type`"
-            class="text-xs text-neutral-400"
+            v-if="(accounts?.length ?? 0) === 0"
+            id="__profile-page__accounts-empty"
+            class="text-sm text-neutral-400"
           >
-            {{ account.profile.type }}
+            {{ Translations?.Messages?.["profile.accounts.empty"] }}
           </span>
-          <button
-            :id="`__profile-page__account-${account.profile.uuid}-remove`"
-            @click="removeAccount(account.profile.uuid)"
-            class="relative ml-auto rounded-md p-1 transition-[background-color] hover:bg-[theme(colors.neutral.100/.1)]"
-            :title="Translations?.Messages?.['profile.accounts.remove']"
+          <div
+            v-for="account of accounts ?? []"
+            :key="account.profile.uuid"
+            :id="`__profile-page__account-${account.profile.uuid}`"
+            class="flex items-center gap-2 rounded-md p-2 bg-[theme(colors.neutral.100/.05)]"
           >
             <span
-              :id="`__profile-page__account-${account.profile.uuid}-remove-icon`"
-              class="i-lucide-trash-2 block size-4"
+              :id="`__profile-page__account-${account.profile.uuid}-name`"
+              class="font-medium"
+            >
+              {{ account.profile.name }}
+            </span>
+            <span
+              :id="`__profile-page__account-${account.profile.uuid}-type`"
+              class="text-xs text-neutral-400"
+            >
+              {{ account.profile.type }}
+            </span>
+            <button
+              :id="`__profile-page__account-${account.profile.uuid}-remove`"
+              @click="removeAccount(account.profile.uuid)"
+              class="relative ml-auto rounded-md p-1 transition-[background-color] hover:bg-[theme(colors.neutral.100/.1)]"
+              :title="Translations?.Messages?.['profile.accounts.remove']"
+            >
+              <span
+                :id="`__profile-page__account-${account.profile.uuid}-remove-icon`"
+                class="i-lucide-trash-2 block size-4"
+              ></span>
+            </button>
+          </div>
+          <button
+            id="__profile-page__sign-in-button"
+            @click="handleSignIn"
+            :disabled="signingIn"
+            class="relative w-fit flex flex-nowrap items-center gap-2 rounded-md p-2 transition-[filter] bg-[theme(colors.neutral.100/.1)] disabled:opacity-50"
+          >
+            <span
+              id="__profile-page__sign-in-button-icon"
+              :class="[
+                signingIn ? 'i-lucide-loader-circle animate-spin' : 'i-lucide-user-plus',
+                'block size-4',
+              ]"
             ></span>
+            <span id="__profile-page__sign-in-button-label" class="block">
+              {{ Translations?.Messages?.["profile.accounts.add-microsoft"] }}
+            </span>
+            <MaterialRipple />
           </button>
-        </div>
-        <button
-          id="__profile-page__sign-in-button"
-          @click="handleSignIn"
-          :disabled="signingIn"
-          class="relative w-fit flex flex-nowrap items-center gap-2 rounded-md bg-neutral-800 p-2 transition-[filter] disabled:opacity-50"
-        >
           <span
-            id="__profile-page__sign-in-button-icon"
-            :class="[
-              signingIn ? 'i-lucide-loader-circle animate-spin' : 'i-lucide-user-plus',
-              'block size-4',
-            ]"
-          ></span>
-          <span id="__profile-page__sign-in-button-label" class="block">
-            {{ Translations?.Messages?.["profile.accounts.add-microsoft"] }}
+            v-if="signingIn && signInStatus !== null"
+            id="__profile-page__sign-in-status"
+            class="text-sm text-neutral-400"
+          >
+            {{ Translations?.Messages?.[`profile.sign-in.status.${signInStatus}`] }}
           </span>
-          <MaterialRipple />
-        </button>
-        <span
-          v-if="signingIn && signInStatus !== null"
-          id="__profile-page__sign-in-status"
-          class="text-sm text-neutral-400"
-        >
-          {{ Translations?.Messages?.[`profile.sign-in.status.${signInStatus}`] }}
-        </span>
-        <span
-          v-if="signInError !== null"
-          id="__profile-page__sign-in-error"
-          class="text-sm text-red-400"
-        >
-          {{ signInError }}
-        </span>
+          <span
+            v-if="signInError !== null"
+            id="__profile-page__sign-in-error"
+            class="text-sm text-red-400"
+          >
+            {{ signInError }}
+          </span>
+        </div>
       </div>
     </div>
   </C.PageWrapper>

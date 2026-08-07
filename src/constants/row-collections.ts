@@ -260,7 +260,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
   computed(() => ({
     "idRoot"  : "__settings-page__extensions-show-after-initialization",
     "icon"    : "i-lucide-clock",
-    "title"   : "Show window after extensions load",
+    "title"   : "Show the window after extensions load",
     "subtitle": "Wait for extensions to initialize before showing the launcher window",
     "onClick" : (): void => {
       globalStates.extensions.showAppAfterExtensionsLoad =
@@ -442,7 +442,7 @@ export const ExtensionsSettingsRows: SettingsRowCollectionType = [
     "empty": {
       "idRoot"  : "__settings-page__extensions-list-invalid-empty",
       "icon"    : "__kaede-do-not-render",
-      "subtitle": "No invalid extensions loaded",
+      "subtitle": "No invalid extensions",
     },
   })),
 ];
@@ -482,7 +482,7 @@ export const DevelopmentSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__development-show-fps",
     "icon"    : "i-lucide-gauge",
     "title"   : "Show FPS",
-    "subtitle": "Display the current frames per second",
+    "subtitle": "Display the current FPS",
     "onClick" : (): void => {
       globalStates.development.showFPS = !globalStates.development.showFPS;
     },
@@ -495,7 +495,7 @@ export const DevelopmentSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__development-show-cpu-usage",
     "icon"    : "i-lucide-cpu",
     "title"   : "Show CPU usage",
-    "subtitle": "Display current CPU usage in percents",
+    "subtitle": "Display current CPU usage",
     "onClick" : (): void => {
       globalStates.development.showCPUUsage = !globalStates.development.showCPUUsage;
     },
@@ -539,7 +539,7 @@ export const DevelopmentSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__development-enable-native-reload-key-binds",
     "icon"    : "i-lucide-refresh-cw",
     "title"   : "Native reload keybinds",
-    "subtitle": "Allow Ctrl+R / F5 to reload the window",
+    "subtitle": "Allow Ctrl+R / F5 keys to reload the window",
     "onClick" : (): void => {
       globalStates.development.enableNativeReloadKeyBinds =
         !globalStates.development.enableNativeReloadKeyBinds;
@@ -860,7 +860,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__minecraft-window-width",
     "icon"    : "i-lucide-move-horizontal",
     "title"   : "Window width",
-    "subtitle": "Default game window width in pixels",
+    "subtitle": "The default value in pixels for instances",
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-move-horizontal",
@@ -882,7 +882,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__minecraft-window-height",
     "icon"    : "i-lucide-move-vertical",
     "title"   : "Window height",
-    "subtitle": "Default game window height in pixels",
+    "subtitle": "The default value in pixels for instances",
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-move-vertical",

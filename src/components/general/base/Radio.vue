@@ -37,19 +37,12 @@ const { styles } = useConfigColors();
     :aria-checked="value"
     @click="onSelect"
     :disabled="value"
-    :style="{
-      'background-color': styles.widget.background,
-    }"
-    class="relative z-10 grid size-6 shrink-0 cursor-pointer place-items-center rounded-full"
+    class="group relative z-10 grid size-6 shrink-0 cursor-pointer place-items-center rounded-full transition-[background-color] bg-[theme(colors.neutral.100/.1)] disabled:bg-white"
   >
     <span
       :id="`${id}-thumb`"
       class="block size-2 rounded-full transition-[background-color]"
-      :style="{
-        'background-color': value
-          ? styles.widget.color
-          : 'rgba(245, 245, 245, 0.1)',
-      }"
+      :style="{ 'background-color': value ? 'black' : styles.widget.color }"
     ></span>
     <MaterialRipple :disabled="!ripples" />
   </button>

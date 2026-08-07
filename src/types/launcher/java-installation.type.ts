@@ -16,11 +16,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type TabSectionType = {
-  "id"     : string;
-  "name"   : string;
-  "icon"  ?: string;
-  "image" ?: string;
-  "await" ?: () => Promise<void>;
-  "action"?: (id: string) => Promise<void>;
+export type JavaInstallationType = {
+  "path"   : string;
+  "vendor" : string;
+  "version": string;
+  "major"  : number | null;
+
+  /*
+   * "environment" (found by the command)
+   * "java-home" (found thanks to 'JAVA_HOME')
+   * "path" (found in 'PATH')
+   * "scan" (found in usual JVM directories)
+   */
+  "source": "environment" | "java-home" | "path" | "scan";
 };

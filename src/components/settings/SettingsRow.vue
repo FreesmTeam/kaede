@@ -172,9 +172,12 @@ function handleRowClick(event: MouseEvent): void {
       v-for="childRow in row.inner"
       :key="childRow.idRoot"
       :id="`${childRow.idRoot}-padding`"
-      class="flex flex-nowrap items-center gap-6 pl-6"
+      class="flex flex-nowrap items-center gap-5 pl-5"
     >
-      <div :id="`${childRow.idRoot}-divider`" class="h-8 w-[1px] bg-neutral-400"></div>
+      <div :id="`${childRow.idRoot}-divider`" class="grid h-8 place-items-center">
+        <div :id="`${childRow.idRoot}-divider`" class="h-[1px] w-2 bg-neutral-300">
+        </div>
+      </div>
       <SettingsRow
         :row="childRow"
       />

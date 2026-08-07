@@ -164,6 +164,7 @@ pub fn run() {
             extensions::read_extensions,
             finalization::finalize_initialization,
             finalization::get_java_major,
+            finalization::detect_java_installations,
             hashes::hash_md5,
             hashes::hash_sha1_file,
             hashes::hash_sha256,

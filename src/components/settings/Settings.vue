@@ -3,6 +3,7 @@ import { computed } from "vue";
 
 import DevelopmentSettings from "@/components/settings/tabs/DevelopmentSettings.vue";
 import ExtensionsSettings from "@/components/settings/tabs/ExtensionsSettings.vue";
+import JavaSettings from "@/components/settings/tabs/JavaSettings.vue";
 import MinecraftSettings from "@/components/settings/tabs/MinecraftSettings.vue";
 import UserInterfaceSettings from "@/components/settings/tabs/UserInterfaceSettings.vue";
 import { SettingsSections } from "@/constants/application.ts";
@@ -36,6 +37,7 @@ const sections = computed((): Array<TabSectionType> => {
       />
       <UserInterfaceSettings v-if="selected === 'user-interface'" />
       <MinecraftSettings v-else-if="selected === 'minecraft'" />
+      <JavaSettings v-else-if="selected === 'java'" />
       <ExtensionsSettings v-else-if="selected === 'extensions'" />
       <DevelopmentSettings v-else-if="selected === 'development'" />
       <LazyPluginPlayground v-else-if="selected === 'plugin-playground'" />

@@ -17,33 +17,23 @@
   -->
 
 <script setup lang="ts">
-import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
-
-const { id, value, onToggle, ripples = false } = defineProps<{
-  "id"       : string;
-  "value"    : boolean;
-  "onToggle"?: (value: boolean) => void;
-  "ripples" ?: boolean;
-}>();
+import RowContainer from "@/components/general/base/RowContainer.vue";
+import SettingsRow from "@/components/settings/SettingsRow.vue";
+import { JavaSettingsRows } from "@/constants/row-collections.ts";
 </script>
 
 <template>
-  <button
-    :id="id"
-    role="switch"
-    :aria-checked="value"
-    @click="() => onToggle?.(!value)"
-    class="relative h-6 w-11 shrink-0 cursor-pointer rounded-full bg-[theme(colors.neutral.100/.1)]"
+  <div
+    id="__settings-page__java-wrapper"
+    class="h-fit w-full flex flex-col gap-2 pb-2"
   >
-    <span
-      :id="`${id}-thumb`"
-      :class="[
-        value
-          ? 'translate-x-6 bg-white'
-          : 'translate-x-1 bg-neutral-500',
-        'block size-4 rounded-full transition-[transform,background-color] duration-150',
-      ]"
-    ></span>
-    <MaterialRipple :disabled="!ripples" />
-  </button>
+    <RowContainer id="__settings-page__java-inner">
+      <SettingsRow
+        transition
+        v-for="row in JavaSettingsRows"
+        :row="row.value"
+        :key="row.value.idRoot"
+      />
+    </RowContainer>
+  </div>
 </template>

@@ -257,6 +257,10 @@ export async function placeholderInvoke(
         "javaMajorSource"   : "unresolved",
       };
     }
+    case "detect_java_installations": {
+      // There is no file system to scan for Java runtimes in the browser
+      return [];
+    }
     case "plugin:dialog|open": {
       const input = document.createElement("input");
 

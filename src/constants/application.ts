@@ -136,9 +136,10 @@ export const SettingsSections: Array<TabSectionType> = [
     "icon": "i-lucide-box",
   },
   {
-    "id"  : "java",
-    "name": "Java",
-    "icon": "i-lucide-coffee",
+    "id"   : "java",
+    "name" : "Java",
+    "icon" : "i-lucide-coffee",
+    "await": () => Launcher.detectJavaInstallations(),
   },
   {
     "id"  : "extensions",

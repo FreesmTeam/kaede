@@ -17,7 +17,7 @@
   -->
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
@@ -34,13 +34,25 @@ const { sections, stateKey } = defineProps<{
   >;
 }>();
 
+const disabled = ref<string>();
 const selected = computed((): string => (
   globalStates?.pages?.[stateKey]?.tab ?? sections[0].id
 ));
 const { styles } = useConfigColors();
 
-function handleModeSelect(id: string): void {
-  globalStates.pages[stateKey].tab = id;
+async function handleModeSelect(tab: TabSectionType): Promise<void> {
+  disabled.value = tab.id;
+
+  if (tab.await) {
+    await tab.await();
+
+    // Prevent a race condition
+    if (disabled.value !== tab.id) {
+      return;
+    }
+  }
+
+  globalStates.pages[stateKey].tab = tab.id;
 }
 </script>
 
@@ -53,8 +65,8 @@ function handleModeSelect(id: string): void {
     <button
       v-for="tab in sections"
       :key="tab.id"
-      :disabled="selected === tab.id"
-      @click="() => tab?.action?.(tab.id) ?? handleModeSelect(tab.id)"
+      :disabled="selected === tab.id || disabled === tab.id"
+      @click="() => tab?.action?.(tab.id) ?? handleModeSelect(tab)"
       :id="`__${stateKey}-page__type-selector-item-${tab.id}`"
       :class="[
         `__${stateKey}-page__type-selector-item`,
@@ -81,7 +93,7 @@ function handleModeSelect(id: string): void {
       >
         {{ tab.name }}
       </span>
-      <MaterialRipple />
+      <MaterialRipple :disabled="selected === tab.id || disabled === tab.id" />
     </button>
   </div>
 </template>

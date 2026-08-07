@@ -16,11 +16,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type TabSectionType = {
-  "id"     : string;
-  "name"   : string;
-  "icon"  ?: string;
-  "image" ?: string;
-  "await" ?: () => Promise<void>;
-  "action"?: (id: string) => Promise<void>;
-};
+import { type ShallowReactive, shallowReactive } from "vue";
+
+import type { JavaInstallationType } from "@/types/launcher/java-installation.type.ts";
+
+export const javaStates: ShallowReactive<{
+  "installations": Array<JavaInstallationType>;
+  "environment"  : JavaInstallationType | null;
+  "status"       : "idle" | "scanning" | "loaded" | "failed";
+}> = shallowReactive({
+  "installations": [],
+  "environment"  : null,
+  "status"       : "idle",
+});

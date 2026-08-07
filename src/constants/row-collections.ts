@@ -27,7 +27,9 @@ import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/log.ts";
 import { extensionStates, trustedExtensionHashes } from "@/states/extension.ts";
 import { globalStates } from "@/states/global.ts";
+import { javaStates } from "@/states/java.ts";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
+import type { JavaInstallationType } from "@/types/launcher/java-installation.type.ts";
 import type { SettingsRowCollectionType } from "@/types/ui/settings-row.type.ts";
 
 const extensionHandler = {
@@ -56,13 +58,14 @@ const extensionHandler = {
      * are enabled, and since this code changes extensions, we can imply that the extensions
      * are enabled.
      *
-     * Another scenario is that user has enabled extensions, loaded extensions
+     * Another scenario is that the user has enabled extensions, loaded extensions
      * (therefore, making these 'extensionHandler' variable functions accessible), and then
      * disabled extensions while still having these functions accessible. In such case,
      * everything will still work as 'ExtensionLoader' was already loaded, making 'Extensions'
-     * and the rest of the libs exposed to globals
+     * and the rest of the libs stay exposed to globals
      *
      * UPD: Yeah, I have tested the output. With direct imports:
+     *
      * ```
      * dist/assets/ExtensionLoader-DeFIFzDe.js       14.43 kB │ gzip:   5.70 kB
      * dist/assets/PluginPlayground-C6G2CMXN.js      30.28 kB │ gzip:  13.36 kB
@@ -71,6 +74,7 @@ const extensionHandler = {
      * ```
      *
      * Without direct imports (via 'GlobalObject.libs.Extensions'):
+     *
      * ```
      * dist/assets/PluginPlayground-CCMrxMdk.js      30.28 kB │ gzip:  13.36 kB
      * dist/assets/index-CC3e8Kpc.js                 73.45 kB │ gzip:  20.75 kB
@@ -1001,9 +1005,63 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
   })),
 ];
 
+function formatJavaTitle(installation: JavaInstallationType): string {
+  return `${installation.vendor} ${installation.version}`.trim();
+}
+
+export const JavaSettingsRows: SettingsRowCollectionType = [
+  computed(() => {
+    const available = javaStates
+      .installations
+      .map(installation => ({
+        "idRoot"  : `__settings-page__java-detected-entry-${installation.path}`,
+        "icon"    : "i-lucide-coffee",
+        "title"   : formatJavaTitle(installation),
+        "subtitle": installation.path,
+        "onClick" : (): void => {
+          globalStates.minecraft.javaBinary = installation.path;
+        },
+        "inner": {
+          "kind" : "toggle" as const,
+          "value": globalStates.minecraft.javaBinary === installation.path,
+        },
+      }));
+
+    if (javaStates.environment !== null) {
+      available.unshift({
+        "idRoot"  : "__settings-page__java-environment-entry",
+        "icon"    : "i-lucide-star",
+        "title"   : formatJavaTitle(javaStates.environment),
+        "subtitle": "java",
+        "onClick" : (): void => {
+          globalStates.minecraft.javaBinary = "java";
+        },
+        "inner": {
+          "kind" : "toggle",
+          "value": globalStates.minecraft.javaBinary === "java",
+        },
+      });
+    }
+
+    return {
+      "idRoot"  : "__settings-page__java-detected",
+      "icon"    : "i-lucide-file-search",
+      "title"   : "Java paths",
+      "subtitle": "All runtimes found in the system",
+      "inner"   : available,
+      "empty"   : {
+        "idRoot"  : "__settings-page__java-detected-empty",
+        "icon"    : "__kaede-do-not-render",
+        "subtitle": "No Java runtimes found",
+      },
+    };
+  }),
+];
+
 export default {
   DevelopmentSettingsRows,
   ExtensionsSettingsRows,
   UserInterfaceSettingsRows,
   MinecraftSettingsRows,
+  JavaSettingsRows,
 } as const;

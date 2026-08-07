@@ -1,3 +1,4 @@
+import { detectJavaInstallations } from "@/lib/launcher/fetching/detect-java-installations.ts";
 import { fetchJavaMajor } from "@/lib/launcher/fetching/fetch-java-major.ts";
 import Arguments from "@/lib/launcher/scopes/arguments";
 import { createCommand } from "@/lib/launcher/scopes/create-command.ts";
@@ -17,6 +18,7 @@ export default {
      * useShell,
      */
   },
+  detectJavaInstallations,
   fetchJavaMajor,
   Arguments,
   Extractors,

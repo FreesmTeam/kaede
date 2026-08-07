@@ -99,6 +99,12 @@ Filters & Searching
 
 ---
 
+Microsoft Sign-in in Windows 7
+
+<img src="./demos/kaede_vmware_windows-7_microsoft-sign-in.webp" alt="Profile page with a successfully logged in Microsoft account">
+
+---
+
 A custom plugin for the Multi-Window experience (each window adds 30 MB of RAM usage)
 
 <img src="./demos/multi-window__blue-archive-different-bgs.jpg" alt="Multi-Window navigation with different Blue Archive background images">

@@ -5,6 +5,7 @@ import { useDebounceFn, useEventListener } from "@vueuse/core";
 import { ref, useTemplateRef } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 
 const {
   icon,
@@ -52,6 +53,8 @@ const {
     "onPick"   : (value: string) => void;
   };
 }>();
+
+const { styles } = useConfigColors();
 
 const target = useTemplateRef("target");
 
@@ -151,9 +154,11 @@ if (listenToEvents) {
       :class="[
         classNames?.icon,
         icon,
-        focused ? 'text-white' : 'text-neutral-400',
         'pointer-events-none absolute z-10 size-4 transition-[color]',
       ]"
+      :style="{
+        'color': focused ? styles.widget.color : styles.widgetSecondary.color,
+      }"
     ></div>
     <input
       ref="target"
@@ -161,10 +166,12 @@ if (listenToEvents) {
       :id="`${idRoot}-input`"
       :class="[
         classNames?.input,
-        focused ? 'text-white' : 'text-neutral-400',
         'absolute pl-8 left-0 right-0 top-0 bottom-0 bg-transparent text-sm',
-        'outline-none transition-[color] focus:outline-none placeholder-neutral-400',
+        'outline-none transition-[color] focus:outline-none placeholder-neutral-500',
       ]"
+      :style="{
+        'color': focused ? styles.widget.color : styles.widgetSecondary.color,
+      }"
       :type="type ?? 'text'"
       :placeholder="focused ? '' : placeholder"
       :value="defaultValue"

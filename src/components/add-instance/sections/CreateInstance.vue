@@ -20,6 +20,7 @@
 import { computed } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { Patches, PrettyPatchLabels } from "@/constants/meta.ts";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
@@ -27,6 +28,8 @@ import type {
   GlobalStatesType,
 } from "@/types/application/global-states.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
+
+const { styles } = useConfigColors();
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
@@ -58,7 +61,8 @@ const currentPatch = computed((): ExtendedPatchUIDType => (
     </button>
     <div
       id="__add-instance-page__create-instance-type-display"
-      class="py-1 pr-2 text-neutral-300"
+      class="py-1 pr-2"
+      :style="styles.widgetSecondary"
     >
       with {{ PrettyPatchLabels[currentPatch] }}
     </div>

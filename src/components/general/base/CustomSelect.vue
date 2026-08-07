@@ -21,6 +21,7 @@ import { onClickOutside } from "@vueuse/core";
 import { ref, useTemplateRef } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 
 const {
   idRoot,
@@ -43,6 +44,8 @@ const {
     "dropdown"?: string;
   };
 }>();
+
+const { styles } = useConfigColors();
 
 const target = useTemplateRef("target");
 
@@ -102,10 +105,12 @@ onClickOutside(target, event => {
       :id="`${idRoot}-button`"
       :class="[
         classNames?.button,
-        opened ? 'text-white' : 'text-neutral-400',
         'h-8 w-full flex flex-nowrap items-center gap-2 rounded-md',
         'relative overflow-x-hidden pl-2 bg-[theme(colors.neutral.100/.1)] outline-none',
       ]"
+      :style="{
+        'color': opened ? styles.widget.color : styles.widgetSecondary.color,
+      }"
     >
       <span
         :id="`${idRoot}-chevron`"
@@ -125,14 +130,15 @@ onClickOutside(target, event => {
       <div
         v-if="opened"
         :id="`${idRoot}-dropdown-wrapper`"
-        class="absolute left-0 right-0 top-10 z-50 flex flex-col rounded-md bg-neutral-900 py-1"
+        class="absolute left-0 right-0 top-10 z-50 flex flex-col rounded-md py-1"
+        :style="styles.widget"
       >
         <button
           v-for="option in options"
           :id="`${idRoot}-dropdown-item-${option}`"
           :key="option"
           @click="() => handleSelect(option)"
-          class="relative px-4 py-1 text-start text-neutral-300 active:bg-[theme(colors.white/.1)] hover:bg-[theme(colors.white/.05)]"
+          class="relative px-4 py-1 text-start active:bg-[theme(colors.white/.1)] hover:bg-[theme(colors.white/.05)]"
         >
           {{ option }}
         </button>

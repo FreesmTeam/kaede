@@ -35,6 +35,15 @@ export function useConfigColors(): {
         "background": globalStates.ui.widget.background || "rgb(10, 10, 10)",
         "color"     : globalStates.ui.widget.textColor || "rgb(255, 255, 255)",
       },
+      "widgetSecondary": {
+        "color": globalStates.ui.widget.secondaryColor || "rgb(212, 212, 212)",
+      },
+      "text": {
+        "color": globalStates.ui.text.mainColor || "rgb(255, 255, 255)",
+      },
+      "textSecondary": {
+        "color": globalStates.ui.text.secondaryColor || "rgb(212, 212, 212)",
+      },
     };
 
     if (globalStates.ui.text.font !== null) {

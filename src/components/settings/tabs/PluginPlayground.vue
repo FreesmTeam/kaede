@@ -112,7 +112,7 @@ onMounted(() => {
   >
     <div
       id="__settings-page__plugin-playground-description"
-      class="shrink-0 text-neutral-300"
+      class="shrink-0"
     >
       A place where you can experiment with your Kaede plugins. Your code and output will be lost as soon as you reload the UI or close the launcher.
     </div>

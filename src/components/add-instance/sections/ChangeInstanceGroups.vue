@@ -20,10 +20,13 @@
 import { computed } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
+
+const { styles } = useConfigColors();
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
@@ -71,8 +74,9 @@ function handleGroup(group: string): void {
           'shrink-0 relative rounded-md px-2 py-1 transition-[background-color,color]',
           currentInstance?.groups?.includes?.(group)
             ? 'bg-[theme(colors.neutral.100/.25)]'
-            : 'bg-[theme(colors.neutral.100/.1)] text-neutral-400',
+            : 'bg-[theme(colors.neutral.100/.1)]',
         ]"
+        :style="styles.widgetSecondary"
       >
         <span
           :id="`__add-instance-page__instance-group-${group}-label`"
@@ -85,7 +89,7 @@ function handleGroup(group: string): void {
     <template v-else>
       <p
         id="__add-instance-page__no-groups-text"
-        class="h-8 flex items-center pl-2 text-neutral-400 leading-none"
+        class="h-8 flex items-center pl-2 leading-none"
       >
         No groups to select...
       </p>

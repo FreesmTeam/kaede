@@ -24,6 +24,7 @@ import ChangeInstanceVersionDropdown
   from "@/components/add-instance/sections/ChangeInstanceVersionDropdown.vue";
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { Patches } from "@/constants/meta.ts";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
@@ -31,6 +32,8 @@ import type {
   GlobalStatesType,
 } from "@/types/application/global-states.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
+
+const { styles } = useConfigColors();
 
 const target = useTemplateRef("target");
 
@@ -85,16 +88,18 @@ onClickOutside(target, () => handleDropdown(false));
     <div
       v-if="currentInstance?.patchVersions?.[Patches.Minecraft]"
       id="__add-instance-page__instance-version-selected-badge"
-      class="grid place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
+      class="grid place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
       :title="`Selected version of '${Patches.Minecraft}'`"
+      :style="styles.widgetSecondary"
     >
       {{ currentInstance.patchVersions[Patches.Minecraft] }}
     </div>
     <div
       v-if="currentPatch !== Patches.Minecraft && currentInstance?.patchVersions?.[currentPatch]"
       id="__add-instance-page__instance-version-selected-badge-modloader"
-      class="grid place-items-center rounded-md px-2 text-neutral-400 leading-none bg-[theme(colors.neutral.100/.1)]"
+      class="grid place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
       :title="`Selected version of '${currentPatch}'`"
+      :style="styles.widgetSecondary"
     >
       {{ currentInstance.patchVersions[currentPatch] }}
     </div>

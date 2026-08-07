@@ -21,6 +21,7 @@ import { onClickOutside } from "@vueuse/core";
 import { computed, ref, useTemplateRef } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { globalStates } from "@/states/global.ts";
 
 const {
@@ -45,6 +46,8 @@ const {
   };
   "toBottom"?: boolean;
 }>();
+
+const { styles } = useConfigColors();
 
 const container = useTemplateRef("container");
 const nativeInput = useTemplateRef("nativeInput");
@@ -134,7 +137,8 @@ onClickOutside(container, event => {
     ></span>
     <span
       :id="`${idRoot}-label`"
-      :class="[classNames?.label, 'line-clamp-1 text-ellipsis text-sm text-neutral-400']"
+      :class="[classNames?.label, 'line-clamp-1 text-ellipsis text-sm']"
+      :style="styles.widgetSecondary"
     >
       {{ value || "Default" }}
     </span>
@@ -168,10 +172,12 @@ onClickOutside(container, event => {
       :id="`${idRoot}-button`"
       :class="[
         classNames?.button,
-        opened ? 'text-white' : 'text-neutral-400',
         'h-8 w-full flex flex-nowrap items-center gap-2 rounded-md',
         'relative overflow-x-hidden px-2 bg-[theme(colors.neutral.100/.1)] outline-none',
       ]"
+      :style="{
+        'color': opened ? styles.widget.color : styles.widgetSecondary.color,
+      }"
     >
       <span
         :id="`${idRoot}-swatch`"

@@ -20,12 +20,15 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import General from "@/lib/general";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type {
   GlobalStatesType,
 } from "@/types/application/global-states.type.ts";
+
+const { styles } = useConfigColors();
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
@@ -97,7 +100,8 @@ function handleHeightChange(value: string): void {
       >
         <p
           id="__add-instance-page__instance-resolution-title"
-          class="text-neutral-300 leading-none"
+          class="leading-none"
+          :style="styles.widgetSecondary"
         >
           Aspect Ratio
         </p>
@@ -126,7 +130,8 @@ function handleHeightChange(value: string): void {
       >
         <div
           id="__add-instance-page__instance-other-width-unit"
-          class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm text-neutral-400"
+          class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm"
+          :style="styles.widgetSecondary"
         >
           px
         </div>
@@ -149,7 +154,8 @@ function handleHeightChange(value: string): void {
       >
         <div
           id="__add-instance-page__instance-other-height-unit"
-          class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm text-neutral-400"
+          class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm"
+          :style="styles.widgetSecondary"
         >
           px
         </div>

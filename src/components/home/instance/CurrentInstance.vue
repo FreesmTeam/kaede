@@ -4,6 +4,7 @@ import { computed, ref } from "vue";
 import Dropdown from "@/components/general/base/Dropdown.vue";
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { Patches } from "@/constants/meta.ts";
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
@@ -16,6 +17,8 @@ import type {
 } from "@/types/application/instance-states.type.ts";
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 import type { DropdownItemType } from "@/types/ui/dropdown-item.type.ts";
+
+const { styles } = useConfigColors();
 
 const selector = ref<boolean>(false);
 const syncing = ref<boolean>(false);
@@ -115,12 +118,14 @@ const dropdownItems = computed((): Array<DropdownItemType> => {
       <span
         id="__home-page__current-instance-information-title"
         class="block font-medium"
+        :style="styles.text"
       >
         {{ currentInstance?.instance?.name ?? "Unknown" }}
       </span>
       <span
         id="__home-page__current-instance-information-version"
-        class="block text-start text-neutral-400"
+        class="block text-start"
+        :style="styles.textSecondary"
       >
         {{
           currentInstance?.instance?.patchVersions?.[Patches.Minecraft]

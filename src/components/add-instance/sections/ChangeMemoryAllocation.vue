@@ -20,11 +20,14 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type {
   GlobalStatesType,
 } from "@/types/application/global-states.type.ts";
+
+const { styles } = useConfigColors();
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
@@ -88,7 +91,7 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   >
     <p
       id="__add-instance-page__instance-other-memory-title-label"
-      class="h-8 flex items-center pl-2 text-neutral-400 leading-none"
+      class="h-8 flex items-center pl-2 leading-none"
     >
       Memory allocation
     </p>
@@ -99,7 +102,8 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   >
     <div
       id="__add-instance-page__instance-other-min-memory-unit"
-      class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm text-neutral-400"
+      class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm"
+      :style="styles.widgetSecondary"
     >
       MB
     </div>
@@ -122,7 +126,8 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
   >
     <div
       id="__add-instance-page__instance-other-max-memory-unit"
-      class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm text-neutral-400"
+      class="pointer-events-none absolute right-4 top-[50%] z-10 translate-y-[-50%] text-sm"
+      :style="styles.widgetSecondary"
     >
       MB
     </div>

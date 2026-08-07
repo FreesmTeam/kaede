@@ -18,6 +18,7 @@
 
 <script setup lang="ts">
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 
 const { id, value, onToggle, ripples = true } = defineProps<{
   "id"       : string;
@@ -25,6 +26,8 @@ const { id, value, onToggle, ripples = true } = defineProps<{
   "onToggle"?: (value: boolean) => void;
   "ripples" ?: boolean;
 }>();
+
+const { styles } = useConfigColors();
 </script>
 
 <template>
@@ -39,10 +42,13 @@ const { id, value, onToggle, ripples = true } = defineProps<{
       :id="`${id}-thumb`"
       :class="[
         value
-          ? 'translate-x-6 bg-white'
-          : 'translate-x-1 bg-neutral-500',
-        'block size-4 rounded-full transition-[transform,background-color] duration-150',
+          ? 'translate-x-6'
+          : 'translate-x-1 opacity-50',
+        'block size-4 rounded-full transition-[transform,opacity,background-color] duration-150',
       ]"
+      :style="{
+        'background-color': value ? styles.widget.color : styles.widgetSecondary.color,
+      }"
     ></span>
     <MaterialRipple :disabled="!ripples" />
   </button>

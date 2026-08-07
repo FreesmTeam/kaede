@@ -26,8 +26,9 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import Radio from "@/components/general/base/Radio.vue";
 import Row from "@/components/general/base/Row.vue";
 import Toggle from "@/components/general/base/Toggle.vue";
-import type { SettingsRowType } from "@/types/ui/settings-row.type.ts";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { globalStates } from "@/states/global.ts";
+import type { SettingsRowType } from "@/types/ui/settings-row.type.ts";
 
 const { row } = defineProps<{
   "row": SettingsRowType;
@@ -39,6 +40,8 @@ const inputReference = useTemplateRef<{
   "pick" : (event: Event) => void;
 }>("input");
 const colorReference = useTemplateRef<{ "open": () => void }>("color");
+
+const { styles } = useConfigColors();
 
 const interactiveKind = computed((): string | undefined => {
   if (!row.inner || Array.isArray(row.inner)) {
@@ -151,7 +154,8 @@ function handleRowClick(event: MouseEvent): void {
       >
         <span
           :id="`${row.idRoot}-input-file-picker-icon`"
-          :class="[row.inner.filePicker.icon, 'block size-4 text-neutral-400']"
+          :class="[row.inner.filePicker.icon, 'block size-4']"
+          :style="styles.widgetSecondary"
         ></span>
         <MaterialRipple />
       </button>

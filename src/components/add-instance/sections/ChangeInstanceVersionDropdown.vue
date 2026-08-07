@@ -227,7 +227,8 @@ function slideOverVersions(event: MouseEvent): void {
       v-for="entry in filteredVersions"
       :id="`__add-instance-page__instance-version-dropdown-item-wrapper-${entry.version}`"
       :key="entry.version"
-      class="__add-instance-page__instance-version-dropdown-item flex flex-nowrap border-b border-neutral-600 p-2 text-neutral-300 hover:bg-[theme(colors.neutral.100/.1)]"
+      class="__add-instance-page__instance-version-dropdown-item flex flex-nowrap border-b border-neutral-600 p-2 hover:bg-[theme(colors.neutral.100/.1)]"
+      :style="styles.widgetSecondary"
     >
       <span
         :id="`__add-instance-page__instance-version-dropdown-item-star-${entry.version}`"

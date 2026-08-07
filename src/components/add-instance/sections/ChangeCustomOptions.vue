@@ -54,7 +54,7 @@ const customSettings = computed(
     >
       <p
         id="__add-instance-page__instance-other-custom-title-label"
-        class="h-8 flex items-center pl-2 text-neutral-400 leading-none"
+        class="h-8 flex items-center pl-2 leading-none"
       >
         Custom
       </p>
@@ -68,7 +68,7 @@ const customSettings = computed(
       <p
         v-if="option?.label"
         :id="`__add-instance-page__instance-other-custom-option-label-${index}`"
-        class="h-8 flex items-center pl-2 text-neutral-400 leading-none"
+        class="h-8 flex items-center pl-2 leading-none"
       >
         {{ option.label }}
       </p>

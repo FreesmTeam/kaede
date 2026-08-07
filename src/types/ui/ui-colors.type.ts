@@ -35,4 +35,16 @@ export type UIColorsType = {
     // 'widget.blur'
     "backdropFilter"?: string;
   };
+  "widgetSecondary": {
+    // 'widget.secondaryColor'
+    "color": string;
+  };
+  "text": {
+    // 'text.mainColor'
+    "color": string;
+  };
+  "textSecondary": {
+    // 'text.secondaryColor'
+    "color": string;
+  };
 };

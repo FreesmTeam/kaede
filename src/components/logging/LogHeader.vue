@@ -25,6 +25,7 @@ import CustomInput from "@/components/general/base/CustomInput.vue";
 import CustomSelect from "@/components/general/base/CustomSelect.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import LogSections from "@/components/logging/header/LogSections.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { InstanceLogsContextKey } from "@/constants/application.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import FileManager from "@/lib/file-manager";
@@ -42,6 +43,8 @@ const { size, searcher, status } = defineProps<{
   };
   "status": LogSearchComposableType["status"];
 }>();
+
+const { styles } = useConfigColors();
 
 const instanceLogs = inject<ShallowReactive<Record<
   string,
@@ -120,7 +123,7 @@ function handleIndex(event: Event): void {
   </div>
   <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
   <div id="__log-viewer__inner-subtitle-wrapper" class="flex flex-nowrap items-center gap-2">
-    <div id="__log-viewer__inner-subtitle-part-left" class="text-neutral-300">
+    <div id="__log-viewer__inner-subtitle-part-left" :style="styles.widgetSecondary">
       View
     </div>
     <CustomSelect
@@ -130,10 +133,10 @@ function handleIndex(event: Event): void {
       :on-select="value => globalStates.logs.mode = value"
       :options="['kaede-launcher', ...Object.keys(instanceLogs ?? {})]"
     />
-    <div id="__log-viewer__inner-subtitle-part-right" class="text-neutral-300">
+    <div id="__log-viewer__inner-subtitle-part-right" :style="styles.widgetSecondary">
       logs
     </div>
-    <div id="__log-viewer__inner-subtitle-part-additional" class="text-neutral-400">
+    <div id="__log-viewer__inner-subtitle-part-additional" class="opacity-80" :style="styles.widgetSecondary">
       ({{ size }} lines)
     </div>
     <CustomButton
@@ -173,13 +176,14 @@ function handleIndex(event: Event): void {
       :class="[
         status.searching === '' ? 'hidden' : 'flex',
         'h-full shrink-0 flex-nowrap items-center',
-        'rounded-md bg-neutral-800 text-sm text-neutral-400',
+        'rounded-md bg-[theme(colors.neutral.100/.1)] text-sm',
       ]"
+      :style="styles.widgetSecondary"
     >
       <button
         id="__log-viewer__header-matches-increment-button"
         @click="searcher.back"
-        class="relative grid ml-1 size-6 place-items-center rounded-md transition-[color] hover:text-white"
+        class="relative grid ml-1 size-6 place-items-center rounded-md transition-[background-color] hover:bg-[theme(colors.neutral.100/.1)]"
       >
         <span id="__log-viewer__header-matches-increment-icon" class="i-lucide-chevron-up block size-4"></span>
         <MaterialRipple />
@@ -187,7 +191,7 @@ function handleIndex(event: Event): void {
       <button
         id="__log-viewer__header-matches-decrement-button"
         @click="searcher.next"
-        class="relative grid ml-1 size-6 place-items-center rounded-md transition-[color] hover:text-white"
+        class="relative grid ml-1 size-6 place-items-center rounded-md transition-[background-color] hover:bg-[theme(colors.neutral.100/.1)]"
       >
         <span id="__log-viewer__header-matches-decrement-icon" class="i-lucide-chevron-down block size-4"></span>
         <MaterialRipple />

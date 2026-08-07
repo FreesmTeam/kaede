@@ -120,7 +120,8 @@ async function removeAccount(uuid: string): Promise<void> {
           <span
             v-if="(accounts?.length ?? 0) === 0"
             id="__profile-page__accounts-empty"
-            class="text-sm text-neutral-400"
+            class="text-sm"
+            :style="styles.widgetSecondary"
           >
             {{ Translations?.Messages?.["profile.accounts.empty"] }}
           </span>
@@ -138,7 +139,8 @@ async function removeAccount(uuid: string): Promise<void> {
             </span>
             <span
               :id="`__profile-page__account-${account.profile.uuid}-type`"
-              class="text-xs text-neutral-400"
+              class="text-xs"
+              :style="styles.widgetSecondary"
             >
               {{ account.profile.type }}
             </span>
@@ -175,7 +177,8 @@ async function removeAccount(uuid: string): Promise<void> {
           <span
             v-if="signingIn && signInStatus !== null"
             id="__profile-page__sign-in-status"
-            class="text-sm text-neutral-400"
+            class="text-sm"
+            :style="styles.widgetSecondary"
           >
             {{ Translations?.Messages?.[`profile.sign-in.status.${signInStatus}`] }}
           </span>

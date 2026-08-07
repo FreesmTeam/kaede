@@ -2,9 +2,12 @@
 import { onClickOutside } from "@vueuse/core";
 import { computed, ref, useTemplateRef } from "vue";
 
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
+
+const { styles } = useConfigColors();
 
 // On every new component mount, this will change (i.e., when page changes)
 const randomIndex = Math.floor(Math.random() * globalStates.ui.atAGlance.length);
@@ -80,7 +83,11 @@ function transformInput(input: string): string {
       @click="() => editing = 'title'"
       class="relative w-fit cursor-pointer break-all border border-transparent rounded-md p-2 text-3xl leading-none transition-[background-color,border-color] hover:border-[theme(colors.white/.3)] hover:bg-[theme(colors.white/.1)]"
     >
-      <p id="__home-page__header-title-text" class="whitespace-pre-wrap">
+      <p
+        id="__home-page__header-title-text"
+        class="whitespace-pre-wrap"
+        :style="styles.text"
+      >
         {{ transformInput(currentGlance.title) }}
       </p>
       <Transition name="pop">
@@ -97,9 +104,13 @@ function transformInput(input: string): string {
     <div
       id="__home-page__header-subtitle"
       @click="() => editing = 'subtitle'"
-      class="relative w-fit cursor-pointer break-all border border-transparent rounded-md p-2 text-lg text-neutral-300 leading-none transition-[background-color,border-color] hover:border-[theme(colors.white/.3)] hover:bg-[theme(colors.white/.1)]"
+      class="relative w-fit cursor-pointer break-all border border-transparent rounded-md p-2 text-lg leading-none transition-[background-color,border-color] hover:border-[theme(colors.white/.3)] hover:bg-[theme(colors.white/.1)]"
     >
-      <p id="__home-page__header-subtitle-text" class="whitespace-pre-wrap">
+      <p
+        id="__home-page__header-subtitle-text"
+        class="whitespace-pre-wrap"
+        :style="styles.textSecondary"
+      >
         {{ transformInput(currentGlance.subtitle) }}
       </p>
       <Transition name="pop">

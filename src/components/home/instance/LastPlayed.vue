@@ -20,6 +20,7 @@
 import { computed, inject } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import { useConfigColors } from "@/composables/use-config-colors.ts";
 import {
   TranslationsContextKey,
 } from "@/constants/application.ts";
@@ -27,6 +28,8 @@ import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 import type { TranslationsStateType } from "@/types/translations/translations.type.ts";
+
+const { styles } = useConfigColors();
 
 const Translations = inject<TranslationsStateType>(TranslationsContextKey);
 
@@ -65,6 +68,7 @@ function handleSwitch(): void {
       <span
         id="__home-page__last-launch-icon"
         class="i-lucide-clock-fading block size-8"
+        :style="styles.text"
       ></span>
     </span>
     <span
@@ -74,12 +78,14 @@ function handleSwitch(): void {
       <span
         id="__home-page__current-playtime-information-label"
         class="block font-medium"
+        :style="styles.text"
       >
         {{ Translations?.Messages?.["home.instance.last-launch.label"] }}
       </span>
       <span
         id="__home-page__current-instance-information-version"
-        class="block text-sm text-neutral-400"
+        class="block text-sm"
+        :style="styles.textSecondary"
       >
         {{ lastLaunch }}
       </span>

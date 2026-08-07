@@ -90,7 +90,7 @@ const { canvas, viewer, shown } = useSkinRenderer({ "render": "3d" });
           id="__profile-page__sign-in-wrapper"
           class="min-w-44 flex flex-1 flex-col gap-2 py-2 pr-2"
         >
-          <div id="__profile-page__sign-in-space" class="h-8 w-full hidden md:block"></div>
+          <div id="__profile-page__sign-in-space" class="hidden h-8 w-full md:block"></div>
           <Microsoft />
           <Offline />
         </div>

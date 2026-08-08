@@ -19,10 +19,11 @@
 <script setup lang="ts">
 import { computed, onMounted } from "vue";
 
-import CustomInput from "@/components/general/base/CustomInput.vue";
+import CustomSelect from "@/components/general/base/CustomSelect.vue";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
 import { globalStates } from "@/states/global.ts";
+import { javaStates } from "@/states/java.ts";
 import type {
   GlobalStatesType,
 } from "@/types/application/global-states.type.ts";
@@ -35,15 +36,38 @@ const currentInstance = computed(
     )
   ),
 );
+const options = computed((): Array<{
+  "id"   : string;
+  "label": string;
+}> => {
+  const available = javaStates
+    .installations
+    .map(({ vendor, version, path }) => ({
+      "id"   : path,
+      "label": `${vendor} ${version}`.trim(),
+    }));
 
-function handleJavaProgram(value: string): void {
+  if (javaStates.environment !== null) {
+    available.unshift({
+      "id"   : javaStates.environment.path,
+      "label": `java (${javaStates.environment.vendor} ${javaStates.environment.version})`.trim(),
+    });
+  }
+
+  return available;
+});
+
+function handleJavaProgram(value: {
+  "id"   : string;
+  "label": string;
+}): void {
   if (!currentInstance.value) {
     return;
   }
 
   globalStates.pages["add-instance"].instance = {
     ...currentInstance.value,
-    "javaBinary": value,
+    "javaBinary": value.id,
   };
 }
 
@@ -68,16 +92,11 @@ onMounted(() => {
     id="__add-instance-page__instance-other-java-binary"
     class="relative rounded-md p-2"
   >
-    <CustomInput
-      icon="i-lucide-coffee"
-      placeholder="A program name of the Java binary path"
+    <CustomSelect
       id-root="__add-instance-page__instance-other-java-binary"
-      type="text"
-      tooltip="A program name of the Java binary path"
-      :debounce-time="300"
-      :default-value="currentInstance?.javaBinary"
-      :on-input="handleJavaProgram"
-      :on-blur="handleJavaProgram"
+      :options="options"
+      :value="currentInstance?.javaBinary"
+      :on-select="handleJavaProgram"
       :class-names="{ 'wrapper': 'h-8 w-full sm:w-full' }"
     />
   </div>

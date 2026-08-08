@@ -130,8 +130,16 @@ function handleIndex(event: Event): void {
       tooltip="Select mode..."
       id-root="__log-viewer__header-select-mode"
       :value="globalStates.logs.mode"
-      :on-select="value => globalStates.logs.mode = value"
-      :options="['kaede-launcher', ...Object.keys(instanceLogs ?? {})]"
+      :on-select="value => globalStates.logs.mode = value.id"
+      :options="
+        ['kaede-launcher', ...Object.keys(instanceLogs ?? {})].map(currentId => {
+          if (currentId === 'kaede-launcher') {
+            return { 'id': 'kaede-launcher', 'label': 'Kaede' };
+          }
+
+          return { 'id': currentId, 'label': currentId };
+        })
+      "
     />
     <div id="__log-viewer__inner-subtitle-part-right" :style="styles.widgetSecondary">
       logs

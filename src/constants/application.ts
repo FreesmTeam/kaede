@@ -3,6 +3,7 @@ import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
+import EnglishTranslations from "@/constants/english.json";
 import FileStructure from "@/constants/file-structure.ts";
 import Auth from "@/lib/auth";
 import Configs from "@/lib/configs";
@@ -30,6 +31,7 @@ export const ApplicationRootID = "#app";
 export const CustomFontFamily = "kaede-custom-font";
 
 export const DefaultLocale = "en";
+export const DefaultLocaleName = EnglishTranslations.Info.Name;
 
 export const TranslationsContextKey = Symbol();
 export const AuthOneTimeFetchContextKey = Symbol();
@@ -396,6 +398,7 @@ export default {
   ApplicationRootID,
   CustomFontFamily,
   DefaultLocale,
+  DefaultLocaleName,
   TranslationsContextKey,
   AuthOneTimeFetchContextKey,
   AuthStatesContextKey,

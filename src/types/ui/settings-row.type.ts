@@ -36,9 +36,9 @@ export type SettingsRowType = {
     "value": boolean;
   } | {
     "kind"     : "select";
-    "options"  : Array<string>;
+    "options"  : Array<{ "id": string; "label": string }>;
     "value"   ?: string;
-    "onSelect"?: (value: string) => void;
+    "onSelect"?: (value: { "id": string; "label": string }) => void;
   } | {
     "icon"         : string;
     "placeholder"  : string;

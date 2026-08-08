@@ -20,7 +20,7 @@
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { computed } from "vue";
 
-import { DefaultLocale } from "@/constants/application.ts";
+import { DefaultLocale, DefaultLocaleName } from "@/constants/application.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
 import Launcher from "@/lib/launcher";
@@ -573,10 +573,10 @@ export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
     "subtitle": "Change the launcher language",
     "inner"   : {
       "kind"    : "select",
-      "options" : [DefaultLocale],
+      "options" : [{ "id": DefaultLocale, "label": DefaultLocaleName }],
       "value"   : globalStates.locale,
-      "onSelect": (value: string): void => {
-        globalStates.locale = value;
+      "onSelect": (value: { "id": string; "label": string }): void => {
+        globalStates.locale = value.id;
       },
     },
   })),
@@ -971,7 +971,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__minecraft-remove-jvm-arguments",
     "icon"    : "i-lucide-minus",
     "title"   : "Removed JVM arguments",
-    "subtitle": "JVM arguments stripped out on launch",
+    "subtitle": "JVM arguments removed on launch",
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-minus",
@@ -987,7 +987,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "idRoot"  : "__settings-page__minecraft-remove-game-arguments",
     "icon"    : "i-lucide-minus",
     "title"   : "Removed game arguments",
-    "subtitle": "Game arguments stripped out on launch",
+    "subtitle": "Game arguments removed on launch",
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-minus",

@@ -23,6 +23,11 @@ import { ref, useTemplateRef } from "vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 
+type OptionType = {
+  "id"   : string;
+  "label": string;
+};
+
 const {
   idRoot,
   options,
@@ -32,9 +37,9 @@ const {
   classNames,
 } = defineProps<{
   "idRoot"       : string;
-  "options"      : Array<string>;
+  "options"      : Array<OptionType>;
   "value"       ?: string;
-  "onSelect"    ?: (value: string) => void;
+  "onSelect"    ?: (value: OptionType) => void;
   "tooltip"     ?: string;
   "classNames"  ?: {
     "wrapper" ?: string;
@@ -54,7 +59,7 @@ const opened = ref<boolean>(false);
 function handleDropdown(enabled?: boolean): void {
   opened.value = enabled ?? !opened.value;
 }
-function handleSelect(value: string): void {
+function handleSelect(value: OptionType): void {
   onSelect?.(value);
   handleDropdown(false);
 }
@@ -121,7 +126,7 @@ onClickOutside(target, event => {
         ]"
       ></span>
       <span :id="`${idRoot}-label`" class="line-clamp-1 text-ellipsis text-start transition-[color]">
-        {{ value }}
+        {{ options.find(({ id }) => id === value)?.label ?? value }}
       </span>
       <MaterialRipple />
     </button>
@@ -135,12 +140,12 @@ onClickOutside(target, event => {
       >
         <button
           v-for="option in options"
-          :id="`${idRoot}-dropdown-item-${option}`"
-          :key="option"
+          :id="`${idRoot}-dropdown-item-${option.id}`"
+          :key="option.id"
           @click="() => handleSelect(option)"
           class="relative px-4 py-1 text-start active:bg-[theme(colors.white/.1)] hover:bg-[theme(colors.white/.05)]"
         >
-          {{ option }}
+          {{ option.label }}
         </button>
       </div>
     </Transition>

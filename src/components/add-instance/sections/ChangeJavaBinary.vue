@@ -17,10 +17,11 @@
   -->
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import Instances from "@/lib/instances";
+import Launcher from "@/lib/launcher";
 import { globalStates } from "@/states/global.ts";
 import type {
   GlobalStatesType,
@@ -45,6 +46,10 @@ function handleJavaProgram(value: string): void {
     "javaBinary": value,
   };
 }
+
+onMounted(() => {
+  void Launcher.detectJavaInstallations();
+});
 </script>
 
 <template>

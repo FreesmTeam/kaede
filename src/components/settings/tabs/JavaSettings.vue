@@ -29,7 +29,6 @@ import { JavaSettingsRows } from "@/constants/row-collections.ts";
   >
     <RowContainer id="__settings-page__java-inner">
       <SettingsRow
-        transition
         v-for="row in JavaSettingsRows"
         :row="row.value"
         :key="row.value.idRoot"

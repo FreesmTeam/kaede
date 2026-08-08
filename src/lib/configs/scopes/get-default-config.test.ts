@@ -2,6 +2,7 @@ import { expect, test } from "bun:test";
 
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
+import { DefaultInstanceIcon } from "../../../constants/launcher.ts";
 import { getDefaultConfig } from "./get-default-config.ts";
 
 const testName = "Default Config: No arguments";
@@ -80,7 +81,7 @@ test(testName, async () => {
     "minecraft": {
       "windowHeight": 480,
       "windowWidth" : 854,
-      "icon"        : "",
+      "icon"        : DefaultInstanceIcon,
       "javaBinary"  : "java",
       "add"         : {
         "jvmArguments" : [],

@@ -1,6 +1,6 @@
 import { DefaultLocale } from "@/constants/application.ts";
+import { DefaultInstanceIcon } from "@/constants/launcher.ts";
 import Hooks from "@/lib/hooks";
-import DefaultInstanceIcon from "@/resources/dirt_block.png";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 export async function getDefaultConfig(): Promise<ConfigType> {

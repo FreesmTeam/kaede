@@ -4,6 +4,7 @@ import { inject } from "vue";
 import AccountRow from "@/components/profile/AccountRow.vue";
 import Microsoft from "@/components/profile/Logins/Microsoft.vue";
 import Offline from "@/components/profile/Logins/Offline.vue";
+import LoginStatus from "@/components/profile/LoginStatus.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { useSkinRenderer } from "@/composables/use-skin-renderer.ts";
 import {
@@ -69,6 +70,7 @@ const { canvas, viewer, shown } = useSkinRenderer({ "render": "3d" });
             <span id="__profile-page__accounts-title-label" class="pl-1">
               {{ Translations?.Messages?.["profile.accounts.title"] }}
             </span>
+            <LoginStatus />
           </div>
           <div
             v-if="(accounts?.length ?? 0) === 0"

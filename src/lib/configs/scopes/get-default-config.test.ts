@@ -82,8 +82,14 @@ test(testName, async () => {
       "windowWidth" : 854,
       "icon"        : "",
       "javaBinary"  : "java",
-      "add"         : {},
-      "remove"      : {},
+      "add"         : {
+        "jvmArguments" : [],
+        "gameArguments": [],
+      },
+      "remove": {
+        "jvmArguments" : [],
+        "gameArguments": [],
+      },
     },
   };
 

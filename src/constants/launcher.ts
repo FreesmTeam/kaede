@@ -1,23 +1,19 @@
 import { Patches } from "@/constants/meta.ts";
 import DefaultInstanceIcon from "@/resources/dirt_block.png";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 
 export const FamousAndOldJavaMajorVersion = 8;
-export const DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions"> = {
-  "name"        : "Minecraft - Vanilla",
-  "icon"        : DefaultInstanceIcon,
-  "windowHeight": 480,
-  "windowWidth" : 854,
-  "checksum"    : true,
-  "pinned"      : false,
-  "groups"      : [],
-  "entry"       : Patches.Minecraft,
-  "javaBinary"  : "java",
-  "add"         : {
-    "jvmArguments" : ["-Xms4096m", "-Xmx6144m"],
-    "gameArguments": [],
-  },
-  "remove"    : {},
+export const DefaultInstanceSettings: Omit<
+  InstanceStateType,
+  // Only store those properties that are not handled by global states or instance themselves
+  "patchVersions" | keyof GlobalStatesType["minecraft"]
+> = {
+  "name"      : "Minecraft - Vanilla",
+  "checksum"  : true,
+  "pinned"    : false,
+  "groups"    : [],
+  "entry"     : Patches.Minecraft,
   "playTime"  : 0,
   "lastLaunch": 0,
 };

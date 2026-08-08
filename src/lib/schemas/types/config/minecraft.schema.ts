@@ -5,12 +5,12 @@ export const MinecraftSchema = Type.Object({
   "windowWidth" : Type.Number(),
   "icon"        : Type.String(),
   "javaBinary"  : Type.String(),
-  "add"         : Type.Partial(Type.Object({
+  "add"         : Type.Object({
     "jvmArguments" : Type.Array(Type.String()),
     "gameArguments": Type.Array(Type.String()),
-  })),
-  "remove": Type.Partial(Type.Object({
+  }),
+  "remove": Type.Object({
     "jvmArguments" : Type.Array(Type.String()),
     "gameArguments": Type.Array(Type.String()),
-  })),
+  }),
 });

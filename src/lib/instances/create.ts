@@ -78,6 +78,7 @@ export function create(
 
   instanceStates[id] = {
     ...DefaultInstanceSettings,
+    ...globalStates.minecraft,
     ...currentInstance,
     "entry": uid,
   };

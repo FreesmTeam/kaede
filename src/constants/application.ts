@@ -4,7 +4,6 @@ import { confirm } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import FileStructure from "@/constants/file-structure.ts";
-import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import Auth from "@/lib/auth";
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
@@ -173,7 +172,7 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
             const currentInstance = globalStates.pages["add-instance"].instance;
 
             if (!currentInstance) {
-              return Launcher.Arguments.joinArguments(DefaultInstanceSettings.add?.jvmArguments);
+              return Launcher.Arguments.joinArguments(globalStates.minecraft.add?.jvmArguments);
             }
 
             return Launcher.Arguments.joinArguments(currentInstance.add.jvmArguments);
@@ -200,7 +199,7 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
             const currentInstance = globalStates.pages["add-instance"].instance;
 
             if (!currentInstance) {
-              return Launcher.Arguments.joinArguments(DefaultInstanceSettings.add?.gameArguments);
+              return Launcher.Arguments.joinArguments(globalStates.minecraft.add?.gameArguments);
             }
 
             return Launcher.Arguments.joinArguments(currentInstance.add.gameArguments);

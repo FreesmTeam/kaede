@@ -20,33 +20,27 @@ import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 export function extractSavedFromPages(
-  globalStates: GlobalStatesType | undefined,
+  storedInstance: GlobalStatesType["pages"]["add-instance"]["instance"] | undefined,
+  minecraft: GlobalStatesType["minecraft"],
 ): GlobalStatesType["pages"]["add-instance"]["instance"] {
-  const storedInstance = globalStates?.pages?.["add-instance"]?.instance;
-
   if (!storedInstance) {
     return {
-      "icon"        : globalStates?.minecraft?.icon,
-      "name"        : DefaultInstanceSettings.name,
-      "entry"       : DefaultInstanceSettings.entry,
-      "checksum"    : DefaultInstanceSettings.checksum,
-      "groups"      : [...DefaultInstanceSettings.groups],
-      "javaBinary"  : globalStates?.minecraft?.javaBinary || DefaultInstanceSettings.javaBinary,
-      "windowHeight": globalStates?.minecraft?.windowHeight ||
-        DefaultInstanceSettings.windowHeight,
-      "windowWidth"  : globalStates?.minecraft?.windowWidth || DefaultInstanceSettings.windowWidth,
+      "icon"         : minecraft.icon,
+      "name"         : DefaultInstanceSettings.name,
+      "entry"        : DefaultInstanceSettings.entry,
+      "checksum"     : DefaultInstanceSettings.checksum,
+      "groups"       : [...DefaultInstanceSettings.groups],
+      "javaBinary"   : minecraft.javaBinary,
+      "windowHeight" : minecraft.windowHeight,
+      "windowWidth"  : minecraft.windowWidth,
       "patchVersions": { "net.minecraft": "1.16.5" },
       "add"          : {
-        "jvmArguments": [...(
-          globalStates?.minecraft?.add?.jvmArguments ??
-          DefaultInstanceSettings.add?.jvmArguments ??
-          []
-        )],
-        "gameArguments": [...(
-          globalStates?.minecraft?.add?.gameArguments ??
-          DefaultInstanceSettings.add?.gameArguments ??
-          []
-        )],
+        "jvmArguments" : [...minecraft.add.jvmArguments],
+        "gameArguments": [...minecraft.add.gameArguments],
+      },
+      "remove": {
+        "jvmArguments" : [...minecraft.remove.jvmArguments],
+        "gameArguments": [...minecraft.remove.gameArguments],
       },
     };
   }

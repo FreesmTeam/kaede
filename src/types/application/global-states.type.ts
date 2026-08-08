@@ -67,14 +67,14 @@ type MinecraftType = {
   "windowWidth" : number;
   "icon"        : string;
   "javaBinary"  : string;
-  "add"         : Partial<{
+  "add"         : {
     "jvmArguments" : Array<string>;
     "gameArguments": Array<string>;
-  }>;
-  "remove": Partial<{
+  };
+  "remove": {
     "jvmArguments" : Array<string>;
     "gameArguments": Array<string>;
-  }>;
+  };
 };
 type SidebarItemsType = Array<"divider" | {
   "path"  : RouteType;
@@ -118,6 +118,10 @@ type PagesType = {
       "windowWidth"  : number;
       "icon"        ?: string;
       "add"          : {
+        "jvmArguments" : Array<string>;
+        "gameArguments": Array<string>;
+      };
+      "remove"         : {
         "jvmArguments" : Array<string>;
         "gameArguments": Array<string>;
       };

@@ -33,7 +33,10 @@ const { styles } = useConfigColors();
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
-    Instances.extractSavedFromPages(globalStates)
+    Instances.extractSavedFromPages(
+      globalStates.pages?.["add-instance"]?.instance,
+      globalStates.minecraft,
+    )
   ),
 );
 const currentVersionSearch = computed(

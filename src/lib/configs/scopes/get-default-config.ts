@@ -1,5 +1,6 @@
 import { DefaultLocale } from "@/constants/application.ts";
 import Hooks from "@/lib/hooks";
+import DefaultInstanceIcon from "@/resources/dirt_block.png";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 
 export async function getDefaultConfig(): Promise<ConfigType> {
@@ -87,10 +88,16 @@ export async function getDefaultConfig(): Promise<ConfigType> {
     "minecraft": {
       "windowHeight": 480,
       "windowWidth" : 854,
-      "icon"        : "",
+      "icon"        : DefaultInstanceIcon,
       "javaBinary"  : "java",
-      "add"         : {},
-      "remove"      : {},
+      "add"         : {
+        "jvmArguments" : [],
+        "gameArguments": [],
+      },
+      "remove": {
+        "jvmArguments" : [],
+        "gameArguments": [],
+      },
     },
   };
 }

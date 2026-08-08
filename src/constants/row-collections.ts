@@ -939,7 +939,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-plus",
-      "placeholder" : "Additional JVM arguments",
+      "placeholder" : "Arguments",
       "debounceTime": 300,
       "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.add.jvmArguments),
       "onInput"     : (value: string): void => {
@@ -955,7 +955,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-plus",
-      "placeholder" : "Additional game arguments",
+      "placeholder" : "Arguments",
       "debounceTime": 300,
       "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.add.gameArguments),
       "onInput"     : (value: string): void => {
@@ -975,7 +975,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-minus",
-      "placeholder" : "Removed JVM arguments",
+      "placeholder" : "Arguments",
       "debounceTime": 300,
       "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.remove.jvmArguments),
       "onInput"     : (value: string): void => {
@@ -991,7 +991,7 @@ export const MinecraftSettingsRows: SettingsRowCollectionType = [
     "inner"   : {
       "kind"        : "input",
       "icon"        : "i-lucide-minus",
-      "placeholder" : "Removed game arguments",
+      "placeholder" : "Arguments",
       "debounceTime": 300,
       "defaultValue": Launcher.Arguments.joinArguments(globalStates.minecraft.remove.gameArguments),
       "onInput"     : (value: string): void => {

@@ -22,7 +22,6 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { computed } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
-import { DefaultInstanceSettings } from "@/constants/launcher.ts";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
@@ -30,7 +29,10 @@ import type { GlobalStatesType } from "@/types/application/global-states.type.ts
 
 const currentInstance = computed(
   (): GlobalStatesType["pages"]["add-instance"]["instance"] => (
-    Instances.extractSavedFromPages(globalStates)
+    Instances.extractSavedFromPages(
+      globalStates.pages?.["add-instance"]?.instance,
+      globalStates.minecraft,
+    )
   ),
 );
 
@@ -93,7 +95,7 @@ async function handleIconPick(): Promise<void> {
   >
     <Image
       id="__add-instance-page__instance-icon-image"
-      :src="currentInstance?.icon || DefaultInstanceSettings.icon"
+      :src="currentInstance?.icon || globalStates.minecraft.icon"
       alt="An instance icon"
       class-names="cursor-pointer object-cover rounded-md size-22 hover:opacity-70"
       @click="handleIconPick"

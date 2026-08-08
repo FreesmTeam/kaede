@@ -95,8 +95,14 @@ const defaultConfig: ConfigType = {
     "windowWidth" : 854,
     "icon"        : "",
     "javaBinary"  : "java",
-    "add"         : {},
-    "remove"      : {},
+    "add"         : {
+      "jvmArguments" : [],
+      "gameArguments": [],
+    },
+    "remove": {
+      "jvmArguments" : [],
+      "gameArguments": [],
+    },
   },
 };
 
@@ -171,7 +177,14 @@ const tests: Array<{
           // 'windowHeight' should have a 'number' type
           "windowHeight": "480",
           "windowWidth" : 854,
-          "jvmArgs"     : "",
+          "add"         : {
+            "jvmArguments" : [],
+            "gameArguments": [],
+          },
+          "remove": {
+            "jvmArguments" : [],
+            "gameArguments": [],
+          },
         },
       },
     },

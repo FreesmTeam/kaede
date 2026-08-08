@@ -22,7 +22,7 @@ import type { GlobalStatesType } from "@/types/application/global-states.type.ts
 export function extractSavedFromPages(
   storedInstance: GlobalStatesType["pages"]["add-instance"]["instance"] | undefined,
   minecraft: GlobalStatesType["minecraft"],
-): GlobalStatesType["pages"]["add-instance"]["instance"] {
+): Required<GlobalStatesType["pages"]["add-instance"]["instance"]> {
   if (!storedInstance) {
     return {
       "icon"         : minecraft.icon,
@@ -35,10 +35,20 @@ export function extractSavedFromPages(
       "windowWidth"  : minecraft.windowWidth,
       "patchVersions": { "net.minecraft": "1.16.5" },
       "add"          : {
-        "jvmArguments" : [...minecraft.add.jvmArguments],
-        "gameArguments": [...minecraft.add.gameArguments],
+
+        /*
+         * We need to be extremely careful not to write into
+         * the references of these arrays in 'DefaultGlobalStatesPagesStates'.
+         *
+         * Basically, on input, we should detach the arrays while on no input
+         * the rendered arguments list should be attached to global states
+         * so that the user will se new changes he makes in global states
+         */
+        "jvmArguments" : minecraft.add.jvmArguments,
+        "gameArguments": minecraft.add.gameArguments,
       },
       "remove": {
+        // We do not care about these as they are not changeable through UI (I am lazy)
         "jvmArguments" : [...minecraft.remove.jvmArguments],
         "gameArguments": [...minecraft.remove.gameArguments],
       },

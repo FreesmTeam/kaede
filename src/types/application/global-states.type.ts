@@ -116,7 +116,7 @@ type PagesType = {
       "patchVersions": InstanceStateType["patchVersions"];
       "windowHeight" : number;
       "windowWidth"  : number;
-      "icon"        ?: string;
+      "icon"         : string;
       "add"          : {
         "jvmArguments" : Array<string>;
         "gameArguments": Array<string>;

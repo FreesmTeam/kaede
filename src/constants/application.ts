@@ -158,13 +158,16 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
       {
         "input": {
           "onInput": (value: string): void => {
-            const currentInstance = globalStates.pages["add-instance"].instance;
+            const currentState = globalStates.pages["add-instance"];
 
-            if (!currentInstance) {
-              return;
+            if (!currentState.instance) {
+              globalStates.pages["add-instance"].instance = Instances
+                .extractSavedFromPages(currentState.instance, globalStates.minecraft);
             }
 
-            currentInstance.add.jvmArguments = Launcher.Arguments.splitArguments(value);
+            if (currentState.instance) {
+              currentState.instance.add.jvmArguments = Launcher.Arguments.splitArguments(value);
+            }
           },
           "placeholder"  : "JVM arguments",
           "iconClassName": "i-lucide-braces",
@@ -185,13 +188,16 @@ export const DefaultGlobalStatesPagesStates: GlobalStatesType["pages"] = {
       {
         "input": {
           "onInput": (value: string): void => {
-            const currentInstance = globalStates.pages["add-instance"].instance;
+            const currentState = globalStates.pages["add-instance"];
 
-            if (!currentInstance) {
-              return;
+            if (!currentState.instance) {
+              globalStates.pages["add-instance"].instance = Instances
+                .extractSavedFromPages(currentState.instance, globalStates.minecraft);
             }
 
-            currentInstance.add.gameArguments = Launcher.Arguments.splitArguments(value);
+            if (currentState.instance) {
+              currentState.instance.add.gameArguments = Launcher.Arguments.splitArguments(value);
+            }
           },
           "placeholder"  : "Game arguments",
           "iconClassName": "i-lucide-gamepad-2",

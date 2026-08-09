@@ -67,10 +67,6 @@ const imported = computed(
   ),
 );
 
-/**
- * Modpack downloads report into the same statuses the launch progress
- * widget already renders, so the import is visible while it runs
- */
 function trackDownloads(instanceId: string): LauncherStatusesType {
   const statuses: LauncherStatusesType = {
     "launching": 1,

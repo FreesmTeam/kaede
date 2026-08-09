@@ -38,13 +38,16 @@ const currentInstance = computed(
   ),
 );
 const currentMemoryAllocation = computed((): {
-  "max": number;
-  "min": number;
+  "max": number | undefined;
+  "min": number | undefined;
 } => {
   const jvmArguments: Array<string> = currentInstance?.value?.add?.jvmArguments ?? [];
-  const results = {
-    "max": 6144,
-    "min": 4096,
+  const results: {
+    "max": number | undefined;
+    "min": number | undefined;
+  } = {
+    "max": undefined,
+    "min": undefined,
   };
 
   for (const jvmArgument of jvmArguments) {
@@ -70,11 +73,21 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
     .filter(jvmArgument => !jvmArgument.startsWith("-Xms") && !jvmArgument.startsWith("-Xmx"));
 
   if (type === "max") {
-    currentJvmArguments
-      .unshift(`-Xms${currentMemoryAllocation.value.min}m`, `-Xmx${value}m`);
+    const built: Array<string> = value ? [`-Xmx${value}m`] : [];
+
+    if (currentMemoryAllocation.value.min) {
+      built.unshift(`-Xms${currentMemoryAllocation.value.min}m`);
+    }
+
+    currentJvmArguments.unshift(...built);
   } else {
-    currentJvmArguments
-      .unshift(`-Xms${value}m`, `-Xmx${currentMemoryAllocation.value.max}m`);
+    const built: Array<string> = value ? [`-Xms${value}m`] : [];
+
+    if (currentMemoryAllocation.value.max) {
+      built.push(`-Xmx${currentMemoryAllocation.value.max}m`);
+    }
+
+    currentJvmArguments.unshift(...built);
   }
 
   globalStates.pages["add-instance"].instance = {
@@ -112,7 +125,7 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
     </div>
     <CustomInput
       icon="i-lucide-chevron-down"
-      placeholder="Minimum amount of RAM to allocate"
+      placeholder="Minimum"
       id-root="__add-instance-page__instance-other-min-memory"
       type="number"
       tooltip="Minimum amount of RAM to allocate, in megabytes (MB)"
@@ -136,7 +149,7 @@ function handleMemoryAllocation(value: string, type: "min" | "max"): void {
     </div>
     <CustomInput
       icon="i-lucide-chevron-up"
-      placeholder="Maximum amount of RAM to allocate"
+      placeholder="Maximum"
       id-root="__add-instance-page__instance-other-max-memory"
       type="number"
       tooltip="Maximum amount of RAM to allocate, in megabytes (MB)"

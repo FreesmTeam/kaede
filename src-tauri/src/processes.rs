@@ -158,7 +158,7 @@ pub async fn spawn_process(
                         let _ = app.emit("process-error", ErrorPayload { token: token.clone(), pid, message });
                     }
                     Some(CommandEvent::Terminated(payload)) => {
-                        // shellx sends Terminated only after both pipes hit EOF,
+                        // shellx sends 'Terminated' only after both pipes hit EOF,
                         // so this flush drains every remaining line before the exit event
                         flush_output(&app, &token, pid, &mut stdout_pending, &mut stderr_pending);
                         app.state::<ProcessRegistry>().0.lock().unwrap().remove(&pid);
@@ -169,13 +169,10 @@ pub async fn spawn_process(
                     }
                     Some(_) => {} // #[non_exhaustive]
                     None => {
-                        // Channel closed — normally nothing is pending by now, but drain defensively
                         flush_output(&app, &token, pid, &mut stdout_pending, &mut stderr_pending);
                         break;
                     }
                 },
-                // Armed only while something is buffered: an idle process costs zero
-                // wakeups, and exit/error events are never delayed by the throttle
                 _ = interval.tick(), if !stdout_pending.is_empty() || !stderr_pending.is_empty() => {
                     flush_output(&app, &token, pid, &mut stdout_pending, &mut stderr_pending);
                 }

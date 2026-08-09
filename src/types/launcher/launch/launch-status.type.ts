@@ -16,17 +16,19 @@ export type LauncherStatusesDownloadsType = {
   "total"  : number;
 };
 export type LauncherStatusesType = {
-  "launching": 0 | 1 | 2;
-  "current"  : LaunchStatusType | undefined;
-  "downloads": LauncherStatusesDownloadsType;
+  "instanceId": string;
+  "launching" : 0 | 1 | 2;
+  "current"   : LaunchStatusType | undefined;
+  "downloads" : LauncherStatusesDownloadsType;
 };
 export type WrappedInstanceLauncherStatusesType = Reactive<
   Record<
     string,
     {
-      "launching": LauncherStatusesType["launching"];
-      "current"  : LauncherStatusesType["current"];
-      "downloads": LauncherStatusesDownloadsType;
+      "instanceId": LauncherStatusesType["instanceId"];
+      "launching" : LauncherStatusesType["launching"];
+      "current"   : LauncherStatusesType["current"];
+      "downloads" : LauncherStatusesType["downloads"];
     }
   >
 >;

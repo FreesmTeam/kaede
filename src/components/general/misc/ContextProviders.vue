@@ -80,7 +80,6 @@ function createLogSink(instanceId: string): (lines: Array<string>) => void {
   const lineLimit: number = GeneralSettings.Logs.LineLimit;
 
   return (lines: Array<string>): void => {
-    // A relaunch replaced the bucket — drop the old process's late flushes
     if (logs[instanceId]?.list !== stored) {
       return;
     }
@@ -140,6 +139,7 @@ async function launchInstance(instanceId?: string): Promise<void> {
   }
 
   launches[instanceId] = {
+    instanceId,
     "launching": 1,
     "current"  : undefined,
     "downloads": {
@@ -206,12 +206,10 @@ async function closeInstance(instanceId: string): Promise<void> {
   const process: MinecraftProcessType | undefined = childProcesses[instanceId];
 
   if (!process) {
-    log.error(
+    return log.error(
       __PRE_BUNDLED_FILENAME__,
       `The '${instanceId}' instance kill action was called but no process is present`,
     );
-
-    return;
   }
 
   const beforeHooksResult: "continue" | void | undefined =
@@ -252,6 +250,7 @@ async function rehydrateLaunchedInstances(): Promise<void> {
       const { instanceId } = handle.meta as MinecraftMetaType;
 
       launches[instanceId] = {
+        instanceId,
         "launching": 2,
         "current"  : LaunchStatus.General.Success,
         "downloads": {

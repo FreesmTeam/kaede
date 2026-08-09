@@ -105,6 +105,7 @@ type PagesType = {
     "error"  : string | null;
   }>;
   "add-instance": Partial<{
+    "lastCreated"          : string | undefined;
     "select"               : (tab: TabSectionType) => Promise<void>;
     "instanceVersionSearch": {
       "patch": ExtendedPatchUIDType;

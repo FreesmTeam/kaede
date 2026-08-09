@@ -33,10 +33,11 @@ import Modrinth from "@/lib/modrinth";
 import { globalStates } from "@/states/global.ts";
 import type { MrpackManifestType } from "@/types/modrinth/mrpack.type.ts";
 
-const { idRoot, projectId, projectName, close } = defineProps<{
+const { idRoot, projectId, projectName, projectIcon, close } = defineProps<{
   "idRoot"     : string;
   "projectId"  : string;
   "projectName": string;
+  "projectIcon": string | null;
   "close"      : () => void;
 }>();
 
@@ -164,6 +165,10 @@ async function handleClick(event: MouseEvent): Promise<void> {
 
   Modrinth.applyManifest({ manifest, "path": cachePath });
   globalStates.pages["add-instance"]?.select?.(InstanceCreationSections[0]);
+
+  if (projectIcon && globalStates.pages["add-instance"]?.instance?.icon) {
+    globalStates.pages["add-instance"].instance.icon = projectIcon;
+  }
 }
 
 onClickOutside(container, close);

@@ -69,6 +69,7 @@ const imported = computed(
 
 function trackDownloads(instanceId: string): LauncherStatusesType {
   const statuses: LauncherStatusesType = {
+    instanceId,
     "launching": 1,
     "current"  : undefined,
     "downloads": {
@@ -94,13 +95,13 @@ async function handleCreate(): Promise<void> {
     currentPatch.value,
   );
 
-  // 'create' already told the user why nothing happened
   if (instanceId === undefined || !archive) {
     return;
   }
 
-  globalStates.pages["add-instance"].importedModpack = undefined;
   pending.value = true;
+  globalStates.selected.currentInstance = instanceId;
+  globalStates.pages["add-instance"].importedModpack = undefined;
 
   const statuses: LauncherStatusesType = trackDownloads(instanceId);
 
@@ -116,10 +117,11 @@ async function handleCreate(): Promise<void> {
       `Could not install '${archive.path}' into '${instanceId}':`,
       Errors.prettify(error),
     );
-  } finally {
-    statuses.launching = 0;
-    pending.value = false;
   }
+
+  globalStates.pages["add-instance"].lastCreated = undefined;
+  statuses.launching = 0;
+  pending.value = false;
 }
 </script>
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useIntervalFn } from "@vueuse/core";
-import { computed, inject, ref } from "vue";
+import { useDraggable, useElementSize, useIntervalFn, useWindowSize } from "@vueuse/core";
+import { computed, inject, ref, useTemplateRef, watch } from "vue";
 
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import {
@@ -10,6 +10,7 @@ import {
 import { LaunchStatus } from "@/constants/launcher.ts";
 import Instances from "@/lib/instances";
 import { globalStates } from "@/states/global.ts";
+import { instanceStates } from "@/states/instance.ts";
 import type {
   LauncherStatusesType,
   WrappedInstanceLauncherStatusesType,
@@ -24,7 +25,15 @@ const instanceStatuses = inject<WrappedInstanceLauncherStatusesType>(
 );
 const Translations = inject<TranslationsStateType>(TranslationsContextKey);
 
+const container = useTemplateRef("container");
+
 const { styles } = useConfigColors();
+const { width, height } = useWindowSize();
+const { "width": elementWidth } = useElementSize(container);
+const { position } = useDraggable(container, {
+  "containerElement": document.getElementById("app"),
+  "initialValue"    : { "x": 0, "y": 0 },
+});
 
 const currentDownloadSpeed = ref<string>("0");
 
@@ -34,10 +43,7 @@ const currentInstance = computed((): CurrentInstanceType => (
 const statuses = computed((): LauncherStatusesType | undefined => {
   const instanceId: string | undefined = currentInstance?.value?.id;
 
-  if (
-    instanceId === undefined ||
-    instanceStatuses === undefined
-  ) {
+  if (instanceId === undefined || instanceStatuses === undefined) {
     return undefined;
   }
 
@@ -98,15 +104,47 @@ useIntervalFn(() => {
   currentDownloadSpeed.value = (totalSpeed / divider).toFixed(2);
   // Updates 10 times a second
 }, 100);
+
+watch(
+  () => [
+    statuses.value?.downloads,
+    elementWidth.value,
+    width.value,
+    height.value,
+  ],
+  (): void => {
+    // If the element is not rendered, then we do not want to spend resources calculating that crap
+    if (!statuses?.value?.downloads || !container.value) {
+      return;
+    }
+
+    position.value.x = width.value - elementWidth.value - 32;
+    position.value.y = 16;
+  },
+  { "flush": "post" },
+);
 </script>
 
 <template>
   <div
+    ref="container"
     v-if="statuses?.downloads"
     id="__layout__launch-progress-downloads-count"
-    class="pointer-events-none absolute right-2 top-2 z-10 flex flex-col items-end gap-1 rounded-md p-2 leading-none opacity-60"
-    :style="styles.widget"
+    class="absolute z-9800 flex flex-col items-end gap-1 rounded-md p-2 leading-none opacity-60"
+    :style="{
+      'backdrop-filter': styles.widget.backdropFilter,
+      'background'     : styles.widget.background,
+      'color'          : styles.widget.color,
+      'transform'      : `translate(${position.x}px, ${position.y}px)`,
+    }"
   >
+    <div
+      v-if="statuses?.instanceId"
+      id="__layout__launch-progress-current-id"
+      class="text-sm"
+    >
+      {{ instanceStates[statuses.instanceId].name }} (status)
+    </div>
     <div
       v-if="currentDownloadSpeed !== '0.00'"
       id="__layout__launch-progress-current-speed"

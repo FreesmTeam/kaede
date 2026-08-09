@@ -106,6 +106,7 @@ export async function installMrpack({
     return undefined;
   }
 
+  statuses.launching = 0;
   log.info(
     __PRE_BUNDLED_FILENAME__,
     `Installed '${manifest.name}' (${manifest.versionId}):`,

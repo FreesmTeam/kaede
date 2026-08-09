@@ -17,11 +17,8 @@ const TICK: Duration = Duration::from_millis(100);
 #[derive(Serialize, Clone)]
 #[serde(tag = "type", content = "data", rename_all = "camelCase")]
 pub enum LogStreamEvent {
-    /// First message: every complete line currently in the file
     Snapshot(Vec<String>),
-    /// New complete lines, ~10x/sec while there is activity
     Lines(Vec<String>),
-    /// The file shrank (cleared/rotated) — the viewer should reset
     Truncated,
 }
 
@@ -35,8 +32,7 @@ impl LogTail {
         Self { path, current: Mutex::new(None) }
     }
 
-    /// Single viewer slot: starting a new stream stops the previous one,
-    /// so a stream orphaned by a webview reload replaces itself on remount.
+    // Starting a new stream stops the previous one
     fn begin(&self) -> Arc<AtomicBool> {
         let mut slot = self.current.lock().unwrap();
 
@@ -74,7 +70,7 @@ pub async fn stream_logs(
     let stopped = state.begin();
     let path = state.path.clone();
 
-    // Snapshot: everything up to the last complete line
+    // Everything up to the last complete line
     let contents = match tokio::fs::read(&path).await {
         Ok(contents) => contents,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => Vec::new(),
@@ -110,7 +106,6 @@ pub async fn stream_logs(
         };
 
         if length < offset {
-            // Cleared or replaced — start over from the top
             offset = 0;
             let _ = on_event.send(LogStreamEvent::Truncated);
 
@@ -118,7 +113,7 @@ pub async fn stream_logs(
         }
 
         if length == offset {
-            continue; // nothing new; idle tick costs one metadata call
+            continue;
         }
 
         let Ok(mut file) = tokio::fs::File::open(&path).await else {
@@ -135,7 +130,6 @@ pub async fn stream_logs(
             continue;
         }
 
-        // Forward only complete lines — a torn tail waits for the next tick
         let Some(line_end) = buffer.iter().rposition(|&byte| byte == b'\n') else {
             continue;
         };

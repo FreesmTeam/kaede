@@ -194,7 +194,7 @@ useIntervalFn((): void => {
       id="__home-page__launch-label"
       class="block"
     >
-      Close
+      Stop
     </span>
     <MaterialRipple
       :colors="{ ripple: '#00000010', sparkles: '0 0 0' }"

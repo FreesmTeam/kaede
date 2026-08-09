@@ -88,7 +88,7 @@ function handleSwitch(): void {
           <span
             id="__home-page__current-playtime-information-time-text"
             :key="playTime"
-            class="absolute left-0 w-full text-nowrap"
+            class="absolute left-0 w-full text-start text-nowrap"
           >
             {{ playTime }}
           </span>

@@ -7,8 +7,10 @@ mod finalization;
 mod hashes;
 mod launcher;
 mod logging;
+mod modrinth;
 mod processes;
 mod system;
+mod translations;
 mod zip;
 
 // Launcher name
@@ -173,6 +175,8 @@ pub fn run() {
             launcher::verify_file_paths,
             logging::stream_logs,
             logging::stop_log_stream,
+            modrinth::install_mrpack,
+            modrinth::peek_mrpack,
             processes::list_processes,
             processes::spawn_process,
             processes::kill_process,
@@ -180,6 +184,7 @@ pub fn run() {
             processes::run_process,
             system::get_system_memory,
             system::get_cpu_usage,
+            translations::get_locales,
             zip::read_archive_entry,
             zip::unzip_files,
         ])

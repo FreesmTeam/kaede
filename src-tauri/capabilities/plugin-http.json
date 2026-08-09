@@ -10,11 +10,7 @@
       "identifier": "http:default",
       "allow": [
         { "url": "https://*" },
-        { "url": "http://127.0.0.1" },
-        { "url": "http://127.0.0.1:*" },
-        { "url": "http://localhost" },
-        { "url": "http://localhost:*" },
-        { "url": "http://textures.minecraft.net" }
+        { "url": "http://*" }
       ]
     },
     "http:allow-fetch",

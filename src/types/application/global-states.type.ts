@@ -3,6 +3,7 @@ import type { RouteType } from "@/types/application/route.type.ts";
 import type { SignInStatusType } from "@/types/auth/microsoft-auth.type.ts";
 import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
+import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 
 type DevelopmentType = {
   "loadErudaDevTools"         : boolean;
@@ -95,7 +96,8 @@ type PagesType = {
     "selected": string;
   }>;
   "settings": Partial<{
-    "tab": string;
+    "select": (tab: TabSectionType) => Promise<void>;
+    "tab"   : string;
   }>;
   "profile": Partial<{
     "pending": boolean;
@@ -103,9 +105,16 @@ type PagesType = {
     "error"  : string | null;
   }>;
   "add-instance": Partial<{
+    "select"               : (tab: TabSectionType) => Promise<void>;
     "instanceVersionSearch": {
       "patch": ExtendedPatchUIDType;
       "input": string;
+    };
+    // A modpack archive (only '.mrpack' for now)
+    "importedModpack": {
+      "path"  : string;
+      "name"  : string | undefined;
+      "loader": string;
     };
     "instance": {
       "name"         : string;

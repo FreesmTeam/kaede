@@ -86,6 +86,36 @@ input::-webkit-inner-spin-button {
   width: 100%;
 }
 
+.__marked-parsed-body {
+  overflow: auto;
+  max-height: 80vh;
+  padding: 16px 24px;
+
+  * {
+    /* Revert the UnoCSS reset styles */
+    all: revert;
+  }
+
+  h1, h2 {
+    border-bottom: 1px solid #fff2;
+    padding-bottom: 8px;
+  }
+
+  img {
+    /* Some images exceed the container width */
+    max-width: 100%;
+    border-radius: 6px;
+  }
+
+  blockquote {
+    border-left: 4px solid #fff2;
+    padding-left: 16px;
+    margin-left: 0;
+  }
+
+  user-select: text;
+}
+
 /**
  * Data Attributes
  */

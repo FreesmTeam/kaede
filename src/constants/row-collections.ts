@@ -18,7 +18,7 @@
 
 /* eslint-disable max-lines */
 import { confirm } from "@tauri-apps/plugin-dialog";
-import { computed } from "vue";
+import { computed, shallowReactive } from "vue";
 
 import { DefaultLocale, DefaultLocaleName } from "@/constants/application.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
@@ -565,6 +565,9 @@ export const DevelopmentSettingsRows: SettingsRowCollectionType = [
   })),
 ];
 
+export const ReadLocales = shallowReactive([
+  { "id": DefaultLocale, "label": DefaultLocaleName },
+]);
 export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
   computed(() => ({
     "idRoot"  : "__settings-page__ui-locale",
@@ -573,7 +576,7 @@ export const UserInterfaceSettingsRows: SettingsRowCollectionType = [
     "subtitle": "Change the launcher language",
     "inner"   : {
       "kind"    : "select",
-      "options" : [{ "id": DefaultLocale, "label": DefaultLocaleName }],
+      "options" : ReadLocales,
       "value"   : globalStates.locale,
       "onSelect": (value: { "id": string; "label": string }): void => {
         globalStates.locale = value.id;
@@ -1058,6 +1061,7 @@ export const JavaSettingsRows: SettingsRowCollectionType = [
 export default {
   DevelopmentSettingsRows,
   ExtensionsSettingsRows,
+  ReadLocales,
   UserInterfaceSettingsRows,
   MinecraftSettingsRows,
   JavaSettingsRows,

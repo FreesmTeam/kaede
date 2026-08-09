@@ -31,12 +31,14 @@ import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.typ
 export function create(
   currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
   uid: ExtendedPatchUIDType,
-): void {
+): string | undefined {
   if (!currentInstance) {
-    return log.error(
+    log.error(
       __PRE_BUNDLED_FILENAME__,
       "Could not create an instance since the instance is undefined",
     );
+
+    return undefined;
   }
 
   if (currentInstance.patchVersions[Patches.Minecraft] === undefined) {
@@ -48,10 +50,12 @@ export function create(
       },
     );
 
-    return log.error(
+    log.error(
       __PRE_BUNDLED_FILENAME__,
       "Could not create an instance since the Minecraft patch version is undefined",
     );
+
+    return undefined;
   }
 
   if (currentInstance.patchVersions[uid] === undefined) {
@@ -63,10 +67,12 @@ export function create(
       },
     );
 
-    return log.error(
+    log.error(
       __PRE_BUNDLED_FILENAME__,
       "Could not create an instance since the entry patch version is undefined",
     );
+
+    return undefined;
   }
 
   const randomDigits: number = Math.floor(Math.random() * 1000);
@@ -91,4 +97,6 @@ export function create(
 
   globalStates.pages["add-instance"].instance = undefined;
   globalStates.currentPage = Routes.Library;
+
+  return id;
 }

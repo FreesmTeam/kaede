@@ -97,7 +97,7 @@ export async function installMrpack({
     entries,
     "concurrency": GeneralSettings.ConcurrentDownloads.Libraries,
     "label"      : "modrinth modpack",
-    "cancelId"   : instanceId,
+    "cancelId"   : `${instanceId}-download`,
   });
 
   if (report.cancelled) {

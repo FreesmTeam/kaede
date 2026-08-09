@@ -68,7 +68,11 @@ const imported = computed(
 );
 
 function trackDownloads(instanceId: string): LauncherStatusesType {
-  const statuses: LauncherStatusesType = {
+  if (!instanceStatuses) {
+    throw new Error("'instanceStatuses' is undefined");
+  }
+
+  instanceStatuses[instanceId] = {
     instanceId,
     "launching": 1,
     "current"  : undefined,
@@ -80,11 +84,7 @@ function trackDownloads(instanceId: string): LauncherStatusesType {
     },
   };
 
-  if (instanceStatuses !== undefined) {
-    instanceStatuses[instanceId] = statuses;
-  }
-
-  return statuses;
+  return instanceStatuses[instanceId];
 }
 
 async function handleCreate(): Promise<void> {

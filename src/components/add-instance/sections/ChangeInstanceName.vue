@@ -20,6 +20,7 @@
 import { computed } from "vue";
 
 import CustomInput from "@/components/general/base/CustomInput.vue";
+import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
@@ -54,7 +55,7 @@ function handleNameChange(input: string): void {
 <template>
   <div
     id="__add-instance-page__instance-name"
-    class="rounded-md p-2"
+    class="flex flex-nowrap gap-2 rounded-md p-2"
   >
     <CustomInput
       icon="i-lucide-grid-2x2"
@@ -65,7 +66,20 @@ function handleNameChange(input: string): void {
       :default-value="currentInstance?.name"
       :on-input="handleNameChange"
       :on-blur="handleNameChange"
-      :class-names="{ 'wrapper': 'h-8 w-full sm:w-full' }"
+      :class-names="{ 'wrapper': 'h-8 flex-1 w-fit sm:w-fit' }"
     />
+    <button
+      v-if="globalStates.pages['add-instance'].importedModpack"
+      id="__add-instance-page__instance-name-import-reset"
+      class="relative grid size-8 shrink-0 place-items-center rounded-md bg-[theme(colors.neutral.100/.1)]"
+      title="Remove the imported modpack"
+      @click="Instances.resetPageStates"
+    >
+      <span
+        id="__add-instance-page__instance-name-import-reset-icon"
+        class="i-lucide-package-x block size-4"
+      ></span>
+      <MaterialRipple />
+    </button>
   </div>
 </template>

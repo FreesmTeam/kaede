@@ -2,6 +2,7 @@
 import { computed } from "vue";
 
 import CleanInstance from "@/components/add-instance/tabs/CleanInstance.vue";
+import ModrinthInstance from "@/components/add-instance/tabs/ModrinthInstance.vue";
 import { InstanceCreationSections } from "@/constants/application.ts";
 import { C } from "@/extendable/component-registry.ts";
 import { globalStates } from "@/states/global.ts";
@@ -24,7 +25,10 @@ const selected = computed((): string => (
         :state-key="stateKey"
       />
       <CleanInstance v-if="selected === 'clean-minecraft'" />
-      <div v-else id="__add-instance-page__page-placeholder"></div>
+      <ModrinthInstance v-else-if="selected === 'modrinth'" />
+      <div v-else id="__add-instance-page__page-placeholder">
+        Nothing to see here for now :c
+      </div>
     </div>
   </C.PageWrapper>
 </template>

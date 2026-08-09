@@ -17,9 +17,41 @@
   -->
 
 <script setup lang="ts">
+import { invoke } from "@tauri-apps/api/core";
+import { onMounted } from "vue";
+
 import RowContainer from "@/components/general/base/RowContainer.vue";
 import SettingsRow from "@/components/settings/SettingsRow.vue";
-import { UserInterfaceSettingsRows } from "@/constants/row-collections.ts";
+import FileStructure from "@/constants/file-structure.ts";
+import { ReadLocales, UserInterfaceSettingsRows } from "@/constants/row-collections.ts";
+import Errors from "@/lib/errors";
+import FileManager from "@/lib/file-manager";
+import { log } from "@/lib/logging/log.ts";
+
+onMounted(() => {
+  const directory: string = FileManager.join(
+    FileManager.getBaseDirectory(),
+    FileStructure.Folders.Translations.Path,
+  );
+
+  invoke<Array<{ "name": string; "code": string }>>("get_locales", { directory })
+    .then(list => {
+      const set = new Set<string>(
+        ReadLocales.map(({ id }) => id),
+      );
+
+      for (const { name, code } of list) {
+        if (set.has(code)) {
+          continue;
+        }
+
+        ReadLocales.push({ "label": name, "id": code });
+      }
+    })
+    .catch(error => {
+      log.error(__PRE_BUNDLED_FILENAME__, Errors.prettify(error));
+    });
+});
 </script>
 
 <template>

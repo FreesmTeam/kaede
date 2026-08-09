@@ -57,6 +57,8 @@ const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
 
+const temporaryPatch = ref<ExtendedPatchUIDType | undefined>();
+
 function toggleTypeFilter(): void {
   currentFilter.value = currentFilter.value === "release"
     ? "all"
@@ -70,6 +72,7 @@ function handleDropdown(state: boolean, event?: PointerEvent): void {
   }
 
   selector.value = state;
+  temporaryPatch.value = undefined;
 }
 function handleVersionSearch(input: string): void {
   globalStates.pages["add-instance"].instanceVersionSearch = {
@@ -77,6 +80,13 @@ function handleVersionSearch(input: string): void {
     ...currentVersionSearch.value,
     input,
   };
+  temporaryPatch.value = undefined;
+}
+function temporaryDropdown(type?: ExtendedPatchUIDType): void {
+  selector.value = true;
+  temporaryPatch.value = type === undefined
+    ? currentPatch.value
+    : Patches.Minecraft;
 }
 
 onClickOutside(target, () => handleDropdown(false));
@@ -88,24 +98,28 @@ onClickOutside(target, () => handleDropdown(false));
     id="__add-instance-page__instance-version"
     class="relative flex flex-nowrap gap-2 rounded-md p-2"
   >
-    <div
+    <button
       v-if="currentInstance?.patchVersions?.[Patches.Minecraft]"
       id="__add-instance-page__instance-version-selected-badge"
-      class="grid place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
+      class="relative grid place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
+      @click="() => temporaryDropdown(Patches.Minecraft)"
       :title="`Selected version of '${Patches.Minecraft}'`"
       :style="styles.widgetSecondary"
     >
       {{ currentInstance.patchVersions[Patches.Minecraft] }}
-    </div>
-    <div
+      <MaterialRipple />
+    </button>
+    <button
       v-if="currentPatch !== Patches.Minecraft && currentInstance?.patchVersions?.[currentPatch]"
       id="__add-instance-page__instance-version-selected-badge-modloader"
-      class="grid place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
+      class="relative grid place-items-center rounded-md px-2 leading-none bg-[theme(colors.neutral.100/.1)]"
+      @click="() => temporaryDropdown()"
       :title="`Selected version of '${currentPatch}'`"
       :style="styles.widgetSecondary"
     >
       {{ currentInstance.patchVersions[currentPatch] }}
-    </div>
+      <MaterialRipple />
+    </button>
     <CustomInput
       icon="i-lucide-search"
       id-root="__add-instance-page__instance-version"
@@ -133,6 +147,7 @@ onClickOutside(target, () => handleDropdown(false));
         v-if="selector"
         :handle-dropdown="handleDropdown"
         :current-filter="currentFilter"
+        :current-patch="temporaryPatch ?? currentPatch"
       />
     </Transition>
   </div>

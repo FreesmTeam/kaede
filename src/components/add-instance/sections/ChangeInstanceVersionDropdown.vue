@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { useQuery } from "@tanstack/vue-query";
-import { computed } from "vue";
+import { computed, markRaw } from "vue";
 
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { APIEndpoints } from "@/constants/launcher.ts";
@@ -34,9 +34,10 @@ import type {
   PatchIndexType, PatchVariantType,
 } from "@/types/launcher/meta/patch-index.type.ts";
 
-const { handleDropdown, currentFilter } = defineProps<{
+const { handleDropdown, currentFilter, currentPatch } = defineProps<{
   "handleDropdown": (state: boolean, event?: PointerEvent) => void;
   "currentFilter" : "release" | "all";
+  "currentPatch"  : ExtendedPatchUIDType;
 }>();
 
 const currentInstance = computed(
@@ -52,19 +53,17 @@ const currentVersionSearch = computed(
     globalStates?.pages?.["add-instance"]?.instanceVersionSearch
   ),
 );
-const currentPatch = computed((): ExtendedPatchUIDType => (
-  currentVersionSearch.value?.patch ?? Patches.Minecraft
-));
+
 const { styles } = useConfigColors();
 
 const queryKey = computed((): Array<unknown> => [
   "meta",
   APIEndpoints.Meta.Paths.Minecraft.Id,
   "versions",
-  currentPatch.value === Patches.Minecraft
+  currentPatch === Patches.Minecraft
     ? "do-not-reload"
     : currentInstance.value?.patchVersions?.["net.minecraft"],
-  currentPatch.value,
+  currentPatch,
 ]);
 
 const noMatches = {
@@ -76,10 +75,11 @@ const noMatches = {
 const { data, status } = useQuery({
   "queryKey": queryKey,
   "queryFn" : (): Promise<PatchIndexType["versions"]> => {
-    return Launcher.Fetching.fetchAllVersions(
-      currentPatch.value,
+    // For some reason, 'useQuery' makes 'data' deeply reactive...
+    return markRaw(Launcher.Fetching.fetchAllVersions(
+      currentPatch,
       currentInstance.value?.patchVersions?.["net.minecraft"],
-    );
+    ));
   },
 });
 
@@ -136,7 +136,7 @@ const filteredVersions = computed((): Array<{
          */
         currentFilter === "all" ||
         type === currentFilter ||
-        currentPatch.value !== Patches.Minecraft
+        currentPatch !== Patches.Minecraft
       ));
 
     if (filteredData.length === 0) {
@@ -158,7 +158,7 @@ const filteredVersions = computed((): Array<{
       (
         currentFilter === "all" ||
         type === currentFilter ||
-        currentPatch.value !== Patches.Minecraft
+        currentPatch !== Patches.Minecraft
       )
     ));
 
@@ -183,7 +183,7 @@ function selectVersion(event: MouseEvent): void {
   if (
     !extractedVersion ||
     !currentInstance.value ||
-    !currentPatch.value ||
+    !currentPatch ||
     // Sometimes it may happen...
     extractedVersion === "Loading..." ||
     // This can happen as well if the user click "No Matches"
@@ -193,11 +193,11 @@ function selectVersion(event: MouseEvent): void {
   }
 
   // If user changes the minecraft version, we need to reset all patch versions
-  const handledPatchVersions = currentPatch.value === Patches.Minecraft ? {
-    [currentPatch.value]: extractedVersion,
+  const handledPatchVersions = currentPatch === Patches.Minecraft ? {
+    [currentPatch]: extractedVersion,
   } : {
     ...currentInstance.value.patchVersions,
-    [currentPatch.value]: extractedVersion,
+    [currentPatch]: extractedVersion,
   };
 
   globalStates.pages["add-instance"].instance = {

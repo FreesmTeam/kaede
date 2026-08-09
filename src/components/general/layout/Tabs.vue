@@ -54,6 +54,8 @@ async function handleModeSelect(tab: TabSectionType): Promise<void> {
 
   globalStates.pages[stateKey].tab = tab.id;
 }
+
+globalStates.pages[stateKey].select = handleModeSelect;
 </script>
 
 <template>

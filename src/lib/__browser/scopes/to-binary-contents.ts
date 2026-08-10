@@ -16,28 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { Channel } from "@tauri-apps/api/core";
-
-export async function handleBodyRead(response: Response, channel: Channel): Promise<void> {
-  if (!response.body) {
-    return channel.onmessage([1]);
+// Text files are stored as strings while binary files are stored as 'File' objects
+export async function toBinaryContents(value: string | File): Promise<Uint8Array> {
+  if (typeof value === "string") {
+    return (new TextEncoder).encode(value);
   }
 
-  const reader = response.body.getReader();
+  const buffer: ArrayBuffer = await value.arrayBuffer();
 
-  while (true) {
-    const { done, value } = await reader.read();
-
-    if (done) {
-      reader.releaseLock();
-
-      return channel.onmessage([1]);
-    }
-
-    if (!value) {
-      continue;
-    }
-
-    channel.onmessage(new Uint8Array([...value, 0]));
-  }
+  return new Uint8Array(buffer);
 }

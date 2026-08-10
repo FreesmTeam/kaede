@@ -18,6 +18,12 @@
 
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { handleDatabase } from "@/lib/browser/scopes/handle-database.ts";
+import {
+  runCallbackReplica,
+  transformCallbackReplica,
+  unregisterCallbackReplica,
+} from "@/lib/browser/scopes/handle-events.ts";
+import { getFilePreviewUrl } from "@/lib/browser/scopes/pick-file.ts";
 import { placeholderInvoke } from "@/lib/browser/scopes/placeholder-invoke.ts";
 
 export async function handleTauriEnvironment(): Promise<void> {
@@ -32,7 +38,8 @@ export async function handleTauriEnvironment(): Promise<void> {
       },
     },
     "callbacks"     : new Map,
-    "convertFileSrc": (path: string): string => path,
+    // Picked images are displayed through their in-memory data URLs
+    "convertFileSrc": (path: string): string => getFilePreviewUrl(path) ?? path,
     "invoke"        : placeholderInvoke,
     "ipc"           : (): void => {},
     "metadata"      : {
@@ -40,9 +47,9 @@ export async function handleTauriEnvironment(): Promise<void> {
       "currentWindow" : { "label": "main" },
     },
     "postMessage"       : (): void => {},
-    "runCallback"       : (): void => {},
-    "transformCallback" : (): void => {},
-    "unregisterCallback": (): void => {},
+    "runCallback"       : runCallbackReplica,
+    "transformCallback" : transformCallbackReplica,
+    "unregisterCallback": unregisterCallbackReplica,
     "__TAURI_PATTERN__" : {
       "pattern": "brownfield",
     },

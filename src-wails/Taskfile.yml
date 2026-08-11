@@ -1,11 +1,5 @@
 version: "3"
 
-# Build tasks for the Wails backend. Usable with `wails3 task <name>`
-# (the task runner is vendored into the CLI) or with a standalone `task`.
-#
-# Every path is relative to this directory, so the frontend tasks reach the
-# repository root through `..`.
-
 vars:
   APP_NAME: kaede
   FRONTEND_DIST: frontend/dist
@@ -22,9 +16,24 @@ tasks:
     cmds:
       - bun install
       - bun run build:frontend
-      - rm -rf src-wails/{{.FRONTEND_DIST}}
-      - mkdir -p src-wails/{{.FRONTEND_DIST}}
-      - cp -r dist/. src-wails/{{.FRONTEND_DIST}}/
+      # Remove old dist (Unix)
+      - cmd: rm -rf src-wails/{{.FRONTEND_DIST}}
+        platforms: [ linux, darwin ]
+      # Remove old dist (Windows) – only if exists
+      - cmd: powershell -Command "if (Test-Path 'src-wails/{{.FRONTEND_DIST}}') { Remove-Item -Recurse -Force 'src-wails/{{.FRONTEND_DIST}}' }"
+        platforms: [ windows ]
+      # Create fresh dist directory (Unix)
+      - cmd: mkdir -p src-wails/{{.FRONTEND_DIST}}
+        platforms: [ linux, darwin ]
+      # Create fresh dist directory (Windows)
+      - cmd: powershell -Command "New-Item -ItemType Directory -Force 'src-wails/{{.FRONTEND_DIST}}' | Out-Null"
+        platforms: [ windows ]
+      # Copy built frontend contents (Unix)
+      - cmd: cp -r dist/. src-wails/{{.FRONTEND_DIST}}/
+        platforms: [ linux, darwin ]
+      # Copy built frontend contents (Windows)
+      - cmd: powershell -Command "Copy-Item -Recurse 'dist/*' 'src-wails/{{.FRONTEND_DIST}}/'"
+        platforms: [ windows ]
 
   build:
     desc: Build the frontend and compile the backend around it
@@ -59,4 +68,7 @@ tasks:
   clean:
     desc: Remove build output
     cmds:
-      - rm -rf {{.FRONTEND_DIST}} {{.APP_NAME}} {{.APP_NAME}}.exe
+      - cmd: rm -rf {{.FRONTEND_DIST}} {{.APP_NAME}} {{.APP_NAME}}.exe
+        platforms: [linux, darwin]
+      - cmd: powershell -Command "Remove-Item -Recurse -Force {{.FRONTEND_DIST}}, {{.APP_NAME}}, {{.APP_NAME}}.exe -ErrorAction SilentlyContinue"
+        platforms: [windows]

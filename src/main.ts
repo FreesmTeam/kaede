@@ -39,6 +39,7 @@ import Globals from "@/lib/globals";
 import Initialization from "@/lib/initialization";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
+import Wails from "@/lib/wails";
 import Watchers from "@/lib/watchers";
 import { declareGlobalStates } from "@/states/global.ts";
 import { declareInstanceStates } from "@/states/instance.ts";
@@ -56,6 +57,12 @@ Watchers.watchErrors();
 
 // The global object is accessed not only by extensions but by the application itself
 Globals.declareGlobals();
+
+// Used in Wails v3 builds
+if (await Wails.detectIsWails()) {
+  // Replaces the Tauri API with a Wails v3 API
+  await Wails.handleTauriEnvironment();
+}
 
 // For a live preview: https://kaede-basement.github.io/kaede/
 if (Browser.detectIsBrowser()) {

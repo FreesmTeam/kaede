@@ -1,0 +1,10 @@
+# The staged frontend build. Produced by `task frontend`; the directory itself
+# must survive so that the `//go:embed all:frontend` directive stays valid.
+/frontend/dist/
+
+# Compiled binaries. `go build ./...` names its output after this directory,
+# hence the src-wails entries alongside the task-produced ones.
+/kaede
+/kaede.exe
+/src-wails
+/src-wails.exe

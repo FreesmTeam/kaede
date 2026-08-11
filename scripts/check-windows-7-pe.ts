@@ -17,6 +17,9 @@
  */
 
 /* eslint-disable */
+/**
+ * ATTENTION: AI-generated (by GPT-5.6-Sol and Claude Fable 5 on 'max' reasoning)
+ */
 
 const DosSignature = 0x5A_4D;
 const PeSignature = 0x45_50;

@@ -1,3 +1,7 @@
+///
+/// ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning),
+/// but the code here was initially written by me in TypeScript (so this is a rewrite)
+///
 use std::collections::HashMap;
 use std::fs;
 use std::io;

@@ -271,6 +271,7 @@ pub async fn verify_file_paths(artifacts: Vec<Artifact>) -> Result<Vec<String>, 
     .map_err(|e| e.to_string())?
 }
 
+/// ATTENTION: AI-generated (by Qwen 3.6-Plus (most likely))
 fn verify_file_hash(path: &Path, expected_hash: &str) -> io::Result<bool> {
     let mut file = File::open(path)?;
 

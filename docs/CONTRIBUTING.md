@@ -34,7 +34,7 @@ Please also follow the project's conventions for the frontend:
 - `.vue` file names should be formatted as `PascalCase`. All other files should use `kebab-case`.
 - Exported constants should be formatted as `PascalCase`.
 - Functions, variables, and non-exported constants should be formatted as `camelCase`.
-- Element styling is preferred by using `Tailwind v3` classes. In case if the UnoCSS preset misses some utility classes, make a custom CSS class.
+- Element styling is preferred by using `Tailwind v3` classes. In case the UnoCSS preset misses some utility classes, make a custom CSS class.
 - [BEM](https://en.bem.info/methodology/) methodology is the preferred way to name element IDs and classes (alongside the Atomic CSS names) to simplify styling for extensions. All elements should have unique IDs.
 - Desirably, HTML structure should be semantically correct, i.e. no `<div></div>` in the `<button></button>` elements.
 

@@ -1,10 +1,15 @@
 [<<< Back](../README.md)
 
-# Wails backend
+# Wails Backend
 
-The Go backend of Kaede, built on [Wails v3](https://v3.wails.io/). It is an alternative to `src-tauri/`: the same launcher frontend, the same behaviour, a different host process.
+> [!WARNING]
+> The whole Wails code is AI-generated (by Claude Opus 5 on 'max' reasoning)
 
-Nothing in `src/` is aware of it except [`src/lib/__wails/`](../src/lib/__wails), which translates Tauri IPC calls into calls on the services declared here, and one block in [`src/main.ts`](../src/main.ts) that installs the bridge. Read [`src/lib/__wails/README.md`](../src/lib/__wails/README.md) first if you want the frontend half of the story.
+This is a backend written in [Go](https://go.dev/) for [Wails v3](https://v3.wails.io/). The code features various rewrites from the Tauri backend and is aimed at replicating as much functionality as possible.
+
+I should note that Wails code is self-contained, and nothing in `src/` is aware of this environment except for [`src/lib/__wails/`](../src/lib/__wails), which replaces Tauri IPC calls with Wails IPC calls.
+
+Read [`src/lib/README.md`](../src/lib/README.md#wails) first if you want the frontend half of the story.
 
 ## Layout
 

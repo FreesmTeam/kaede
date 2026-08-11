@@ -111,12 +111,11 @@ fn extract_archive(archive_file: &ArchiveFile, target_dir: &Path) -> Result<(), 
             .by_index(index)
             .map_err(|error| format!("Failed to read entry #{} in {}: {}", index, archive_path.display(), error))?;
 
-        // `extract.exclude` entries are path prefixes, e.g. "META-INF/"
+        // `extract.exclude` entries are path prefixes, e.g., "META-INF/"
         if archive_file.exclude.iter().any(|prefix| entry.name().starts_with(prefix.as_str())) {
             continue;
         }
 
-        // None = the entry path would escape target_dir (zip-slip); skip it
         let Some(relative_path) = entry.enclosed_name() else {
             continue;
         };

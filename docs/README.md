@@ -11,7 +11,7 @@
 A Tauri-based Minecraft launcher written in TypeScript with a permission-based plugin system
 
 <p align="center">
-<strong>English</strong> | <a style="color:#a1fee4" href="./README.ru.md">Русский</a> | Other languages?..
+<strong>English</strong> | <a style="color:#a1fee4" href="./README.ru.md">Русский</a> | 中文 | 日本語 | Other languages?..
 </p>
 
 [![star-count]](https://github.com/kaede-basement/kaede/stargazers)
@@ -23,9 +23,9 @@ A Tauri-based Minecraft launcher written in TypeScript with a permission-based p
 
 ## Reason
 
-I always loved the idea of applications ([Tachiyomi](https://github.com/tachiyomiorg)) and games ([Mindustry](https://github.com/Anuken/Mindustry)) having addons. The addition of features at runtime with one's own code, the modification of UI to one's own liking, and the ability to use community-made plugins is so cool...
+I always loved the idea of applications ([Tachiyomi](https://github.com/tachiyomiorg)) and games ([Mindustry](https://github.com/Anuken/Mindustry)) having addons. The addition of features at runtime with one's own code, the modification of the UI to one's own liking, and the ability to use community-made plugins are so cool...
 
-However, the existing Minecraft Launchers lack a user plugin system. While it is questionable whether extensible launchers for Minecraft are even needed, I still decided to make this project, primarily for myself.
+However, the existing Minecraft launchers lack a user plugin system. While it is questionable whether extensible launchers for Minecraft are even needed, I still decided to make this project, primarily for myself.
 
 ## Demonstration
 
@@ -41,7 +41,7 @@ Home page and a launched Minecraft instance with the [HorizonUI mod](https://git
 
 ---
 
-Home page with expanded version dropdown
+Home page with an expanded version dropdown
 
 <img src="./demos/kaede_home-page_no-minecraft.webp" alt="Home page without launched Minecraft">
 
@@ -126,22 +126,30 @@ A custom plugin for the Multi-Window experience (each window adds 30 MB of RAM u
 ## Features
 
 - Plugin system
-- Required MSA authentication
+- MSA authentication and offline account system (MSA account is required)
 - Cross-platform (launching part is not tested on macOS yet)
 - Fast startup
-- Uses just 150 MBs of RAM (without plugins)
+- Uses around 120-200 MBs of RAM (without plugins)
 - MultiMC patch system
+- Modrinth Modpacks support
 - Available as Non-Portable/Portable
 - Open Source, GPL-3.0
 - Written in TypeScript
 
 ## Installation
 
+### Support
+
+| System       | Arch          | Support                   |
+|--------------|---------------|---------------------------|
+| Windows 8.1+ | x86_64        | Full                      |
+| macOS        | arm64, x86_64 | Full                      |
+| Linux        | x86_64        | Full                      |
+| Windows 7    | x86_64        | [Partial](./WINDOWS-7.md) |
+
 ### Stable Releases
 
-Download Kaede from the [GitHub Releases](https://github.com/kaede-basement/kaede/releases) page. Packages are available for Linux, Windows, and macOS.
-
-For Windows 7, see [this file](./WINDOWS-7.md).
+Download Kaede from the [GitHub Releases](https://github.com/kaede-basement/kaede/releases) page. For Windows 7, see [this file](./WINDOWS-7.md) first.
 
 ### Development builds
 
@@ -170,12 +178,17 @@ Kaede is in early stages of development. Look at the [plan](./PLAN.md) to see mo
 
 No prior Rust knowledge is needed to contribute to this project. Most of the code was written in TypeScript using the Tauri API. These files will help in contributing:
 
-- [Introduction to Kaede Architecture](./INTRODUCTION.md) (the most important one)
-- [README for TypeScript-related code](../src/README.md) (the second most important one)
+- [README for TypeScript-related code](../src/README.md) (the most important one)
 - [README for Rust-related code](../src-tauri/README.md)
 - [Contributing Guidelines](./CONTRIBUTING.md)
 - [MultiMC Patch System](./MULTIMC.md)
 - [Building from Source](#building-from-source)
+
+In case you want to run this launcher with [Wails](https://wails.io/) or other backends, or if you want to contribute to the Browser/Wails versions, see the following files.
+
+- [README for Browser environment](../src/lib/README.md#browser)
+- [README for Wails mocks in TypeScript](../src/lib/README.md#wails)
+- [README for Wails backend](../src-wails/README.md)
 
 I also leave comments in the code.
 
@@ -186,9 +199,7 @@ For launcher plugins, themes, or translations:
 - [Making a Theme](./EXTENSIONS.md#making-a-theme)
 - [Translating the Launcher](https://github.com/kaede-basement/translations)
 
-Pull requests are welcome. AI code is not welcome (with the exception being user plugins). For major changes, please open an issue first to discuss what you would like to change.
-
-In case if you want to run this launcher with [Wails](https://wails.io/) (or any other backend), see [the following file](../src/lib/README.md#browser).
+Pull requests are welcome. AI code that impacts regular Tauri builds is not welcome; see [AGENTS.md](../AGENTS.md) for more. For major changes, please open an issue first to discuss what you would like to change.
 
 ## Building from Source
 
@@ -204,7 +215,6 @@ Once you are ready, clone this repository:
 
 ```bash
 git clone https://github.com/kaede-basement/kaede
-
 ```
 
 Navigate to the cloned directory and install project dependencies:
@@ -235,7 +245,7 @@ bun run build
 
 [![license-badge]](https://github.com/kaede-basement/kaede/blob/main/LICENSE)
 
-## Credits
+## Credits and AI Usage
 
 Please refer to [this file](./CREDITS.md).
 

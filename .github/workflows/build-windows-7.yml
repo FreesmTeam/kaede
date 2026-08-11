@@ -1,3 +1,6 @@
+#
+# ATTENTION: AI-generated (by GPT-5.6-Sol on 'max' reasoning)
+#
 name: "Build (Windows 7)"
 
 on:
@@ -241,5 +244,5 @@ jobs:
           @'
           ## Windows 7 compatibility
 
-          See `docs/WINDOWS7-COMPATIBILITY.md` before downloading the build
+          See `docs/WINDOWS-7.md` before downloading the build
           '@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY

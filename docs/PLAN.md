@@ -1,4 +1,11 @@
-// temporary
+# Plan
+
+I have left `Ancient writings` sections for one to see the path from an initial idea to the final implementation :3
+
+## Todo
+
+<details>
+
 - [ ] Plugin system
     - [x] Custom CSS themes
     - [x] Permission-system (need to add more permissions, though)
@@ -9,7 +16,7 @@
     - [x] Unrestricted environment with `new Function`
     - [ ] Repository fetching
     - [ ] Downloading from the repository
-    - [ ] UI to manage plugins
+    - [x] UI to manage plugins
     - [ ] Plugin packs (?)
 - [x] Minecraft launching
   - [x] Uses MultiMC meta
@@ -23,9 +30,9 @@
   - [x] All snapshots, beta, and alpha versions work
   - [x] [Custom launch wrapper](https://github.com/MCPHackers/LaunchWrapper) for alpha & beta versions of minecraft
   - [x] Built-in OptiFine patch support
-- [ ] Authentication
-    - [ ] Microsoft authentication
-    - [ ] Offline accounts if user has a Microsoft account with the game
+- [x] Authentication
+    - [x] Microsoft authentication
+    - [x] Offline accounts if user has a Microsoft account with the game
     - [ ] Profile systems (?) (basically different launcher settings for different users)
 - [ ] Instance management
     - [x] Isolated instances
@@ -34,18 +41,19 @@
     - [ ] Sandboxed minecraft instances (?)
 - [ ] Modpack providers support
     - [ ] CurseForge
-    - [ ] Modrinth
+    - [x] Modrinth
     - [ ] ATLauncher
     - [ ] FTB
     - [ ] Legacy FTB
     - [ ] Technic
-- [ ] Mod loaders
+- [ ] Mod loaders and OptiFine
+    - [x] OptiFine
     - [x] Fabric
     - [x] Forge
     - [x] NeoForge
     - [x] Quilt
     - [x] Legacy Fabric
-    - [x] LiteLoader (kind of)
+    - [x] LiteLoader
     - [ ] Kaolin
 - [ ] Resource management
     - [ ] Mods
@@ -56,36 +64,95 @@
     - [ ] Worlds
     - [ ] Datapacks
 - [ ] Java management
-    - [ ] Already installed JDKs detection
+    - [x] Already installed JDKs detection
+    - [x] Custom ones import
     - [ ] Different version selection for supported Minecraft versions
     - [ ] Bundled GraalVM Community Edition JDK (?)
-- [ ] Server management (via plugin)
-    - [ ] Various server cores (Bukkit-based, Sponge-based, Forge, Fabric, Minestom, etc.)
-    - [ ] Plugins management
-    - [ ] Mods management
 
-tbd (https://mc-launcher.tayou.org/)
-// temporary
+</details>
 
-# UI/UX Design
+## UI/UX Design
 
 Whatever my mind thinks is good
-
-# Plan
 
 ## Routing
 
 <details>
+
+### Latest
+
+I simply use `globalStates.currentPage` with string literals to switch components:
+
+```vue
+<template>
+  <C.Home v-if="page === 'home'" />
+  <C.Library v-else-if="page === 'library'" />
+  <C.Settings v-else-if="page === 'settings'" />
+  <C.AddInstance v-else-if="page === 'add-instance'" />
+  <C.Profile v-else-if="page === 'profile'" />
+  <!-- This block of elements is shown only when custom pages are selected -->
+  <C.PageWrapper v-else>
+    <div id="__custom-page__wrapper">
+      <component :is="page" />
+    </div>
+  </C.PageWrapper>
+</template>
+```
+
+The navigation method is:
+
+```ts
+export function navigate(path: RouteType): void {
+  globalStates.currentPage = path;
+}
+```
+
+`globalStates` is simply a `reactive` object:
+
+```ts
+/**
+ * Contains all global application states.
+ * Will be overwritten in 'main.ts' once the global states are ready
+ */
+export let globalStates: Reactive<GlobalStatesType>;
+
+/**
+ * Assign the actual global states to 'globalStates'.
+ * This function is called in 'main.ts'
+ */
+export function declareGlobalStates(): void {
+  /*
+   * Since global states are deeply reactive,
+   * we should copy the original config object to avoid its changes
+   */
+  const configFile: ConfigType = structuredClone(GlobalInternals.initialConfig);
+  const customSettings = DefaultGlobalStatesPagesStates["add-instance"].customSettings;
+
+  globalStates = reactive<GlobalStatesType>({
+    ...configFile,
+    "contextMenuItems": markRaw(ContextMenuItems),
+    "currentPage"     : Router.getInitialPage(),
+    "translations"    : markRaw(GlobalInternals.initialTranslations),
+    "pages"           : { /* ... */ },
+    "sidebarItems"    : markRaw([ /* ... */ ]),
+  });
+}
+```
+
+---
+
+### Ancient writings (2025)
+
 I don't see any advantages in using a package for page routes
 
 Just define a global store using `pinia` with fields like this:
 
 ```ts
 // just a mock-up, i dont remember how pinia stores look like lol
-{
-  "page"   : "home" // "home" | "library" | "settings" | `custom-${string}`,
-  "setPage": (to: /* a type above */) => {
-    for (const hook of /* window.[...].hooks */) {
+_ = {
+  "page"   : "home", // "home" | "library" | "settings" | `custom-${string}`
+  "setPage": (to: RouteType /* a type above */) => {
+    for (const hook of hooks /* window.[...].hooks */) {
       // handle responses
       const response = hook(to);
       // let it be { "navigate": boolean; "navigated": boolean }
@@ -100,15 +167,15 @@ Just define a global store using `pinia` with fields like this:
     "library" : {},
     "settings": { "tab": "plugins" },
     // plugins can add their own fields
-  };
-  "setState": (key: string; value: object) {
+  },
+  "setState": (key: string, value: object) => {
     // handle hooks
 
     this.states[key] = value;
   },
 };
 
-window.__KAEDE__.router = /* pass the non-reactive object, or properties */
+window.__KAEDE__.router = _; /* pass the non-reactive object, or properties */
 ```
 
 and in the `layout.vue`:
@@ -136,29 +203,38 @@ plugins will change some state for `<Teleport />` to mount a page component on t
 ___
 
 wait, but why am I using a global store? This can be implemented with a simple top-level state in the App.vue buh
+
 </details>
 
 ## Extensions
 
 <details>
 
+### Latest
+
+See [this file](./EXTENSIONS.md).
+
+---
+
+### Ancient writings (2025-2026)
+
 ### Goal
 
-Allow users to expand launcher's functionality by using extensions that are loaded in runtime
+Allow users to expand launcher's functionality by using extensions that are loaded at runtime
 
 ### Implementation
 
 Make a page that fetches extensions from some remote repository
 
-That repository must include only moderated extensions. Moderation process should require extension's source code and, if differs from usual, a build manual. Every extension update must go through the moderation process. This is the only way to make custom extensions secure, I guess
+That repository must include only moderated extensions. Moderation process should require extension's source code and, if it differs from usual, a build manual. Every extension update must go through the moderation process. This is the only way to make custom extensions secure, I guess
 
-Those extensions should be loaded once at application launch. Programming language must be a JavaScript. Any framework is ok, as long as it is capable running in a browser. Extensions will be able to communicate with the launcher
+Those extensions should be loaded once at application launch. Programming language must be JavaScript. Any framework is ok, as long as it is capable of running in a browser. Extensions will be able to communicate with the launcher
 
 ### More
 
 **Previous implementation details**
 
-Any JS code can be dynamically fetched in runtime from somewhere and executed with the `new Function` constructor. Example (I implemented it in [one of my projects](https://github.com/notwindstone/tsuki)):
+Any JS code can be dynamically fetched at runtime from somewhere and executed with the `new Function` constructor. Example (I implemented it in [one of my projects](https://github.com/notwindstone/tsuki)):
 
 ```ts
 const url = "..."; // an endpoint containing bundled JS code (with CSS styles, etc.)
@@ -170,13 +246,13 @@ const initPlugin = new Function("module", "exports", pluginCode);
 initPlugin({ exports: {} }, {});
 ```
 
-Looks simple, but works like a charm. I didn't figure how to share dependencies yet, though. There is also a [module federation runtime](https://www.npmjs.com/package/@module-federation/runtime) thing, I need to look at it sometime lol
+Looks simple, but works like a charm. I didn't figure out how to share dependencies yet, though. There is also a [module federation runtime](https://www.npmjs.com/package/@module-federation/runtime) thing, I need to look at it sometime lol
 
-Now, about the launcher and plugin communication. I didn't find anything better than `window.postMessage`, so I will stick with it. Variables can be shared using the `window.__KAEDE__` object, and Tauri functionality is already exposed that way (`window.__TAURI__`) thanks to `withGlobalTauri` parameter in `tauri.conf.json`
+Now, about the launcher and plugin communication. I didn't find anything better than `window.postMessage`, so I will stick with it. Variables can be shared using the `window.__KAEDE__` object, and Tauri functionality is already exposed that way (`window.__TAURI__`) thanks to the `withGlobalTauri` parameter in `tauri.conf.json`
 
-The biggest concern here is the security. Even if the `new Function` can't access local variables, because it runs in a different scope, it still has a lot (and I mean really a lot) of other security issues. Executing an unknown code (especially with the access to some Tauri bindings) is a **horrible** thing
+The biggest concern here is the security. Even if the `new Function` can't access local variables, because it runs in a different scope, it still has a lot (and I mean really a lot) of other security issues. Executing unknown code (especially with the access to some Tauri bindings) is a **horrible** thing
 
-Unfortunately, if VSCode, Obsidian, Vencord and other apps can't implement a secure user plugin system, I won't be able to do it too. In this case it's either functionality or security, not both
+Unfortunately, if VSCode, Obsidian, Vencord and other apps can't implement a secure user plugin system, I won't be able to do it either. In this case it's either functionality or security, not both
 
 Btw, Figma chose security over functionality with their `iframe` approach
 
@@ -184,11 +260,11 @@ Btw, Figma chose security over functionality with their `iframe` approach
 
 Microfrontends supremacy >.<
 
-Using a Module Federation Runtime we can load any Vue component just like an ordinary component in the node tree. To make it possible for plugins to render components anywhere, a `<Teleport />` could be used. Module Federation Runtime also allows us to share dependencies, so the final extension budle size should be low.
+Using a Module Federation Runtime we can load any Vue component just like an ordinary component in the node tree. To make it possible for plugins to render components anywhere, a `<Teleport />` could be used. Module Federation Runtime also allows us to share dependencies, so the final extension bundle size should be low.
 
 For other JS frameworks, we can run them using the previous implementation: `new Function`.
 
-Launcher should expose everything that it can through the `window.__KAEDE__`. Previously, communication was done using the `window.postMessage` function, but now I came up with the idea of exposing an array of functions for almost every action in app. That array can be changed by extensions, and then the launcher will execute every function listed in that array.
+Launcher should expose everything that it can through the `window.__KAEDE__`. Previously, communication was done using the `window.postMessage` function, but now I came up with the idea of exposing an array of functions for almost every action in the app. That array can be changed by extensions, and then the launcher will execute every function listed in that array.
 
 For example, see the next code:
 
@@ -215,7 +291,7 @@ const handleKaedeMessages = (event: { data: string ) => {
 window.addEventListener("message", handleKaedeMessages);
 ```
 
-While it works, it doesn't look good to me. Adding a lot of window listeners can affect launcher's performance. If user has 20 extensions, that `handleKaedeMessages` function will fire on every new event 20 times, even if no one wanted to listen to that event.
+While it works, it doesn't look good to me. Adding a lot of window listeners can affect the launcher's performance. If a user has 20 extensions, that `handleKaedeMessages` function will fire on every new event 20 times, even if no one wanted to listen to that event.
 
 Now I'm suggesting the next structure:
 
@@ -239,14 +315,15 @@ onBeforeRouteChange(() => {
 });
 ```
 
-Extensions are not needed to listen for window events anymore. Only specified actions will be triggered. Must be a perfect solution? Maybe. I'm not sure that this will work, because, well, launcher doesn't have the same scope as that extension code block where `window.__KAEDE__` was reassigned (?)
+Extensions are not needed to listen for window events anymore. Only specified actions will be triggered. Must be a perfect solution? Maybe. I'm not sure that this will work, because, well, the launcher doesn't have the same scope as that extension code block where `window.__KAEDE__` was reassigned (?)
 
 Update: it works, somehow. I tested it both ways: firstly, I made a Svelte plugin state change from the Launcher (in Vue), and then I made a Vue state change from the Svelte plugin.
 
-___
+---
+
 about security: what if i introduce a permission-based plugin system? plugins will be able to use only those things (`window.__TAURI__` object scopes, localStorage, WASM, .dll/.so, etc.) that user has allowed
 
-**Latest implementation details (22.01.2026)**
+**Last implementation details (22.01.2026)**
 
 Secure ECMAScript for sandboxing plugins
 
@@ -257,6 +334,14 @@ A regular `new AsyncFunction` for unrestricted plugins
 ## Auth
 
 <details>
+
+### Latest
+
+See [this file](./AUTHENTICATION.md).
+
+---
+
+### Ancient writings (2025)
 
 ### Goal
 
@@ -281,6 +366,14 @@ None
 
 <details>
 
+### Latest
+
+Libraries and assets are already shared between instances. As for the mods - maybe some day?
+
+---
+
+### Ancient writings (2025)
+
 ### Goal
 
 Make a disk efficient way to manage isolated instances. Share mods, and maybe libraries, assets (?)
@@ -298,6 +391,14 @@ Hard to implement (bruh how do I even create a symlink using Tauri API), need th
 ## Server Management (?)
 
 <details>
+
+### Latest
+
+Will be implemented as a sandboxed plugin.
+
+---
+
+### Ancient writings (2025)
 
 ### Goal
 
@@ -317,6 +418,22 @@ None
 
 <details>
 
+### Latest
+
+Will be implemented as a plugin ^^
+
+|         | Utility                                                       |
+|---------|---------------------------------------------------------------|
+| Windows | [Sandboxie Plus](https://github.com/sandboxie-plus/sandboxie) |
+| Linux   | [bubblewrap](https://github.com/containers/bubblewrap)        |
+| macOS   | `sandbox-exec`                                                |
+
+For macOS, [minecraft-macos-sandboxing](https://github.com/RayBytes/minecraft-macos-sandboxing) is useful.
+
+---
+
+### Ancient writings (2025)
+
 ### Goal
 
 Not allowing [this](https://github.com/trigram-mrp/fractureiser) type of situations to happen in the future
@@ -334,6 +451,14 @@ https://github.com/PrismLauncher/PrismLauncher/issues/1146
 ## Deleted Files
 
 <details>
+
+### Latest
+
+No, they will be just deleted. Extensions, however, might implement this idea.
+
+---
+
+### Ancient writings (2025)
 
 ### Goal
 

@@ -1,3 +1,6 @@
+///
+/// ATTENTION: AI-generated (by GPT-5.6-Sol and Claude Fable 5 on 'max' reasoning)
+///
 use std::fmt::Write;
 use std::fs::File;
 use std::io::{self, Read};

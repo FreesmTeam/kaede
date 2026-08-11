@@ -28,7 +28,7 @@ Balancing between the safety, performance, and developer experience of plugins i
 
 Therefore, I propose the following idea: separate extensions into sandboxed and unrestricted types. So, extensions can be loaded in two environments.
 
-The first one is a restricted environment (sandbox) that uses a permission-based system. When enabling the plugin for the first time, the list of static permissions will be shown. Static permissions are defined ahead-of-time. In case if the plugin wants to extend its capabilities, it can use the `requestPermissions` function that returns a promise that resolves as soon as the user allows the request. `requestPermissions` is a plugin-scoped global variable that is essentially a reference to the function from another lexical environment, i.e., Kaede itself.
+The first one is a restricted environment (sandbox) that uses a permission-based system. When enabling the plugin for the first time, the list of static permissions will be shown. Static permissions are defined ahead-of-time. In case the plugin wants to extend its capabilities, it can use the `requestPermissions` function that returns a promise that resolves as soon as the user allows the request. `requestPermissions` is a plugin-scoped global variable that is essentially a reference to the function from another lexical environment, i.e., Kaede itself.
 
 KAUR extensions are executed in this environment.
 
@@ -96,6 +96,6 @@ TO-DO explain:
 
 Theming is possible via CSS. Themes should represent files that end with the `.css` extension. Kaede will pick up one-level deep CSS files in the `themes` folder.
 
-Every DOM element has a unique `id` attribute. In case if the element is attached to a dynamic list (`<... v-for="..." />`), it will also have a unique class name.
+Every DOM element has a unique `id` attribute. In case the element is attached to a dynamic list (`<... v-for="..." />`), it will also have a unique class name.
 
 The `id` attribute uses BEM methodology for naming.

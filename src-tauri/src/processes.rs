@@ -1,3 +1,6 @@
+///
+/// ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+///
 use std::{collections::HashMap, path::PathBuf, sync::Mutex, time::Duration};
 
 use serde::{Deserialize, Serialize};

@@ -1,4 +1,6 @@
-
+#
+# ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+#
 
 # Local mirror of .github/workflows/build-windows-7.yml
 #

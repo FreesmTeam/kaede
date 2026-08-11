@@ -103,13 +103,13 @@ pub fn run() {
             //
             // But in JavaScript, the logging plugin has already been loaded.
             // Thus, the logging preparation strategy provided below will fail,
-            // requiring the JavaScript code to copy the contents from the log file into another
+            // requiring the JavaScript code to copy the contents from the log file into another one
             // instead of just renaming that file. Of course, copying takes more time.
             if let Err(error) = launcher::prepare_log_file(&path, APP_NAME) {
                 error!("Failed to prepare the log file: {}", error);
             }
 
-            // Handle logging targets differently based on build mode
+            // Handle logging targets differently based on a build mode
             let logging_builder = if cfg!(debug_assertions) {
                 // Debug mode
                 tauri_plugin_log::Builder::default()

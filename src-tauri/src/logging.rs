@@ -1,3 +1,6 @@
+///
+/// ATTENTION: AI-generated (by Qwen 3.8-Max Claude Fable 5 on 'max' reasoning)
+///
 use std::{
     io::SeekFrom,
     path::PathBuf,

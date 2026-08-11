@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 

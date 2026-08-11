@@ -14,5 +14,9 @@ export const ConfigSchema = Type.Object({
   "selected"   : SelectedSchema,
   "locale"     : Type.String(),
   "logs"       : LogsSchema,
-  "minecraft"  : MinecraftSchema,
+  "java"       : Type.Array(Type.Object({
+    "label": Type.String(),
+    "path" : Type.String(),
+  })),
+  "minecraft": MinecraftSchema,
 });

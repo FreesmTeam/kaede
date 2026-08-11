@@ -1043,6 +1043,22 @@ export const JavaSettingsRows: SettingsRowCollectionType = [
       });
     }
 
+    for (const [index, custom] of globalStates.java.entries()) {
+      available.push({
+        "idRoot"  : `__settings-page__java-custom-entry-${index}`,
+        "icon"    : "i-lucide-file-cog",
+        "title"   : custom.label,
+        "subtitle": custom.path,
+        "onClick" : (): void => {
+          globalStates.minecraft.javaBinary = custom.path;
+        },
+        "inner": {
+          "kind" : "radio",
+          "value": globalStates.minecraft.javaBinary === custom.path,
+        },
+      });
+    }
+
     return {
       "idRoot"  : "__settings-page__java-detected",
       "icon"    : "i-lucide-file-search",

@@ -78,6 +78,7 @@ test(testName, async () => {
       "partsShown": { "time": true, "level": true, "target": true, "message": true },
       "partsSize" : { "time": 12, "level": 5, "target": 32 },
     },
+    "java"     : [],
     "minecraft": {
       "windowHeight": 480,
       "windowWidth" : 854,

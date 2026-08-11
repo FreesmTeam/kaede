@@ -42,6 +42,7 @@ export async function sync(): Promise<void> {
     "selected"   : globalStates.selected,
     "locale"     : globalStates.locale,
     "minecraft"  : globalStates.minecraft,
+    "java"       : globalStates.java,
     "logs"       : {
       ...globalStates.logs,
       // Make 'logs.show' always false so that the user won't see log viewer on app launch

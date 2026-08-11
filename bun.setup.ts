@@ -30,6 +30,7 @@ const testWindow = {
   "__KAEDE__": {
     "internals": {
       "requestPermissions" : async (): Promise<Array<boolean>> => ([]),
+      "executableHash"     : "",
       "joinDelimiter"      : "",
       "launcherVersion"    : "",
       "portable"           : false,

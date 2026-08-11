@@ -167,6 +167,7 @@ export type GlobalStatesType = {
   "selected"        : SelectedType;
   "locale"          : string;
   "logs"            : LogsType;
+  "java"            : Array<{ "label": string; "path": string }>;
   "minecraft"       : MinecraftType;
   // Not specified in config (non-JSON values)
   "currentPage"     : RouteType;

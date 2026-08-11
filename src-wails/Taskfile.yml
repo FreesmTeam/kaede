@@ -1,0 +1,62 @@
+version: "3"
+
+# Build tasks for the Wails backend. Usable with `wails3 task <name>`
+# (the task runner is vendored into the CLI) or with a standalone `task`.
+#
+# Every path is relative to this directory, so the frontend tasks reach the
+# repository root through `..`.
+
+vars:
+  APP_NAME: kaede
+  FRONTEND_DIST: frontend/dist
+
+tasks:
+  default:
+    desc: Build the application
+    cmds:
+      - task: build
+
+  frontend:
+    desc: Build the launcher frontend and stage it for embedding
+    dir: ..
+    cmds:
+      - bun install
+      - bun run build:frontend
+      - rm -rf src-wails/{{.FRONTEND_DIST}}
+      - mkdir -p src-wails/{{.FRONTEND_DIST}}
+      - cp -r dist/. src-wails/{{.FRONTEND_DIST}}/
+
+  build:
+    desc: Build the frontend and compile the backend around it
+    deps: [frontend]
+    cmds:
+      - go build -o {{.APP_NAME}}{{exeExt}} .
+
+  build:backend:
+    desc: Compile the backend only, reusing whatever frontend is already staged
+    cmds:
+      - go build -o {{.APP_NAME}}{{exeExt}} .
+
+  dev:
+    desc: Run the backend against the Vite dev server (start `bun run dev:frontend` first)
+    cmds:
+      - go run .
+
+  check:
+    desc: Vet and compile-check without any system webview libraries
+    env:
+      GOOS: windows
+      CGO_ENABLED: "0"
+    cmds:
+      - go build ./...
+      - go vet ./...
+
+  tidy:
+    desc: Tidy the module
+    cmds:
+      - go mod tidy
+
+  clean:
+    desc: Remove build output
+    cmds:
+      - rm -rf {{.FRONTEND_DIST}} {{.APP_NAME}} {{.APP_NAME}}.exe

@@ -244,5 +244,5 @@ jobs:
           @'
           ## Windows 7 compatibility
 
-          See `docs/WINDOWS-7.md` before downloading the build
+          See [docs/WINDOWS-7.md](https://github.com/kaede-basement/kaede/blob/nightly/docs/WINDOWS-7.md) before downloading the build
           '@ | Add-Content -LiteralPath $env:GITHUB_STEP_SUMMARY

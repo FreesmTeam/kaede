@@ -65,7 +65,7 @@ jobs:
           build-name: ${{ matrix.build.name }}
           build: true
           wails3-tool: go tool wails3
-          wails3-command: package
+          wails3-command: build
 
       - name: Upload the builds
         uses: actions/upload-artifact@v7

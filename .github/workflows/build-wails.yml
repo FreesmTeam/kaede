@@ -52,6 +52,8 @@ jobs:
       - name: Build wails
         uses: dAppCore/build@v4.16.0
         id: build
+        env:
+          NPM_CONFIG_LEGACY_PEER_DEPS: true
         with:
           build-name: ${{ matrix.build.name }}
           package: false

@@ -61,7 +61,7 @@ jobs:
           NPM_CONFIG_LEGACY_PEER_DEPS: true
           NPM_CONFIG_IGNORE_SCRIPTS: true
         with:
-          app-working-directory: 'src-wails/'
+          app-working-directory: 'src-wails'
           build-name: ${{ matrix.build.name }}
           build: true
           wails3-tool: go tool wails3

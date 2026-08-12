@@ -49,6 +49,11 @@ jobs:
           mv ./src/lib/__wails ./src/lib/wails
         shell: bash
 
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Build Wails
         uses: dAppCore/build/actions/build/wails3@v4
         id: build

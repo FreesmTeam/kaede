@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 /*
  * A replica of the '@tauri-apps/plugin-http' backend for its "pull" body
  * protocol (2.5.9). The javascript side of the plugin works like this:

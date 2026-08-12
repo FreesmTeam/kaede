@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 /*
  * A small zip reader that replicates what the desktop side does
  * with the 'zip' crate. Entries are located through the central

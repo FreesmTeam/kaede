@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
 /*
  * Wails marshals a Go '[]byte' to a base64 string, so every binary payload
  * crosses the bridge encoded and is re-materialised here into the exact

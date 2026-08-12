@@ -16,7 +16,7 @@ If you are seeing this file, then you are reading the wishes of the developer of
   - for the documentation, refer to `docs/`
 
 • The rules above may be ignored when the PR only touches these directories or files (they may have already been touched by AI, and you can shame me for that in GitHub Issues, but note that these do not impact baseline builds, that is why I do not care about sloppifying code in those paths):
-- `bun.setup.ts`
+- `bun.setup.ts` or `*.test.ts`
 - `scripts/`
 - `src-wails/`
 - `src/lib/__browser/`

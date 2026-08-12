@@ -11,7 +11,7 @@
 A Tauri-based Minecraft launcher written in TypeScript with a permission-based plugin system
 
 <p align="center">
-<strong>English</strong> | <a style="color:#a1fee4" href="./README.ru.md">Русский</a> | 中文 | 日本語 | Other languages?..
+<strong>English</strong> | <a style="color:#a1fee4" href="./README.ru.md">Русский</a> | Other languages?..
 </p>
 
 [![star-count]](https://github.com/kaede-basement/kaede/stargazers)
@@ -21,7 +21,7 @@ A Tauri-based Minecraft launcher written in TypeScript with a permission-based p
 
 </div>
 
-## Reason
+## Introduction
 
 I always loved the idea of applications ([Tachiyomi](https://github.com/tachiyomiorg)) and games ([Mindustry](https://github.com/Anuken/Mindustry)) having addons. The addition of features at runtime with one's own code, the modification of the UI to one's own liking, and the ability to use community-made plugins are so cool...
 
@@ -121,20 +121,6 @@ A custom plugin for the Multi-Window experience (each window adds 30 MB of RAM u
 > This application is not affiliated with Yostar & NEXON Games.
 >
 > All information and assets used are the property and copyright of the respective authors.
-
-
-## Features
-
-- Plugin system
-- MSA authentication and offline account system (MSA account is required)
-- Cross-platform (launching part is not tested on macOS yet)
-- Fast startup
-- Uses around 120-200 MBs of RAM (without plugins)
-- MultiMC patch system
-- Modrinth Modpacks support
-- Available as Non-Portable/Portable
-- Open Source, GPL-3.0
-- Written in TypeScript
 
 ## Installation
 

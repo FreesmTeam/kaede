@@ -16,10 +16,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
 import {
   loadWailsRuntime,
   type WailsRuntimeType,
-} from "@/lib/__wails/scopes/load-wails-runtime.ts";
+} from "@/lib/wails/scopes/load-wails-runtime.ts";
 
 /*
  * Wails addresses a bound method by a fully qualified name built from the

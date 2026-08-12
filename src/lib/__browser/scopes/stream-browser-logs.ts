@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 import type { Channel } from "@tauri-apps/api/core";
 
 import { GlobalInternals } from "@/extendable/global-internals.ts";

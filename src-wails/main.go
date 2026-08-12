@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
 // Command kaede is the Wails v3 backend of the Kaede launcher.
 //
 // It replaces the Tauri (Rust) backend: every service method exposed here is

@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 /*
  * Browsers do not expose real system statistics, so the development
  * mode overlay gets the javascript heap numbers where available
@@ -32,16 +36,11 @@ type MemoryPerformanceType = Performance & {
 
 const Gibibyte: number = 1024 ** 3;
 
-let placeholderCpuUsage: number = 20;
 let placeholderUsedMemory: number = 2 * Gibibyte;
 
-// A replica of the 'get_cpu_usage' command: a random walk between 1% and 99%
+// A replica of the 'get_cpu_usage' command: a placeholder value
 export function getCpuUsageReplica(): number {
-  const drift: number = (Math.random() - 0.5) * 10;
-
-  placeholderCpuUsage = Math.min(Math.max(placeholderCpuUsage + drift, 1), 99);
-
-  return placeholderCpuUsage;
+  return 0;
 }
 
 // A replica of the 'get_system_memory' command: '[used, total]' in bytes

@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
 /*
  * The Wails runtime is not taken from '@wailsio/runtime' on purpose.
  *

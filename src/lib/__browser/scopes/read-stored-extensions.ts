@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 import { digestBytes } from "@/lib/browser/scopes/digest-bytes.ts";
 import { readStoredArchive } from "@/lib/browser/scopes/handle-archives.ts";
 import { listStores } from "@/lib/browser/scopes/list-stores.ts";

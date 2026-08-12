@@ -16,8 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { detectIsWails } from "@/lib/__wails/scopes/detect-is-wails.ts";
-import { handleTauriEnvironment } from "@/lib/__wails/scopes/handle-tauri-environment.ts";
+import { detectIsWails } from "@/lib/wails/scopes/detect-is-wails.ts";
+import { handleTauriEnvironment } from "@/lib/wails/scopes/handle-tauri-environment.ts";
 
 export default {
   detectIsWails,

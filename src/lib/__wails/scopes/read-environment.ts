@@ -16,7 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { callService } from "@/lib/__wails/scopes/call-service.ts";
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
+import { callService } from "@/lib/wails/scopes/call-service.ts";
 
 /*
  * The platform description is asked for once, during the environment setup,

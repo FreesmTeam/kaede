@@ -4,8 +4,6 @@
 
 ## Browser
 
-ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
-
 Kaede is a Webview-based application that requires a [Tauri](https://v2.tauri.app/) environment. Yet, in browsers, no Tauri environment exists. For one to simply test the UI of this launcher, they would need to install this application on their respective platform. However, since almost everything in Kaede was done using JavaScript, there is a way to replicate Tauri functionality using the built-in browser utilities. The `browser/` directory contains a work that is aimed at replicating Tauri API in browser environments.
 
 Moreover, one may replace the replicas with [Wails](https://wails.io/)/[Electron](https://www.electronjs.org/)/[Electrobun](https://github.com/blackboardsh/electrobun) utils to make Kaede work with a completely different backend.
@@ -104,8 +102,6 @@ The custom (`src-tauri/`) commands:
 </details>
 
 ## Wails
-
-ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
 
 Kaede is a Webview-based application that requires a [Tauri](https://v2.tauri.app/) environment. The `__browser/` directory replaces that environment with browser built-ins so the UI can be previewed without installing anything. This directory does the opposite: it keeps a **real** desktop backend, but a different one. Every Tauri IPC call is translated into a call on a Go service running under [Wails v3](https://v3.wails.io/), which lives in [`src-wails/`](../../../src-wails).
 

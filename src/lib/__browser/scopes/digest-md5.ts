@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 /*
  * MD5 (RFC 1321) is used only to derive stable offline account UUIDs
  * from nicknames, exactly like the desktop 'hash_md5' command does.

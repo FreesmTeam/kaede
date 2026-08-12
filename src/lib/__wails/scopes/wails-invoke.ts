@@ -16,22 +16,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
 /* eslint-disable max-lines */
-import { callService } from "@/lib/__wails/scopes/call-service.ts";
-import { fromBase64, toBase64, toBytes } from "@/lib/__wails/scopes/handle-binary.ts";
-import { openStream, type StreamType } from "@/lib/__wails/scopes/handle-channels.ts";
+import { callService } from "@/lib/wails/scopes/call-service.ts";
+import { fromBase64, toBase64, toBytes } from "@/lib/wails/scopes/handle-binary.ts";
+import { openStream, type StreamType } from "@/lib/wails/scopes/handle-channels.ts";
 import {
   addWailsEventListener,
   emitWailsEvent,
   removeWailsEventListener,
-} from "@/lib/__wails/scopes/handle-events.ts";
-import { getEnvironment } from "@/lib/__wails/scopes/read-environment.ts";
+} from "@/lib/wails/scopes/handle-events.ts";
+import { getEnvironment } from "@/lib/wails/scopes/read-environment.ts";
 import {
   cancelRequest,
   readRequestBody,
   registerRequest,
   sendRequest,
-} from "@/lib/__wails/scopes/route-http.ts";
+} from "@/lib/wails/scopes/route-http.ts";
 
 /*
  * The Wails counterpart of the browser 'placeholderInvoke'.

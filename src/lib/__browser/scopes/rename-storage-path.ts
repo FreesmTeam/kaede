@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 import { deleteStoragePath } from "@/lib/browser/scopes/delete-storage-path.ts";
 import { listStores } from "@/lib/browser/scopes/list-stores.ts";
 import { readStoragePath } from "@/lib/browser/scopes/read-storage-path.ts";

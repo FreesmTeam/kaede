@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 /* eslint-disable max-lines */
 import { LogInfo } from "@/constants/browser.ts";
 import EnglishTranslations from "@/constants/english.json";

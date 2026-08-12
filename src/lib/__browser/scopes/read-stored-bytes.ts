@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 import { readStoragePath } from "@/lib/browser/scopes/read-storage-path.ts";
 import { toBinaryContents } from "@/lib/browser/scopes/to-binary-contents.ts";
 

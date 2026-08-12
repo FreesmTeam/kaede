@@ -16,14 +16,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { exposeGlobalTauri } from "@/lib/__wails/scopes/expose-global-tauri.ts";
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
+import { exposeGlobalTauri } from "@/lib/wails/scopes/expose-global-tauri.ts";
 import {
   runCallbackReplica,
   transformCallbackReplica,
   unregisterCallbackReplica,
-} from "@/lib/__wails/scopes/handle-events.ts";
-import { type EnvironmentType, loadEnvironment } from "@/lib/__wails/scopes/read-environment.ts";
-import { wailsInvoke } from "@/lib/__wails/scopes/wails-invoke.ts";
+} from "@/lib/wails/scopes/handle-events.ts";
+import { type EnvironmentType, loadEnvironment } from "@/lib/wails/scopes/read-environment.ts";
+import { wailsInvoke } from "@/lib/wails/scopes/wails-invoke.ts";
 
 /*
  * The route the Go backend serves local files on. It stands in for the Tauri

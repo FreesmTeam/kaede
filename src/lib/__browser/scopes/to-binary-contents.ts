@@ -16,6 +16,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * ATTENTION: AI-generated (by Claude Fable 5 on 'max' reasoning)
+ */
+
 // Text files are stored as strings while binary files are stored as 'File' objects
 export async function toBinaryContents(value: string | File): Promise<Uint8Array> {
   if (typeof value === "string") {

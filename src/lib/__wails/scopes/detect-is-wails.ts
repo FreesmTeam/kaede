@@ -16,7 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { loadWailsRuntime } from "@/lib/__wails/scopes/load-wails-runtime.ts";
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
+import { loadWailsRuntime } from "@/lib/wails/scopes/load-wails-runtime.ts";
 
 /**
  * Reports whether the page is hosted by the Wails backend.

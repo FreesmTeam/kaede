@@ -16,8 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { callService } from "@/lib/__wails/scopes/call-service.ts";
-import { fromBase64, toBase64 } from "@/lib/__wails/scopes/handle-binary.ts";
+/**
+ * ATTENTION: AI-generated (by Claude Opus 5 on 'max' reasoning)
+ */
+
+import { callService } from "@/lib/wails/scopes/call-service.ts";
+import { fromBase64, toBase64 } from "@/lib/wails/scopes/handle-binary.ts";
 
 /*
  * The '@tauri-apps/plugin-http' backend, mapped onto the Go HTTP service.

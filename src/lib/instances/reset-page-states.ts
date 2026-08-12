@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { DefaultInstanceSettings } from "@/constants/launcher.ts";
+import { DefaultInstanceIcon, DefaultInstanceSettings } from "@/constants/launcher.ts";
 import Instances from "@/lib/instances/index.ts";
 import { globalStates } from "@/states/global.ts";
 
@@ -38,6 +38,7 @@ export function resetPageStates(): void {
   };
   globalStates.pages["add-instance"].instance = {
     ...currentInstance,
+    "icon"         : DefaultInstanceIcon,
     "name"         : DefaultInstanceSettings.name,
     "patchVersions": { "net.minecraft": "1.16.5" },
   };

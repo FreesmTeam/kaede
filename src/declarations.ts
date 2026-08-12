@@ -29,7 +29,7 @@ import type * as TauriOs from "@tauri-apps/plugin-os";
 import type * as TauriProcess from "@tauri-apps/plugin-process";
 import type * as TauriUpload from "@tauri-apps/plugin-upload";
 import type DevelopmentMode from "src/lib/development-mode";
-import type { App, ComputedRef, ShallowReactive, ShallowRef } from "vue";
+import type { App, ComponentPublicInstance, ComputedRef, ShallowReactive, ShallowRef } from "vue";
 
 import type _Application from "@/constants/application.ts";
 import type _ASCIIArt from "@/constants/ascii-art.ts";
@@ -155,6 +155,7 @@ declare global {
         "javaMajor"          ?: number;
 
         "appInstance"        ?: App<Element>;
+        "mountedInstance"    ?: ComponentPublicInstance;
         "logs"               ?: {
           "raw"     : ShallowRef<{ "list": Array<string> }>;
           "filtered": ComputedRef<{ "list": Array<LogLineType> }>;

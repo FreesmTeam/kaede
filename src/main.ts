@@ -49,157 +49,174 @@ import type { AccountType } from "@/types/configs/account.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
 import type { TranslationsType } from "@/types/translations/translations.type.ts";
 
-log.info(
-  __PRE_BUNDLED_FILENAME__,
-  `Starting to execute 'main.ts' at time mark: ${performance.now().toFixed(1)} ms`,
-);
-Watchers.watchErrors();
+async function run(): Promise<void> {
+  log.info(
+    __PRE_BUNDLED_FILENAME__,
+    `Starting to execute 'main.ts#run' at time mark: ${performance.now().toFixed(1)} ms`,
+  );
+  Watchers.watchErrors();
 
-// The global object is accessed not only by extensions but by the application itself
-Globals.declareGlobals();
+  // The global object is accessed not only by extensions but by the application itself
+  Globals.declareGlobals();
 
-// Used in Wails v3 builds
-if (await Wails.detectIsWails()) {
-  // Replaces the Tauri API with a Wails v3 API
-  await Wails.handleTauriEnvironment();
-}
+  // Used in Wails v3 builds
+  if (await Wails.detectIsWails()) {
+    // Replaces the Tauri API with a Wails v3 API
+    await Wails.handleTauriEnvironment();
+  }
 
-// For a live preview: https://kaede-basement.github.io/kaede/
-if (Browser.detectIsBrowser()) {
-  // Handle Tauri API placeholders
-  await Browser.handleTauriEnvironment();
-}
+  // For a live preview: https://kaede-basement.github.io/kaede/
+  if (Browser.detectIsBrowser()) {
+    // Handle Tauri API placeholders
+    await Browser.handleTauriEnvironment();
+  }
 
-const { basic, parsed } = await Initialization.start();
-const baseDirectory = basic.baseDirectory;
+  const { basic, parsed } = await Initialization.start();
+  const baseDirectory = basic.baseDirectory;
 
-// Caching
-GlobalInternals.baseDirectory = baseDirectory;
-GlobalInternals.portable = basic.portable;
-GlobalInternals.joinDelimiter = basic.separator;
-GlobalInternals.launcherVersion = basic.launcherVersion;
-GlobalInternals.executableHash = basic.executableHash;
-GlobalInternals.launchCount = basic.launchCount;
+  // Caching
+  GlobalInternals.baseDirectory = baseDirectory;
+  GlobalInternals.portable = basic.portable;
+  GlobalInternals.joinDelimiter = basic.separator;
+  GlobalInternals.launcherVersion = basic.launcherVersion;
+  GlobalInternals.executableHash = basic.executableHash;
+  GlobalInternals.launchCount = basic.launchCount;
 
-// Show a pretty ASCII art with the launcher name :3
-log.info(
-  __PRE_BUNDLED_FILENAME__,
-  ASCIIArt.getASCIIArt(
-    basic.portable,
-    basic.launchCount,
-    basic.launcherVersion,
-    basic.executableHash,
-  ),
-);
+  // Show a pretty ASCII art with the launcher name :3
+  log.info(
+    __PRE_BUNDLED_FILENAME__,
+    ASCIIArt.getASCIIArt(
+      basic.portable,
+      basic.launchCount,
+      basic.launcherVersion,
+      basic.executableHash,
+    ),
+  );
 
-const [
-  config,
-  translations,
-  instances,
-  fetchAccounts,
-]: [
-  ConfigType,
-  TranslationsType,
-  InstanceStatesType,
-  () => Array<AccountType>,
-] = await Promise.all([
-  Configs.getSafe({ baseDirectory, "parsedFile": parsed.config }),
-  Configs.getTranslations({ baseDirectory, "parsedFile": parsed.translations }),
-  Instances.readInstances({ baseDirectory, "parsedFile": parsed.instances }),
+  const [
+    config,
+    translations,
+    instances,
+    accounts,
+  ]: [
+    ConfigType,
+    TranslationsType,
+    InstanceStatesType,
+    Array<AccountType>,
+  ] = await Promise.all([
+    Configs.getSafe({ baseDirectory, "parsedFile": parsed.config }),
+    Configs.getTranslations({ baseDirectory, "parsedFile": parsed.translations }),
+    Instances.readInstances({ baseDirectory, "parsedFile": parsed.instances }),
+    Configs.getAccounts({ baseDirectory, "parsedFile": parsed.accounts }),
+
+    /*
+     * Variables returned from this 'Promise#all' are globally visible,
+     * and exposing user accounts like that feels bad (even though
+     * anyone can use 'Configs#getAccounts' to fetch accounts again),
+     * so we return a one-time fetch function (for ContextProviders).
+     *
+     * UPD: Alright, they are no longer globally visible since we are wrapping the code
+     * in a function, but let the code stay commented
+     */
+
+    /*
+     * (async (): Promise<() => Array<AccountType>> => {
+     *   const accounts: Array<AccountType> = await Configs.getAccounts({
+     *     baseDirectory,
+     *     "parsedFile": parsed.accounts,
+     *   });
+     *   let executed: boolean = false;
+     *
+     *   return function () {
+     *     if (!executed) {
+     *       executed = true;
+     *
+     *       return accounts;
+     *     }
+     *
+     *     // HMR might trigger this branch
+     *     log.error(__PRE_BUNDLED_FILENAME__, "You cannot load accounts once more");
+     *
+     *     return [];
+     *   };
+     * })(),
+     */
+  ]);
+
+  // Define launcher's initial values at globals to make them accessible from anywhere
+  GlobalInternals.initialConfig = config;
+  GlobalInternals.initialTranslations = translations;
+  GlobalInternals.initialInstances = instances;
 
   /*
-   * Variables returned from this 'Promise#all' are globally visible,
-   * and exposing user accounts like that feels bad (even though
-   * anyone can use 'Configs#getAccounts' to fetch accounts again),
-   * so we return a one-time fetch function (for ContextProviders)
+   * The global and instance states were declared outside the Vue instance,
+   * so they require the value assigning at this point
    */
-  (async (): Promise<() => Array<AccountType>> => {
-    const accounts: Array<AccountType> = await Configs.getAccounts({
-      baseDirectory,
-      "parsedFile": parsed.accounts,
+  declareGlobalStates();
+  declareInstanceStates();
+
+  /*
+   * They handle the necessary watching actions.
+   * For example, if 'enableDebugMode' is true, they allow debug messages to be logged
+   */
+  Watchers.watchConfigSync();
+  Watchers.watchInstancesSync();
+  Watchers.watchDevelopmentStates();
+  Watchers.watchLocaleStates();
+  Watchers.watchCustomFont();
+  Watchers.watchProcesses()
+    .then(() => declareServerProcesses())
+    .then(() => {
+      log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated server processes state");
+    })
+    .catch((error: unknown) => {
+      log.error(
+        __PRE_BUNDLED_FILENAME__,
+        "Failed to attach a listener to server processes:",
+        Errors.prettify(error),
+      );
     });
-    let executed: boolean = false;
 
-    return function () {
-      if (!executed) {
-        executed = true;
+  log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
+    "Config contents",
+    config,
+  ));
+  log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
+    "Instances metadata contents",
+    instances,
+  ));
 
-        return accounts;
-      }
+  log.debug(__PRE_BUNDLED_FILENAME__, "Creating a Vue instance");
+  const AppInstance = createApp(App);
 
-      /**
-       * HMR might trigger this branch
-       */
-      log.error(__PRE_BUNDLED_FILENAME__, "You cannot load accounts once more");
+  AppInstance.provide(AuthOneTimeFetchContextKey, accounts);
 
-      return [];
-    };
-  })(),
-]);
+  // Expose the app instance so that plugins can register components, etc.
+  GlobalInternals.appInstance = AppInstance;
 
-// Define launcher's initial values at globals to make them accessible from anywhere
-GlobalInternals.initialConfig = config;
-GlobalInternals.initialTranslations = translations;
-GlobalInternals.initialInstances = instances;
+  log.debug(__PRE_BUNDLED_FILENAME__, "Initializing Vue Query plugin");
+  AppInstance.use(VueQueryPlugin);
 
-/*
- * The global and instance states were declared outside the Vue instance,
- * so they require the value assigning at this point
- */
-declareGlobalStates();
-declareInstanceStates();
+  log.debug(
+    __PRE_BUNDLED_FILENAME__,
+    `Mounting an app instance to the DOM element (${ApplicationRootID})`,
+  );
+  GlobalInternals.mountedInstance = AppInstance.mount(ApplicationRootID);
 
-/*
- * They handle the necessary watching actions.
- * For example, if 'enableDebugMode' is true, they allow debug messages to be logged
- */
-Watchers.watchConfigSync();
-Watchers.watchInstancesSync();
-Watchers.watchDevelopmentStates();
-Watchers.watchLocaleStates();
-Watchers.watchCustomFont();
-Watchers.watchProcesses()
-  .then(() => declareServerProcesses())
-  .then(() => {
-    log.info(__PRE_BUNDLED_FILENAME__, "Successfully hydrated server processes state");
-  })
-  .catch((error: unknown) => {
-    log.error(
-      __PRE_BUNDLED_FILENAME__,
-      "Failed to attach a listener to server processes:",
-      Errors.prettify(error),
-    );
-  });
+  log.debug(__PRE_BUNDLED_FILENAME__, "Initializing launcher");
+  await Initialization
+    .finish({ config, baseDirectory })
+    .catch((error: unknown) => {
+      log.error(__PRE_BUNDLED_FILENAME__, "Failed to initialize launcher:", Errors.prettify(error));
+    });
+}
 
-log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
-  "Config contents",
-  config,
-));
-log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
-  "Instances metadata contents",
-  instances,
-));
-
-log.debug(__PRE_BUNDLED_FILENAME__, "Creating a Vue instance");
-const AppInstance = createApp(App);
-
-AppInstance.provide(AuthOneTimeFetchContextKey, fetchAccounts);
-
-// Expose the app instance so that plugins can register components, etc.
-GlobalInternals.appInstance = AppInstance;
-
-log.debug(__PRE_BUNDLED_FILENAME__, "Initializing Vue Query plugin");
-AppInstance.use(VueQueryPlugin);
-
-log.debug(
-  __PRE_BUNDLED_FILENAME__,
-  `Mounting an app instance to the DOM element (${ApplicationRootID})`,
-);
-AppInstance.mount(ApplicationRootID);
-
-log.debug(__PRE_BUNDLED_FILENAME__, "Initializing launcher");
-await Initialization
-  .finish({ config, baseDirectory })
-  .catch((error: unknown) => {
-    log.error(__PRE_BUNDLED_FILENAME__, "Failed to initialize launcher:", Errors.prettify(error));
-  });
+run().catch(error => {
+  // eslint-disable-next-line no-console
+  console.error(error);
+  log.error(
+    __PRE_BUNDLED_FILENAME__,
+    "An error occurred:",
+    Errors.prettify(error),
+  );
+});

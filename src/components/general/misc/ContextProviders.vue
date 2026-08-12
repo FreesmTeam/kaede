@@ -41,13 +41,9 @@ import type {
 } from "@/types/launcher/launch/launch-status.type.ts";
 import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 
-/**
- * HMR breaks 'fetchAccounts'
- */
-const fetchAccounts = inject<() => Array<AccountType>>(AuthOneTimeFetchContextKey)
-  ?? ((): Array<AccountType> => []);
+const providedAccounts = inject<Array<AccountType>>(AuthOneTimeFetchContextKey) ?? [];
 
-const accounts = shallowRef<Array<AccountType>>(fetchAccounts());
+const accounts = shallowRef<Array<AccountType>>(providedAccounts);
 const launches = reactive<Record<string, LauncherStatusesType>>({});
 const logs = shallowReactive<Record<string, { "list": Array<string> }>>({});
 

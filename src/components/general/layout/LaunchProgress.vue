@@ -130,7 +130,7 @@ watch(
     ref="container"
     v-if="statuses?.downloads"
     id="__layout__launch-progress-downloads-count"
-    class="absolute z-9800 flex flex-col items-end gap-1 rounded-md p-2 leading-none opacity-60"
+    class="absolute z-9800 flex flex-col cursor-move items-end gap-1 rounded-md p-2 leading-none opacity-60"
     :style="{
       'backdrop-filter': styles.widget.backdropFilter,
       'background'     : styles.widget.background,

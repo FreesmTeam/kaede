@@ -58,4 +58,4 @@ jobs:
         with:
           build-name: ${{ matrix.build.name }}
           package: false
-          wails3-tool: wails3
+          wails3-tool: go tool wails3

@@ -23,3 +23,5 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 )
+
+tool github.com/wailsapp/wails/v3/cmd/wails3

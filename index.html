@@ -9,6 +9,27 @@
   <body style="background:#111111">
     <script>
       console.log("WebView for Kaede has loaded >.<");
+
+      // When using macOS 10.15 in VMWare while having Safari 15.6.1,
+      // accessing 'WebGL2RenderingContext' throws a module evaluation error:
+      // 'ReferenceError: Can't find variable: WebGL2RenderingContext',
+      // which then completely breaks Kaede and just slips past
+      // error boundaries and listeners. I try to mitigate that with this measure
+      // since I remember that assigning new properties at 'window' makes them
+      // globally accessible. A funny thing is that this error
+      // seems not to be thrown at a module evaluation step when accessing
+      // the Browser live preview of Kaede even though 'WebGL2RenderingContext'
+      // is still undefined, because (I think that this is the marker reason)
+      // the 3D skin is not rendered in that preview.
+      if (!window.WebGL2RenderingContext) {
+        window.WebGL2RenderingContext = undefined;
+      }
+
+      window.__TAURI_INTERNALS__.invoke("plugin:log|log", {
+        "level"   : 3,
+        "message" : "Starting 'main.ts' module evaluation",
+        "location": "index.html:28",
+      });
     </script>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>

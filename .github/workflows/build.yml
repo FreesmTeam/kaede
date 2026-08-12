@@ -162,6 +162,13 @@ jobs:
       - name: Install frontend dependencies
         run: bun install
 
+      - name: Target Safari 13+ (macOS)
+        if: matrix.platform == 'macos-latest'
+        uses: restackio/update-json-file-action@2.1
+        with:
+          file: "./kaede-extra.json"
+          fields: "{\"useKaedeBase\": false, \"oldSafari\": true}"
+
       - name: Run TypeScript checks
         run: bun run typecheck
 

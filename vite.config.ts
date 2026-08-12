@@ -64,12 +64,18 @@ function handleSourceFileNames(): {
   };
 }
 
+// In macOS builds, 'oldSafari' is true
+const transpiledForSafari = kaedeExtraConfiguration.oldSafari ? {
+  "target": ["safari13"],
+} : {};
+
 export default defineConfig({
   // Use '/kaede' base path for GitHub Pages
   "base" : kaedeExtraConfiguration.useKaedeBase ? "/kaede" : undefined,
   "build": {
     // Do not inline any images
     "assetsInlineLimit": 0,
+    ...transpiledForSafari,
   },
   // Better support for Tauri CLI output
   "clearScreen": false,

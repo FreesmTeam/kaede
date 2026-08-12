@@ -10,18 +10,17 @@
     "beforeBuildCommand": "bun build:frontend"
   },
   "app": {
-    "macOSPrivateApi": false,
+    "macOSPrivateApi": true,
     "withGlobalTauri": true,
     "windows": [
       {
-        "devtools": "always",
         "label": "main",
         "title": "Kaede",
         "width": 800,
         "height": 600,
         "resizable": true,
         "fullscreen": false,
-        "visible": true,
+        "visible": false,
         "center": true,
         "minWidth": 512,
         "minHeight": 288

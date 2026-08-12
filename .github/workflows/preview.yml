@@ -57,7 +57,7 @@ jobs:
         uses: restackio/update-json-file-action@2.1
         with:
           file: "./kaede-extra.json"
-          fields: "{\"useKaedeBase\": true}"
+          fields: "{\"useKaedeBase\": true, \"oldSafari\": false}"
 
       - name: Swap placeholder exports with actual Browser-only utils
         run: |

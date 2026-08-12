@@ -64,6 +64,7 @@ jobs:
           app-working-directory: 'src-wails'
           build-name: ${{ matrix.build.name }}
           build: true
+          upload-artifact: false
           wails3-tool: go tool wails3
           wails3-command: build
 
@@ -71,6 +72,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: App-linux-amd64
-          path: src-wails/wails3-artifact/*
+          path: src-wails/*
           retention-days: 7
           if-no-files-found: error

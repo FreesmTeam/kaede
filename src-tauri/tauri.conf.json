@@ -10,10 +10,11 @@
     "beforeBuildCommand": "bun build:frontend"
   },
   "app": {
-    "macOSPrivateApi": true,
+    "macOSPrivateApi": false,
     "withGlobalTauri": true,
     "windows": [
       {
+        "devtools": true,
         "label": "main",
         "title": "Kaede",
         "width": 800,

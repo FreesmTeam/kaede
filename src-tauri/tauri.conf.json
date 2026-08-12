@@ -14,7 +14,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "devtools": true,
+        "devtools": "always",
         "label": "main",
         "title": "Kaede",
         "width": 800,

@@ -49,19 +49,8 @@ jobs:
           mv ./src/lib/__wails ./src/lib/wails
         shell: bash
 
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.21'
-
-      - name: Install Wails3
-        run: go install github.com/wailsapp/wails/v3/cmd/wails3@latest
-
-      - name: Add Go bin to PATH
-        run: echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-      - name: Build wails
-        uses: dAppCore/build@v4.16.0
+      - name: Build Wails
+        uses: dAppCore/build/actions/build/wails3@v4
         id: build
         env:
           NPM_CONFIG_LEGACY_PEER_DEPS: true
@@ -69,4 +58,4 @@ jobs:
         with:
           build-name: ${{ matrix.build.name }}
           package: false
-          STACK: wails3
+          wails3-tool: wails3

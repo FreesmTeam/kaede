@@ -65,13 +65,33 @@ jobs:
           build-name: ${{ matrix.build.name }}
           build: true
           upload-artifact: false
+          package: false
           wails3-tool: go tool wails3
           wails3-command: build
 
-      - name: Upload the builds
+      - name: Upload the builds (Linux)
+        if: matrix.build.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v7
         with:
-          name: App-linux-amd64
-          path: src-wails/*
+          name: Linux-Build
+          path: src-wails/kaede
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload the builds (Windows)
+        if: matrix.build.os == 'windows-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: Windows-Build
+          path: kaede.exe
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload the builds (macOS)
+        if: matrix.build.os == 'macos-latest'
+        uses: actions/upload-artifact@v7
+        with:
+          name: macOS-Build
+          path: kaede
           retention-days: 7
           if-no-files-found: error

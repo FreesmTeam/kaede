@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Linux-Build
-          path: src-wails/kaede
+          path: 'src-wails/kaede'
           retention-days: 7
           if-no-files-found: error
 
@@ -83,7 +83,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: Windows-Build
-          path: kaede.exe
+          path: 'src-wails/kaede.exe'
           retention-days: 7
           if-no-files-found: error
 
@@ -92,6 +92,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: macOS-Build
-          path: kaede
+          path: 'src-wails/kaede'
           retention-days: 7
           if-no-files-found: error

@@ -33,7 +33,7 @@ jobs:
             args: "--target aarch64-apple-darwin"
             # type: "non-portable"
           - name: "macOS x86_64"
-            identifier: "macos-x86"
+            identifier: "macos-x86_64"
             platform: "macos-latest" # For Intel based macs.
             args: "--target x86_64-apple-darwin"
             # type: "non-portable"
@@ -43,7 +43,7 @@ jobs:
             args: "--target aarch64-apple-darwin"
             # type: "non-portable"
           - name: "macOS x86_64 (Old Safari)"
-            identifier: "macos-x86-old"
+            identifier: "macos-x86_64-old"
             platform: "macos-latest" # For Intel based macs.
             args: "--target x86_64-apple-darwin"
             # type: "non-portable"
@@ -173,7 +173,7 @@ jobs:
         run: bun install
 
       - name: Target Safari 13+ (macOS)
-        if: matrix.identifier == 'macos-arm-old' || matrix.identifier == 'macos-x86-old'
+        if: matrix.identifier == 'macos-arm-old' || matrix.identifier == 'macos-x86_64-old'
         uses: restackio/update-json-file-action@2.1
         with:
           file: "./kaede-extra.json"
@@ -274,19 +274,19 @@ jobs:
           path: "./src-tauri/target/release/bundle/appimage/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_amd64.AppImage"
 
       - name: Upload binary (macOS, x86_64, DMG)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-x86' || matrix.identifier == 'macos-x86-old')
+        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-x86_64' || matrix.identifier == 'macos-x86_64-old')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-dmg-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-${{matrix.identifier}}-dmg-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64.dmg"
 
       - name: Upload binary (macOS, x86_64, tarball)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-x86' || matrix.identifier == 'macos-x86-old')
+        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-x86_64' || matrix.identifier == 'macos-x86_64-old')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-x86_64-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-${{matrix.identifier}}-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"
 
       - name: Upload binary (macOS, ARM, DMG)
@@ -294,7 +294,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-dmg-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-${{matrix.identifier}}-dmg-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_aarch64.dmg"
 
       - name: Upload binary (macOS, ARM, tarball)
@@ -302,7 +302,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev-macos-arm-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev${{matrix.identifier}}-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"
 
   windows7-build:

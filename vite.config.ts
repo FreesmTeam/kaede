@@ -76,17 +76,18 @@ function injectSafariPolyfills(): Plugin {
             "children": `
               // Safari < 14
               // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList#browser_compatibility
-              if (window.MediaQueryList && !MediaQueryList.prototype.addEventListener) {
-                MediaQueryList.prototype.addEventListener = (type, listener) => {
-                  if (type === "change") {
+              if (window.matchMedia) {
+                const mql = window.matchMedia("(min-width: 1px)");
+                const proto = Object.getPrototypeOf(mql);
+                
+                if (proto && typeof proto.addEventListener !== 'function') {
+                  proto.addEventListener = function(type, listener) {
                     this.addListener(listener);
-                  }
-                };
-                MediaQueryList.prototype.removeEventListener = (type, listener) => {
-                  if (type === "change") {
+                  };
+                  proto.removeEventListener = function(type, listener) {
                     this.removeListener(listener);
-                  }
-                };
+                  };
+                }
               }
 
               // Safari < 15

@@ -26,6 +26,7 @@ import "@/globals.css";
 import "m3ripple-vue/style.css";
 
 import { VueQueryPlugin } from "@tanstack/vue-query";
+import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { createApp } from "vue";
 
 import App from "@/App.vue";
@@ -214,9 +215,30 @@ async function run(): Promise<void> {
 run().catch(error => {
   // eslint-disable-next-line no-console
   console.error(error);
+
+  const prettified: string = Errors.prettify(error);
+
   log.error(
     __PRE_BUNDLED_FILENAME__,
     "An error occurred:",
-    Errors.prettify(error),
+    prettified,
   );
+  log.debug(__PRE_BUNDLED_FILENAME__, "Making current webview window visible");
+  getCurrentWebviewWindow()
+    .show()
+    .then(() => {
+      const root = document.querySelector(ApplicationRootID);
+
+      if (!root || root?.childNodes?.length > 0) {
+        return;
+      }
+
+      const fallback = document.createElement("div");
+
+      fallback.className =
+        "h-vh w-full flex justify-center items-center select-text whitespace-pre-wrap text-center";
+      fallback.textContent = `A fatal error occurred while starting the launcher:\n${prettified}`;
+
+      root.append(fallback);
+    });
 });

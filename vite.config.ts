@@ -74,6 +74,7 @@ function injectSafariPolyfills(): Plugin {
           {
             "tag"     : "script",
             "children": `
+              // Safari < 14
               if (window.MediaQueryList && !MediaQueryList.prototype.addEventListener) {
                 MediaQueryList.prototype.addEventListener = function(type, listener) {
                   if (type === 'change') this.addListener(listener);
@@ -81,6 +82,11 @@ function injectSafariPolyfills(): Plugin {
                 MediaQueryList.prototype.removeEventListener = function(type, listener) {
                   if (type === 'change') this.removeListener(listener);
                 };
+              }
+
+              // Safari < 15
+              if (window.WebGL2RenderingContext === undefined) {
+                window.WebGL2RenderingContext = window.WebGLRenderingContext ?? {};
               }
             `,
             "injectTo": "head-prepend",

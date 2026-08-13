@@ -1487,7 +1487,7 @@ Your launch arguments are invalid.
 
 I have the same issue :c
 
-No idea why it does not work.
+~~No idea why it does not work.~~ If you are from Russia, see https://hypixel.net/threads/%D0%A4%D0%B8%D0%BA%D1%81-%D0%BF%D0%BE%D0%B4%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D1%8F-%D0%BA-hypixel-%D0%B2-%D0%A0%D0%BE%D1%81%D1%81%D0%B8%D0%B8-2026-%D0%91%D0%B5%D0%B7-warp-windows-linux.6015227/
 
 ### a1.0.4
 

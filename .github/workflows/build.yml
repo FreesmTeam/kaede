@@ -37,6 +37,16 @@ jobs:
             platform: "macos-latest" # For Intel based macs.
             args: "--target x86_64-apple-darwin"
             # type: "non-portable"
+          - name: "macOS ARM (Old Safari)"
+            identifier: "macos-arm-old"
+            platform: "macos-latest" # For Arm based macs (M1 and above).
+            args: "--target aarch64-apple-darwin"
+            # type: "non-portable"
+          - name: "macOS x86_64 (Old Safari)"
+            identifier: "macos-x86-old"
+            platform: "macos-latest" # For Intel based macs.
+            args: "--target x86_64-apple-darwin"
+            # type: "non-portable"
           - name: "Linux"
             identifier: "linux"
             platform: "ubuntu-22.04"
@@ -163,7 +173,7 @@ jobs:
         run: bun install
 
       - name: Target Safari 13+ (macOS)
-        if: matrix.platform == 'macos-latest'
+        if: matrix.identifier == 'macos-arm-old' || matrix.identifier == 'macos-x86-old'
         uses: restackio/update-json-file-action@2.1
         with:
           file: "./kaede-extra.json"
@@ -264,7 +274,7 @@ jobs:
           path: "./src-tauri/target/release/bundle/appimage/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_amd64.AppImage"
 
       - name: Upload binary (macOS, x86_64, DMG)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-x86'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-x86' || matrix.identifier == 'macos-x86-old')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
@@ -272,7 +282,7 @@ jobs:
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_x64.dmg"
 
       - name: Upload binary (macOS, x86_64, tarball)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-x86'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-x86' || matrix.identifier == 'macos-x86-old')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
@@ -280,7 +290,7 @@ jobs:
           path: "./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"
 
       - name: Upload binary (macOS, ARM, DMG)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-arm'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-arm' || matrix.identifier == 'macos-arm-old')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
@@ -288,7 +298,7 @@ jobs:
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{ steps.json_properties.outputs.productName }}_${{steps.json_properties.outputs.version}}_aarch64.dmg"
 
       - name: Upload binary (macOS, ARM, tarball)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'macos-arm'
+        if: (startsWith(github.ref, 'refs/tags/') != true) && (matrix.identifier == 'macos-arm' || matrix.identifier == 'macos-arm-old')
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"

@@ -21,14 +21,19 @@
       // the Browser live preview of Kaede even though 'WebGL2RenderingContext'
       // is still undefined, because (I think that this is the marker reason)
       // the 3D skin is not rendered in that preview.
-      if (!window.WebGL2RenderingContext) {
-        window.WebGL2RenderingContext = undefined;
-      }
+      /*
+       * if (!window.WebGL2RenderingContext) {
+       *   window.WebGL2RenderingContext = undefined;
+       * }
+       */
+      // UPD: It turns out that the WebView that is available in macOS 10.15
+      // is Safari 13. And that version breaks way more things
+      // than a simple 'WebGL2RenderingContext'
 
       window.__TAURI_INTERNALS__.invoke("plugin:log|log", {
         "level"   : 3,
         "message" : "Starting 'main.ts' module evaluation",
-        "location": "index.html:28",
+        "location": "index.html:36",
       });
     </script>
     <div id="app"></div>

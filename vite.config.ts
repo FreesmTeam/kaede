@@ -20,7 +20,7 @@ import path from "node:path";
 
 import vue from "@vitejs/plugin-vue";
 import unocss from "unocss/vite";
-import { defineConfig } from "vite";
+import { defineConfig, type IndexHtmlTransformResult, type Plugin } from "vite";
 import eslint from "vite-plugin-eslint2";
 
 import kaedeExtraConfiguration from "./kaede-extra.json";
@@ -64,18 +64,58 @@ function handleSourceFileNames(): {
   };
 }
 
+function injectSafariPolyfills(): Plugin {
+  return {
+    "name"              : "inject-safari-polyfills",
+    "transformIndexHtml": {
+      "order": "pre",
+      "handler"(): IndexHtmlTransformResult {
+        return [
+          {
+            "tag"     : "script",
+            "children": `
+              if (window.MediaQueryList && !MediaQueryList.prototype.addEventListener) {
+                MediaQueryList.prototype.addEventListener = function(type, listener) {
+                  if (type === 'change') this.addListener(listener);
+                };
+                MediaQueryList.prototype.removeEventListener = function(type, listener) {
+                  if (type === 'change') this.removeListener(listener);
+                };
+              }
+            `,
+            "injectTo": "head-prepend",
+          },
+        ];
+      },
+    },
+  };
+}
+
 // In macOS builds, 'oldSafari' is true
-const transpiledForSafari = kaedeExtraConfiguration.oldSafari ? {
-  "target": ["safari13"],
-} : {};
+const transpiledForSafari = {
+  "build": kaedeExtraConfiguration.oldSafari ? {
+    "target": ["safari13"],
+  } : {},
+  "esbuild": kaedeExtraConfiguration.oldSafari ? {
+    "esbuildOptions": {
+      "target": ["safari13"],
+    },
+  } : {},
+  "plugins": kaedeExtraConfiguration.oldSafari ? [
+    injectSafariPolyfills(),
+  ] : [],
+};
 
 export default defineConfig({
   // Use '/kaede' base path for GitHub Pages
   "base" : kaedeExtraConfiguration.useKaedeBase ? "/kaede" : undefined,
   "build": {
+    ...transpiledForSafari.build,
     // Do not inline any images
     "assetsInlineLimit": 0,
-    ...transpiledForSafari,
+  },
+  "optimizeDeps": {
+    ...transpiledForSafari.esbuild,
   },
   // Better support for Tauri CLI output
   "clearScreen": false,
@@ -104,6 +144,7 @@ export default defineConfig({
   "plugins": [
     // Replace all '__PRE_BUNDLED_FILENAME__,' variables at build time
     handleSourceFileNames(),
+    ...transpiledForSafari.plugins,
     // Handle a Vue framework
     vue(),
     // Handle a UnoCSS package

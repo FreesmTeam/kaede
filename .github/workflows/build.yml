@@ -302,7 +302,7 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           if-no-files-found: "warn"
-          name: "${{ steps.json_properties.outputs.productName }}-dev${{matrix.identifier}}-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
+          name: "${{ steps.json_properties.outputs.productName }}-dev-${{matrix.identifier}}-tarball-${{steps.json_properties.outputs.version}}-${{ github.ref_name }}"
           path: "./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{ steps.json_properties.outputs.productName }}.app.tar.gz"
 
   windows7-build:

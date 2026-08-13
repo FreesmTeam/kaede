@@ -103,7 +103,7 @@ function injectSafariPolyfills(): Plugin {
                   // which only contains JSON values. Well, we could use this library:
                   // https://github.com/ungap/structured-clone
                   // But I am too lazy to add it properly here
-                  return JSON.parse(JSON.stringify(obj));
+                  return JSON.parse(JSON.stringify(input));
                 };
               }
             `,

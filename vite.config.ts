@@ -75,18 +75,36 @@ function injectSafariPolyfills(): Plugin {
             "tag"     : "script",
             "children": `
               // Safari < 14
+              // https://developer.mozilla.org/en-US/docs/Web/API/MediaQueryList#browser_compatibility
               if (window.MediaQueryList && !MediaQueryList.prototype.addEventListener) {
-                MediaQueryList.prototype.addEventListener = function(type, listener) {
-                  if (type === 'change') this.addListener(listener);
+                MediaQueryList.prototype.addEventListener = (type, listener) => {
+                  if (type === "change") {
+                    this.addListener(listener);
+                  }
                 };
-                MediaQueryList.prototype.removeEventListener = function(type, listener) {
-                  if (type === 'change') this.removeListener(listener);
+                MediaQueryList.prototype.removeEventListener = (type, listener) => {
+                  if (type === "change") {
+                    this.removeListener(listener);
+                  }
                 };
               }
 
               // Safari < 15
+              // https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext#browser_compatibility
               if (window.WebGL2RenderingContext === undefined) {
                 window.WebGL2RenderingContext = window.WebGLRenderingContext ?? {};
+              }
+
+              // Safari < 15.4
+              // https://developer.mozilla.org/en-US/docs/Web/API/Window/structuredClone#browser_compatibility
+              if (window.structuredClone === undefined) {
+                window.structuredClone = input => {
+                  // Kaede only used 'structuredClone' to clone a 'ConfigType' object,
+                  // which only contains JSON values. Well, we could use this library:
+                  // https://github.com/ungap/structured-clone
+                  // But I am too lazy to add it properly here
+                  return JSON.parse(JSON.stringify(obj));
+                };
               }
             `,
             "injectTo": "head-prepend",

@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-This guide is hopefully written for any Windows 7, but Kaede was tested only in Windows 7 x64 Ultimate Service Pack 1 (build 7601).
+This guide is hopefully written for any version of Windows 7, but Kaede was tested only in Windows 7 x64 Ultimate Service Pack 1 (build 7601).
 
 Install these necessary updates and runtimes:
 
@@ -27,7 +27,7 @@ Also, you probably need to update your root-certificates to avoid TLS certificat
 certutil -generateSSTFromWU C:\roots.sst
 ```
 
-Get that `roots.sst` file into `C:\` in your Windows 7 and open powershell (administrator) to run:
+Get that `roots.sst` file into `C:\` in your Windows 7 and open powershell (Administrator) to run:
 
 ```shell
 $certs = New-Object Security.Cryptography.X509Certificates.X509Certificate2Collection

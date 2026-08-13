@@ -21,7 +21,7 @@ Information about extensions can be found [here](./EXTENSIONS.md).
 
 ## Code of Conduct
 
-See [Code of Conduct](./CODE_OF_CONDUCT.md)
+See [this file](./CODE_OF_CONDUCT.md).
 
 ## Code Formatting
 
@@ -36,7 +36,7 @@ Please also follow the project's conventions for the frontend:
 - Functions, variables, and non-exported constants should be formatted as `camelCase`.
 - Element styling is preferred by using `Tailwind v3` classes. In case the UnoCSS preset misses some utility classes, make a custom CSS class.
 - [BEM](https://en.bem.info/methodology/) methodology is the preferred way to name element IDs and classes (alongside the Atomic CSS names) to simplify styling for extensions. All elements should have unique IDs.
-- Desirably, HTML structure should be semantically correct, i.e. no `<div></div>` in the `<button></button>` elements.
+- Desirably, HTML structure should be semantically correct, i.e., no `<div></div>` in the `<button></button>` elements.
 
 ## Commit Messages
 
@@ -62,14 +62,13 @@ TL;DR follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.
   - `build`: changes that affect the build system or external dependencies.
   - `chore`: other changes that do not modify src or test files.
   - `revert`: reverts a previous commit.
-  - `release`: releasing a new version.
   - `ci`: changes to our CI configuration.
 - **Scope**: provides a short context to the commit.
 - **Breaking Change**: used when introducing a (possibly) breaking change.
 
 ### Guidelines
 
-- Use imperative mood, e.g. "add feature" instead of "adding feature" or "added feature".
+- Use imperative mood, e.g., "add feature" instead of "adding feature" or "added feature".
 - Avoid ending with a period.
 
 ### Examples
@@ -77,7 +76,7 @@ TL;DR follow [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.
 - `feat: add a support for fabric`
 - `refactor!: re-write the config synchronization`
 - `perf(startup): concurrently resolve independent Tauri API invokes`
-- `chore(deps): add svelte`
+- `chore(deps): add the svelte package`
 - `build(linux)!: migrate to the mold linker`
 
 Or just look at others' commit messages lol

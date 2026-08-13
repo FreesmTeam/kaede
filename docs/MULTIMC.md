@@ -42,21 +42,28 @@ Also, take into consideration RyRy's[^1] explanations:
 Initially, I wanted to write the code parts as a pseudocode following the [CLRS conventions](https://course.ccs.neu.edu/cs3000/resources/latex_pseudocode.pdf). However, it would have taken plenty of time, so this walkthrough will only feature TypeScript. To make it easier for one to understand type schemas, they need to know:
 
 - The `?` symbol represents an optional field, e.g. `{ "a"?: string }`.
-- The `|` symbol represents a logical `XOR` (either of the types are present but not both).
-- The `&` symbol represents a logical `AND` (both types are present).
+- The `|` symbol represents a union (set theory).
+- The `&` symbol represents an intersection (set theory).
 
-Despite `|` and `&` being called 'Union' and 'Intersection' types, respectively, they do **not** represent the Set operators:
+However, it should be noted that the `|` and `&` symbols cover the sets of _values_, not keys:
 
 ```ts
+// This is trivial: we have either the first or the second option, or both
 type First = { "a": number } | { "b": string };
 // Implies:
 // { "a": 10 };
 // { "b": "Eden Treaty" };
+// { "a": 10, "b": "Decagrammaton" }; <-- both fields 'a' and 'b' are present
 //
 // However, does not imply these:
-// { "a": 10, "b": "Decagrammaton" };
 // {};
 
+// This one is a bit more complex.
+// If the intersection covered the set of keys, the final type would be {}.
+// Covering the set of values, on the other hand, means we are essentially
+// making an object type that has values that belong to both type A and B,
+// i.e., '"a": number' belongs to type A, '"b": string' belongs to type B,
+// so we have a type C to where '"a": number' and '"b": string' belong
 type Second = { "a": number } & { "b": string };
 // Implies:
 // { "a": 0, "b": "Moondrop Aria" }; <-- both fields 'a' and 'b' are present
@@ -67,7 +74,7 @@ type Second = { "a": number } & { "b": string };
 // {};
 ```
 
-- The `[key: KeyType]: value` field is a value with the computed key name of `KeyType`. For example, `{ [key: "macos" | "linux"]: string }` is equivalent to:
+The `[key in KeyType]: value` field is a value with the computed key name of `KeyType`. For example, `{ [key in "macos" | "linux"]: string }` is equivalent to:
 
 ```ts
 type T = {
@@ -79,7 +86,7 @@ type T = {
 The `Partial<{ ... }>` type represents an object where all fields are optional. That is, all fields could be missing. For example:
 
 ```ts
-type Example = Partial<{ [key: "macos" | "linux"]: string }>;
+type Example = Partial<{ [key in "macos" | "linux"]: string }>;
 // Implies:
 // { "linux": "NixOS Yarara" };
 // { "macos": "macOS Sequoia" };
@@ -563,7 +570,7 @@ type SpecificPatchLibraryType = {
     // Present in older versions (1.16.5)
     "classifiers"?: {
       // Same structure as in the 'artifact' field
-      [key: SpecificPatchClassifierKeyType]: {
+      [key in SpecificPatchClassifierKeyType]: {
         "sha1": string;
         "size": number;
         "url": string;
@@ -582,7 +589,7 @@ type SpecificPatchLibraryType = {
   "natives"?: Partial<{
     // The 'linux' key turns into a 'natives-linux' value that
     // might have a 'SpecificPatchClassifierKeyType' type
-    [key: SpecificPatchLibraryOSNameType]: string;
+    [key in SpecificPatchLibraryOSNameType]: string;
   }>;
   // A list of rules that should be applied for specified platforms (and arches)
   "rules"?: Array<SpecificPatchLibraryRuleType>;

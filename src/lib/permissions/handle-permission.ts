@@ -18,6 +18,7 @@
 
 import { handleInternetPermission } from "@/lib/permissions/atomic/internet.ts";
 import { handleLoggingPermission } from "@/lib/permissions/atomic/logging.ts";
+import { handleTimePermission } from "@/lib/permissions/atomic/time.ts";
 import {
   handleBasicUIPermission,
 } from "@/lib/permissions/atomic/ui.ts";
@@ -27,6 +28,9 @@ export function handlePermission(permission: PermissionType | string, id: string
   const base: string = permission.split("::")[0];
 
   switch (base) {
+    case "time": {
+      return handleTimePermission({ id, permission });
+    }
     case "ui-basic": {
       return handleBasicUIPermission({ id });
     }

@@ -1,6 +1,9 @@
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
 export const Permissions = {
+  "General": {
+    "Time": "time",
+  },
   "UI": {
     "Basic": "ui-basic",
     "Style": "ui-style",

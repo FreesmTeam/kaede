@@ -1,8 +1,5 @@
 import { Type } from "typebox";
 
-import { PermissionsList } from "@/constants/permissions.ts";
-import type { PermissionType } from "@/types/extensions/permission.type.ts";
-
 export const ExtensionMetadataSchema = Type.Intersect([
   Type.Object({
     "logo": Type.String(),
@@ -19,11 +16,7 @@ export const ExtensionMetadataSchema = Type.Intersect([
   }),
   Type.Partial(Type.Object({
     "description": Type.String(),
-    "permissions": Type.Array(
-      Type.Union(
-        PermissionsList.map((permission: PermissionType) => Type.Literal(permission)),
-      ),
-    ),
-    "enabled": Type.Boolean(),
+    "permissions": Type.Array(Type.String()),
+    "enabled"    : Type.Boolean(),
   })),
 ]);

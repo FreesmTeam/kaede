@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import "ses";
+
 import Errors from "@/lib/errors";
 import Extensions from "@/lib/extensions";
 import { log } from "@/lib/logging/log.ts";

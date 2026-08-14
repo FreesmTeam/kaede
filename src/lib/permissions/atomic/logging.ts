@@ -1,3 +1,5 @@
+import "ses";
+
 import { log } from "@/lib/logging/log.ts";
 
 export function handleLoggingPermission({ id }: { "id": string }): unknown {

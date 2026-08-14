@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import "ses";
+
 import { type ClientOptions, fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import { log } from "@/lib/logging/log.ts";

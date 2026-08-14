@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import "ses";
+
 import { createSafeDocument, type SafeDocument } from "ark-of-atrahasis";
 
 import { log } from "@/lib/logging/log.ts";

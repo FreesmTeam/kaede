@@ -22,8 +22,8 @@ test(testName, async () => {
     "extensions": {
       "list"                      : [],
       "permissions"               : {},
-      "enabled"                   : true,
-      "allowUnrestrictedUntrusted": true,
+      "enabled"                   : false,
+      "allowUnrestrictedUntrusted": false,
       "showAppAfterExtensionsLoad": false,
     },
     "ui": {

@@ -36,6 +36,18 @@ export function runInSandbox({
   "enable" : () => void | Promise<void>;
   "disable": () => void | Promise<void>;
 } {
+  try {
+    // It will not lock down more than once
+    Extensions.lockdownEnvironment();
+  } catch (error: unknown) {
+    // Do not continue executing the plugin if the lockdown failed
+    return log.error(
+      __PRE_BUNDLED_FILENAME__,
+      `An error occurred while locking down the environment (extension '${id}'):`,
+      Errors.prettify(error),
+    );
+  }
+
   const scopedThis = Permissions.grantStaticPermissions({ id, permissions });
 
   /*
@@ -53,9 +65,6 @@ export function runInSandbox({
   } = { "enable": (): void => {}, "disable": (): void => {} };
 
   try {
-    // It will not lock down more than once
-    Extensions.lockdownEnvironment();
-
     const compartment = new Compartment({
       "globals": harden({
         "requestPermissions": wrappedPermissionsRequest,

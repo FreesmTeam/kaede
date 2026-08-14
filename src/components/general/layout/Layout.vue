@@ -1,77 +1,26 @@
 <script setup lang="ts">
-import { useEventListener } from "@vueuse/core";
-import { ref } from "vue";
-
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import PageError from "@/components/general/errors/PageError.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { ContextMenu } from "@/constants/application.ts";
 import { C } from "@/extendable/component-registry.ts";
-import { GlobalObject } from "@/extendable/global-object.ts";
 import { globalStates } from "@/states/global.ts";
 
-const contextMenu = ref<{
-  "opened": boolean;
-  "x"     : number;
-  "y"     : number;
-}>({ "opened": false, "x": 0, "y": 0 });
+const { contextMenu } = defineProps<{
+  "contextMenu": {
+    "opened": boolean;
+    "x"     : number;
+    "y"     : number;
+  };
+}>();
 
 const { styles } = useConfigColors();
-
-function closeContextMenu(): void {
-  contextMenu.value.opened = false;
-}
-function showContextMenu(event: MouseEvent): void {
-  if (!globalStates.development.enableNativeContextMenu) {
-    event.preventDefault();
-  }
-
-  const target = event.target as HTMLElement;
-
-  if (
-    target?.className?.includes?.("__context_menu__wrapper") ||
-    target?.parentElement?.className?.includes?.("__context_menu__entry")
-  ) {
-    return;
-  }
-
-  if (
-    target?.className?.includes?.("__context-menu-disable") ||
-    target?.className?.includes?.("_rippleOverlay")
-  ) {
-    closeContextMenu();
-
-    return;
-  }
-
-  contextMenu.value.opened = true;
-  contextMenu.value.x = event.clientX;
-  contextMenu.value.y = event.clientY;
-}
-
-ContextMenu.show = showContextMenu;
-ContextMenu.close = closeContextMenu;
-
-GlobalObject.libs.ContextMenu = ContextMenu;
-
-useEventListener(window, "pointerdown", (event: PointerEvent) => {
-  const target = event.target as HTMLElement;
-
-  if (
-    target?.className?.includes?.("__context_menu__wrapper") ||
-    target?.parentElement?.className?.includes?.("__context_menu__entry")
-  ) {
-    return;
-  }
-
-  closeContextMenu();
-});
 </script>
 
 <template>
   <div
     id="__layout__wrapper"
-    @contextmenu="showContextMenu"
+    @contextmenu="ContextMenu.show"
     class="relative h-vh w-full flex flex-nowrap gap-0 overflow-hidden text-white"
     :style="styles.root"
   >

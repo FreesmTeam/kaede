@@ -2,6 +2,7 @@
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { confirm } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import type { Ref } from "vue";
 
 import EnglishTranslations from "@/constants/english.json";
 import FileStructure from "@/constants/file-structure.ts";
@@ -53,6 +54,11 @@ export const CSSThemeExtensions = {
 } as const;
 
 export const ContextMenu: {
+  "contextMenu"?: Ref<{
+    "opened": boolean;
+    "x"     : number;
+    "y"     : number;
+  }>;
   "show" : (event: MouseEvent) => void;
   "close": () => void;
 } = {

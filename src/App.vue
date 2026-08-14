@@ -28,13 +28,23 @@ import Router from "@/components/general/layout/Router.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
-import { TranslationsContextKey } from "@/constants/application.ts";
+import { useContextMenu } from "@/composables/use-context-menu.ts";
+import { ContextMenu, TranslationsContextKey } from "@/constants/application.ts";
 import { C, LazyExtensionLoader } from "@/extendable/component-registry.ts";
 import { globalStates } from "@/states/global.ts";
 import type {
   TranslationsStateType,
   TranslationsType,
 } from "@/types/translations/translations.type.ts";
+
+const { contextMenu, showContextMenu, closeContextMenu } = useContextMenu();
+
+/**
+ * Expose the custom context menu utilities
+ */
+ContextMenu.contextMenu = contextMenu;
+ContextMenu.show = showContextMenu;
+ContextMenu.close = closeContextMenu;
 
 /**
  * Contains a computed translation state to pass down with the 'inject'.
@@ -53,7 +63,7 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
   <ErrorBoundary>
     <template #default>
       <ContextProviders>
-        <C.Layout>
+        <C.Layout :context-menu="contextMenu">
           <Router />
 
           <Transition name="fade">

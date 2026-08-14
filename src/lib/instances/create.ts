@@ -75,6 +75,13 @@ export function create(
     return undefined;
   }
 
+  const toAdd: Partial<Record<ExtendedPatchUIDType, string>> = {};
+
+  if (uid === Patches.FabricLoader) {
+    // 'net.fabricmc.intermediary' should equal a Minecraft version
+    toAdd[Patches.FabricIntermediary] = currentInstance.patchVersions[Patches.Minecraft];
+  }
+
   const randomDigits: number = Math.floor(Math.random() * 1000);
   const id: string =
     "instance_" + randomDigits + "_" +
@@ -86,6 +93,10 @@ export function create(
     ...DefaultInstanceSettings,
     ...globalStates.minecraft,
     ...currentInstance,
+    "patchVersions": {
+      ...currentInstance.patchVersions,
+      ...toAdd,
+    },
     "entry": uid,
   };
 

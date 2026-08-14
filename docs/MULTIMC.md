@@ -320,7 +320,7 @@ The patch index files are usually used on Minecraft instance creation. They are 
 
 > [!WARNING]
 > This is a beginning of absolute horrors of Minecraft installation and launching. It only gets worse from this point ^^
-> 
+>
 > <img width="60%" src="./assets/never-kys-arisu.jpg" alt="A twitter post with Tendou Arisu plush and a 'never kys' text" />
 
 The JSON files for version-specific patches diverse with each patch. This is what the final type looks like:
@@ -605,7 +605,7 @@ type SpecificPatchLibraryType = {
 > [!IMPORTANT]
 > Some libraries only specify the `name` field.
 > In such case, use `https://libraries.minecraft.net` as a base URL for downloading that library.
-> 
+>
 > Example:
 > ```json
 > {
@@ -695,7 +695,7 @@ type SpecificPatchClassifierKeyType =
 
 > [!NOTE]
 > The next sections will include the coding part...
-> 
+>
 > <img width="60%" src="./assets/never-kys-hina.jpg" alt="A twitter post with Sorasaki Hina plush and a 'never kys' text" />
 
 ### Normalizing the artifact name
@@ -981,9 +981,9 @@ If the library name includes the `native` keyword, then the library **is** nativ
 
 > [!IMPORTANT]
 > Old-formatted native libraries are separate from "non-native" libraries. For this step, you should ignore them (the `classifiers` field).
-> 
+>
 > New-formatted native libraries should be both added into classpath and extracted (the `artifact` field), so you need to parse them here too.
-> 
+>
 > Do not forget about `+libraries` field. I only saw it in the OptiFine patch, though. By checking how Hello Minecraft! Launcher sorts classpath, it seems like `+libraries` should go before all other `libraries`
 
 If the library only has a `name` field, then use `https://libraries.minecraft.net` as a base URL and build a download URL by normalizing `name` (`<group>:<name>:<version>[:classifier][@extension]`) into `<group splitted by dots and joined using a forward slash>/<name>/<version>/<name>-<version>[-classifier only if present].<extension>`, e.g. `net.minecraft:launchwrapper:1.12` becomes `https://libraries.minecraft.net/net/minecraft/launchwrapper/1.12/launchwrapper-1.12.jar`.
@@ -1161,7 +1161,7 @@ function finalizePatches({
 
 > [!NOTE]
 > One of the most complex parts is done. However, you still need to download artifacts and build classpath, JVM arguments, and game arguments
-> 
+>
 > <img width="60%" src="./assets/never-kys-hoshino.jpg" alt="A twitter post with Takanashi Hoshino plush and a 'never kys' text" />
 
 ## Downloading objects
@@ -1305,9 +1305,9 @@ The launching command looks like this: `<java binary> <JVM arguments> <classpath
 
 > [!IMPORTANT]
 > Depending on your programming language and used libraries to spawn programs, you probably want to provide arguments as an array of strings. Otherwise, you might see `Error: Could not create the Java Virtual Machine`.
-> 
+>
 > If you have decided to provide launch arguments as an array of strings, then the elements of that array should approximately look like this:
-> 
+>
 > ```ts
 > const commandArguments: Array<string> = [
 >   "-XX:HeapDumpPath=MojangTricksIntelDriversForPerformance_javaw.exe_minecraft.exe.heapdump",
@@ -1395,7 +1395,7 @@ Lin[^3] states that "the classpath is a string that includes all the paths to th
 The order of libraries in the Java classpath matters. To build it like in Hello Minecraft! Launcher, add the parsed libraries from `+libraries` first, then from the `libraries` field, and end with a path to the client jar.
 
 > Hello Minecraft! Launcher this, Hello Minecraft! Launcher that... Wasn't this a guide for launching Minecraft using a MultiMC patch system?
-> 
+>
 > Hello Minecraft! Launcher directly launches Minecraft since it is a Java program, so the launch command is easily accessible. Prism Launcher uses Java applets to manage Minecraft launching because it is not a Java program, so that seems to be a reason why I cannot get the exact launch command for Prism.
 
 The libraries should be separated by a `:` symbol on Linux and macOS. On Windows, the `;` symbol should be used.

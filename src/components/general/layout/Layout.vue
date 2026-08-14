@@ -4,7 +4,6 @@ import { ref } from "vue";
 
 import ErrorBoundary from "@/components/general/errors/ErrorBoundary.vue";
 import PageError from "@/components/general/errors/PageError.vue";
-import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { ContextMenu } from "@/constants/application.ts";
 import { C } from "@/extendable/component-registry.ts";
@@ -70,31 +69,29 @@ useEventListener(window, "pointerdown", (event: PointerEvent) => {
 </script>
 
 <template>
-  <ContextProviders>
-    <div
-      id="__layout__wrapper"
-      @contextmenu="showContextMenu"
-      class="relative h-vh w-full flex flex-nowrap gap-0 overflow-hidden text-white"
-      :style="styles.root"
-    >
-      <C.LaunchProgress />
-      <C.ContextMenu
-        :opened="contextMenu.opened"
-        :x="contextMenu.x"
-        :y="contextMenu.y"
-      />
-      <C.Sidebar />
-      <!-- Pages error boundary -->
-      <ErrorBoundary :reset-key="globalStates.currentPage">
-        <template #default>
-          <slot />
-        </template>
+  <div
+    id="__layout__wrapper"
+    @contextmenu="showContextMenu"
+    class="relative h-vh w-full flex flex-nowrap gap-0 overflow-hidden text-white"
+    :style="styles.root"
+  >
+    <C.LaunchProgress />
+    <C.ContextMenu
+      :opened="contextMenu.opened"
+      :x="contextMenu.x"
+      :y="contextMenu.y"
+    />
+    <C.Sidebar />
+    <!-- Pages error boundary -->
+    <ErrorBoundary :reset-key="globalStates.currentPage">
+      <template #default>
+        <slot />
+      </template>
 
-        <!-- In case of an error, show this template -->
-        <template #error="{ currentError }">
-          <PageError :error="currentError" />
-        </template>
-      </ErrorBoundary>
-    </div>
-  </ContextProviders>
+      <!-- In case of an error, show this template -->
+      <template #error="{ currentError }">
+        <PageError :error="currentError" />
+      </template>
+    </ErrorBoundary>
+  </div>
 </template>

@@ -25,6 +25,7 @@ import ExtensionsError from "@/components/general/errors/ExtensionsError.vue";
 import GlobalError from "@/components/general/errors/GlobalError.vue";
 import CssThemeLoader from "@/components/general/extensions/CssThemeLoader.vue";
 import Router from "@/components/general/layout/Router.vue";
+import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
 import { TranslationsContextKey } from "@/constants/application.ts";
@@ -51,16 +52,18 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
   <!-- Global error boundary -->
   <ErrorBoundary>
     <template #default>
-      <C.Layout>
-        <Router />
+      <ContextProviders>
+        <C.Layout>
+          <Router />
 
-        <Transition name="fade">
-          <LogViewer v-if="globalStates.logs.show" />
-        </Transition>
+          <Transition name="fade">
+            <LogViewer v-if="globalStates.logs.show" />
+          </Transition>
 
-        <DevelopmentMode />
-        <NonBundledClasses />
-      </C.Layout>
+          <DevelopmentMode />
+          <NonBundledClasses />
+        </C.Layout>
+      </ContextProviders>
     </template>
 
     <template #error="{ currentError }">

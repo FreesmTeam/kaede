@@ -24,17 +24,18 @@ export type AccountActionHandlersType = {
   "success": () => void;
   "error"  : (message: string, error?: unknown) => void;
 };
+export type AccountActionPropertiesType = {
+  "event"   : MouseEvent;
+  "account" : AccountType;
+  // We are passing this so that the action can easily make changes to 'accounts.json'
+  "accounts": WrappedAccountsType | undefined;
+  // These reflect statuses in the UI
+  "handlers": AccountActionHandlersType;
+};
 export type AccountActionType = {
-  "icon"  : string;
-  "label" : string;
-  "action": (properties: {
-    "event"   : MouseEvent;
-    "account" : AccountType;
-    // We are passing this so that the action can easily make changes to 'accounts.json'
-    "accounts": WrappedAccountsType | undefined;
-    // These reflect statuses in the UI
-    "handlers": AccountActionHandlersType;
-  }) => void | Promise<void>;
+  "icon"     : string;
+  "label"    : string;
+  "action"   : (properties: AccountActionPropertiesType) => Promise<boolean>;
   "disabled"?: (account: AccountType) => boolean;
 };
 export type AccountActionCollectionType = Array<AccountActionType>;

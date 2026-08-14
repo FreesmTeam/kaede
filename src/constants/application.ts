@@ -1,13 +1,10 @@
 /* eslint-disable max-lines */
-import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { confirm } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import type { Ref } from "vue";
 
 import EnglishTranslations from "@/constants/english.json";
 import FileStructure from "@/constants/file-structure.ts";
-import Auth from "@/lib/auth";
-import Configs from "@/lib/configs";
+import { ActionRegistry } from "@/extendable/action-registry.ts";
 import Errors from "@/lib/errors";
 import FileManager from "@/lib/file-manager";
 import Instances from "@/lib/instances";
@@ -20,10 +17,12 @@ import FTBIcon from "@/resources/FTBIcon.svg";
 import ModrinthIcon from "@/resources/ModrinthIcon.webp";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
-import type { EnsureFreshResultType } from "@/types/auth/microsoft-auth.type.ts";
 import type { AccountType } from "@/types/configs/account.type.ts";
 import type { LogLevelType } from "@/types/logging/log-level.type.ts";
-import type { AccountActionCollectionType } from "@/types/ui/account-action.type.ts";
+import type {
+  AccountActionCollectionType,
+  AccountActionPropertiesType,
+} from "@/types/ui/account-action.type.ts";
 import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 
 export const ApplicationName = "Kaede";
@@ -68,80 +67,34 @@ export const ContextMenu: {
   "close": () => {},
 };
 
+export const ActionKeys = {
+  "AccountsRefresh" : "accounts.refresh",
+  "AccountsCopyUUID": "accounts.copy-uuid",
+  "AccountsRemove"  : "accounts.remove",
+} as const;
+
 export const AccountActions: AccountActionCollectionType = [
   {
     "icon"    : "i-lucide-refresh-cw",
     "label"   : "profile.accounts.refresh",
     // Offline accounts don't need to be refreshed
     "disabled": (account: AccountType): boolean => account.msa === null,
-    "action"  : async ({ account, accounts, handlers }): Promise<void> => {
-      // We use 'pending' only for time-consuming tasks
-      handlers.pending();
-      const result: EnsureFreshResultType = await Auth.ensureFreshAccount(account, true);
-
-      if (result.status === "failed") {
-        return handlers.error("Failed to refresh the account");
-      }
-
-      if (result.status === "fresh") {
-        return handlers.success();
-      }
-
-      if (!accounts?.value) {
-        return handlers
-          .error("Failed to update stored accounts as received 'accounts' is undefined");
-      }
-
-      accounts.value = accounts.value.map(current => (
-        current.profile.uuid === account.profile.uuid
-          ? result.account
-          : current
-      ));
-
-      await Configs.writeAccounts({
-        "accounts": accounts.value,
-      });
-
-      handlers.success();
+    "action"  : (properties: AccountActionPropertiesType): Promise<boolean> => {
+      return ActionRegistry.execute(ActionKeys.AccountsRefresh, properties);
     },
   },
   {
     "icon"  : "i-lucide-copy",
     "label" : "profile.accounts.copy-uuid",
-    "action": async ({ account, handlers }): Promise<void> => {
-      await writeText(account.profile.uuid);
-
-      handlers.success();
+    "action": (properties: AccountActionPropertiesType): Promise<boolean> => {
+      return ActionRegistry.execute(ActionKeys.AccountsCopyUUID, properties);
     },
   },
   {
     "icon"  : "i-lucide-trash-2",
     "label" : "profile.accounts.remove",
-    "action": async ({ account, accounts, handlers }): Promise<void> => {
-      handlers.pending();
-
-      if (!accounts?.value) {
-        return handlers.error("Failed to remove the account as received 'accounts' is undefined");
-      }
-
-      const toDelete: boolean = await confirm(
-        `Do you really want to delete '${account.profile.name}'?`,
-        "Accounts",
-      );
-
-      if (!toDelete) {
-        return handlers.reset();
-      }
-
-      accounts.value = accounts.value.filter(({ profile }) => (
-        profile.uuid !== account.profile.uuid
-      ));
-
-      await Configs.writeAccounts({
-        "accounts": accounts.value,
-      });
-
-      handlers.success();
+    "action": (properties: AccountActionPropertiesType): Promise<boolean> => {
+      return ActionRegistry.execute(ActionKeys.AccountsRemove, properties);
     },
   },
 ];

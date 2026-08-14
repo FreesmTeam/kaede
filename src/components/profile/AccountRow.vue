@@ -106,7 +106,11 @@ async function wrapAction(event: MouseEvent, entry: AccountActionType): Promise<
   };
 
   try {
-    await entry.action({ event, account, handlers, accounts });
+    const result: boolean = await entry.action({ event, account, handlers, accounts });
+
+    if (!result) {
+      handlers.error(`Failed to run the action for '${entry.label}'`);
+    }
   } catch (error: unknown) {
     handlers.error(`Failed to run the action for '${entry.label}':`, error);
   }

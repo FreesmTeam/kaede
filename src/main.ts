@@ -59,6 +59,7 @@ async function run(): Promise<void> {
 
   // The global object is accessed not only by extensions but by the application itself
   Globals.declareGlobals();
+  Globals.declareActionRegistry();
 
   // Used in Wails v3 builds
   if (await Wails.detectIsWails()) {

@@ -3,9 +3,11 @@ import type { Component } from "vue";
 import { ActionRegistry, Actions } from "@/extendable/action-registry.ts";
 import { __registerComponent, __restoreComponent, C } from "@/extendable/component-registry.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
-import { declareGlobals } from "@/lib/globals/scopes/declare-globals.ts";
+import { declareActionRegistry } from "@/lib/globals/declare-action-registry.ts";
+import { declareGlobals } from "@/lib/globals/declare-globals.ts";
 
 export default {
+  declareActionRegistry,
   declareGlobals,
   Actions,
   ActionRegistry,

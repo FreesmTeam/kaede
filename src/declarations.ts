@@ -31,6 +31,7 @@ import type * as TauriUpload from "@tauri-apps/plugin-upload";
 import type DevelopmentMode from "src/lib/development-mode";
 import type { App, ComponentPublicInstance, ComputedRef, ShallowReactive, ShallowRef } from "vue";
 
+import type Composables from "@/composables";
 import type _Application from "@/constants/application.ts";
 import type _ASCIIArt from "@/constants/ascii-art.ts";
 import type _Browser from "@/constants/browser.ts";
@@ -285,6 +286,11 @@ declare global {
          * A support for the Browser environment (non-application)
          */
         "Browser": typeof Browser;
+
+        /**
+         * Launcher composables
+         */
+        "Composables": typeof Composables;
 
         /**
          * Launcher configuration-related collection of utilities

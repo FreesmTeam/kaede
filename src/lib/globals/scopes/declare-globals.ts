@@ -1,6 +1,7 @@
 import { cancel, onInvalidUrl, onUrl, start } from "@fabianlars/tauri-plugin-oauth";
 import * as Vue from "vue";
 
+import Composables from "@/composables";
 import _Application, { ContextMenu } from "@/constants/application.ts";
 import _ASCIIArt from "@/constants/ascii-art.ts";
 import _Browser from "@/constants/browser.ts";
@@ -63,6 +64,7 @@ export function declareGlobals(): void {
   GlobalObject.libs = {
     Auth,
     Browser,
+    Composables,
     Configs,
     DevelopmentMode,
     Errors,

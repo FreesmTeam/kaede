@@ -98,6 +98,8 @@ class wrappedDate {
   constructor(input: unknown) {
     if (input === undefined) {
       this.currentDate = Date.now();
+
+      return;
     }
 
     // That's why we will validate the input directly in methods

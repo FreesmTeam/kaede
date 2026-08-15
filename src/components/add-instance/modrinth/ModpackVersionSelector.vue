@@ -92,7 +92,7 @@ async function handleClick(event: MouseEvent): Promise<void> {
   const response: Response | {
     "status": string;
     "ok"    : false;
-    // I don't want to wrap in 'try {} catch {}' again
+    // I don't want to wrap it in 'try {} catch {}'
   } = await fetch(packURL).catch(error => {
     // Lol
     return { "status": Errors.prettify(error), "ok": false as const };
@@ -166,7 +166,7 @@ async function handleClick(event: MouseEvent): Promise<void> {
   Modrinth.applyManifest({ manifest, "path": cachePath });
   globalStates.pages["add-instance"]?.select?.(InstanceCreationSections[0]);
 
-  if (projectIcon && globalStates.pages["add-instance"]?.instance?.icon) {
+  if (projectIcon && globalStates.pages["add-instance"]?.instance) {
     globalStates.pages["add-instance"].instance.icon = projectIcon;
   }
 }

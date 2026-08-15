@@ -15,9 +15,9 @@
     "description": "Allows the extension to change the user interface of Kaede"
   },
   "ui::interactivity": {
-    "label": "add interactive UI elements",
+    "label": "change and add interactive UI",
     "icon": "",
-    "description": "Allows the extension to act on your interactions"
+    "description": "Allows the extension to change the user interface of Kaede and act on your interactions"
   },
   "events::page": {
     "label": "",

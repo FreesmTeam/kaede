@@ -24,21 +24,36 @@ import {
 } from "@/lib/permissions/atomic/ui.ts";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
-export function handlePermission(permission: PermissionType | string, id: string): unknown {
-  const base: string = permission.split("::")[0];
+type SplitPermission<T extends PermissionType> =
+  T extends `${infer Base}::${infer Scope}`
+    // The third argument is a dynamic value, e.g., 'internet::http-get::https://github.com'
+    ? [Base, Scope, string]
+    : never;
+
+function split<Key extends PermissionType>(key: Key): SplitPermission<Key> {
+  return key.split("::") as SplitPermission<Key>;
+}
+
+export function handlePermission<Key extends PermissionType>(permission: Key, id: string): unknown {
+  const [base, scope, argument] = split(permission);
+
+  if (!base || !scope) {
+    throw new Error("The requested permission is invalid");
+  }
 
   switch (base) {
     case "time": {
-      return handleTimePermission({ id, permission });
+      // The 'scope' variable belongs to the correct 'base', gladly
+      return handleTimePermission({ id, scope });
     }
-    case "ui-basic": {
-      return handleBasicUIPermission({ id });
+    case "ui": {
+      return handleBasicUIPermission({ id, scope });
     }
     case "internet": {
-      return handleInternetPermission({ id, permission });
+      return handleInternetPermission({ id, scope, argument });
     }
-    case "write-to-log-file": {
-      return handleLoggingPermission({ id });
+    case "log": {
+      return handleLoggingPermission({ id, scope });
     }
     default: {
       return undefined;

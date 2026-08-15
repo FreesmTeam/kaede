@@ -19,32 +19,112 @@
 import "ses";
 
 const wrappedPerformance = {
-  "now": (): number => performance.now(),
-};
-const wrappedDate = {
-  "now"        : (): number => Date.now(),
-  "toISOString": (): string => (new Date).toISOString(),
+  "timeOrigin": performance.timeOrigin,
+  "now"       : (): number => performance.now(),
 };
 
-export function handleTimePermission({
-  permission,
-}: {
-  "id"        : string;
-  "permission": string;
-}): unknown {
-  const parts = permission.split("::");
-
-  parts.shift();
-
-  const scope = parts.join("::");
-
-  if (!scope) {
-    return harden({
-      "performance": wrappedPerformance,
-      "Date"       : wrappedDate,
-    });
+function extractDate(input: unknown): Date {
+  if (
+    (typeof input === "number" && !Number.isNaN(input)) ||
+    typeof input === "string"
+  ) {
+    return harden(new Date(input));
   }
 
+  if (input instanceof wrappedDate) {
+    const absolute: number = input.valueOf();
+
+    return harden(new Date(absolute));
+  }
+
+  throw new TypeError("The input for the 'Date' constructor is invalid");
+}
+
+class wrappedDate {
+  public static now(): number {
+    return Date.now();
+  }
+
+  public static parse(input: unknown): number {
+    if (typeof input !== "string") {
+      throw new TypeError("The input for 'Date#parse' should be a string");
+    }
+
+    return Date.parse(input);
+  }
+
+  public static UTC(
+    year?: unknown,
+    monthIndex?: unknown,
+    date?: unknown,
+    hours?: unknown,
+    minutes?: unknown,
+    seconds?: unknown,
+    ms?: unknown,
+  ): number {
+    const toValidate = [year, monthIndex, date, hours, minutes, seconds, ms];
+    const validated: Array<number> = [];
+
+    for (const current of toValidate) {
+      const isNumber = typeof current === "number" && !Number.isNaN(current);
+
+      if (isNumber) {
+        validated.push(current);
+
+        continue;
+      }
+
+      if (current === undefined) {
+        // It's okay if we have an undefined value since it might mean the argument isn't present
+        continue;
+      }
+
+      throw new TypeError("The input for 'Date#UTC' should be a number");
+    }
+
+    return Date.UTC(
+      ...(validated as [number, number, number, number, number, number, number]),
+    );
+  }
+
+  // Extensions will be able to change this, of course, and '#field' is still pretty new
+  private readonly currentDate: unknown;
+
+  constructor(input: unknown) {
+    // That's why we will validate the input directly in methods
+    this.currentDate = input;
+  }
+
+  public valueOf(): number {
+    const _date = extractDate(this.currentDate);
+
+    /*
+     * I think of it like this:
+     *
+     * 'new wrappedDate2(new wrappedDate1(wrappedDate.now()))#valueOf' ->
+     * 'this#currentDate' of 'wrappedDate2' becomes 'wrappedDate1'
+     * 'extractDate' executes 'wrappedDate2#valueOf' and gets into 'wrappedDate1#valueOf'
+     * 'this#currentDate' of 'wrappedDate1' is a number
+     * 'extractDate' sees that 'currentDate' is a number,
+     * so it initializes an actual 'Date' object with a valid 'valueOf' that returns a number
+     */
+    return _date.valueOf();
+  }
+
+  public getDate(): number {
+    const _date = extractDate(this.currentDate);
+
+    return _date.getDate();
+  }
+  // TODO: safe getters, setters, and converters
+}
+
+export function handleTimePermission({
+  scope,
+}: {
+  "id"   : string;
+  "scope": "performance" | "date";
+}): unknown {
   switch (scope) {
     case "performance": {
       return harden({
@@ -55,9 +135,6 @@ export function handleTimePermission({
       return harden({
         "Date": wrappedDate,
       });
-    }
-    default: {
-      return harden({});
     }
   }
 }

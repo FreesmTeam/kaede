@@ -87,10 +87,19 @@ class wrappedDate {
     );
   }
 
-  // Extensions will be able to change this, of course, and '#field' is still pretty new
+  /*
+   * Extensions will be able to change this field, of course, but '#field' is still pretty new,
+   * so old macOS builds with Safari < 14.1 won't be able to support the actual private fields.
+   * Transpilation/etc. will work but will probably lead to a simple re-write
+   * from '#currentDate' into a publicly available 'currentDate', which misses the point
+   */
   private readonly currentDate: unknown;
 
   constructor(input: unknown) {
+    if (input === undefined) {
+      this.currentDate = Date.now();
+    }
+
     // That's why we will validate the input directly in methods
     this.currentDate = input;
   }

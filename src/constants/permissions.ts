@@ -1,34 +1,74 @@
+import PermissionData from "@/constants/permission-data.json";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
+import IsKeyInObject from "@/types/utils/is-key-in-object.ts";
 
 export const Permissions = {
-  "General": {
-    "Time": "time",
+  "Time": {
+    "Performance": "time::performance",
+    "Date"       : "time::date",
   },
   "UI": {
-    "Basic": "ui-basic",
-    "Style": "ui-style",
+    "Basic"        : "ui::basic",
+    "Interactivity": "ui::interactivity",
   },
   "Events": {
-    "All": "all-events",
+    "Page"             : "events::page",
+    "InstanceSelection": "events::instance-selection",
   },
   "Internet": {
-    "General": "internet",
+    "HTTPGet" : "internet::http-get",
+    "HTTPPost": "internet::http-post",
   },
-  "ExternalStorage": {
-    "Read" : "read-external-storage",
-    "Write": "write-external-storage",
+  "Log": {
+    "Write" : "log::write",
+    "Read"  : "log::read",
+    "Stream": "log::stream",
   },
   "InternalStorage": {
-    "Read"   : "read-internal-storage",
-    "Write"  : "write-internal-storage",
-    "Logging": "write-to-log-file",
+    "Read" : "internal-storage::read",
+    "Write": "internal-storage::write",
   },
-} as const;
+  "ExternalStorage": {
+    "Read" : "external-storage::read",
+    "Write": "external-storage::write",
+  },
+} as const satisfies Record<
+  string,
+  Record<string, `${string}::${string}`>
+>;
 export const PermissionsList: Array<PermissionType> = Object
   .values(Permissions)
   .flatMap(scope => Object.values(scope));
 
+export const getPermissionDisplayData: (id: string | undefined) => {
+  "label"      : string;
+  "icon"       : string;
+  "description": string;
+} = id => {
+  if (!id) {
+    return {
+      "label"      : "do unknown",
+      "icon"       : "i-lucide-question-mark",
+      "description": "The requested permission is undefined",
+    };
+  }
+
+  const [base, scope]: Array<string> = id.split("::");
+  const requested: string = `${base}::${scope}`;
+
+  if (IsKeyInObject(requested, PermissionData)) {
+    return PermissionData[requested];
+  }
+
+  return {
+    "label"      : "do unknown",
+    "icon"       : "i-lucide-question-mark",
+    "description": "The requested permission does not exist in the list of available permissions",
+  };
+};
+
 export default {
   Permissions,
   PermissionsList,
+  getPermissionDisplayData,
 } as const;

@@ -1,0 +1,77 @@
+{
+  "time::performance": {
+    "label": "measure time",
+    "icon": "",
+    "description": "Allows the extension to know time that was elapsed since opening Kaede"
+  },
+  "time::date": {
+    "label": "know time",
+    "icon": "",
+    "description": "Allows the extension to know your time and access time-related utilities"
+  },
+  "ui::basic": {
+    "label": "change UI",
+    "icon": "",
+    "description": "Allows the extension to change the user interface of Kaede"
+  },
+  "ui::interactivity": {
+    "label": "add interactive UI elements",
+    "icon": "",
+    "description": "Allows the extension to act on your interactions"
+  },
+  "events::page": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "events::instance-selection": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "internet::http-get": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "internet::http-post": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "log::write": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "log::read": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "log::stream": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "internal-storage::read": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "internal-storage::write": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "external-storage::read": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  },
+  "external-storage::write": {
+    "label": "",
+    "icon": "",
+    "description": ""
+  }
+}

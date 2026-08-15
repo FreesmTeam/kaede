@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import AllowButton from "@/components/general/extensions/permissions/AllowButton.vue";
 import { ContextMenu } from "@/constants/application.ts";
+import Permissions from "@/constants/permissions.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { __requestPermissions } from "@/lib/permissions/request-permissions.ts";
 import { globalStates } from "@/states/global.ts";
@@ -14,6 +15,10 @@ const requestedPermissionState = ref<{
   "extension": string;
   "resolve"  : (state: boolean) => void;
 } | undefined>(undefined);
+
+const displayData = computed(() => {
+  return Permissions.getPermissionDisplayData(requestedPermissionState.value?.id);
+});
 
 function handlePermissionRequest(
   permission?: PermissionType | string,
@@ -74,7 +79,7 @@ GlobalInternals.requestPermissions = requestPermissions;
       <div
         @contextmenu.prevent
         id="__extensions-loader__permission-request-inner"
-        class="max-w-72 w-full flex flex-col items-start gap-2 rounded-md bg-neutral-900 p-2"
+        class="max-w-80 w-full flex flex-col items-start gap-2 rounded-md bg-neutral-900 p-2"
       >
         <div
           id="__extensions-loader__permission-request-information"
@@ -82,28 +87,43 @@ GlobalInternals.requestPermissions = requestPermissions;
         >
           <div
             id="__extensions-loader__permission-request-information-icon"
-            class="i-lucide-globe mt-1 size-5 shrink-0"
+            :class="[
+              displayData.icon,
+              'mt-1 size-6 shrink-0',
+            ]"
           ></div>
           <div
-            id="__extensions-loader__permission-request-information-title"
-            class="text-neutral-300"
+            id="__extensions-loader__permissions-request-information-column"
+            class="flex flex-col gap-2"
           >
-            <span
-              id="__extensions-loader__permission-request-information-title-before"
+            <div
+              id="__extensions-loader__permission-request-information-title"
+              class="text-neutral-300"
             >
-              Allow
-            </span>
-            <span
-              id="__extensions-loader__permission-request-information-title-extension"
-              class="text-white font-medium"
+              <span
+                id="__extensions-loader__permission-request-information-title-before"
+              >
+                Allow
+              </span>
+                <span
+                  id="__extensions-loader__permission-request-information-title-extension"
+                  class="text-white font-medium"
+                >
+                {{ requestedPermissionState.extension }}
+              </span>
+                <span
+                  id="__extensions-loader__permission-request-information-title-after"
+                >
+                to {{ displayData.label }}?
+              </span>
+            </div>
+            <div
+              id="__extensions-loader__permission-request-information-description"
+              class="whitespace-pre-wrap text-base text-neutral-400"
             >
-              {{ requestedPermissionState.extension }}
-            </span>
-            <span
-              id="__extensions-loader__permission-request-information-title-after"
-            >
-              to access {{ requestedPermissionState.id }}?
-            </span>
+              {{ displayData.description }}
+              (Permission: '{{ requestedPermissionState.id }}')
+            </div>
           </div>
         </div>
         <div

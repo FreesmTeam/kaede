@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useIntervalFn } from "@vueuse/core";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 
@@ -9,17 +8,26 @@ const { onClick } = defineProps<{
 }>();
 
 // No one wants to accidentally allow an extension permission
-const timeout = ref<number>(30);
+const timeout = ref<number>(5000);
+let previous: number = performance.now();
 
-const { pause } = useIntervalFn(() => {
+function decrease(): void {
+  const current: number = performance.now();
+  const difference: number = current - previous;
+
+  timeout.value = timeout.value - difference;
+  previous = current;
+
   if (timeout.value <= 0) {
-    pause();
-
     return;
   }
 
-  timeout.value--;
-}, 100);
+  requestAnimationFrame(decrease);
+}
+
+onMounted((): void => {
+  requestAnimationFrame(decrease);
+});
 </script>
 
 <template>
@@ -40,7 +48,7 @@ const { pause } = useIntervalFn(() => {
       id="__extensions-loader__permission-request-allow-timer-label"
       class="text-red-300"
     >
-      {{ `, ${(timeout / 10).toFixed(1)}` }}
+      {{ `, ${(timeout / 1000).toFixed(2)}` }}
     </span>
     <MaterialRipple v-if="timeout <= 0" />
   </button>

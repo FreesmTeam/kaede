@@ -23,21 +23,16 @@ const wrappedPerformance = {
   "now"       : (): number => performance.now(),
 };
 
-function extractDate(input: unknown): Date {
-  if (
-    (typeof input === "number" && !Number.isNaN(input)) ||
-    typeof input === "string"
-  ) {
-    return harden(new Date(input));
+const dateReferences = new WeakMap<wrappedDate, Date>;
+
+function getDateReference(input: wrappedDate): Date {
+  const current: Date | undefined = dateReferences.get(input);
+
+  if (!current) {
+    throw new Error("The provided 'Date' is unregistered in the host references");
   }
 
-  if (input instanceof wrappedDate) {
-    const absolute: number = input.valueOf();
-
-    return harden(new Date(absolute));
-  }
-
-  throw new TypeError("The input for the 'Date' constructor is invalid");
+  return current;
 }
 
 class wrappedDate {
@@ -63,19 +58,15 @@ class wrappedDate {
     ms?: unknown,
   ): number {
     const toValidate = [year, monthIndex, date, hours, minutes, seconds, ms];
-    const validated: Array<number> = [];
+    const validated: Array<number | undefined> = [];
 
     for (const current of toValidate) {
       const isNumber = typeof current === "number" && !Number.isNaN(current);
 
-      if (isNumber) {
+      if (isNumber || current === undefined) {
+        // It's okay if we have an undefined value since it might mean the argument isn't present
         validated.push(current);
 
-        continue;
-      }
-
-      if (current === undefined) {
-        // It's okay if we have an undefined value since it might mean the argument isn't present
         continue;
       }
 
@@ -87,47 +78,120 @@ class wrappedDate {
     );
   }
 
-  /*
-   * Extensions will be able to change this field, of course, but '#field' is still pretty new,
-   * so old macOS builds with Safari < 14.1 won't be able to support the actual private fields.
-   * Transpilation/etc. will work but will probably lead to a simple re-write
-   * from '#currentDate' into a publicly available 'currentDate', which misses the point
-   */
-  private readonly currentDate: unknown;
-
   constructor(input: unknown) {
     if (input === undefined) {
-      this.currentDate = Date.now();
+      dateReferences.set(this, harden(new Date));
 
       return;
     }
 
-    // That's why we will validate the input directly in methods
-    this.currentDate = input;
+    if (
+      (typeof input === "number" && !Number.isNaN(input)) ||
+      typeof input === "string"
+    ) {
+      dateReferences.set(this, harden(new Date(input)));
+
+      return;
+    }
+
+    if (input instanceof wrappedDate) {
+      const absolute: number = getDateReference(input).valueOf();
+
+      dateReferences.set(this, harden(new Date(absolute)));
+
+      return;
+    }
+
+    throw new TypeError("The input for the 'Date' constructor is invalid");
   }
 
   public valueOf(): number {
-    const _date = extractDate(this.currentDate);
-
-    /*
-     * I think of it like this:
-     *
-     * 'new wrappedDate2(new wrappedDate1(wrappedDate.now()))#valueOf' ->
-     * 'this#currentDate' of 'wrappedDate2' becomes 'wrappedDate1'
-     * 'extractDate' executes 'wrappedDate2#valueOf' and gets into 'wrappedDate1#valueOf'
-     * 'this#currentDate' of 'wrappedDate1' is a number
-     * 'extractDate' sees that 'currentDate' is a number,
-     * so it initializes an actual 'Date' object with a valid 'valueOf' that returns a number
-     */
-    return _date.valueOf();
+    return getDateReference(this).valueOf();
   }
 
   public getDate(): number {
-    const _date = extractDate(this.currentDate);
-
-    return _date.getDate();
+    return getDateReference(this).getDate();
   }
-  // TODO: safe getters, setters, and converters
+
+  public getDay(): number {
+    return getDateReference(this).getDay();
+  }
+
+  public getFullYear(): number {
+    return getDateReference(this).getFullYear();
+  }
+
+  public getHours(): number {
+    return getDateReference(this).getHours();
+  }
+
+  public getMilliseconds(): number {
+    return getDateReference(this).getMilliseconds();
+  }
+
+  public getMinutes(): number {
+    return getDateReference(this).getMinutes();
+  }
+
+  public getMonth(): number {
+    return getDateReference(this).getMonth();
+  }
+
+  public getSeconds(): number {
+    return getDateReference(this).getSeconds();
+  }
+
+  public getTime(): number {
+    return getDateReference(this).getTime();
+  }
+
+  public getTimezoneOffset(): number {
+    return getDateReference(this).getTimezoneOffset();
+  }
+
+  public getUTCDate(): number {
+    return getDateReference(this).getUTCDate();
+  }
+
+  public getUTCDay(): number {
+    return getDateReference(this).getUTCDay();
+  }
+
+  public getUTCFullYear(): number {
+    return getDateReference(this).getUTCFullYear();
+  }
+
+  public getUTCHours(): number {
+    return getDateReference(this).getUTCHours();
+  }
+
+  public getUTCMilliseconds(): number {
+    return getDateReference(this).getUTCMilliseconds();
+  }
+
+  public getUTCMinutes(): number {
+    return getDateReference(this).getUTCMinutes();
+  }
+
+  public getUTCMonth(): number {
+    return getDateReference(this).getUTCMonth();
+  }
+
+  public getUTCSeconds(): number {
+    return getDateReference(this).getUTCSeconds();
+  }
+
+  public toString(): string {
+    return getDateReference(this).toString();
+  }
+
+  public toDateString(): string {
+    return getDateReference(this).toDateString();
+  }
+
+  public toISOString(): string {
+    return getDateReference(this).toISOString();
+  }
 }
 
 export function handleTimePermission({

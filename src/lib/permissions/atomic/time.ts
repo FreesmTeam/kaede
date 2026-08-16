@@ -185,12 +185,36 @@ class wrappedDate {
     return getDateReference(this).toString();
   }
 
+  public toTimeString(): string {
+    return getDateReference(this).toTimeString();
+  }
+
+  public toUTCString(): string {
+    return getDateReference(this).toUTCString();
+  }
+
+  public toJSON(): string {
+    return getDateReference(this).toJSON();
+  }
+
   public toDateString(): string {
     return getDateReference(this).toDateString();
   }
 
   public toISOString(): string {
     return getDateReference(this).toISOString();
+  }
+
+  public toLocaleString(): string {
+    return getDateReference(this).toLocaleString();
+  }
+
+  public toLocaleDateString(): string {
+    return getDateReference(this).toLocaleDateString();
+  }
+
+  public toLocaleTimeString(): string {
+    return getDateReference(this).toLocaleTimeString();
   }
 }
 

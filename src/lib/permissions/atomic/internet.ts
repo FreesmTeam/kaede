@@ -18,77 +18,140 @@
 
 import "ses";
 
-import { type ClientOptions, fetch as tauriFetch } from "@tauri-apps/plugin-http";
+import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import { log } from "@/lib/logging/log.ts";
 
-function guard(input: RequestInfo | URL, scope: string): void {
-  const scopeUrl = new URL(scope);
-  const requestUrl = new URL(
-    input instanceof Request ? input.url : input.toString(),
-  );
+type RestrictedResponse = {
+  "json"      : Response["json"];
+  "text"      : Response["text"];
+  "ok"        : boolean;
+  "redirected": boolean;
+  "status"    : number;
+  "statusText": string;
+  "type"      : ResponseType;
+  "url"       : string;
+};
 
-  const scopePath = scopeUrl.pathname.endsWith("/")
+function guard(input: string | unknown, allowed: string): void {
+  if (typeof input !== "string") {
+    throw new TypeError("The input URL for the fetch should be a string");
+  }
+
+  const requestUrl = new URL(input);
+  const scopeUrl = new URL(allowed);
+
+  // Let the scope 'https://github.com/safeProfile' not allow 'https://github.com/safeProfileOhNotSoSafe'
+  const scopePath: string = scopeUrl.pathname.endsWith("/")
     ? scopeUrl.pathname
     : scopeUrl.pathname + "/";
+  const allowedOrigin: boolean = requestUrl.origin === scopeUrl.origin;
+  const allowedPath: boolean =
+    requestUrl.pathname === scopeUrl.pathname ||
+    requestUrl.pathname.startsWith(scopePath);
 
-  if (
-    requestUrl.origin !== scopeUrl.origin ||
-    (
-      requestUrl.pathname !== scopeUrl.pathname &&
-      !requestUrl.pathname.startsWith(scopePath)
-    )
-  ) {
+  if (!allowedOrigin || !allowedPath) {
     throw new Error(`This request (${requestUrl.href}) goes out of your allowed scope`);
   }
 }
 
+function buildSafeResponse(response: Response): RestrictedResponse {
+  return harden({
+    "json": async () => {
+      const json = await response.json();
+
+      return harden(json);
+    },
+    "text": async () => {
+      const text: string = await response.text();
+
+      return text;
+    },
+    "ok"        : response.ok,
+    "redirected": response.redirected,
+    "status"    : response.status,
+    "statusText": response.statusText,
+    "type"      : response.type,
+    "url"       : response.url,
+  });
+}
+
+function hook({ id, url, argument, method, label, body }: {
+  "id"      : string;
+  "url"     : string;
+  "argument": string;
+  "method"  : "GET" | "POST";
+  "label"   : "Web" | "Tauri";
+  "body"   ?: string;
+}): void {
+  guard(url, argument);
+  log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
+    `The '${id}' plugin made a ${label} fetch call with the next params`,
+    { url, argument, method, body },
+  ));
+}
+
 export function handleInternetPermission({
   id,
-  permission,
+  scope,
+  argument,
 }: {
-  "id"        : string;
-  "permission": string;
+  "id"       : string;
+  "scope"    : "http-get" | "http-post";
+  "argument"?: `http${string}` | "*" | string;
 }): unknown {
-  const parts = permission.split("::");
-
-  parts.shift();
-
-  const scope = parts.join("::");
-
-  if (!scope) {
-    throw new Error("Internet permissions must include URL scope");
+  if (!argument) {
+    throw new Error("Internet permissions must include a URL scope");
   }
 
-  const wrappedWebFetch = async (
-    input: RequestInfo | URL,
-    init?: RequestInit,
-  ): Promise<Response> => {
-    guard(input, scope);
+  switch (scope) {
+    case "http-get": {
+      const method = "GET" as const;
 
-    log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
-      `The '${id}' plugin made a Web fetch call with the next params`,
-      { input, init },
-    ));
+      return harden({
+        "webFetch": async (url: string): Promise<RestrictedResponse> => {
+          hook({ id, url, argument, method, "label": "Web" });
 
-    return fetch(input, init);
-  };
-  const wrappedTauriFetch = async (
-    input: URL | Request | string,
-    init?: RequestInit & ClientOptions,
-  ): Promise<Response> => {
-    guard(input, scope);
+          const response: Response = await fetch(url, { method });
 
-    log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
-      `The '${id}' plugin made a Tauri fetch call with the next params`,
-      { input, init },
-    ));
+          return buildSafeResponse(response);
+        },
+        "tauriFetch": async (url: string): Promise<RestrictedResponse> => {
+          hook({ id, url, argument, method, "label": "Tauri" });
 
-    return tauriFetch(input, init);
-  };
+          const response: Response = await tauriFetch(url, { method });
 
-  return harden({
-    "webFetch"  : wrappedWebFetch,
-    "tauriFetch": wrappedTauriFetch,
-  });
+          return buildSafeResponse(response);
+        },
+      });
+    }
+    case "http-post": {
+      const method = "POST" as const;
+
+      return harden({
+        "webFetch": async (url: string, body: string): Promise<RestrictedResponse> => {
+          if (typeof body !== "string") {
+            throw new TypeError("The fetch body must be a string");
+          }
+
+          hook({ id, url, argument, method, "label": "Web", body });
+
+          const response: Response = await fetch(url, { method, body });
+
+          return buildSafeResponse(response);
+        },
+        "tauriFetch": async (url: string, body: string): Promise<RestrictedResponse> => {
+          if (typeof body !== "string") {
+            throw new TypeError("The fetch body must be a string");
+          }
+
+          hook({ id, url, argument, method, "label": "Tauri", body });
+
+          const response: Response = await tauriFetch(url, { method, body });
+
+          return buildSafeResponse(response);
+        },
+      });
+    }
+  }
 }

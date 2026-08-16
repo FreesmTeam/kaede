@@ -47,7 +47,8 @@ export async function __requestPermissions(
 
     if (hasPermission !== undefined) {
       granted.push(hasPermission
-        ? handlePermission(permission, extension)
+        // 'handlePermission' validates the permission type, so we are safe to typecast
+        ? handlePermission(permission as PermissionType, extension)
         : false);
 
       continue;
@@ -63,7 +64,8 @@ export async function __requestPermissions(
     }
 
     granted.push(allowed
-      ? handlePermission(permission, extension)
+      // 'handlePermission' validates the permission type, so we are safe to typecast
+      ? handlePermission(permission as PermissionType, extension)
       : false);
 
     currentPermissions[extension][permission] = allowed;

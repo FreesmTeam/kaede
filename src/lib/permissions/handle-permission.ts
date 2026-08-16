@@ -20,7 +20,7 @@ import { handleInternetPermission } from "@/lib/permissions/atomic/internet.ts";
 import { handleLoggingPermission } from "@/lib/permissions/atomic/logging.ts";
 import { handleTimePermission } from "@/lib/permissions/atomic/time.ts";
 import {
-  handleBasicUIPermission,
+  handleUIPermission,
 } from "@/lib/permissions/atomic/ui.ts";
 import type { PermissionType } from "@/types/extensions/permission.type.ts";
 
@@ -47,7 +47,7 @@ export function handlePermission<Key extends PermissionType>(permission: Key, id
       return handleTimePermission({ id, scope });
     }
     case "ui": {
-      return handleBasicUIPermission({ id, scope });
+      return handleUIPermission({ id, scope });
     }
     case "internet": {
       return handleInternetPermission({ id, scope, argument });

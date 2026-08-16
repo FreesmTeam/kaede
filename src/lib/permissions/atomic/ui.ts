@@ -22,15 +22,30 @@ import { createSafeDocument, type SafeDocument } from "ark-of-atrahasis";
 
 import { log } from "@/lib/logging/log.ts";
 
-export function handleBasicUIPermission({
+export function handleUIPermission({
   id,
+  scope,
 }: {
-  "id": string;
+  "id"   : string;
+  "scope": "basic" | "interactivity";
 }): unknown {
+  if (scope === "interactivity") {
+    return (elementId: string): unknown => {
+      const gui: SafeDocument = createSafeDocument(elementId);
+
+      log.info(
+        __PRE_BUNDLED_FILENAME__,
+        `Created an interactive safe DOM for '${id}' with '#${elementId}'`,
+      );
+
+      return harden({ ...gui });
+    };
+  }
+
   return (elementId: string): unknown => {
     const gui: SafeDocument = createSafeDocument(elementId);
 
-    log.info(__PRE_BUNDLED_FILENAME__, `Created a safe DOM for '${id}'`);
+    log.info(__PRE_BUNDLED_FILENAME__, `Created a safe DOM for '${id}' with '#${elementId}'`);
 
     return harden({
       ...gui,

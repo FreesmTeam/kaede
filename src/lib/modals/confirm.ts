@@ -16,7 +16,10 @@ export async function confirm({
   }>;
 }): Promise<boolean> {
   return new Promise((resolve, reject) => {
-    const agree = (): void => resolve(true);
+    const handler = {
+      "yes": (): void => resolve(true),
+      "no" : (): void => resolve(false),
+    } as const;
 
     modalStates.push({
       title,
@@ -24,8 +27,8 @@ export async function confirm({
       icon,
       rows,
       "actions": [
-        { "label": "Cancel", "callback": reject },
-        { "label": "Confirm", "callback": agree },
+        { "label": "Cancel", "callback": handler.yes },
+        { "label": "Confirm", "callback": handler.no },
       ],
     });
   }).catch(error => {

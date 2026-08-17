@@ -22,15 +22,24 @@ import { fetch as tauriFetch } from "@tauri-apps/plugin-http";
 
 import { log } from "@/lib/logging/log.ts";
 
+type RestrictedBlob = {
+  "size"       : number;
+  "type"       : string;
+  "arrayBuffer": () => Promise<ArrayBuffer>;
+  "text"       : () => Promise<string>;
+  "slice"      : (start?: number, end?: number, contentType?: string) => RestrictedBlob;
+};
 type RestrictedResponse = {
-  "json"      : Response["json"];
-  "text"      : Response["text"];
-  "ok"        : boolean;
-  "redirected": boolean;
-  "status"    : number;
-  "statusText": string;
-  "type"      : ResponseType;
-  "url"       : string;
+  "json"       : Response["json"];
+  "text"       : Response["text"];
+  "arrayBuffer": Response["arrayBuffer"];
+  "blob"       : () => Promise<RestrictedBlob>;
+  "ok"         : boolean;
+  "redirected" : boolean;
+  "status"     : number;
+  "statusText" : string;
+  "type"       : Response["type"];
+  "url"        : string;
 };
 
 function guard(input: string | unknown, allowed: string): void {
@@ -55,6 +64,25 @@ function guard(input: string | unknown, allowed: string): void {
   }
 }
 
+function buildSafeBlob(blob: Blob): RestrictedBlob {
+  return harden({
+    "size"       : blob.size,
+    "type"       : blob.type,
+    "arrayBuffer": async () => {
+      const buffer: ArrayBuffer = await blob.arrayBuffer();
+
+      return harden(buffer.slice(0));
+    },
+    "text": async () => {
+      const text: string = await blob.text();
+
+      return text;
+    },
+    "slice": (start?: number, end?: number, contentType?: string): RestrictedBlob => {
+      return buildSafeBlob(blob.slice(start, end, contentType));
+    },
+  });
+}
 function buildSafeResponse(response: Response): RestrictedResponse {
   return harden({
     "json": async () => {
@@ -67,6 +95,16 @@ function buildSafeResponse(response: Response): RestrictedResponse {
 
       return text;
     },
+    "arrayBuffer": async () => {
+      const buffer: ArrayBuffer = await response.arrayBuffer();
+
+      return harden(buffer.slice(0));
+    },
+    "blob": async (): Promise<RestrictedBlob> => {
+      const blob: Blob = await response.blob();
+
+      return buildSafeBlob(blob);
+    },
     "ok"        : response.ok,
     "redirected": response.redirected,
     "status"    : response.status,
@@ -78,7 +116,7 @@ function buildSafeResponse(response: Response): RestrictedResponse {
 
 function hook({ id, url, argument, method, label, body }: {
   "id"      : string;
-  "url"     : string;
+  "url"     : string | unknown;
   "argument": string;
   "method"  : "GET" | "POST";
   "label"   : "Web" | "Tauri";
@@ -129,7 +167,7 @@ export function handleInternetPermission({
       const method = "POST" as const;
 
       return harden({
-        "webFetch": async (url: string, body: string): Promise<RestrictedResponse> => {
+        "webFetch": async (url: string, body: string | unknown): Promise<RestrictedResponse> => {
           if (typeof body !== "string") {
             throw new TypeError("The fetch body must be a string");
           }
@@ -140,7 +178,7 @@ export function handleInternetPermission({
 
           return buildSafeResponse(response);
         },
-        "tauriFetch": async (url: string, body: string): Promise<RestrictedResponse> => {
+        "tauriFetch": async (url: string, body: string | unknown): Promise<RestrictedResponse> => {
           if (typeof body !== "string") {
             throw new TypeError("The fetch body must be a string");
           }

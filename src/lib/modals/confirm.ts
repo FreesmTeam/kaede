@@ -1,6 +1,12 @@
-// 'modalStates = shallowReactive([]);'
+// 'modalStates = shallowReactive(new Set);'
 
-export async function confirm({
+let modalSetOrder = 0;
+
+function getOrder(): number {
+  return modalSetOrder++;
+}
+
+export function confirm({
   title,
   description,
   icon,
@@ -15,22 +21,29 @@ export async function confirm({
     "icon"      ?: string;
   }>;
 }): Promise<boolean> {
-  return new Promise((resolve, reject) => {
-    const handler = {
-      "yes": (): void => resolve(true),
-      "no" : (): void => resolve(false),
-    } as const;
+  const actions: PendingModalType["actions"] = [];
+  const entry: PendingModalType = {
+    title,
+    description,
+    icon,
+    rows,
+    actions,
+    "order": getOrder(),
+  };
 
-    modalStates.push({
-      title,
-      description,
-      icon,
-      rows,
-      "actions": [
-        { "label": "Cancel", "callback": handler.yes },
-        { "label": "Confirm", "callback": handler.no },
-      ],
-    });
+  return new Promise((resolve, reject) => {
+    const handler = (state: boolean): void => {
+      // 'entry' is a constant reference
+      modalStates.remove(entry);
+      resolve(state);
+    };
+
+    actions.push(
+      { "label": "Cancel", "callback": (): void => handler(false) },
+      { "label": "Confirm", "callback": (): void => handler(true) },
+    );
+    // Now, we can actually update the UI
+    modalStates.add(entry);
   }).catch(error => {
     log.error(
       __PRE_BUNDLED_FILENAME__,
@@ -38,6 +51,7 @@ export async function confirm({
       Errors.prettify(error),
     );
 
+    // Treat any unknown errors as a rejection for the user confirmation
     return false;
   });
 }

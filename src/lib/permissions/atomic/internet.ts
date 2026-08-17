@@ -63,6 +63,45 @@ function guard(input: string | unknown, allowed: string): void {
     throw new Error(`This request (${requestUrl.href}) goes out of your allowed scope`);
   }
 }
+function validateRequestData(body: unknown, contentType: unknown): void {
+  const isValidBody: boolean = (
+    body === undefined ||
+    typeof body === "string" ||
+    ArrayBuffer.isView(body) ||
+    body instanceof ArrayBuffer
+  );
+
+  if (!isValidBody) {
+    throw new TypeError("The request body must be a string");
+  }
+
+  if (typeof contentType !== "string") {
+    throw new TypeError("The request 'Content-Type' header must be a string");
+  }
+
+  switch (contentType.toLowerCase()) {
+    // 'https://www.iana.org/assignments/media-types/media-types.xhtml'
+    case "text/plain":
+    case "image/gif":
+    case "image/jpeg":
+    case "image/png":
+    case "video/mpeg":
+    case "video/mp4":
+    case "video/webm":
+    case "application/json; charset=utf-8":
+    case "application/json;charset=utf-8":
+    case "application/json":
+    case "application/zip":
+    case "application/x-www-form-urlencoded":
+    case "application/ogg":
+    case "audio/mpeg": {
+      break;
+    }
+    default: {
+      throw new Error("The provided content type is not allowed");
+    }
+  }
+}
 
 function buildSafeBlob(blob: Blob): RestrictedBlob {
   return harden({
@@ -120,7 +159,7 @@ function hook({ id, url, argument, method, label, body }: {
   "argument": string;
   "method"  : "GET" | "POST";
   "label"   : "Web" | "Tauri";
-  "body"   ?: string;
+  "body"   ?: Uint8Array | ArrayBuffer | string;
 }): void {
   guard(url, argument);
   log.debug(__PRE_BUNDLED_FILENAME__, log.templates.json.contents(
@@ -129,6 +168,14 @@ function hook({ id, url, argument, method, label, body }: {
   ));
 }
 
+/**
+ * The main idea here is to allow only known things and reject unknown,
+ * even if something that was not included is safe.
+ *
+ * @param id - a string that represents the plugin ID
+ * @param scope - literals that represent the scope of the permission ('base::scope::argument')
+ * @param argument - a string that represents the allowed URL
+ */
 export function handleInternetPermission({
   id,
   scope,
@@ -136,7 +183,7 @@ export function handleInternetPermission({
 }: {
   "id"       : string;
   "scope"    : "http-get" | "http-post";
-  "argument"?: `http${string}` | "*" | string;
+  "argument"?: string;
 }): unknown {
   if (!argument) {
     throw new Error("Internet permissions must include a URL scope");
@@ -150,14 +197,14 @@ export function handleInternetPermission({
         "webFetch": async (url: string): Promise<RestrictedResponse> => {
           hook({ id, url, argument, method, "label": "Web" });
 
-          const response: Response = await fetch(url, { method });
+          const response: Response = await fetch(url, { method, "redirect": "manual" });
 
           return buildSafeResponse(response);
         },
         "tauriFetch": async (url: string): Promise<RestrictedResponse> => {
           hook({ id, url, argument, method, "label": "Tauri" });
 
-          const response: Response = await tauriFetch(url, { method });
+          const response: Response = await tauriFetch(url, { method, "redirect": "manual" });
 
           return buildSafeResponse(response);
         },
@@ -167,25 +214,41 @@ export function handleInternetPermission({
       const method = "POST" as const;
 
       return harden({
-        "webFetch": async (url: string, body: string | unknown): Promise<RestrictedResponse> => {
-          if (typeof body !== "string") {
-            throw new TypeError("The fetch body must be a string");
-          }
-
+        "webFetch": async (
+          url: string,
+          body: Uint8Array | ArrayBuffer | string | undefined,
+          contentType: string = "text/plain",
+        ): Promise<RestrictedResponse> => {
+          validateRequestData(body, contentType);
           hook({ id, url, argument, method, "label": "Web", body });
 
-          const response: Response = await fetch(url, { method, body });
+          const response: Response = await fetch(url, {
+            method,
+            body,
+            "redirect": "manual",
+            "headers" : {
+              "Content-Type": contentType,
+            },
+          });
 
           return buildSafeResponse(response);
         },
-        "tauriFetch": async (url: string, body: string | unknown): Promise<RestrictedResponse> => {
-          if (typeof body !== "string") {
-            throw new TypeError("The fetch body must be a string");
-          }
-
+        "tauriFetch": async (
+          url: string,
+          body: Uint8Array | ArrayBuffer | string | undefined,
+          contentType: string = "text/plain",
+        ): Promise<RestrictedResponse> => {
+          validateRequestData(body, contentType);
           hook({ id, url, argument, method, "label": "Tauri", body });
 
-          const response: Response = await tauriFetch(url, { method, body });
+          const response: Response = await tauriFetch(url, {
+            method,
+            body,
+            "redirect": "manual",
+            "headers" : {
+              "Content-Type": contentType,
+            },
+          });
 
           return buildSafeResponse(response);
         },

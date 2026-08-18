@@ -37,6 +37,9 @@ const currentVersionSearch = computed(
 const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
+const hasSelectedModpack = computed((): boolean => {
+  return globalStates.pages["add-instance"].importedModpack !== undefined;
+});
 
 async function handlePatch(patch: (typeof InstallablePatches)[number]): Promise<void> {
   if (patch.action) {
@@ -59,7 +62,10 @@ async function handlePatch(patch: (typeof InstallablePatches)[number]): Promise<
 <template>
   <div
     id="__add-instance-page__instance-patch"
-    class="flex flex-wrap gap-2 rounded-md p-2"
+    :class="[
+      hasSelectedModpack ? 'pointer-events-none opacity-60' : '',
+      'flex flex-wrap gap-2 rounded-md p-2',
+    ]"
   >
     <button
       v-for="patch in InstallablePatches"

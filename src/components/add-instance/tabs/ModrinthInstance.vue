@@ -86,7 +86,11 @@ function handleSearch(input: string): void {
   page.value = 1;
   search.value = input;
 }
-function handleGameVersion(version: string): void {
+function handleGameVersion(version: string, status: "pending" | "error" | "success"): void {
+  if (status !== "success") {
+    return;
+  }
+
   gameVersions.value = toggleInside(gameVersions.value, version);
 }
 function handleLoader(loader: string): void {

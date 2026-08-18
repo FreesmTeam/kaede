@@ -29,7 +29,7 @@ import type { PatchIndexType } from "@/types/launcher/meta/patch-index.type.ts";
 
 const { selected, onToggle } = defineProps<{
   "selected": Array<string>;
-  "onToggle": (version: string) => void;
+  "onToggle": (version: string, status: "pending" | "error" | "success") => void;
 }>();
 
 const rowSize: number = 32;
@@ -142,7 +142,7 @@ onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView))
             transitionless
             :id="`__add-instance-page__modrinth-versions-checkbox-${index}`"
             :value="selected.includes(versions[position + index])"
-            :on-toggle="() => onToggle(versions[position + index])"
+            :on-toggle="() => onToggle(versions[position + index], status)"
           />
           <span
             :id="`__add-instance-page__modrinth-versions-item-label-${index}`"

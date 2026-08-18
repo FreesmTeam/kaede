@@ -61,7 +61,7 @@ const current = computed((): PendingModalType | undefined => {
         </div>
         <div
           id="__modal__item-description"
-          class="w-full text-start text-pretty text-sm text-neutral-300"
+          class="w-full whitespace-pre-wrap text-start text-pretty text-sm text-neutral-300"
         >
           {{ current.description }}
         </div>
@@ -77,6 +77,7 @@ const current = computed((): PendingModalType | undefined => {
             class="w-full flex flex-nowrap gap-2 text-neutral-300"
           >
             <div
+              v-if="row.icon !== '__kaede-do-not-render'"
               :id="`__modal__item-rows-${row.title}-row-icon-wrapper`"
               class="size-8 flex shrink-0 items-center justify-center"
             >

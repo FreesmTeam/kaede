@@ -100,7 +100,7 @@ export const LaunchStatus = {
     "IncompatibleArch"    : "errors-incompatible-arch",
   },
 } as const;
-// TODO remove this one
+// TODO remove this one once you actually implement all those errors handling
 export const _LaunchStatus = {
   "General": {
     "Starting": "general-starting",

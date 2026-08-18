@@ -31,6 +31,7 @@ import { javaStates } from "@/states/java.ts";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 import type { JavaInstallationType } from "@/types/launcher/java-installation.type.ts";
 import type { SettingsRowCollectionType } from "@/types/ui/settings-row.type.ts";
+import Modals from "@/lib/modals";
 
 const extensionHandler = {
   "generic": async (
@@ -160,8 +161,45 @@ const extensionHandler = {
       },
     );
   },
-  "communityUnrestricted": (index: number, extension: ExtensionType): Promise<void> => {
-    // TODO: confirm user choice for community unrestricted
+  "communityUnrestricted": async (index: number, extension: ExtensionType): Promise<void> => {
+    const confirmed: boolean = await Modals.confirm({
+      "title"      : "Enabling the plugin",
+      "description": `Do you really want to enable the '${extension.metadata.name}' plugin` +
+        ` (ID: '${extension.id}')? Only enable if you trust the author of this plugin.` +
+        " This plugin will be able to perform actions listed below" +
+        " and cause irreversible harm to your device.",
+      "icon": "i-lucide-circle-alert",
+      "rows": [
+        {
+          "icon"       : "__kaede-do-not-render",
+          "title"      : "Interact with your File System",
+          "description": "This includes but is not limited to: reading your Minecraft accounts," +
+            " deleting the system files, and changing the contents of any files.",
+        },
+        {
+          "icon"       : "__kaede-do-not-render",
+          "title"      : "Launch and install programs",
+          "description": "The plugin may run shell commands (e.g., 'rm -rf /')," +
+            " install harmful software, and open any program on your device.",
+        },
+        {
+          "icon"       : "__kaede-do-not-render",
+          "title"      : "Access the internet",
+          "description": "Any URL is accessible for this plugin, meaning it can send there" +
+            " important data from your device.",
+        },
+        {
+          "icon"       : "__kaede-do-not-render",
+          "title"      : "Other",
+          "description": "It can modify Kaede user interface so that a regular launch button will" +
+            " launch two programs (Minecraft and a malicious one) at the same time.",
+        },
+      ],
+    });
+
+    if (!confirmed) {
+      return;
+    }
 
     return extensionHandler.trusted(index, extension);
   },

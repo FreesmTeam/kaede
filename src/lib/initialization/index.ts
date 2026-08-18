@@ -17,9 +17,11 @@
  */
 
 import { finish } from "@/lib/initialization/finish.ts";
+import { recreateWebView } from "@/lib/initialization/recreate-web-view.ts";
 import { start } from "@/lib/initialization/start.ts";
 
 export default {
   finish,
+  recreateWebView,
   start,
 } as const;

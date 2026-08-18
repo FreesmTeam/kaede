@@ -24,6 +24,14 @@ import type { TranslationsType } from "@/types/translations/translations.type.ts
 export const GlobalInternals: KaedeNamespaceType["internals"] = {
 
   /* All these fields will be overwritten */
+  "webViewRecreation": {
+    "url"      : "/",
+    "title"    : "Kaede",
+    "width"    : 800,
+    "height"   : 600,
+    "visible"  : false,
+    "resizable": true,
+  },
   "requestPermissions" : async (): Promise<Array<unknown>> => [],
   "joinDelimiter"      : "",
   "launcherVersion"    : "",

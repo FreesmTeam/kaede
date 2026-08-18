@@ -16,6 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import type { ActionKeyType } from "@/constants/application.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
 
 export type AccountActionHandlersType = {
@@ -35,7 +36,7 @@ export type AccountActionPropertiesType = {
 export type AccountActionType = {
   "icon"     : string;
   "label"    : string;
-  "action"   : (properties: AccountActionPropertiesType) => Promise<boolean>;
+  "action"   : ActionKeyType;
   "disabled"?: (account: AccountType) => boolean;
 };
 export type AccountActionCollectionType = Array<AccountActionType>;

@@ -18,11 +18,20 @@
 
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { confirm } from "@tauri-apps/plugin-dialog";
+import { revealItemInDir } from "@tauri-apps/plugin-opener";
+import { relaunch } from "@tauri-apps/plugin-process";
 
-import { ActionKeys } from "@/constants/application.ts";
+import { ActionKeys, ContextMenu } from "@/constants/application.ts";
+import FileStructure from "@/constants/file-structure.ts";
 import { ActionRegistry } from "@/extendable/action-registry.ts";
 import Auth from "@/lib/auth";
 import Configs from "@/lib/configs";
+import Errors from "@/lib/errors";
+import FileManager from "@/lib/file-manager";
+import Initialization from "@/lib/initialization";
+import Instances from "@/lib/instances";
+import { log } from "@/lib/logging/log.ts";
+import { globalStates } from "@/states/global.ts";
 import type { EnsureFreshResultType } from "@/types/auth/microsoft-auth.type.ts";
 import type { AccountActionPropertiesType } from "@/types/ui/account-action.type.ts";
 
@@ -95,6 +104,98 @@ export function declareActionRegistry(): void {
       });
 
       handlers.success();
+    },
+  );
+  ActionRegistry.register(
+    ActionKeys.ContextMenuSoftReload,
+    (): void => window.location.reload(),
+  );
+  ActionRegistry.register(
+    ActionKeys.ContextMenuHardReload,
+    Initialization.recreateWebView,
+  );
+  ActionRegistry.register(
+    ActionKeys.ContextMenuProcessReload,
+    relaunch,
+  );
+  ActionRegistry.register(
+    ActionKeys.ContextMenuLogs,
+    (): void => {
+      globalStates.logs.show = true;
+
+      ContextMenu.close();
+    },
+  );
+  ActionRegistry.register(
+    ActionKeys.ContextMenuRootFolder,
+    (): void => {
+      const baseDirectory: string = FileManager.getBaseDirectory();
+
+      ContextMenu.close();
+      revealItemInDir(
+        FileManager.join(
+          baseDirectory,
+          FileStructure.Files.Config,
+        ),
+      ).catch((error: unknown) => {
+        log.error(
+          __PRE_BUNDLED_FILENAME__,
+          "Failed to reveal the config file in the explorer:",
+          Errors.prettify(error),
+        );
+
+        revealItemInDir(
+          FileManager.join(baseDirectory),
+        ).catch((error: unknown) => {
+          log.error(
+            __PRE_BUNDLED_FILENAME__,
+            "Failed to reveal the root directory in the explorer:",
+            Errors.prettify(error),
+          );
+        });
+      });
+    },
+  );
+  ActionRegistry.register(
+    ActionKeys.ContextMenuInstanceFolder,
+    (): void => {
+      const currentInstanceId: string | null = globalStates.selected.currentInstance;
+      const baseDirectory: string = FileManager.getBaseDirectory();
+
+      ContextMenu.close();
+
+      if (!currentInstanceId) {
+        log.warn("No instance selected; revealing the root directory in explorer");
+        revealItemInDir(
+          FileManager.join(
+            baseDirectory,
+            FileStructure.Folders.Instances.Path,
+          ),
+        ).catch((error: unknown) => {
+          log.error(
+            __PRE_BUNDLED_FILENAME__,
+            "Failed to reveal the root directory in the explorer:",
+            Errors.prettify(error),
+          );
+        });
+
+        return;
+      }
+
+      const { "instanceDirectory": minecraftDirectory } = Instances.getMinecraftDirectory({
+        "baseDirectory": baseDirectory,
+        "instanceId"   : currentInstanceId,
+      });
+
+      revealItemInDir(
+        FileManager.join(minecraftDirectory),
+      ).catch((error: unknown) => {
+        log.error(
+          __PRE_BUNDLED_FILENAME__,
+          "Failed to reveal the instance directory in the explorer:",
+          Errors.prettify(error),
+        );
+      });
     },
   );
 }

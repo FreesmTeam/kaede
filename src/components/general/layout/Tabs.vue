@@ -22,6 +22,7 @@ import { computed, ref } from "vue";
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
+import { ActionRegistry } from "@/extendable/action-registry.ts";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
@@ -43,13 +44,17 @@ const { styles } = useConfigColors();
 async function handleModeSelect(tab: TabSectionType): Promise<void> {
   disabled.value = tab.id;
 
+  if (tab.action) {
+    await ActionRegistry.execute(tab.action, tab.id);
+  }
+
   if (tab.await) {
     await tab.await();
+  }
 
-    // Prevent a race condition
-    if (disabled.value !== tab.id) {
-      return;
-    }
+  // Prevent a race condition
+  if (disabled.value !== tab.id) {
+    return;
   }
 
   globalStates.pages[stateKey].tab = tab.id;
@@ -68,7 +73,7 @@ globalStates.pages[stateKey].select = handleModeSelect;
       v-for="tab in sections"
       :key="tab.id"
       :disabled="selected === tab.id || disabled === tab.id"
-      @click="() => tab?.action?.(tab.id) ?? handleModeSelect(tab)"
+      @click="() => handleModeSelect(tab)"
       :id="`__${stateKey}-page__type-selector-item-${tab.id}`"
       :class="[
         `__${stateKey}-page__type-selector-item`,

@@ -178,9 +178,7 @@ onMounted(() => {
           </div>
           <button
             :id="`__settings-page__plugin-playground-server-kill-button-${server.name}`"
-            @click="() => {
-              server.value.kill();
-            }"
+            @click="() => server.value.kill()"
             class="flex hover:text-neutral-400"
           >
             <span

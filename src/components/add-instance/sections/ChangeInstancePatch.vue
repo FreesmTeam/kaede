@@ -22,6 +22,7 @@ import { computed } from "vue";
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { InstallablePatches, Patches } from "@/constants/meta.ts";
+import { ActionRegistry } from "@/extendable/action-registry.ts";
 import { globalStates } from "@/states/global.ts";
 import type {
   GlobalStatesType,
@@ -37,10 +38,18 @@ const currentPatch = computed((): ExtendedPatchUIDType => (
   currentVersionSearch.value?.patch ?? Patches.Minecraft
 ));
 
-function handlePatch(uid: ExtendedPatchUIDType): void {
+async function handlePatch(patch: (typeof InstallablePatches)[number]): Promise<void> {
+  if (patch.action) {
+    const result: boolean = await ActionRegistry.execute(patch.action, patch.uid);
+
+    if (!result) {
+      return;
+    }
+  }
+
   globalStates.pages["add-instance"].instanceVersionSearch = {
     ...currentVersionSearch.value,
-    "patch": uid,
+    "patch": patch.uid,
     // Reset the search bar as well
     "input": "",
   };
@@ -57,7 +66,7 @@ function handlePatch(uid: ExtendedPatchUIDType): void {
       :id="`__add-instance-page__item-patch-${patch.id}`"
       :key="patch.uid"
       :disabled="currentPatch === patch.uid"
-      @click="() => patch?.action?.(patch.uid) ?? handlePatch(patch.uid)"
+      @click="() => handlePatch(patch)"
       class="__add-instance-page__item relative flex flex-1 flex-col items-center justify-center gap-2 rounded-md p-2 transition-[background-color] disabled:bg-[theme(colors.neutral.100/.1)] hover:bg-[theme(colors.neutral.100/.05)]"
     >
        <Image

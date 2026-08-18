@@ -16,11 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import type { ActionKeyType } from "@/constants/application.ts";
+
 export type TabSectionType = {
   "id"     : string;
   "name"   : string;
   "icon"  ?: string;
   "image" ?: string;
   "await" ?: () => Promise<void>;
-  "action"?: (id: string) => Promise<void>;
+  "action"?: ActionKeyType;
 };

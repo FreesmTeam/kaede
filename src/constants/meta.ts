@@ -1,3 +1,4 @@
+import type { ActionKeyType } from "@/constants/application.ts";
 import FabricIcon from "@/resources/FabricIcon.webp";
 import ForgeIcon from "@/resources/ForgeIcon.webp";
 import LiteLoaderIcon from "@/resources/LiteLoaderIcon.webp";
@@ -49,7 +50,7 @@ export const InstallablePatches: Array<{
   "uid"    : ExtendedPatchUIDType;
   "name"   : string;
   "icon"  ?: string;
-  "action"?: (uid: string) => Promise<void>;
+  "action"?: ActionKeyType;
 }> = [
   { "id": "minecraft", "uid": Patches.Minecraft, "name": "Vanilla", "icon": MinecraftIcon },
   { "id": "forge", "uid": Patches.MinecraftForge, "name": "Forge", "icon": ForgeIcon },

@@ -28,6 +28,7 @@ import {
   AuthStatesContextKey,
   TranslationsContextKey,
 } from "@/constants/application.ts";
+import { ActionRegistry } from "@/extendable/action-registry.ts";
 import Errors from "@/lib/errors";
 import { globalStates } from "@/states/global.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
@@ -106,7 +107,10 @@ async function wrapAction(event: MouseEvent, entry: AccountActionType): Promise<
   };
 
   try {
-    const result: boolean = await entry.action({ event, account, handlers, accounts });
+    const result: boolean = await ActionRegistry.execute(
+      entry.action,
+      { event, account, handlers, accounts },
+    );
 
     if (!result) {
       handlers.error(`Failed to run the action for '${entry.label}'`);

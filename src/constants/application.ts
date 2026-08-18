@@ -1,15 +1,9 @@
 /* eslint-disable max-lines */
-import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import type { Ref } from "vue";
 
 import EnglishTranslations from "@/constants/english.json";
-import FileStructure from "@/constants/file-structure.ts";
-import { ActionRegistry } from "@/extendable/action-registry.ts";
-import Errors from "@/lib/errors";
-import FileManager from "@/lib/file-manager";
 import Instances from "@/lib/instances";
 import Launcher from "@/lib/launcher";
-import { log } from "@/lib/logging/log.ts";
 import ATLauncherIcon from "@/resources/ATLauncherIcon.svg";
 import CraftingTableIcon from "@/resources/CraftingTableIcon.webp";
 import CurseForgeIcon from "@/resources/CurseForgeIcon.webp";
@@ -21,7 +15,6 @@ import type { AccountType } from "@/types/configs/account.type.ts";
 import type { LogLevelType } from "@/types/logging/log-level.type.ts";
 import type {
   AccountActionCollectionType,
-  AccountActionPropertiesType,
 } from "@/types/ui/account-action.type.ts";
 import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
 
@@ -68,10 +61,17 @@ export const ContextMenu: {
 };
 
 export const ActionKeys = {
-  "AccountsRefresh" : "accounts.refresh",
-  "AccountsCopyUUID": "accounts.copy-uuid",
-  "AccountsRemove"  : "accounts.remove",
+  "AccountsRefresh"          : "accounts.refresh",
+  "AccountsCopyUUID"         : "accounts.copy-uuid",
+  "AccountsRemove"           : "accounts.remove",
+  "ContextMenuSoftReload"    : "context-menu.soft-reload",
+  "ContextMenuHardReload"    : "context-menu.hard-reload",
+  "ContextMenuProcessReload" : "context-menu.process-reload",
+  "ContextMenuLogs"          : "context-menu.logs",
+  "ContextMenuRootFolder"    : "context-menu.root-folder",
+  "ContextMenuInstanceFolder": "context-menu.instance-folder",
 } as const;
+export type ActionKeyType = (typeof ActionKeys)[keyof typeof ActionKeys];
 
 export const AccountActions: AccountActionCollectionType = [
   {
@@ -79,23 +79,17 @@ export const AccountActions: AccountActionCollectionType = [
     "label"   : "profile.accounts.refresh",
     // Offline accounts don't need to be refreshed
     "disabled": (account: AccountType): boolean => account.msa === null,
-    "action"  : (properties: AccountActionPropertiesType): Promise<boolean> => {
-      return ActionRegistry.execute(ActionKeys.AccountsRefresh, properties);
-    },
+    "action"  : ActionKeys.AccountsRefresh,
   },
   {
     "icon"  : "i-lucide-copy",
     "label" : "profile.accounts.copy-uuid",
-    "action": (properties: AccountActionPropertiesType): Promise<boolean> => {
-      return ActionRegistry.execute(ActionKeys.AccountsCopyUUID, properties);
-    },
+    "action": ActionKeys.AccountsCopyUUID,
   },
   {
     "icon"  : "i-lucide-trash-2",
     "label" : "profile.accounts.remove",
-    "action": (properties: AccountActionPropertiesType): Promise<boolean> => {
-      return ActionRegistry.execute(ActionKeys.AccountsRemove, properties);
-    },
+    "action": ActionKeys.AccountsRemove,
   },
 ];
 
@@ -242,92 +236,40 @@ export const InstanceCreationSections: Array<TabSectionType> = [
 ];
 export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
   {
-    "name"  : "Restart UI",
-    "icon"  : "i-lucide-rotate-ccw",
-    "action": (): void => window.location.reload(),
+    "name"    : "Restart",
+    "icon"    : "i-lucide-rotate-ccw",
+    "children": [
+      {
+        "name"  : "UI (Soft Reload)",
+        "icon"  : "i-lucide-panel-top",
+        "action": ActionKeys.ContextMenuSoftReload,
+      },
+      {
+        "name"  : "WebView (Hard Reload)",
+        "icon"  : "i-lucide-app-window",
+        "action": ActionKeys.ContextMenuHardReload,
+      },
+      {
+        "name"  : "Application",
+        "icon"  : "i-lucide-cpu",
+        "action": ActionKeys.ContextMenuProcessReload,
+      },
+    ],
   },
   {
     "name"  : "Show Logs",
     "icon"  : "i-lucide-bug",
-    "action": (): void => {
-      globalStates.logs.show = true;
-
-      ContextMenu.close();
-    },
+    "action": ActionKeys.ContextMenuLogs,
   },
   {
     "name"  : "Open Root Folder",
     "icon"  : "i-lucide-folder",
-    "action": (): void => {
-      const baseDirectory: string = FileManager.getBaseDirectory();
-
-      ContextMenu.close();
-      revealItemInDir(
-        FileManager.join(
-          baseDirectory,
-          FileStructure.Files.Config,
-        ),
-      ).catch((error: unknown) => {
-        log.error(
-          __PRE_BUNDLED_FILENAME__,
-          "Failed to reveal the config file in the explorer:",
-          Errors.prettify(error),
-        );
-
-        revealItemInDir(
-          FileManager.join(baseDirectory),
-        ).catch((error: unknown) => {
-          log.error(
-            __PRE_BUNDLED_FILENAME__,
-            "Failed to reveal the root directory in the explorer:",
-            Errors.prettify(error),
-          );
-        });
-      });
-    },
+    "action": ActionKeys.ContextMenuRootFolder,
   },
   {
     "name"  : "Open Instance Folder",
     "icon"  : "i-lucide-box",
-    "action": (): void => {
-      const currentInstanceId: string | null = globalStates.selected.currentInstance;
-      const baseDirectory: string = FileManager.getBaseDirectory();
-
-      ContextMenu.close();
-
-      if (!currentInstanceId) {
-        log.warn("No instance selected; revealing the root directory in explorer");
-        revealItemInDir(
-          FileManager.join(
-            baseDirectory,
-            FileStructure.Folders.Instances.Path,
-          ),
-        ).catch((error: unknown) => {
-          log.error(
-            __PRE_BUNDLED_FILENAME__,
-            "Failed to reveal the root directory in the explorer:",
-            Errors.prettify(error),
-          );
-        });
-
-        return;
-      }
-
-      const { "instanceDirectory": minecraftDirectory } = Instances.getMinecraftDirectory({
-        "baseDirectory": baseDirectory,
-        "instanceId"   : currentInstanceId,
-      });
-
-      revealItemInDir(
-        FileManager.join(minecraftDirectory),
-      ).catch((error: unknown) => {
-        log.error(
-          __PRE_BUNDLED_FILENAME__,
-          "Failed to reveal the instance directory in the explorer:",
-          Errors.prettify(error),
-        );
-      });
-    },
+    "action": ActionKeys.ContextMenuInstanceFolder,
   },
 ];
 

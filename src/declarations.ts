@@ -129,6 +129,15 @@ declare global {
        * These fields are generally not intended to be modified by extensions
        */
       "internals": {
+        // Used in 'recreate-web-view.ts'. In other words, for a hard reload in the context menu
+        "webViewRecreation": {
+          "url"      : string;
+          "title"    : string;
+          "width"    : number;
+          "height"   : number;
+          "visible"  : boolean;
+          "resizable": boolean;
+        };
         // Requests plugin permissions from user
         "requestPermissions"  : (
           permissions: Array<PermissionType | string> | unknown,

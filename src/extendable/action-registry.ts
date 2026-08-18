@@ -21,7 +21,7 @@ import { shallowReactive } from "vue";
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/log.ts";
 
-export type ActionType<T> = (properties: T) => void | Promise<void>;
+export type ActionType<T> = (properties: T) => (void | false) | Promise<void | false>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type GenericAction = ActionType<any>;
 
@@ -39,7 +39,12 @@ export const ActionRegistry = {
     }
 
     try {
-      await callback(properties);
+      const result = await callback(properties);
+
+      // 'false' acts as a stop action
+      if (result === false) {
+        return false;
+      }
     } catch (error: unknown) {
       log.error(
         __PRE_BUNDLED_FILENAME__,

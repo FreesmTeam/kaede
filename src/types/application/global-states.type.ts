@@ -1,3 +1,4 @@
+import type { ActionKeyType } from "@/constants/application.ts";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
 import type { SignInStatusType } from "@/types/auth/microsoft-auth.type.ts";
@@ -80,15 +81,20 @@ type MinecraftType = {
 type SidebarItemsType = Array<"divider" | {
   "path"  : RouteType;
   "name"  : string;
-  "action": () => void;
+  "action": ActionKeyType;
   "icon" ?: string;
   "image"?: string;
 }>;
 type ContextMenuItemsType = Array<{
-  "name"  : string;
-  "action": () => void;
-  "icon" ?: string;
-  "image"?: string;
+  "name"     : string;
+  "action"   : ActionKeyType;
+  "icon"    ?: string;
+  "image"   ?: string;
+} | {
+  "name"    : string;
+  "children": ContextMenuItemsType;
+  "icon"   ?: string;
+  "image"  ?: string;
 }>;
 type PagesType = {
   "home"   : Partial<object>;

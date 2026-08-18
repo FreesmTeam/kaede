@@ -3,7 +3,11 @@ import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 
 import Image from "@/components/general/base/Image.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import ContextMenuChildren from "@/components/general/layout/ContextMenuChildren.vue";
+import type { ActionKeyType } from "@/constants/application.ts";
+import { ActionRegistry } from "@/extendable/action-registry.ts";
 import { globalStates } from "@/states/global.ts";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 const { opened, x, y } = defineProps<{
   "opened": boolean;
@@ -92,6 +96,14 @@ watch(
     cachedSize.value.width = target.clientWidth;
   },
 );
+
+function wrapAction(item: GlobalStatesType["contextMenuItems"][number], event: MouseEvent): void {
+  if ("action" in item) {
+    const action: ActionKeyType = item.action;
+
+    void ActionRegistry.execute(action, event);
+  }
+}
 </script>
 
 <template>
@@ -103,33 +115,41 @@ watch(
       class="__context_menu__wrapper __context-menu-disable absolute z-9000 flex flex-col gap-1 overflow-hidden rounded-md bg-neutral-800 py-1 text-white drop-shadow-lg"
       :style="styles"
     >
-      <button
+      <template
         v-for="item in globalStates?.contextMenuItems"
         :key="item.name"
-        :id="`__context-menu__entry-${item.icon}`"
-        @click="item.action"
-        class="__context_menu__entry __context-menu-disable relative flex flex-nowrap items-center gap-2 p-2 hover:bg-neutral-700"
       >
-        <span
-          v-if="item.icon"
-          :id="`__context-menu__entry-${item.icon}-icon`"
-          :class="[item.icon, '__context-menu-disable block size-4']"
-        ></span>
-        <Image
-          v-else-if="item.image"
-          :id="`__context-menu__entry-${item.name}-image`"
-          :src="item.image"
-          :alt="`An image for the ${item.name} context menu item`"
-          class-names="size-4"
-        />
-        <span
-          :id="`__context-menu__entry-${item.icon}-label`"
-          class="__context-menu-disable block whitespace-nowrap text-sm leading-none"
+        <button
+          :id="`__context-menu__entry-${item.name}`"
+          @click="event => wrapAction(item, event)"
+          class="__context_menu__entry __context-menu-disable relative flex flex-nowrap items-center gap-2 p-2 hover:bg-neutral-700"
         >
-          {{ item.name }}
-        </span>
-        <MaterialRipple />
-      </button>
+          <span
+            v-if="item.icon"
+            :id="`__context-menu__entry-${item.name}-icon`"
+            :class="[item.icon, '__context-menu-disable block size-4']"
+          ></span>
+          <Image
+            v-else-if="item.image"
+            :id="`__context-menu__entry-${item.name}-image`"
+            :src="item.image"
+            :alt="`An image for the ${item.name} context menu item`"
+            class-names="size-4"
+          />
+          <span
+            :id="`__context-menu__entry-${item.name}-label`"
+            class="__context-menu-disable block whitespace-nowrap text-sm leading-none"
+          >
+            {{ item.name }}
+          </span>
+          <MaterialRipple />
+        </button>
+        <ContextMenuChildren
+          v-if="'children' in item"
+          :id-root="`__context-menu__entry-${item.name}-pop-up`"
+          :children="item.children"
+        />
+      </template>
     </div>
   </Transition>
 </template>

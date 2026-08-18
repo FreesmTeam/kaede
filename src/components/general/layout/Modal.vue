@@ -108,6 +108,7 @@ const current = computed((): PendingModalType | undefined => {
             v-for="action in current.actions"
             :key="action.label"
             :id="`__modal__item-action-${action.label}`"
+            @click="action.callback"
             class="relative rounded-lg p-3 text-sm leading-none transition-[background-color] hover:bg-[theme(colors.neutral.100/.05)]"
           >
             {{ action.label }}

@@ -21,17 +21,27 @@ import { confirm } from "@tauri-apps/plugin-dialog";
 import { computed, shallowReactive } from "vue";
 
 import { DefaultLocale, DefaultLocaleName } from "@/constants/application.ts";
+import Permissions from "@/constants/permissions.ts";
 import { GlobalObject } from "@/extendable/global-object.ts";
 import Errors from "@/lib/errors";
+import General from "@/lib/general";
 import Launcher from "@/lib/launcher";
 import { log } from "@/lib/logging/log.ts";
+import Modals from "@/lib/modals";
 import { extensionStates, trustedExtensionHashes } from "@/states/extension.ts";
 import { globalStates } from "@/states/global.ts";
 import { javaStates } from "@/states/java.ts";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 import type { JavaInstallationType } from "@/types/launcher/java-installation.type.ts";
 import type { SettingsRowCollectionType } from "@/types/ui/settings-row.type.ts";
-import Modals from "@/lib/modals";
+
+const emptyPermissions = [
+  {
+    "icon"       : "__kaede-do-not-render",
+    "title"      : "None",
+    "description": "This extensions does not have any static permissions.",
+  },
+];
 
 const extensionHandler = {
   "generic": async (
@@ -162,7 +172,8 @@ const extensionHandler = {
     );
   },
   "communityUnrestricted": async (index: number, extension: ExtensionType): Promise<void> => {
-    const confirmed: boolean = await Modals.confirm({
+    const alreadyEnabled: boolean = globalStates.extensions.list[index].enabled;
+    const confirmed: boolean = alreadyEnabled || await Modals.confirm({
       "title"      : "Enabling the plugin",
       "description": `Do you really want to enable the '${extension.metadata.name}' plugin` +
         ` (ID: '${extension.id}')? Only enable if you trust the author of this plugin.` +
@@ -203,8 +214,28 @@ const extensionHandler = {
 
     return extensionHandler.trusted(index, extension);
   },
-  "communitySandboxed": (index: number, extension: ExtensionType): Promise<void> => {
-    // TODO: confirm user choice for community sandboxed (with static permissions)
+  "communitySandboxed": async (index: number, extension: ExtensionType): Promise<void> => {
+    const alreadyEnabled: boolean = globalStates.extensions.list[index].enabled;
+    const mappedRows = (extension.metadata?.permissions ?? []).map(currentPermission => {
+      const displayData =Permissions.getPermissionDisplayData(currentPermission);
+
+      return {
+        "icon"       : displayData.icon,
+        "title"      : General.capitalize(displayData.label),
+        "description": displayData.description,
+      };
+    });
+    const confirmed: boolean = alreadyEnabled || await Modals.confirm({
+      "title"      : "Enabling the plugin",
+      "description": `Do you really want to enable the '${extension.metadata.name}' plugin` +
+        ` (ID: '${extension.id}')? This plugin will be able to perform actions listed below.`,
+      "icon": "i-lucide-circle-alert",
+      "rows": mappedRows.length > 0 ? mappedRows : emptyPermissions,
+    });
+
+    if (!confirmed) {
+      return;
+    }
 
     return extensionHandler.generic(
       index,

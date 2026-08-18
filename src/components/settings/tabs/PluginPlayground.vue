@@ -123,6 +123,7 @@ onMounted(() => {
       <div
         id="__settings-page__plugin-playground-editor"
         class="h-full w-full overflow-hidden rounded-md outline-2 outline-neutral-300 outline-offset-2 [&>.prism-code-editor]:h-full focus-within:outline"
+        @contextmenu.stop
       ></div>
       <div
         id="__settings-page__plugin-playground-servers"

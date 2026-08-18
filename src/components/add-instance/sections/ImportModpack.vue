@@ -105,7 +105,7 @@ async function handleImport(): Promise<void> {
     <div
       v-if="imported"
       id="__add-instance-page__instance-import-selected"
-      class="min-w-0 flex flex-1 flex-nowrap items-center gap-2 rounded-md pl-2 pr-1 leading-none bg-[theme(colors.neutral.100/.05)]"
+      class="min-w-0 flex flex-1 flex-nowrap items-center gap-2 rounded-md pl-2 pr-1 leading-none"
       :title="imported.path"
     >
       <span
@@ -117,7 +117,7 @@ async function handleImport(): Promise<void> {
       ></span>
       <span
         id="__add-instance-page__instance-import-selected-name"
-        class="line-clamp-1 h-8 flex flex-1 items-center text-ellipsis text-sm"
+        class="line-clamp-1 h-8 flex flex-1 items-center text-ellipsis"
       >
         {{ displayedName }}
       </span>

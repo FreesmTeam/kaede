@@ -85,7 +85,7 @@ type SidebarItemsType = Array<"divider" | {
   "icon" ?: string;
   "image"?: string;
 }>;
-type ContextMenuItemsType = Array<{
+type ContextMenuItemsType = Array<"divider" | {
   "name"     : string;
   "action"   : ActionKeyType;
   "icon"    ?: string;

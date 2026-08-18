@@ -256,6 +256,7 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
       },
     ],
   },
+  "divider",
   {
     "name"  : "Show Logs",
     "icon"  : "i-lucide-bug",

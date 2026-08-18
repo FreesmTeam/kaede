@@ -71,8 +71,8 @@ export function useContextMenu(): {
     const target = event.target as HTMLElement;
 
     if (
-      target?.className?.includes?.("__context_menu__wrapper") ||
-      target?.parentElement?.className?.includes?.("__context_menu__entry")
+      target?.className?.includes?.("__context_menu__") ||
+      target?.parentElement?.className?.includes?.("__context_menu__")
     ) {
       return;
     }

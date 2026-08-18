@@ -32,6 +32,7 @@ import type { ExtendedPatchUIDType } from "@/types/launcher/meta/patch-index.typ
 export function create(
   currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"],
   uid: ExtendedPatchUIDType,
+  modpackPath?: string,
 ): string | undefined {
   if (!currentInstance) {
     log.error(
@@ -100,6 +101,10 @@ export function create(
     },
     "entry": uid,
   };
+
+  if (modpackPath) {
+    instanceStates[id].modpackPath = modpackPath;
+  }
 
   log.info(
     __PRE_BUNDLED_FILENAME__,

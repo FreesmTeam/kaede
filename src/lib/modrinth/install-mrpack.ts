@@ -25,6 +25,7 @@ import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import Network from "@/lib/network";
 import type { InstanceStateType } from "@/types/application/instance-states.type.ts";
+import type { DownloadReportType } from "@/types/launcher/artifacts/download.type.ts";
 import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";
 import type { MrpackManifestType } from "@/types/modrinth/mrpack.type.ts";
 
@@ -64,11 +65,13 @@ export async function installMrpack({
   archivePath,
   instanceId,
   statuses,
+  sha1,
 }: {
   "archivePath": string;
   "instanceId" : string;
   "statuses"   : LauncherStatusesType;
-}): Promise<MrpackManifestType | undefined> {
+  "sha1"      ?: boolean;
+}): Promise<{ "manifest": MrpackManifestType | undefined; "report": DownloadReportType }> {
   const { instanceDirectory } = Instances.getMinecraftDirectory({
     "baseDirectory": FileManager.getBaseDirectory(),
     instanceId,
@@ -85,16 +88,42 @@ export async function installMrpack({
     `(${manifest.versionId}) and indexed ${manifest.files.length} files`,
   );
 
-  const entries: Array<{ "url": string; "path": string }> = manifest
+  const entries: Array<{ "url": string; "path": string; "hash": string }> = manifest
     .files
-    .map(({ path, url }) => ({
+    .map(({ path, url, sha1 }) => ({
       url,
+      "hash": sha1,
       "path": FileManager.join(instanceDirectory, path),
     }));
 
+  const startTime: number = performance.now();
+  const hashesToReDownload: Set<string> = new Set(
+    await FileManager.verifyPaths({
+      "paths": entries,
+      "sha1" : sha1,
+    }),
+  );
+  const endTime: number = performance.now();
+  const totalTime: string = (endTime - startTime).toFixed(2);
+
+  log.info(
+    __PRE_BUNDLED_FILENAME__,
+    `Successfully verified ${entries.length} modpack files in ${totalTime} ms.`,
+    `Total mismatches: ${hashesToReDownload.size}.`,
+    `SHA1 checks enabled: ${sha1}`,
+  );
+
+  const missingModpackObjects: Array<{
+    "url" : string;
+    "path": string;
+    "hash": string;
+  }> = entries.filter(({ path }) => {
+    return hashesToReDownload.has(path);
+  });
+
   const report = await Network.concurrentlyDownload({
     statuses,
-    entries,
+    "entries"    : missingModpackObjects,
     "concurrency": GeneralSettings.ConcurrentDownloads.Libraries,
     "label"      : "modrinth modpack",
     "cancelId"   : `${instanceId}-download`,
@@ -103,7 +132,7 @@ export async function installMrpack({
   if (report.cancelled) {
     log.info(__PRE_BUNDLED_FILENAME__, `Cancelled installing '${manifest.name}'`);
 
-    return undefined;
+    return { "manifest": undefined, report };
   }
 
   statuses.launching = 0;
@@ -113,5 +142,5 @@ export async function installMrpack({
     `${report.success} succeeded, ${report.failed} failed`,
   );
 
-  return manifest;
+  return { manifest, report };
 }

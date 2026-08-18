@@ -9,6 +9,7 @@ export type InstanceStateType = GlobalStatesType["minecraft"] & {
   "entry"        : ExtendedPatchUIDType;
   "pinned"       : boolean;
   "groups"       : Array<string>;
+  "modpackPath" ?: string;
   "patchVersions": {
     "net.minecraft": string;
   } & Partial<

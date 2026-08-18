@@ -93,6 +93,7 @@ async function handleCreate(): Promise<void> {
   const instanceId: string | undefined = Instances.create(
     currentInstance.value,
     currentPatch.value,
+    archive?.path,
   );
 
   if (instanceId === undefined || !archive) {

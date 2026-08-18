@@ -15,6 +15,7 @@ export const InstanceMetadataSchema = Type.Intersect([
     "entry"        : Type.String(),
     "pinned"       : Type.Boolean(),
     "groups"       : Type.Array(Type.String()),
+    "modpackPath"  : Type.Optional(Type.String()),
     "patchVersions": Type.Intersect([
       Type.Record(
         Type.Literal(Patches.Minecraft),

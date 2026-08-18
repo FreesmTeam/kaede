@@ -1,77 +1,77 @@
 {
   "time::performance": {
     "label": "measure time",
-    "icon": "",
+    "icon": "i-lucide-timer",
     "description": "Allows the extension to know time that was elapsed since opening Kaede"
   },
   "time::date": {
     "label": "know time",
-    "icon": "",
+    "icon": "i-lucide-hourglass",
     "description": "Allows the extension to know your time and access time-related utilities"
   },
   "ui::basic": {
     "label": "change UI",
-    "icon": "",
+    "icon": "i-lucide-palette",
     "description": "Allows the extension to change the user interface of Kaede"
   },
   "ui::interactivity": {
     "label": "change and add interactive UI",
-    "icon": "",
+    "icon": "i-lucide-mouse-pointer-click",
     "description": "Allows the extension to change the user interface of Kaede and act on your interactions"
   },
   "events::page": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-hat-glasses",
     "description": ""
   },
   "events::instance-selection": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-hat-glasses",
     "description": ""
   },
   "internet::http-get": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-globe",
     "description": ""
   },
   "internet::http-post": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-globe",
     "description": ""
   },
   "log::write": {
-    "label": "",
-    "icon": "",
-    "description": ""
+    "label": "log messages",
+    "icon": "i-lucide-square-terminal",
+    "description": "Allows the extension to write messages into launcher logs"
   },
   "log::read": {
-    "label": "",
-    "icon": "",
-    "description": ""
+    "label": "read logs",
+    "icon": "i-lucide-eye",
+    "description": "Allows the extension to read launcher logs"
   },
   "log::stream": {
-    "label": "",
-    "icon": "",
-    "description": ""
+    "label": "stream logs",
+    "icon": "i-lucide-view",
+    "description": "Allows the extension to constantly read all the latest launcher logs"
   },
   "internal-storage::read": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-package-search",
     "description": ""
   },
   "internal-storage::write": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-package-open",
     "description": ""
   },
   "external-storage::read": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-folder-key",
     "description": ""
   },
   "external-storage::write": {
     "label": "",
-    "icon": "",
+    "icon": "i-lucide-folder-key",
     "description": ""
   }
 }

@@ -20,6 +20,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type { DeepPartial } from "unocss";
 
 import FileStructure from "@/constants/file-structure.ts";
+import { PermissionsList } from "@/constants/permissions.ts";
 import FileManager from "@/lib/file-manager";
 import { log } from "@/lib/logging/log.ts";
 import Schemas from "@/lib/schemas";
@@ -83,6 +84,7 @@ export async function readExtensions(): Promise<{
     parts.pop();
 
     const id = parts.join(".");
+    // It does not, however, validate permissions precisely
     const valid: ExtensionType["metadata"] | false = Schemas.validate.extension({
       "value": extension.metadata,
       "label": "extension metadata",
@@ -91,8 +93,32 @@ export async function readExtensions(): Promise<{
         "index": index,
       },
     });
+    // Set to true by default since 'permissions' is an optional field
+    let permissionsValid: boolean = true;
 
-    if (valid) {
+    // The permissions are validated precisely here
+    if (valid && valid.permissions) {
+      for (const permission of valid.permissions) {
+        const currentValid: boolean = PermissionsList
+
+          /*
+           * Comparing permissions with '::' suffix to prevent 'time::performanceLOL' to be allowed
+           * while the valid one is 'time::performance' (remember: 'base::scope::argument').
+           *
+           * 'time::performance::' will pass, though, but it should be okay
+           * since we split the permission by '::'
+           */
+          .some(existing => `${permission}::`.startsWith(`${existing}::`));
+
+        if (!currentValid) {
+          permissionsValid = false;
+
+          break;
+        }
+      }
+    }
+
+    if (valid && permissionsValid) {
       validated.push({
         id,
         "code"    : extension.code,

@@ -50,9 +50,9 @@ const queryKey = computed((): Array<unknown> => [
 
 const { data, status, error, isFetching } = useQuery({
   "queryKey": queryKey,
-  "queryFn" : (): Promise<ModrinthSearchResponseType> => (
+  "queryFn" : async (): Promise<ModrinthSearchResponseType> => (
     // For some reason, 'useQuery' makes 'data' deeply reactive...
-    markRaw(Modrinth.search({
+    markRaw(await Modrinth.search({
       "query"       : search.value,
       "gameVersions": gameVersions.value,
       "loaders"     : loaders.value,

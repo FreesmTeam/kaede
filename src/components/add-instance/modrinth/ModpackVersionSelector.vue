@@ -52,7 +52,8 @@ const { data, status, error } = useQuery({
     projectId,
     "version",
   ],
-  "queryFn": () => markRaw(Modrinth.fetchVersion(projectId)),
+  // For some reason, 'useQuery' makes 'data' deeply reactive...
+  "queryFn": async () => markRaw(await Modrinth.fetchVersion(projectId)),
 });
 
 async function handleClick(event: MouseEvent): Promise<void> {

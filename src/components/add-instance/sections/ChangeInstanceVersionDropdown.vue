@@ -74,13 +74,13 @@ const noMatches = {
 
 const { data, status } = useQuery({
   "queryKey": queryKey,
-  "queryFn" : (): Promise<PatchIndexType["versions"]> => {
+  "queryFn" : async (): Promise<PatchIndexType["versions"]> => (
     // For some reason, 'useQuery' makes 'data' deeply reactive...
-    return markRaw(Launcher.Fetching.fetchAllVersions(
+    markRaw(await Launcher.Fetching.fetchAllVersions(
       currentPatch,
       currentInstance.value?.patchVersions?.["net.minecraft"],
-    ));
-  },
+    ))
+  ),
 });
 
 const filteredVersions = computed((): Array<{

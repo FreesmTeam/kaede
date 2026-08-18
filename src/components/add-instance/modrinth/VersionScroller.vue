@@ -49,9 +49,9 @@ const { data, status } = useQuery({
     "do-not-reload",
     Patches.Minecraft,
   ],
-  "queryFn": (): Promise<PatchIndexType["versions"]> => (
+  "queryFn": async (): Promise<PatchIndexType["versions"]> => (
     // For some reason, 'useQuery' makes 'data' deeply reactive...
-    markRaw(Launcher.Fetching.fetchAllVersions(Patches.Minecraft))
+    markRaw(await Launcher.Fetching.fetchAllVersions(Patches.Minecraft))
   ),
 });
 

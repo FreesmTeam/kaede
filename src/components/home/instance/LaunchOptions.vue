@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type ComputedRef, inject, ref } from "vue";
+import { computed, type ComputedRef, inject, ref, useTemplateRef } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import {
@@ -13,12 +13,15 @@ import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { LaunchContextType } from "@/types/launcher/launch/launch-context.type.ts";
+import { onClickOutside } from "@vueuse/core";
 
 const launchInstance = inject<LaunchContextType>(LaunchInstanceContextKey);
 const launchStatuses = inject<{
   "launchable" : ComputedRef<boolean>;
   "unstoppable": ComputedRef<boolean>;
 }>(LaunchInstanceStatusesContextKey);
+
+const container = useTemplateRef<HTMLDivElement>("container");
 
 const unlaunchable = computed((): boolean => (
   !launchStatuses?.launchable?.value
@@ -70,11 +73,14 @@ function wrapAction(item: (typeof LaunchOptionItems)[number], event: MouseEvent)
       disabled.value.delete(item.label);
     });
 }
+
+onClickOutside(container, () => opened.value = false);
 </script>
 
 <template>
   <div
     id="__home-page__launch-options-wrapper"
+    ref="container"
     class="relative"
   >
     <button

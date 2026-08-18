@@ -104,7 +104,6 @@ watch(
     >
       <ContextMenuChildren
         :id-root="`__context-menu__entry`"
-        :cached-width="cachedSize.width"
         :children="globalStates?.contextMenuItems"
       />
     </div>

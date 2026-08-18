@@ -23,10 +23,9 @@ import type { ActionKeyType } from "@/constants/application.ts";
 import { ActionRegistry } from "@/extendable/action-registry.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
-const { idRoot, cachedWidth, children } = defineProps<{
-  "idRoot"     : string;
-  "cachedWidth": number;
-  "children"   : GlobalStatesType["contextMenuItems"];
+const { idRoot, children } = defineProps<{
+  "idRoot"  : string;
+  "children": GlobalStatesType["contextMenuItems"];
 }>();
 
 function wrapAction(item: GlobalStatesType["contextMenuItems"][number], event: MouseEvent): void {
@@ -36,14 +35,20 @@ function wrapAction(item: GlobalStatesType["contextMenuItems"][number], event: M
     void ActionRegistry.execute(action, event);
   }
 }
+
+function normalizeKey(item: GlobalStatesType["contextMenuItems"][number], index: number): string {
+  return item === "divider"
+    ? `${item}-${index}`
+    : `${item.name}-${index}`;
+}
 </script>
 
 <template>
   <div
     v-for="(item, index) in children"
-    :key="item === 'divider' ? `${item}-${index}` : item.name"
-    :id="`${idRoot}-${item === 'divider' ? index : item.name}`"
-    class="__context_menu__entry-wrapper group relative w-full"
+    :key="normalizeKey(item, index)"
+    :id="`${idRoot}-${normalizeKey(item, index)}`"
+    class="__context_menu__entry-wrapper relative w-full"
   >
     <div
       v-if="item === 'divider'"
@@ -77,19 +82,17 @@ function wrapAction(item: GlobalStatesType["contextMenuItems"][number], event: M
         <span
           v-if="'children' in item"
           :id="`${idRoot}-${item.name}-chevron-right`"
-          class="__context-menu-disable i-lucide-chevron-right ml-auto block size-4"
+          class="__context-menu-disable __context-menu-chevron-right i-lucide-chevron-right ml-auto block size-4 transition-[transform]"
         ></span>
         <MaterialRipple :disabled="'children' in item" />
       </button>
       <div
         v-if="'children' in item"
-        :id="idRoot"
-        class="invisible absolute top-0 flex flex-col gap-1 rounded-r-md bg-neutral-800 py-1 text-white drop-shadow-lg group-hover:visible"
-        :style="{ 'left': cachedWidth + 'px' }"
+        :id="`${idRoot}-${item.name}-popup-wrapper`"
+        class="__context_menu__popup-wrapper invisible absolute left-full top-0 flex flex-col gap-1 rounded-r-md bg-neutral-800 py-1 text-white"
       >
         <ContextMenuChildren
-          :id-root="`${idRoot}-${item.name}-pop-up`"
-          :cached-width="cachedWidth"
+          :id-root="`${idRoot}-${item.name}-popup`"
           :children="item.children"
         />
       </div>

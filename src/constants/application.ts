@@ -240,9 +240,9 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
     "icon"    : "i-lucide-rotate-ccw",
     "children": [
       {
-        "name"  : "UI (Soft Reload)",
-        "icon"  : "i-lucide-panel-top",
-        "action": ActionKeys.ContextMenuSoftReload,
+        "name"    : "UI (Soft Reload)",
+        "icon"    : "i-lucide-panel-top",
+        "action"  : ActionKeys.ContextMenuSoftReload,
       },
       {
         "name"  : "WebView (Hard Reload)",

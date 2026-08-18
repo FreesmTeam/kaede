@@ -86,6 +86,15 @@ input::-webkit-inner-spin-button {
   width: 100%;
 }
 
+/* Open the recursive popups */
+.__context_menu__entry-wrapper:hover > .__context_menu__popup-wrapper {
+  visibility: visible;
+}
+/* Rotate the chevron on recursive popups */
+.__context_menu__entry-wrapper:hover > .__context_menu__entry > .__context-menu-chevron-right {
+  transform: rotate(90deg);
+}
+
 .__marked-parsed-body {
   overflow: auto;
   max-height: 80vh;

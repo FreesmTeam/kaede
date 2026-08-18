@@ -21,7 +21,6 @@ import { shallowReactive } from "vue";
 export type PendingModalType = {
   "title"      : string;
   "description": string;
-  "order"      : number;
   "actions"    : Array<{ "label": string; "callback": () => void }>;
   "icon"      ?: string;
   "rows"      ?: Array<{

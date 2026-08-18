@@ -14,7 +14,7 @@ const requestedPermissionState = ref<{
   "id"       : PermissionType | string;
   "extension": string;
   "resolve"  : (state: boolean) => void;
-} | undefined>(undefined);
+} | undefined>();
 
 const displayData = computed(() => {
   return Permissions.getPermissionDisplayData(requestedPermissionState.value?.id);

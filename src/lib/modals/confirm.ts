@@ -1,14 +1,6 @@
-// 'modalStates = shallowReactive(new Set);'
-
 import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/log.ts";
 import { modalStates, type PendingModalType } from "@/states/modal.ts";
-
-let modalSetOrder = 0;
-
-function getOrder(): number {
-  return modalSetOrder++;
-}
 
 export function confirm({
   title,
@@ -32,7 +24,6 @@ export function confirm({
     icon,
     rows,
     actions,
-    "order": getOrder(),
   };
 
   return new Promise((resolve: (input: boolean) => void) => {

@@ -32,6 +32,7 @@ This folder contains only Vue components. All components use [Composition API](h
 | `dev` FPS counter       | `9500` |
 | Context Menu            | `9000` |
 | Permissions Modal       | `8000` |
+| Generic Modal           | `7500` |
 | Sidebar Tooltip         | `7000` |
 | Launch Progressbar      | `6500` |
 | Log Viewer              | `6000` |

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onClickOutside } from "@vueuse/core";
 import { computed, type ComputedRef, inject, ref, useTemplateRef } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
@@ -13,7 +14,6 @@ import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
 import { globalStates } from "@/states/global.ts";
 import type { LaunchContextType } from "@/types/launcher/launch/launch-context.type.ts";
-import { onClickOutside } from "@vueuse/core";
 
 const launchInstance = inject<LaunchContextType>(LaunchInstanceContextKey);
 const launchStatuses = inject<{

@@ -23,6 +23,7 @@ import { Patches, PrettyPatchLabels } from "@/constants/meta.ts";
 import { Routes } from "@/constants/routes.ts";
 import Hashing from "@/lib/hashing";
 import { log } from "@/lib/logging/log.ts";
+import Router from "@/lib/router";
 import { globalStates } from "@/states/global.ts";
 import { instanceStates } from "@/states/instance.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
@@ -107,7 +108,8 @@ export function create(
   );
 
   globalStates.pages["add-instance"].instance = undefined;
-  globalStates.currentPage = Routes.Library;
+
+  Router.navigate(Routes.Library);
 
   return id;
 }

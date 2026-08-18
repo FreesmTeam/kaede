@@ -18,7 +18,11 @@
 
 import { markRaw, type Reactive, reactive } from "vue";
 
-import { ContextMenuItems, DefaultGlobalStatesPagesStates } from "@/constants/application.ts";
+import {
+  ActionKeys,
+  ContextMenuItems,
+  DefaultGlobalStatesPagesStates,
+} from "@/constants/application.ts";
 import { Routes, SidebarRouteGroupItems } from "@/constants/routes.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Router from "@/lib/router";
@@ -61,9 +65,7 @@ export function declareGlobalStates(): void {
           "path"  : item.Path,
           "icon"  : item.Icon,
           "name"  : item.Path,
-          "action": (): void => {
-            globalStates.currentPage = item.Path;
-          },
+          "action": ActionKeys.SidebarRouteChange,
         };
       }),
       "divider",
@@ -71,9 +73,7 @@ export function declareGlobalStates(): void {
         "path"  : Routes.AddInstance,
         "icon"  : "i-lucide-plus",
         "name"  : Routes.AddInstance,
-        "action": (): void => {
-          globalStates.currentPage = Routes.AddInstance;
-        },
+        "action": ActionKeys.SidebarRouteChange,
       },
     ]),
   });

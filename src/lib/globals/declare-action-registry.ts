@@ -31,7 +31,9 @@ import FileManager from "@/lib/file-manager";
 import Initialization from "@/lib/initialization";
 import Instances from "@/lib/instances";
 import { log } from "@/lib/logging/log.ts";
+import Router from "@/lib/router";
 import { globalStates } from "@/states/global.ts";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { EnsureFreshResultType } from "@/types/auth/microsoft-auth.type.ts";
 import type { AccountActionPropertiesType } from "@/types/ui/account-action.type.ts";
 
@@ -196,6 +198,19 @@ export function declareActionRegistry(): void {
           Errors.prettify(error),
         );
       });
+    },
+  );
+  ActionRegistry.register(
+    ActionKeys.SidebarRouteChange,
+    ({ item }: {
+      "item" : GlobalStatesType["sidebarItems"][number];
+      "event": PointerEvent;
+    }): void => {
+      if (item === "divider") {
+        return;
+      }
+
+      Router.navigate(item.path);
     },
   );
 }

@@ -6,7 +6,9 @@ import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import SidebarProfile from "@/components/general/layout/SidebarProfile.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { TranslationsContextKey } from "@/constants/application.ts";
+import { ActionRegistry } from "@/extendable/action-registry.ts";
 import { globalStates } from "@/states/global.ts";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type {
   TranslationKey,
   TranslationsStateType,
@@ -86,13 +88,17 @@ function handleMouseOver(event: MouseEvent): void {
 
   tooltip.value = newTooltipInfo;
 }
-function handleButtonAction(event: PointerEvent, action: () => void): void {
+async function handleButtonAction(
+  event: PointerEvent,
+  item: GlobalStatesType["sidebarItems"][number],
+): Promise<void> {
   // '0' means a left click
-  if (event.button !== 0) {
+  if (event.button !== 0 || item === "divider") {
     return;
   }
 
-  action();
+  await ActionRegistry.execute(item.action, { event, item });
+
   closeTooltip();
   // Close the log viewer in case of a page change
   globalStates.logs.show = false;
@@ -105,8 +111,8 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
     class="pointer-events-none absolute left-20 top-2 z-7000 w-fit rounded-md p-2 leading-none transition-[transform,opacity]"
     :style="{
       ...styles.widget,
-      transform: `translateY(${tooltip.top}px)`,
-      opacity  : tooltip.show ? 1 : 0,
+      'transform': `translateY(${tooltip.top}px)`,
+      'opacity'  : tooltip.show ? 1 : 0,
     }"
   >
     {{ tooltip.text }}
@@ -138,7 +144,7 @@ function handleButtonAction(event: PointerEvent, action: () => void): void {
           v-if="item !== 'divider'"
           :id="`__sidebar__entry-${item.name}-button`"
           :disabled="item.path === globalStates.currentPage"
-          @pointerdown="(event: PointerEvent) => handleButtonAction(event, item.action)"
+          @pointerdown="(event: PointerEvent) => handleButtonAction(event, item)"
           class="__sidebar__entry-button relative grid size-12 shrink-0 place-items-center rounded-md transition-[background-color] duration-150 disabled:bg-[theme(colors.neutral.100/.1)] hover:bg-[theme(colors.neutral.100/.05)]"
           :aria-label="item.name"
         >

@@ -70,6 +70,7 @@ export const ActionKeys = {
   "ContextMenuLogs"          : "context-menu.logs",
   "ContextMenuRootFolder"    : "context-menu.root-folder",
   "ContextMenuInstanceFolder": "context-menu.instance-folder",
+  "SidebarRouteChange"       : "sidebar.route-change",
 } as const;
 export type ActionKeyType = (typeof ActionKeys)[keyof typeof ActionKeys];
 
@@ -240,9 +241,9 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
     "icon"    : "i-lucide-rotate-ccw",
     "children": [
       {
-        "name"    : "UI (Soft Reload)",
-        "icon"    : "i-lucide-panel-top",
-        "action"  : ActionKeys.ContextMenuSoftReload,
+        "name"  : "UI (Soft Reload)",
+        "icon"  : "i-lucide-panel-top",
+        "action": ActionKeys.ContextMenuSoftReload,
       },
       {
         "name"  : "WebView (Hard Reload)",

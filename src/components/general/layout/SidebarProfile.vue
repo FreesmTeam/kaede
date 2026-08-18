@@ -2,21 +2,27 @@
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { useSkinRenderer } from "@/composables/use-skin-renderer.ts";
+import { ActionKeys } from "@/constants/application.ts";
 import { Routes } from "@/constants/routes.ts";
-import Router from "@/lib/router";
 import { globalStates } from "@/states/global.ts";
+import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 
 const { handleMouseOver, handleButtonAction } = defineProps<{
   "handleMouseOver"   : (event: MouseEvent) => void;
-  "handleButtonAction": (event: PointerEvent, action: () => void) => void;
+  "handleButtonAction": (
+    event: PointerEvent,
+    item : GlobalStatesType["sidebarItems"][number],
+  ) => Promise<void>;
 }>();
 
 const { styles } = useConfigColors();
 const { canvas, shown } = useSkinRenderer({ "render": "2d-head" });
 
-function handleProfileNavigation(): void {
-  Router.navigate(Routes.Profile);
-}
+const actionItem = {
+  "name"  : Routes.Profile,
+  "path"  : Routes.Profile,
+  "action": ActionKeys.SidebarRouteChange,
+} satisfies GlobalStatesType["sidebarItems"][number];
 </script>
 
 <template>
@@ -29,7 +35,7 @@ function handleProfileNavigation(): void {
     <button
       id="__sidebar__entry-profile-button"
       :disabled="Routes.Profile === globalStates.currentPage"
-      @pointerdown="(event: PointerEvent) => handleButtonAction(event, handleProfileNavigation)"
+      @pointerdown="(event: PointerEvent) => handleButtonAction(event, actionItem)"
       class="__sidebar__entry-button relative grid size-12 shrink-0 place-items-center rounded-md text-white transition-[background-color] duration-150 disabled:bg-[theme(colors.neutral.100/.1)] hover:bg-[theme(colors.neutral.100/.05)]"
       aria-label="profile"
     >

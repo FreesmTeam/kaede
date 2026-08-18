@@ -1,5 +1,9 @@
 // 'modalStates = shallowReactive(new Set);'
 
+import Errors from "@/lib/errors";
+import { log } from "@/lib/logging/log.ts";
+import { modalStates, type PendingModalType } from "@/states/modal.ts";
+
 let modalSetOrder = 0;
 
 function getOrder(): number {
@@ -31,10 +35,10 @@ export function confirm({
     "order": getOrder(),
   };
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve: (input: boolean) => void) => {
     const handler = (state: boolean): void => {
       // 'entry' is a constant reference
-      modalStates.remove(entry);
+      modalStates.delete(entry);
       resolve(state);
     };
 
@@ -47,7 +51,7 @@ export function confirm({
   }).catch(error => {
     log.error(
       __PRE_BUNDLED_FILENAME__,
-      "An error occured for the modal:",
+      "An error occurred for the modal:",
       Errors.prettify(error),
     );
 

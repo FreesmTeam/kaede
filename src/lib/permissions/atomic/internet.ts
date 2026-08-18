@@ -170,7 +170,7 @@ function hook({ id, url, argument, method, label, body }: {
 
 /**
  * The main idea here is to allow only known things and reject unknown,
- * even if something that was not included is safe.
+ * even if something that was unknown is safe.
  *
  * @param id - a string that represents the plugin ID
  * @param scope - literals that represent the scope of the permission ('base::scope::argument')

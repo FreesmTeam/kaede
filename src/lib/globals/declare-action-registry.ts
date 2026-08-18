@@ -21,7 +21,7 @@ import { confirm } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { relaunch } from "@tauri-apps/plugin-process";
 
-import { ActionKeys, ContextMenu } from "@/constants/application.ts";
+import { ActionKeys, ContextMenu, LaunchOptionItems } from "@/constants/application.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import { ActionRegistry } from "@/extendable/action-registry.ts";
 import Auth from "@/lib/auth";
@@ -35,6 +35,8 @@ import Router from "@/lib/router";
 import { globalStates } from "@/states/global.ts";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { EnsureFreshResultType } from "@/types/auth/microsoft-auth.type.ts";
+import type { LaunchContextType } from "@/types/launcher/launch/launch-context.type.ts";
+import type { CurrentInstanceType } from "@/types/launcher/meta/current-instance.type.ts";
 import type { AccountActionPropertiesType } from "@/types/ui/account-action.type.ts";
 
 export function declareActionRegistry(): void {
@@ -211,6 +213,39 @@ export function declareActionRegistry(): void {
       }
 
       Router.navigate(item.path);
+    },
+  );
+  ActionRegistry.register(
+    ActionKeys.LaunchOptionWithoutSHA1,
+    ({ instance, launch }: {
+      "event"   : MouseEvent;
+      "item"    : (typeof LaunchOptionItems)[number];
+      "instance": Exclude<CurrentInstanceType, undefined>;
+      "launch"  : LaunchContextType;
+    }) => {
+      return launch(instance.id, {
+        "overridden": {
+          "instance": {
+            // Alright
+            ...instance.instance,
+            "checksum": false,
+          },
+          "id": instance.id,
+        },
+      });
+    },
+  );
+  ActionRegistry.register(
+    ActionKeys.LaunchOptionGlobalJava,
+    ({ instance, launch }: {
+      "event"   : MouseEvent;
+      "item"    : (typeof LaunchOptionItems)[number];
+      "instance": Exclude<CurrentInstanceType, undefined>;
+      "launch"  : LaunchContextType;
+    }) => {
+      return launch(instance.id, {
+        "javaPath": globalStates.minecraft.javaBinary,
+      });
     },
   );
 }

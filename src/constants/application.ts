@@ -33,6 +33,7 @@ export const LaunchStatesContextKey = Symbol();
 export const InstanceLogsContextKey = Symbol();
 export const LaunchInstanceContextKey = Symbol();
 export const CloseInstanceContextKey = Symbol();
+export const LaunchInstanceStatusesContextKey = Symbol();
 
 /*
  * JavaScript allows 'AsyncFunction' constructors.
@@ -71,6 +72,8 @@ export const ActionKeys = {
   "ContextMenuRootFolder"    : "context-menu.root-folder",
   "ContextMenuInstanceFolder": "context-menu.instance-folder",
   "SidebarRouteChange"       : "sidebar.route-change",
+  "LaunchOptionWithoutSHA1"  : "launch-option.without-sha1",
+  "LaunchOptionGlobalJava"   : "launch-option.global-java",
 } as const;
 export type ActionKeyType = (typeof ActionKeys)[keyof typeof ActionKeys];
 
@@ -274,6 +277,19 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
     "action": ActionKeys.ContextMenuInstanceFolder,
   },
 ];
+export const LaunchOptionItems: Array<{
+  "label" : string;
+  "action": ActionKeyType;
+}> = [
+  {
+    "label" : "Launch without SHA1 checks",
+    "action": ActionKeys.LaunchOptionWithoutSHA1,
+  },
+  {
+    "label" : "Launch with global Java",
+    "action": ActionKeys.LaunchOptionGlobalJava,
+  },
+];
 
 export const HookResponseStatus = {
   "Stop"    : "stop",
@@ -309,6 +325,7 @@ export default {
   InstanceLogsContextKey,
   LaunchInstanceContextKey,
   CloseInstanceContextKey,
+  LaunchInstanceStatusesContextKey,
   CSSThemeExtensions,
   ContextMenu,
   AccountActions,
@@ -316,6 +333,7 @@ export default {
   SettingsSections,
   InstanceCreationSections,
   ContextMenuItems,
+  LaunchOptionItems,
   HookResponseStatus,
   ExtraHookResponseStatus,
   LogKindColors,

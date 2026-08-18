@@ -30,6 +30,7 @@ import Watchers from "@/lib/watchers";
 import { globalStates } from "@/states/global.ts";
 import type { LaunchAuthType } from "@/types/auth/microsoft-auth.type.ts";
 import type { AccountType, WrappedAccountsType } from "@/types/configs/account.type.ts";
+import type { LaunchContextType } from "@/types/launcher/launch/launch-context.type.ts";
 import type {
   LaunchResponseType,
   MinecraftMetaType,
@@ -52,19 +53,16 @@ const childProcesses: Record<string, MinecraftProcessType> = {};
 function onClose(instanceId: string): void {
   const statuses: LauncherStatusesType | undefined = launches[instanceId];
 
-  // A closed process must not be killable/writable anymore
   delete childProcesses[instanceId];
 
-  if (!statuses) {
-    return;
+  if (statuses) {
+    statuses.launching = 0;
+    statuses.current = LaunchStatus.General.Aborted;
+
+    // Open instance logs since the instance was closed
+    globalStates.logs.show = true;
+    globalStates.logs.mode = instanceId;
   }
-
-  statuses.launching = 0;
-  statuses.current = LaunchStatus.General.Aborted;
-
-  // Open instance logs since the instance was closed
-  globalStates.logs.show = true;
-  globalStates.logs.mode = instanceId;
 }
 
 function createLogSink(instanceId: string): (lines: Array<string>) => void {
@@ -99,39 +97,37 @@ async function resolveLaunchAccount(): Promise<LaunchAuthType | undefined> {
     "accounts": Array<AccountType>;
   } | undefined = await Auth.resolveLaunchAccount(accounts.value);
 
-  if (resolved === undefined) {
-    return undefined;
+  if (resolved !== undefined) {
+    accounts.value = resolved.accounts;
   }
 
-  accounts.value = resolved.accounts;
-
-  return resolved.auth;
+  return resolved?.auth;
 }
 
-const getJavaMajor = async (): Promise<number> => {
-  if (GlobalInternals.javaMajor) {
-    return GlobalInternals.javaMajor;
+const getJavaMajor = async (javaPath?: string): Promise<number> => {
+  if (javaPath || !GlobalInternals.javaMajor) {
+    return Launcher.fetchJavaMajor(javaPath);
   }
 
-  return Launcher.fetchJavaMajor();
+  return GlobalInternals.javaMajor;
 };
 
-async function launchInstance(instanceId?: string): Promise<void> {
+async function launchInstance(instanceId?: string, options?: Partial<{
+  "javaPath"  : string;
+  "overridden": CurrentInstanceType;
+}>): Promise<void> {
   if (!instanceId) {
-    log.error(
+    return log.error(
       __PRE_BUNDLED_FILENAME__,
       "The instance launch button was pressed but no instance is present",
     );
-
-    return;
   }
 
-  const currentInstance: CurrentInstanceType = Instances.findCurrent(instanceId);
+  const currentInstance: CurrentInstanceType =
+    options?.overridden ?? Instances.findCurrent(instanceId);
 
   if (!currentInstance || !currentInstance.instance) {
-    log.error(__PRE_BUNDLED_FILENAME__, "No current instance found");
-
-    return;
+    return log.error(__PRE_BUNDLED_FILENAME__, "No current instance found");
   }
 
   launches[instanceId] = {
@@ -155,12 +151,12 @@ async function launchInstance(instanceId?: string): Promise<void> {
     const onInput = createLogSink(instanceId);
 
     const [javaMajor, account]: [number, LaunchAuthType | undefined] =
-      await Promise.all([getJavaMajor(), resolveLaunchAccount()]);
+      await Promise.all([getJavaMajor(options?.javaPath), resolveLaunchAccount()]);
 
     const { success, process }: LaunchResponseType = await Launcher.handleLaunch({
       "instance"       : currentInstance.instance,
       "userPreferences": {
-        "javaBinary": currentInstance.instance.javaBinary,
+        "javaBinary": options?.javaPath ?? currentInstance.instance.javaBinary,
         "javaMajor" : javaMajor,
         "versions"  : currentInstance.instance.patchVersions,
         account,
@@ -182,8 +178,7 @@ async function launchInstance(instanceId?: string): Promise<void> {
 
     log.error(
       __PRE_BUNDLED_FILENAME__,
-      "Unhandled error.",
-      `Could not launch the '${instanceId}' instance:`,
+      `Unhandled error. Could not launch the '${instanceId}' instance:`,
       Errors.prettify(error),
     );
   }
@@ -320,7 +315,7 @@ provide<WrappedAccountsType>(AuthStatesContextKey, accounts);
 provide<WrappedInstanceLauncherStatusesType>(LaunchStatesContextKey, launches);
 
 provide<ShallowReactive<Record<string, { "list": Array<string> }>>>(InstanceLogsContextKey, logs);
-provide<(instanceId?: string) => Promise<void>>(LaunchInstanceContextKey, launchInstance);
+provide<LaunchContextType>(LaunchInstanceContextKey, launchInstance);
 provide<(instanceId: string) => Promise<void>>(CloseInstanceContextKey, closeInstance);
 
 GlobalInternals.instanceContext = { launches, logs, launchInstance, closeInstance };

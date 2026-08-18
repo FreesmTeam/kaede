@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ask } from "@tauri-apps/plugin-dialog";
 import { useIntervalFn } from "@vueuse/core";
-import { computed, inject, ref, watchEffect } from "vue";
+import { computed, type ComputedRef, inject, provide, ref, watchEffect } from "vue";
 
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
 import {
   CloseInstanceContextKey,
-  LaunchInstanceContextKey,
+  LaunchInstanceContextKey, LaunchInstanceStatusesContextKey,
   LaunchStatesContextKey,
 } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
@@ -18,6 +18,7 @@ import { instanceStates } from "@/states/instance.ts";
 import type {
   InstanceStateType,
 } from "@/types/application/instance-states.type.ts";
+import type { LaunchContextType } from "@/types/launcher/launch/launch-context.type.ts";
 import type {
   LauncherStatusesType,
   WrappedInstanceLauncherStatusesType,
@@ -29,7 +30,7 @@ const killing = ref<boolean>(false);
 const instanceStatuses = inject<WrappedInstanceLauncherStatusesType>(
   LaunchStatesContextKey,
 );
-const launchInstance = inject<(instanceId?: string) => Promise<void>>(
+const launchInstance = inject<LaunchContextType>(
   LaunchInstanceContextKey,
 );
 const closeInstance = inject<(instanceId: string) => Promise<void>>(
@@ -57,6 +58,42 @@ const isDownloading = computed((): boolean => {
     (statuses.value?.downloads?.total ?? 0) > 0
   );
 });
+
+/*
+ * This state handles the launching button and acts as a 'disabled' attribute
+ * not only for the launch buttons but for LaunchOptions.vue as well
+ */
+const launchable = computed((): boolean => (
+  // Pretty simple: if the instance is not launching and not launched, then we can launch it
+  statuses.value === undefined || statuses.value?.launching === 0
+));
+// This state handles the stopping button and acts as a 'disabled' attribute
+const unstoppable = computed((): boolean => (
+  // If the 'killing' is already in the process, then the button is untouchable
+  killing.value ||
+
+  /*
+   * Or, if the instance is not launched and the download tasks are empty, then untouchable too:
+   * - download tasks can be cancelled;
+   * - launched instance can be killed.
+   * When the instance is launched, it implies that the download tasks are done.
+   * When the download tasks are in the process, it implies that the instance is not launched.
+   * Wait, I just repeated myself with P => Q === not(Q) => not(P), but alright??
+   *
+   * Hold on, can we simplify this?
+   * 'launching' can be in three states: none (0 | undefined), launching (1), and launched (2).
+   * 'isDownloading' can either be true or false, and it implies that the 'launching'
+   * is definitely not '2'. Wait, but it also must imply that the 'launching' is not '0 | undefined'
+   * since download tasks only happen when the instance is being launched (1).
+   * Whoa, so we can really simplify this? Also, I am a fucking dumb ass since I just could
+   * glance at the definition of 'isDownloading' and see there 'statuses.value?.launching === 1'.
+   * Hmm wait, what the fuck is going on here. So, if not downloading, then disabled?
+   * HOLD ON, if not downloading but is launched ('true && false'), then it is not disabled
+   * since WE MUST BE ABLE TO KILL THE MINECRAFT PROCESS.
+   * Ohhh, that's why I also wrote 'statuses.value?.launching !== 2' before
+   */
+  (!isDownloading.value && statuses.value?.launching !== 2)
+));
 
 function handleLaunch(): void {
   if (launchInstance === undefined) {
@@ -164,11 +201,16 @@ useIntervalFn((): void => {
     previousIntervalTime.value = currentAbsoluteTime;
   }
 }, 1000);
+
+provide<{
+  "launchable" : ComputedRef<boolean>;
+  "unstoppable": ComputedRef<boolean>;
+}>(LaunchInstanceStatusesContextKey, { launchable, unstoppable });
 </script>
 
 <template>
   <button
-    v-if="statuses === undefined || statuses?.launching === 0"
+    v-if="launchable"
     @click="handleLaunch"
     id="__home-page__launch-button"
     class="relative min-w-24 rounded-l-md rounded-r-sm bg-white px-4 py-2 text-black transition-[opacity] disabled:opacity-70"
@@ -187,7 +229,7 @@ useIntervalFn((): void => {
     v-else
     @click="handleClose"
     id="__home-page__launch-abort-button"
-    :disabled="!isDownloading && statuses?.launching !== 2 || killing"
+    :disabled="unstoppable"
     class="relative min-w-24 rounded-l-md rounded-r-sm bg-white px-4 py-2 text-black transition-[opacity] disabled:opacity-70"
   >
     <span
@@ -198,7 +240,8 @@ useIntervalFn((): void => {
     </span>
     <MaterialRipple
       :colors="{ ripple: '#00000010', sparkles: '0 0 0' }"
-      :disabled="!isDownloading && statuses?.launching !== 2 || killing"
+      :disabled="unstoppable"
     />
   </button>
+  <slot />
 </template>

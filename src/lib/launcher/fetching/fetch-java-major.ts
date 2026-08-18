@@ -22,13 +22,13 @@ import { log } from "@/lib/logging/log.ts";
 import { runProcess } from "@/lib/processes/run-process.ts";
 import type { RunResultType } from "@/types/application/server-process.type.ts";
 
-export async function fetchJavaMajor(): Promise<number> {
+export async function fetchJavaMajor(javaPath?: string): Promise<number> {
   let result: RunResultType;
 
   try {
     log.debug(__PRE_BUNDLED_FILENAME__, "Getting the Java version");
     result = await runProcess({
-      "program": { "type": "path", "value": "java" },
+      "program": { "type": "path", "value": javaPath ?? "java" },
       "args"   : [
         // The '--version' argument does not work in Java 8 and older
         "-version",

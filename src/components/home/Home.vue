@@ -48,8 +48,9 @@ const hasMSA = computed((): boolean => {
             'flex-nowrap gap-1 p-2',
           ]"
         >
-          <Launch />
-          <LaunchOptions />
+          <Launch>
+            <LaunchOptions />
+          </Launch>
         </div>
         <button
           id="__home-page__launch-section-no-msa"

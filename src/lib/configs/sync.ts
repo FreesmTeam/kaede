@@ -28,6 +28,17 @@ import type { ConfigType } from "@/types/configs/config.type.ts";
 
 let lastWritten: string;
 
+function saveExtensionFields<Key extends keyof ConfigType>(configStates: ConfigType): void {
+  for (const key of Object.keys(globalStates)) {
+    // Only save config-specific (extensions may add other fields)
+    if (key.startsWith("config/")) {
+      const currentKey = key as Key;
+
+      configStates[currentKey] = globalStates[currentKey];
+    }
+  }
+}
+
 export async function sync(): Promise<void> {
   if (lastWritten === undefined) {
     lastWritten = JSON.stringify(GlobalInternals.initialConfig);
@@ -49,6 +60,8 @@ export async function sync(): Promise<void> {
       "show": false,
     },
   };
+
+  saveExtensionFields(currentConfigStates);
 
   const currentConfigStatesStringy: string = JSON.stringify(currentConfigStates);
 

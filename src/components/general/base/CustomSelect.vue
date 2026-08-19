@@ -100,7 +100,14 @@ onClickOutside(target, event => {
   <div
     ref="target"
     :id="`${idRoot}-wrapper`"
-    :class="[classNames?.wrapper, 'relative z-20 shrink-0 w-28 sm:w-40']"
+    :class="[
+      classNames?.wrapper,
+      // When two CustomSelect.vue components are near each other,
+      // the dropdown of the top one goes under the button of the bottom one,
+      // so here we make the dropdown-opened select component have a higher z-index
+      opened ? 'z-40' : 'z-20',
+      'relative shrink-0 w-28 sm:w-40',
+    ]"
     :title="tooltip"
   >
     <button

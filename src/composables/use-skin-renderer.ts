@@ -42,6 +42,11 @@ function getSkinSource(account: AccountType): string | Blob {
       character.codePointAt(0) ?? 0
     ));
 
+    /*
+     * We are using '@ts-ignore' instead of '@ts-expect-error' since uhm there are no errors?
+     */
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore 'dts-bundle-generator' throws an error even though there are no errors?????
     return new Blob([bytes], { "type": "image/png" });
   }
 

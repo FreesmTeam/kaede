@@ -11,7 +11,7 @@ import * as TauriOpener from '@tauri-apps/plugin-opener';
 import * as TauriOs from '@tauri-apps/plugin-os';
 import * as TauriProcess from '@tauri-apps/plugin-process';
 import * as TauriUpload from '@tauri-apps/plugin-upload';
-import { App, ComputedRef, ShallowReactive, ShallowRef } from 'vue';
+import { App, ComponentPublicInstance, ComputedRef, ShallowReactive, ShallowRef } from 'vue';
 
 declare function getCpuUsage(): Promise<string>;
 declare function getMemoryUsage(): Promise<{
@@ -24,12 +24,151 @@ declare const _default: {
 	readonly getCpuUsage: typeof getCpuUsage;
 	readonly getMemoryUsage: typeof getMemoryUsage;
 };
+export type UIColorsType = {
+	"root"?: {
+		"fontFamily": string;
+	};
+	"overlay": {
+		"background": string;
+		"backdropFilter"?: string;
+	};
+	"widget": {
+		"background": string;
+		"color": string;
+		"backdropFilter"?: string;
+	};
+	"widgetSecondary": {
+		"color": string;
+	};
+	"text": {
+		"color": string;
+	};
+	"textSecondary": {
+		"color": string;
+	};
+};
+declare function useConfigColors(): {
+	"styles": ComputedRef<UIColorsType>;
+};
+declare function useContextMenu(): {
+	"contextMenu": Ref<{
+		"opened": boolean;
+		"x": number;
+		"y": number;
+	}>;
+	"closeContextMenu": () => void;
+	"showContextMenu": (event: MouseEvent) => void;
+};
+declare function useLogResizer(characterElement: TemplateRef<HTMLDivElement>): {
+	"resizeSection": (event: PointerEvent, section: "time" | "level" | "target") => void;
+	"toggleSection": (section: "time" | "level" | "target" | "message") => void;
+};
+export type LogLineType = {
+	"index": number;
+	"raw": string;
+};
+export type LogSearchMatchType = {
+	"lineIndex": number;
+	"charStart": number;
+	"charEnd": number;
+	"globalIndex": number;
+};
+export type LogSearchStatusType = {
+	"searching": string;
+	"valid": boolean;
+	"active": boolean;
+	"index": number;
+	"matches": Array<LogSearchMatchType>;
+};
+export type LogSearchComposableType = {
+	"status": LogSearchStatusType;
+	"matchesByLine": ComputedRef<Map<number, LogSearchMatchType[]>>;
+	"utils": {
+		"goTo": (index: number) => LogSearchMatchType | undefined;
+		"next": () => LogSearchMatchType | undefined;
+		"previous": () => LogSearchMatchType | undefined;
+		"reset": () => void;
+	};
+};
+export type LogSearchState = "none" | "found" | "current";
+declare function useLogSearch(lines: ComputedRef<{
+	"list": Array<LogLineType>;
+}>): LogSearchComposableType;
+export type LogRenderSegmentType = {
+	"text": string;
+	"kind": "time" | "level" | "target" | "message";
+	"state": LogSearchState;
+	"index": number;
+};
+declare function useLogSegmentation({ filtered, matchesByLine, status, elements, position, }: {
+	"filtered": ComputedRef<{
+		"list": Array<LogLineType>;
+	}>;
+	"matchesByLine": ComputedRef<Map<number, Array<LogSearchMatchType>>>;
+	"status": LogSearchStatusType;
+	"elements": ComputedRef<Array<number>>;
+	"position": Ref<number>;
+}): {
+	"segments": ComputedRef<Array<Array<LogRenderSegmentType & {
+		"gap": boolean;
+		"class": string;
+	}>>>;
+};
+declare function useLogStream(): {
+	"lines": ShallowRef<{
+		"list": Array<string>;
+	}>;
+};
+declare const AccountSchema: Type.TObject<{
+	msa: Type.TUnion<[
+		Type.TObject<{
+			token: Type.TString;
+			refreshToken: Type.TString;
+		}>,
+		Type.TNull
+	]>;
+	profile: Type.TObject<{
+		uuid: Type.TString;
+		name: Type.TString;
+		type: Type.TUnion<[
+			Type.TLiteral<"msa">,
+			Type.TLiteral<"offline">
+		]>;
+	}>;
+	skin: Type.TObject<{
+		id: Type.TString;
+		data: Type.TString;
+		url: Type.TString;
+		variant: Type.TUnion<[
+			Type.TLiteral<"classic">,
+			Type.TLiteral<"slim">
+		]>;
+	}>;
+}>;
+export type AccountType = Static<typeof AccountSchema>;
+declare function useSkinRenderer({ render, account, }: {
+	"render": "3d" | "2d-head";
+	"account"?: ComputedRef<AccountType | undefined>;
+}): {
+	"canvas": TemplateRef<HTMLCanvasElement>;
+	"shown": Ref<boolean>;
+	"viewer": ShallowRef<SkinViewer | undefined>;
+};
+declare const _default$1: {
+	readonly useConfigColors: typeof useConfigColors;
+	readonly useContextMenu: typeof useContextMenu;
+	readonly useLogResizer: typeof useLogResizer;
+	readonly useLogSearch: typeof useLogSearch;
+	readonly useLogSegmentation: typeof useLogSegmentation;
+	readonly useLogStream: typeof useLogStream;
+	readonly useSkinRenderer: typeof useSkinRenderer;
+};
 declare const PatchUIDs: ("com.azul.java" | "com.mumfrey.liteloader" | "net.adoptium.java" | "net.fabricmc.fabric-loader" | "net.fabricmc.intermediary" | "net.minecraft" | "net.minecraft.java" | "net.minecraftforge" | "net.neoforged" | "org.lwjgl" | "org.lwjgl3" | "org.quiltmc.quilt-loader")[];
 declare const CustomPatches: {
 	readonly OptiFine: "optifine.OptiFine";
 	readonly MCPHackersLaunchWrapper: "org.mcphackers.launchwrapper";
 };
-declare const _default$1: {
+declare const _default$2: {
 	readonly Patches: {
 		readonly AzulJava: "com.azul.java";
 		readonly LiteLoader: "com.mumfrey.liteloader";
@@ -70,7 +209,7 @@ declare const _default$1: {
 		uid: ExtendedPatchUIDType;
 		name: string;
 		icon?: string;
-		action?: (uid: string) => Promise<void>;
+		action?: ActionKeyType;
 	}[];
 };
 export type PatchUIDType = (typeof PatchUIDs)[number];
@@ -99,6 +238,7 @@ export type InstanceStateType = GlobalStatesType["minecraft"] & {
 	"entry": ExtendedPatchUIDType;
 	"pinned": boolean;
 	"groups": Array<string>;
+	"modpackPath"?: string;
 	"patchVersions": {
 		"net.minecraft": string;
 	} & Partial<Record<ExtendedPatchUIDType, string>>;
@@ -112,7 +252,7 @@ declare const Routes: {
 	readonly Profile: "profile";
 	readonly None: "none";
 };
-declare const _default$2: {
+declare const _default$3: {
 	readonly Routes: {
 		readonly Home: "home";
 		readonly Library: "library";
@@ -137,7 +277,34 @@ declare const _default$2: {
 	];
 };
 export type RouteType = (typeof Routes)[keyof typeof Routes];
+export type SignInStatusType = "authorizing" | "exchanging-code" | "xbox-live" | "xsts" | "minecraft-token" | "profile" | "finalizing";
+export type SignInResultType = {
+	"success": true;
+	"account": AccountType;
+} | {
+	"success": false;
+	"reason": string;
+};
+export type EnsureFreshResultType = {
+	"account": AccountType;
+	"status": "fresh" | "refreshed" | "failed";
+};
+export type LaunchAuthType = {
+	"username": string;
+	"token": string;
+	"uuid": string;
+	"type": string;
+	"xuid": string;
+};
 export type TranslationsType = typeof EnglishTranslations;
+export type TabSectionType = {
+	"id": string;
+	"name": string;
+	"icon"?: string;
+	"image"?: string;
+	"await"?: () => Promise<void>;
+	"action"?: ActionKeyType;
+};
 export type DevelopmentType = {
 	"loadErudaDevTools": boolean;
 	"showFPS": boolean;
@@ -205,38 +372,58 @@ export type MinecraftType = {
 	"windowWidth": number;
 	"icon": string;
 	"javaBinary": string;
-	"add": Partial<{
+	"add": {
 		"jvmArguments": Array<string>;
 		"gameArguments": Array<string>;
-	}>;
-	"remove": Partial<{
+	};
+	"remove": {
 		"jvmArguments": Array<string>;
 		"gameArguments": Array<string>;
-	}>;
+	};
 };
 export type SidebarItemsType = Array<"divider" | {
 	"path": RouteType;
 	"name": string;
-	"action": () => void;
+	"action": ActionKeyType;
 	"icon"?: string;
 	"image"?: string;
 }>;
-export type ContextMenuItemsType = Array<{
+export type ContextMenuItemsType = Array<"divider" | {
 	"name": string;
-	"action": () => void;
+	"action": ActionKeyType;
+	"icon"?: string;
+	"image"?: string;
+} | {
+	"name": string;
+	"children": ContextMenuItemsType;
 	"icon"?: string;
 	"image"?: string;
 }>;
 export type PagesType = {
 	"home": Partial<object>;
-	"library": Partial<object>;
+	"library": Partial<{
+		"selected": string;
+	}>;
 	"settings": Partial<{
+		"select": (tab: TabSectionType) => Promise<void>;
 		"tab": string;
 	}>;
+	"profile": Partial<{
+		"pending": boolean;
+		"step": SignInStatusType | null;
+		"error": string | null;
+	}>;
 	"add-instance": Partial<{
+		"lastCreated": string | undefined;
+		"select": (tab: TabSectionType) => Promise<void>;
 		"instanceVersionSearch": {
 			"patch": ExtendedPatchUIDType;
 			"input": string;
+		};
+		"importedModpack": {
+			"path": string;
+			"name": string | undefined;
+			"loader": string;
 		};
 		"instance": {
 			"name": string;
@@ -247,8 +434,12 @@ export type PagesType = {
 			"patchVersions": InstanceStateType["patchVersions"];
 			"windowHeight": number;
 			"windowWidth": number;
-			"icon"?: string;
+			"icon": string;
 			"add": {
+				"jvmArguments": Array<string>;
+				"gameArguments": Array<string>;
+			};
+			"remove": {
 				"jvmArguments": Array<string>;
 				"gameArguments": Array<string>;
 			};
@@ -277,6 +468,10 @@ export type GlobalStatesType = {
 	"selected": SelectedType;
 	"locale": string;
 	"logs": LogsType;
+	"java": Array<{
+		"label": string;
+		"path": string;
+	}>;
 	"minecraft": MinecraftType;
 	"currentPage": RouteType;
 	"translations": TranslationsType;
@@ -285,13 +480,13 @@ export type GlobalStatesType = {
 	"pages": PagesType;
 };
 export type LogLevelType = "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR";
-export type TabSectionType = {
-	"id": string;
-	"name": string;
-	"icon"?: string;
-	"image"?: string;
-	"action"?: (id: string) => Promise<void>;
+export type AccountActionType = {
+	"icon": string;
+	"label": string;
+	"action": ActionKeyType;
+	"disabled"?: (account: AccountType) => boolean;
 };
+export type AccountActionCollectionType = Array<AccountActionType>;
 declare const TranslationsContextKey: unique symbol;
 declare const AuthOneTimeFetchContextKey: unique symbol;
 declare const AuthStatesContextKey: unique symbol;
@@ -299,16 +494,33 @@ declare const LaunchStatesContextKey: unique symbol;
 declare const InstanceLogsContextKey: unique symbol;
 declare const LaunchInstanceContextKey: unique symbol;
 declare const CloseInstanceContextKey: unique symbol;
+declare const LaunchInstanceStatusesContextKey: unique symbol;
+declare const ActionKeys: {
+	readonly AccountsRefresh: "accounts.refresh";
+	readonly AccountsCopyUUID: "accounts.copy-uuid";
+	readonly AccountsRemove: "accounts.remove";
+	readonly ContextMenuSoftReload: "context-menu.soft-reload";
+	readonly ContextMenuHardReload: "context-menu.hard-reload";
+	readonly ContextMenuProcessReload: "context-menu.process-reload";
+	readonly ContextMenuLogs: "context-menu.logs";
+	readonly ContextMenuRootFolder: "context-menu.root-folder";
+	readonly ContextMenuInstanceFolder: "context-menu.instance-folder";
+	readonly SidebarRouteChange: "sidebar.route-change";
+	readonly LaunchOptionWithoutSHA1: "launch-option.without-sha1";
+	readonly LaunchOptionGlobalJava: "launch-option.global-java";
+};
+export type ActionKeyType = (typeof ActionKeys)[keyof typeof ActionKeys];
 declare const HookResponseStatus: {
 	readonly Stop: "stop";
 	readonly Continue: "continue";
 };
-declare const _default$3: {
+declare const _default$4: {
 	readonly AsyncFunction: FunctionConstructor;
 	readonly ApplicationName: "Kaede";
 	readonly ApplicationRootID: "#app";
 	readonly CustomFontFamily: "kaede-custom-font";
 	readonly DefaultLocale: "en";
+	readonly DefaultLocaleName: string;
 	readonly TranslationsContextKey: typeof TranslationsContextKey;
 	readonly AuthOneTimeFetchContextKey: typeof AuthOneTimeFetchContextKey;
 	readonly AuthStatesContextKey: typeof AuthStatesContextKey;
@@ -316,24 +528,46 @@ declare const _default$3: {
 	readonly InstanceLogsContextKey: typeof InstanceLogsContextKey;
 	readonly LaunchInstanceContextKey: typeof LaunchInstanceContextKey;
 	readonly CloseInstanceContextKey: typeof CloseInstanceContextKey;
+	readonly LaunchInstanceStatusesContextKey: typeof LaunchInstanceStatusesContextKey;
 	readonly CSSThemeExtensions: {
 		readonly Enabled: ".css";
 		readonly Disabled: ".css.disabled";
 	};
 	readonly ContextMenu: {
+		contextMenu?: Ref<{
+			"opened": boolean;
+			"x": number;
+			"y": number;
+		}>;
 		show: (event: MouseEvent) => void;
 		close: () => void;
 	};
+	readonly AccountActions: AccountActionCollectionType;
 	readonly DefaultGlobalStatesPagesStates: {
 		home: Partial<object>;
-		library: Partial<object>;
+		library: Partial<{
+			"selected": string;
+		}>;
 		settings: Partial<{
+			"select": (tab: TabSectionType) => Promise<void>;
 			"tab": string;
 		}>;
+		profile: Partial<{
+			"pending": boolean;
+			"step": SignInStatusType | null;
+			"error": string | null;
+		}>;
 		"add-instance": Partial<{
+			"lastCreated": string | undefined;
+			"select": (tab: TabSectionType) => Promise<void>;
 			"instanceVersionSearch": {
 				"patch": ExtendedPatchUIDType;
 				"input": string;
+			};
+			"importedModpack": {
+				"path": string;
+				"name": string | undefined;
+				"loader": string;
 			};
 			"instance": {
 				"name": string;
@@ -344,8 +578,12 @@ declare const _default$3: {
 				"patchVersions": InstanceStateType["patchVersions"];
 				"windowHeight": number;
 				"windowWidth": number;
-				"icon"?: string;
+				"icon": string;
 				"add": {
+					"jvmArguments": Array<string>;
+					"gameArguments": Array<string>;
+				};
+				"remove": {
 					"jvmArguments": Array<string>;
 					"gameArguments": Array<string>;
 				};
@@ -369,11 +607,25 @@ declare const _default$3: {
 	};
 	readonly SettingsSections: TabSectionType[];
 	readonly InstanceCreationSections: TabSectionType[];
-	readonly ContextMenuItems: {
+	readonly ContextMenuItems: ("divider" | {
 		name: string;
-		action: () => void;
+		action: ActionKeyType;
 		icon?: string;
 		image?: string;
+	} | {
+		name: string;
+		children: ("divider" | {
+			name: string;
+			action: ActionKeyType;
+			icon?: string;
+			image?: string;
+		} | /*elided*/ any)[];
+		icon?: string;
+		image?: string;
+	})[];
+	readonly LaunchOptionItems: {
+		label: string;
+		action: ActionKeyType;
 	}[];
 	readonly HookResponseStatus: {
 		readonly Stop: "stop";
@@ -386,10 +638,10 @@ declare const _default$3: {
 	readonly LogLevelColors: Record<LogLevelType, string>;
 };
 declare function getASCIIArt(portable: boolean, launchCount: number, launcherVersion: string, executableHash: string): string;
-declare const _default$4: {
+declare const _default$5: {
 	readonly getASCIIArt: typeof getASCIIArt;
 };
-declare const _default$5: {
+declare const _default$6: {
 	readonly BrowserStorageKey: "kaedeBrowserDB";
 	readonly BrowserStorageStoreKey: "storage";
 	readonly LogInfo: {
@@ -403,7 +655,7 @@ declare const _default$5: {
 		};
 	};
 };
-declare const _default$6: {
+declare const _default$7: {
 	readonly AllEventListeners: {
 		readonly "all-clicks": true;
 		readonly "left-click": true;
@@ -415,7 +667,7 @@ declare const _default$6: {
 	readonly EventListeners: Record<string, Record<"instance" | "all-clicks" | "left-click" | "middle-click" | "right-click" | "routing", unknown>>;
 	readonly EventSubscribers: Set<string>;
 };
-declare const _default$7: {
+declare const _default$8: {
 	readonly Folders: {
 		readonly Assets: {
 			readonly Path: "assets";
@@ -535,10 +787,23 @@ declare const LaunchStatus: {
 		readonly IncompatibleArch: "errors-incompatible-arch";
 	};
 };
-declare const _default$8: {
+declare const _default$9: {
 	readonly FamousAndOldJavaMajorVersion: 8;
-	readonly DefaultInstanceIcon: "https://minecraft.wiki/images/Minecraft_Preview_App_Store_icon_2.png";
-	readonly DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions">;
+	readonly DefaultInstanceIcon: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAABAAAAAQABAMAAACNMzawAAAAJFBMVEWXZ0atelSAVTlmQSxQMSCZj4tWNSNlQCpsRS56UDZ2TTR+VDk5BsQAAAAHaElEQVR42u3WAY3bQBCF4ZFVAkNhKZiCD0IolEKwnDmZgikchUKIqqd2L7ffRyB28mtetgp1qEIjtE82+/1/FUsTgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAATANwoAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAAOjQERqhDlVoDz1CLgD/MwAEgAAQAAJAAAhgVOYu3jqAq1ggAATARAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAAbHtohDr0O9ShKzT7+3MBlmICEAACQAAIAAGwjVBN1qHVn3+7QjXZGfrxz28CEAACQAAIAAEgAASAABAAAhAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQADxDFepQhUaoQkfIBfgbJgABIAAEgAAQAALoYqYxO4CzmOkyAQgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAEgAAQAAJAAAgAASAABIAAEAA/PwAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAAC4BnaQ0eoQiPUoSO0h1yAtZgABIAAEAACQAAC6Jpr1Mry97/SAM7KdPwCa7tMAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEACvAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAAOvQZ2kNH6BF6hio0QnEAIzQ3AAGYgDfjPwACQAAIAAEggFGZr8q0AOa6Jgd0CoB/TAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAhAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAAbB16A5V6A49Ql+hZ+gOuQArMQEIAAEgAASAABBAr/35AviY/AOeAuAFASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEwDbeXIdG6DPUk7kAazEBCAABIAAEgAAEMCpz19r63QO4isRHZXYTwAsCQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABCAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAgAASAABIAAEAACQAAIAAEgAASAABAAAkAACAABIAAEgAAQAAJAAAiAP8WHkf6NJVt6AAAAAElFTkSuQmCC";
+	readonly DefaultInstanceSettings: Omit<InstanceStateType, "patchVersions" | keyof {
+		windowHeight: number;
+		windowWidth: number;
+		icon: string;
+		javaBinary: string;
+		add: {
+			"jvmArguments": Array<string>;
+			"gameArguments": Array<string>;
+		};
+		remove: {
+			"jvmArguments": Array<string>;
+			"gameArguments": Array<string>;
+		};
+	}>;
 	readonly JVMArguments: {
 		readonly Default: {
 			readonly Log4J: "-Dlog4j2.formatMsgNoLookups=true";
@@ -620,15 +885,6 @@ declare const _default$8: {
 		};
 	};
 	readonly APIEndpoints: {
-		readonly KaedeCache: {
-			readonly Base: "https://raw.githubusercontent.com/kaede-basement/cache/main/";
-			readonly Paths: {
-				readonly OptiFine: {
-					readonly Id: "optifine.OptiFine";
-					readonly Base: "optifine.OptiFine/";
-				};
-			};
-		};
 		readonly Meta: {
 			readonly Base: "https://meta.prismlauncher.org/v1/";
 			readonly Paths: {
@@ -660,6 +916,7 @@ declare const _default$8: {
 			readonly Libraries: 8;
 		};
 		readonly Logs: {
+			readonly OuterRegion: 280;
 			readonly LineLimit: 65536;
 		};
 	};
@@ -689,49 +946,74 @@ export type PermissionType = {
 	[Key in PermissionsKeyType]: PermissionsObjectType[Key][keyof PermissionsObjectType[Key]];
 }[PermissionsKeyType];
 declare const Permissions$1: {
+	readonly Time: {
+		readonly Performance: "time::performance";
+		readonly Date: "time::date";
+	};
 	readonly UI: {
-		readonly Basic: "ui-basic";
-		readonly Style: "ui-style";
+		readonly Basic: "ui::basic";
+		readonly Interactivity: "ui::interactivity";
 	};
 	readonly Events: {
-		readonly All: "all-events";
+		readonly Page: "events::page";
+		readonly InstanceSelection: "events::instance-selection";
 	};
 	readonly Internet: {
-		readonly General: "internet";
+		readonly HTTPGet: "internet::http-get";
+		readonly HTTPPost: "internet::http-post";
 	};
-	readonly ExternalStorage: {
-		readonly Read: "read-external-storage";
-		readonly Write: "write-external-storage";
+	readonly Log: {
+		readonly Write: "log::write";
+		readonly Read: "log::read";
+		readonly Stream: "log::stream";
 	};
 	readonly InternalStorage: {
-		readonly Read: "read-internal-storage";
-		readonly Write: "write-internal-storage";
-		readonly Logging: "write-to-log-file";
+		readonly Read: "internal-storage::read";
+		readonly Write: "internal-storage::write";
+	};
+	readonly ExternalStorage: {
+		readonly Read: "external-storage::read";
+		readonly Write: "external-storage::write";
 	};
 };
-declare const _default$9: {
+declare const _default$10: {
 	readonly Permissions: {
+		readonly Time: {
+			readonly Performance: "time::performance";
+			readonly Date: "time::date";
+		};
 		readonly UI: {
-			readonly Basic: "ui-basic";
-			readonly Style: "ui-style";
+			readonly Basic: "ui::basic";
+			readonly Interactivity: "ui::interactivity";
 		};
 		readonly Events: {
-			readonly All: "all-events";
+			readonly Page: "events::page";
+			readonly InstanceSelection: "events::instance-selection";
 		};
 		readonly Internet: {
-			readonly General: "internet";
+			readonly HTTPGet: "internet::http-get";
+			readonly HTTPPost: "internet::http-post";
 		};
-		readonly ExternalStorage: {
-			readonly Read: "read-external-storage";
-			readonly Write: "write-external-storage";
+		readonly Log: {
+			readonly Write: "log::write";
+			readonly Read: "log::read";
+			readonly Stream: "log::stream";
 		};
 		readonly InternalStorage: {
-			readonly Read: "read-internal-storage";
-			readonly Write: "write-internal-storage";
-			readonly Logging: "write-to-log-file";
+			readonly Read: "internal-storage::read";
+			readonly Write: "internal-storage::write";
+		};
+		readonly ExternalStorage: {
+			readonly Read: "external-storage::read";
+			readonly Write: "external-storage::write";
 		};
 	};
 	readonly PermissionsList: PermissionType[];
+	readonly getPermissionDisplayData: (id: string | undefined) => {
+		"label": string;
+		"icon": string;
+		"description": string;
+	};
 };
 export type SettingsRowType = {
 	"idRoot": string;
@@ -747,10 +1029,19 @@ export type SettingsRowType = {
 		"kind": "toggle";
 		"value": boolean;
 	} | {
+		"kind": "radio";
+		"value": boolean;
+	} | {
 		"kind": "select";
-		"options": Array<string>;
+		"options": Array<{
+			"id": string;
+			"label": string;
+		}>;
 		"value"?: string;
-		"onSelect"?: (value: string) => void;
+		"onSelect"?: (value: {
+			"id": string;
+			"label": string;
+		}) => void;
 	} | {
 		"icon": string;
 		"placeholder": string;
@@ -772,63 +1063,23 @@ export type SettingsRowType = {
 		"value"?: string | null;
 		"default"?: string;
 		"onColor"?: (value: string) => void;
+		"toBottom"?: boolean;
 	} | Array<SettingsRowType>;
 };
 export type SettingsRowCollectionType = Array<ComputedRef<SettingsRowType>>;
-declare const _default$10: {
+declare const _default$11: {
 	readonly DevelopmentSettingsRows: SettingsRowCollectionType;
 	readonly ExtensionsSettingsRows: SettingsRowCollectionType;
+	readonly ReadLocales: import("vue").ShallowReactive<{
+		id: string;
+		label: string;
+	}[]>;
 	readonly UserInterfaceSettingsRows: SettingsRowCollectionType;
 	readonly MinecraftSettingsRows: SettingsRowCollectionType;
-};
-declare const AccountSchema: Type.TObject<{
-	msa: Type.TUnion<[
-		Type.TObject<{
-			token: Type.TString;
-			refreshToken: Type.TString;
-		}>,
-		Type.TNull
-	]>;
-	profile: Type.TObject<{
-		uuid: Type.TString;
-		name: Type.TString;
-		type: Type.TUnion<[
-			Type.TLiteral<"msa">,
-			Type.TLiteral<"offline">
-		]>;
-	}>;
-	skin: Type.TObject<{
-		id: Type.TString;
-		data: Type.TString;
-		url: Type.TString;
-		variant: Type.TUnion<[
-			Type.TLiteral<"classic">,
-			Type.TLiteral<"slim">
-		]>;
-	}>;
-}>;
-export type AccountType = Static<typeof AccountSchema>;
-export type SignInStatusType = "authorizing" | "exchanging-code" | "xbox-live" | "xsts" | "minecraft-token" | "profile" | "finalizing";
-export type SignInResultType = {
-	"success": true;
-	"account": AccountType;
-} | {
-	"success": false;
-	"reason": string;
-};
-export type EnsureFreshResultType = {
-	"account": AccountType;
-	"status": "fresh" | "refreshed" | "failed";
-};
-export type LaunchAuthType = {
-	"username": string;
-	"token": string;
-	"uuid": string;
-	"type": string;
-	"xuid": string;
+	readonly JavaSettingsRows: SettingsRowCollectionType;
 };
 declare function buildLaunchAuth(account: AccountType): LaunchAuthType;
-declare function ensureFreshAccount(account: AccountType): Promise<EnsureFreshResultType>;
+declare function ensureFreshAccount(account: AccountType, forceRefresh?: boolean): Promise<EnsureFreshResultType>;
 declare function resolveLaunchAccount(accounts: Array<AccountType>): Promise<{
 	"auth": LaunchAuthType;
 	"accounts": Array<AccountType>;
@@ -836,13 +1087,13 @@ declare function resolveLaunchAccount(accounts: Array<AccountType>): Promise<{
 declare function signInWithMicrosoft({ onStatus, }?: {
 	"onStatus"?: (status: SignInStatusType) => void;
 }): Promise<SignInResultType>;
-declare const _default$11: {
+declare const _default$12: {
 	readonly buildLaunchAuth: typeof buildLaunchAuth;
 	readonly ensureFreshAccount: typeof ensureFreshAccount;
 	readonly resolveLaunchAccount: typeof resolveLaunchAccount;
 	readonly signInWithMicrosoft: typeof signInWithMicrosoft;
 };
-declare const _default$12: {
+declare const _default$13: {
 	readonly detectIsBrowser: () => boolean;
 	readonly handleTauriEnvironment: () => Promise<void>;
 	readonly readStoragePath: (path: string) => Promise<string>;
@@ -980,18 +1231,22 @@ declare const ConfigSchema: Type.TObject<{
 			target: Type.TNumber;
 		}>;
 	}>;
+	java: Type.TArray<Type.TObject<{
+		label: Type.TString;
+		path: Type.TString;
+	}>>;
 	minecraft: Type.TObject<{
 		windowHeight: Type.TNumber;
 		windowWidth: Type.TNumber;
 		icon: Type.TString;
 		javaBinary: Type.TString;
 		add: Type.TObject<{
-			jvmArguments: Type.TOptional<Type.TArray<Type.TString>>;
-			gameArguments: Type.TOptional<Type.TArray<Type.TString>>;
+			jvmArguments: Type.TArray<Type.TString>;
+			gameArguments: Type.TArray<Type.TString>;
 		}>;
 		remove: Type.TObject<{
-			jvmArguments: Type.TOptional<Type.TArray<Type.TString>>;
-			gameArguments: Type.TOptional<Type.TArray<Type.TString>>;
+			jvmArguments: Type.TArray<Type.TString>;
+			gameArguments: Type.TArray<Type.TString>;
 		}>;
 	}>;
 }>;
@@ -1025,7 +1280,7 @@ declare function writeAccounts({ accounts, baseDirectory, }: {
 	"baseDirectory"?: string;
 }): Promise<boolean>;
 declare function sync(): Promise<void>;
-declare const _default$13: {
+declare const _default$14: {
 	readonly getMain: typeof getMain;
 	readonly sync: typeof sync;
 	readonly get: typeof getMain;
@@ -1046,7 +1301,7 @@ declare function extract(error: unknown): NativeErrorType;
 declare function handleCapture(error: Error): NativeErrorType;
 declare function prettify(error: unknown): string;
 declare function stringify(error: unknown): string;
-declare const _default$14: {
+declare const _default$15: {
 	readonly extract: typeof extract;
 	readonly handleCapture: typeof handleCapture;
 	readonly prettify: typeof prettify;
@@ -1116,7 +1371,7 @@ declare function runInSandbox({ id, code, permissions, }: {
 	"disable": () => void | Promise<void>;
 };
 declare function showWebviewWindow(): Promise<void>;
-declare const _default$15: {
+declare const _default$16: {
 	readonly requestPermissions: (permissions: Array<PermissionType | string> | unknown, extension: string) => Promise<Array<unknown>>;
 	readonly dirtyLifecycle: typeof dirtyLifecycle;
 	readonly readExtensions: typeof readExtensions;
@@ -1154,7 +1409,7 @@ declare function verifyPaths({ paths, sha1, }: {
 	}>;
 	"sha1"?: boolean;
 }): Promise<Array<string>>;
-declare const _default$16: {
+declare const _default$17: {
 	readonly getBaseDirectory: typeof getBaseDirectory;
 	readonly handleJsonFile: typeof handleJsonFile;
 	readonly join: typeof join;
@@ -1173,7 +1428,7 @@ declare function getRelativeDate({ days, hours, minutes, seconds, milliseconds, 
 	"milliseconds"?: number;
 	"from"?: Date;
 }): Date;
-declare const _default$17: {
+declare const _default$18: {
 	readonly capitalize: typeof capitalize;
 	readonly checkDaysDifference: typeof checkDaysDifference;
 	readonly isFontSourceUrl: typeof isFontSourceUrl;
@@ -1182,17 +1437,55 @@ declare const _default$17: {
 };
 declare function __registerComponent(name: string, component: Component): void;
 declare function __restoreComponent(name: string): boolean;
+declare function declareActionRegistry(): void;
 declare function declareGlobals(): void;
-declare const _default$18: {
+export type ActionType<T> = (properties: T) => (void | false) | Promise<void | false>;
+export type GenericAction = ActionType<any>;
+declare const _default$19: {
+	readonly declareActionRegistry: typeof declareActionRegistry;
 	readonly declareGlobals: typeof declareGlobals;
+	readonly Actions: import("vue").ShallowReactive<Record<string, GenericAction>>;
+	readonly ActionRegistry: {
+		readonly register: <T>(id: string, action: ActionType<T>) => void;
+		readonly execute: <T>(id: string, properties: T) => Promise<boolean>;
+		readonly get: <T>(id: string) => ActionType<T> | undefined;
+		readonly getAll: () => Array<{
+			"id": string;
+			"action": GenericAction;
+		}>;
+	};
+	readonly Components: {
+		[key: string]: Component;
+		ContextMenu: Component;
+		GlobalBackground: Component;
+		LaunchProgress: Component;
+		Layout: Component;
+		PagesSelector: Component;
+		PageWrapper: Component;
+		Sidebar: Component;
+		Tabs: Component;
+		AddInstance: Component;
+		Home: Component;
+		Library: Component;
+		Profile: Component;
+		Settings: Component;
+	};
+	readonly registerAction: <T>(id: string, action: ActionType<T>) => void;
+	readonly getAction: <T>(id: string) => ActionType<T> | undefined;
+	readonly executeAction: <T>(id: string, properties: T) => Promise<boolean>;
+	readonly getAllActions: () => Array<{
+		"id": string;
+		"action": GenericAction;
+	}>;
 	readonly registerComponent: typeof __registerComponent;
 	readonly restoreComponent: typeof __restoreComponent;
+	readonly getComponent: (id: string) => Component | undefined;
 };
 declare function hashFileContents(image: Uint8Array): Promise<string>;
 declare function hashOfflineNickname(input: string): Promise<string>;
 declare function hashString(input: string): number;
 declare function hashStringCrypto(input: string): Promise<string>;
-declare const _default$19: {
+declare const _default$20: {
 	readonly hashFileContents: typeof hashFileContents;
 	readonly hashOfflineNickname: typeof hashOfflineNickname;
 	readonly hashString: typeof hashString;
@@ -1240,7 +1533,7 @@ declare function handleHookResponse<T>({ scope, status, response, timing, index,
 		"hookStart": number;
 	};
 }): "continue-hooks-loop" | T | undefined;
-declare const _default$20: {
+declare const _default$21: {
 	readonly catchAsyncResponseHooks: typeof catchAsyncResponseHooks;
 	readonly catchAsyncVoidHooks: typeof catchAsyncVoidHooks;
 	readonly catchSyncResponseHooks: typeof catchSyncResponseHooks;
@@ -1251,6 +1544,7 @@ declare function finish({ config, baseDirectory, }: {
 	"config": ConfigType;
 	"baseDirectory": string;
 }): Promise<void>;
+declare function recreateWebView(): Promise<void>;
 export type InitialStateType = {
 	"basic": {
 		"launcherVersion": string;
@@ -1268,12 +1562,13 @@ export type InitialStateType = {
 	};
 };
 declare function start(): Promise<InitialStateType>;
-declare const _default$21: {
+declare const _default$22: {
 	readonly finish: typeof finish;
+	readonly recreateWebView: typeof recreateWebView;
 	readonly start: typeof start;
 };
-declare function create(currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"], uid: ExtendedPatchUIDType): void;
-declare function extractSavedFromPages(globalStates: GlobalStatesType | undefined): GlobalStatesType["pages"]["add-instance"]["instance"];
+declare function create(currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"], uid: ExtendedPatchUIDType, modpackPath?: string): string | undefined;
+declare function extractSavedFromPages(storedInstance: GlobalStatesType["pages"]["add-instance"]["instance"] | undefined, minecraft: GlobalStatesType["minecraft"]): Required<GlobalStatesType["pages"]["add-instance"]["instance"]>;
 export type CurrentInstanceType = {
 	"instance": InstanceStateType;
 	"id": string;
@@ -1290,16 +1585,19 @@ declare function readInstances(properties?: Partial<{
 	"baseDirectory": string;
 	"parsedFile": ParsedFile;
 }>): Promise<InstanceStatesType>;
+declare function resetPageStates(): void;
 declare function sync$1(): Promise<void>;
-declare const _default$22: {
+declare const _default$23: {
 	readonly create: typeof create;
 	readonly extractSavedFromPages: typeof extractSavedFromPages;
 	readonly findCurrent: typeof findCurrent;
 	readonly getMinecraftDirectory: typeof getMinecraftDirectory;
 	readonly readInstances: typeof readInstances;
+	readonly resetPageStates: typeof resetPageStates;
 	readonly sync: typeof sync$1;
 };
-declare function fetchJavaMajor(): Promise<number>;
+declare function detectJavaInstallations(): Promise<void>;
+declare function fetchJavaMajor(javaPath?: string): Promise<number>;
 export type LaunchStatusObjectType = typeof LaunchStatus;
 export type LaunchKeyType = keyof LaunchStatusObjectType;
 export type LaunchStatusType = {
@@ -1315,6 +1613,7 @@ export type LauncherStatusesDownloadsType = {
 	"total": number;
 };
 export type LauncherStatusesType = {
+	"instanceId": string;
 	"launching": 0 | 1 | 2;
 	"current": LaunchStatusType | undefined;
 	"downloads": LauncherStatusesDownloadsType;
@@ -1761,8 +2060,9 @@ export type AssetObjectsType = {
 declare function shallowlyValidateMeta({ meta }: {
 	"meta": unknown;
 }): AssetObjectsType | false;
-declare const _default$23: {
+declare const _default$24: {
 	readonly __unused: {};
+	readonly detectJavaInstallations: typeof detectJavaInstallations;
 	readonly fetchJavaMajor: typeof fetchJavaMajor;
 	readonly Arguments: {
 		readonly getAdditionalStartArguments: typeof getAdditionalStartArguments;
@@ -1837,7 +2137,7 @@ declare function handleVirtualTextCopy(copied: boolean, range: [
 declare function selectAllText(container: HTMLDivElement | null | undefined): void;
 declare function stopStreamingLogs(): Promise<void>;
 declare function streamLogs<T>(channel: Channel<T>): Promise<void>;
-declare const _default$24: {
+declare const _default$25: {
 	readonly streamLogs: typeof streamLogs;
 	readonly stopStreamingLogs: typeof stopStreamingLogs;
 	readonly getLogLevelColor: typeof getLogLevelColor;
@@ -1889,15 +2189,15 @@ declare function concurrentlyDownload({ concurrency, entries, statuses, label, c
 	"cancelId"?: string;
 	"debug"?: boolean;
 }): Promise<DownloadReportType>;
-declare const _default$25: {
+declare const _default$26: {
 	readonly concurrentlyDownload: typeof concurrentlyDownload;
 };
 declare function grantStaticPermissions({ id, permissions, }: {
 	"id": string;
 	"permissions"?: Array<PermissionType>;
 }): Record<string, unknown>;
-declare function handlePermission(permission: PermissionType | string, id: string): unknown;
-declare const _default$26: {
+declare function handlePermission<Key extends PermissionType>(permission: Key, id: string): unknown;
+declare const _default$27: {
 	readonly grantStaticPermissions: typeof grantStaticPermissions;
 	readonly handlePermission: typeof handlePermission;
 };
@@ -1923,7 +2223,7 @@ declare function spawnServer({ name, program, args, port }: {
 	"args": Array<string>;
 	"port": number;
 }): Promise<ServerProcessType>;
-declare const _default$27: {
+declare const _default$28: {
 	readonly rehydrateProcesses: typeof rehydrateProcesses;
 	readonly hydrate: typeof hydrate;
 	readonly runProcess: typeof runProcess;
@@ -1932,7 +2232,7 @@ declare const _default$27: {
 };
 declare function getInitialPage(): RouteType;
 declare function navigate(path: RouteType): void;
-declare const _default$28: {
+declare const _default$29: {
 	readonly getInitialPage: typeof getInitialPage;
 	readonly navigate: typeof navigate;
 };
@@ -1948,13 +2248,13 @@ export interface ValidationArgumentsType {
 	};
 	"value": unknown;
 }
-declare const _default$29: {
+declare const _default$30: {
 	readonly validate: {
 		readonly account: (data: ValidationArgumentsType) => false | {
 			profile: {
+				uuid: string;
 				name: string;
 				type: "msa" | "offline";
-				uuid: string;
 			};
 			msa: {
 				token: string;
@@ -1968,46 +2268,18 @@ declare const _default$29: {
 			};
 		};
 		readonly config: (data: ValidationArgumentsType) => false | {
-			extensions: {
-				list: {
-					enabled: boolean;
-					sha256: string;
-					label: string;
-				}[];
-				enabled: boolean;
-				permissions: any;
-				allowUnrestrictedUntrusted: boolean;
-				showAppAfterExtensionsLoad: boolean;
-			};
 			minecraft: {
 				windowHeight: number;
 				windowWidth: number;
 				icon: string;
 				javaBinary: string;
 				add: {
-					jvmArguments?: string[] | undefined;
-					gameArguments?: string[] | undefined;
+					jvmArguments: string[];
+					gameArguments: string[];
 				};
 				remove: {
-					jvmArguments?: string[] | undefined;
-					gameArguments?: string[] | undefined;
-				};
-			};
-			logs: {
-				show: boolean;
-				mode: string;
-				filtering: string;
-				lineHeight: number;
-				partsShown: {
-					time: boolean;
-					level: boolean;
-					target: boolean;
-					message: boolean;
-				};
-				partsSize: {
-					time: number;
-					level: number;
-					target: number;
+					jvmArguments: string[];
+					gameArguments: string[];
 				};
 			};
 			development: {
@@ -2019,6 +2291,17 @@ declare const _default$29: {
 				enableNativeContextMenu: boolean;
 				enableNativeReloadKeyBinds: boolean;
 				useNativeColorPicker: boolean;
+			};
+			extensions: {
+				list: {
+					enabled: boolean;
+					sha256: string;
+					label: string;
+				}[];
+				enabled: boolean;
+				permissions: any;
+				allowUnrestrictedUntrusted: boolean;
+				showAppAfterExtensionsLoad: boolean;
 			};
 			ui: {
 				text: {
@@ -2054,6 +2337,27 @@ declare const _default$29: {
 				stats: "playtime" | "last-launch";
 			};
 			locale: string;
+			logs: {
+				show: boolean;
+				mode: string;
+				filtering: string;
+				lineHeight: number;
+				partsShown: {
+					time: boolean;
+					level: boolean;
+					target: boolean;
+					message: boolean;
+				};
+				partsSize: {
+					time: number;
+					level: number;
+					target: number;
+				};
+			};
+			java: {
+				label: string;
+				path: string;
+			}[];
 		};
 		readonly instance: (data: ValidationArgumentsType) => false | InstanceStateType;
 		readonly extension: (data: ValidationArgumentsType) => false | ({
@@ -2138,7 +2442,7 @@ declare function watchLocaleStates(): () => void;
 declare function watchLogModeStates(logs: ShallowReactive<Record<string, {
 	"list": Array<string>;
 }>>): () => void;
-declare const _default$30: {
+declare const _default$31: {
 	readonly watchConfigSync: typeof watchConfigSync;
 	readonly watchCustomFont: typeof watchCustomFont;
 	readonly watchErrors: typeof watchErrors;
@@ -2178,10 +2482,6 @@ export type ArgumentAuthReplacementsType = {
 	"auth_uuid": string;
 	"auth_xuid": string;
 };
-export type LogLineType = {
-	"index": number;
-	"raw": string;
-};
 declare global {
 	const __PRE_BUNDLED_FILENAME__: string;
 	interface Window {
@@ -2212,6 +2512,14 @@ declare global {
 			 * These fields are generally not intended to be modified by extensions
 			 */
 			"internals": {
+				"webViewRecreation": {
+					"url": string;
+					"title": string;
+					"width": number;
+					"height": number;
+					"visible": boolean;
+					"resizable": boolean;
+				};
 				"requestPermissions": (permissions: Array<PermissionType | string> | unknown, extension: string) => Promise<Array<unknown>>;
 				"joinDelimiter": string;
 				"launcherVersion": string;
@@ -2224,6 +2532,7 @@ declare global {
 				"launchCount": number;
 				"javaMajor"?: number;
 				"appInstance"?: App<Element>;
+				"mountedInstance"?: ComponentPublicInstance;
 				"logs"?: {
 					"raw": ShallowRef<{
 						"list": Array<string>;
@@ -2270,43 +2579,43 @@ declare global {
 				/**
 				 * Application constants
 				 */
-				"Application": typeof _default$3;
+				"Application": typeof _default$4;
 				/**
 				 * Includes a default ASCII art generator
 				 */
-				"ASCIIArt": typeof _default$4;
+				"ASCIIArt": typeof _default$5;
 				/**
 				 * Constants related to the 'Browser' lib in 'libs' (non-application)
 				 */
-				"Browser": typeof _default$5;
+				"Browser": typeof _default$6;
 				/**
 				 * Event listeners for the sandboxed plugins
 				 */
-				"EventListeners": typeof _default$6;
+				"EventListeners": typeof _default$7;
 				/**
 				 * Launcher file structure
 				 */
-				"FileStructure": typeof _default$7;
+				"FileStructure": typeof _default$8;
 				/**
 				 * Minecraft launch related constants
 				 */
-				"Launcher": typeof _default$8;
+				"Launcher": typeof _default$9;
 				/**
 				 * Launcher meta related constants
 				 */
-				"Meta": typeof _default$1;
+				"Meta": typeof _default$2;
 				/**
 				 * Useful objects for the sandboxed permission system
 				 */
-				"Permissions": typeof _default$9;
+				"Permissions": typeof _default$10;
 				/**
 				 * Constants related to the application pages
 				 */
-				"Routes": typeof _default$2;
+				"Routes": typeof _default$3;
 				/**
 				 * Constants related to the settings rows
 				 */
-				"RowCollections": typeof _default$10;
+				"RowCollections": typeof _default$11;
 			};
 			/**
 			 * Global utilities.
@@ -2335,15 +2644,19 @@ declare global {
 				/**
 				 * Launcher account-related collection of utilities
 				 */
-				"Auth": typeof _default$11;
+				"Auth": typeof _default$12;
 				/**
 				 * A support for the Browser environment (non-application)
 				 */
-				"Browser": typeof _default$12;
+				"Browser": typeof _default$13;
+				/**
+				 * Launcher composables
+				 */
+				"Composables": typeof _default$1;
 				/**
 				 * Launcher configuration-related collection of utilities
 				 */
-				"Configs": typeof _default$13;
+				"Configs": typeof _default$14;
 				/**
 				 * Launcher development mode related collection of utilities
 				 */
@@ -2351,7 +2664,7 @@ declare global {
 				/**
 				 * Launcher errors-related collection of utilities
 				 */
-				"Errors": typeof _default$14;
+				"Errors": typeof _default$15;
 				/**
 				 * Launcher untrusted extensions API
 				 */
@@ -2359,63 +2672,63 @@ declare global {
 				/**
 				 * Launcher extensions-related collection of utilities
 				 */
-				"Extensions": typeof _default$15;
+				"Extensions": typeof _default$16;
 				/**
 				 * Launcher file management related collection of utilities
 				 */
-				"FileManager": typeof _default$16;
+				"FileManager": typeof _default$17;
 				/**
 				 * Launcher general-purpose collection of utilities
 				 */
-				"General": typeof _default$17;
+				"General": typeof _default$18;
 				/**
 				 * Launcher 'window' object related collection of utilities
 				 */
-				"Globals": typeof _default$18;
+				"Globals": typeof _default$19;
 				/**
 				 * Hashing functions
 				 */
-				"Hashing": typeof _default$19;
+				"Hashing": typeof _default$20;
 				/**
 				 * Launcher hook system related collection of utilities
 				 */
-				"Hooks": typeof _default$20;
+				"Hooks": typeof _default$21;
 				/**
 				 * Launcher initialization-related collection of utilities
 				 */
-				"Initialization": typeof _default$21;
+				"Initialization": typeof _default$22;
 				/**
 				 * Launcher Minecraft instances related collection of utilities
 				 */
-				"Instances": typeof _default$22;
+				"Instances": typeof _default$23;
 				/**
 				 * Launcher Minecraft-related collection of utilities
 				 */
-				"Launcher": typeof _default$23;
+				"Launcher": typeof _default$24;
 				/**
 				 * Launcher logging-related collection of utilities
 				 */
-				"Logging": typeof _default$24;
+				"Logging": typeof _default$25;
 				/**
 				 * Launcher network and fetching related collection of utilities
 				 */
-				"Network": typeof _default$25;
+				"Network": typeof _default$26;
 				/**
 				 * Launcher extensions-related collection of permission utilities
 				 */
-				"Permissions": typeof _default$26;
+				"Permissions": typeof _default$27;
 				/**
 				 * Launcher processes and servers related collection of utilities
 				 */
-				"Processes": typeof _default$27;
+				"Processes": typeof _default$28;
 				/**
 				 * Launcher navigation-related collection of utilities
 				 */
-				"Router": typeof _default$28;
+				"Router": typeof _default$29;
 				/**
 				 * Launcher collection of typebox validation schemas
 				 */
-				"Schemas": typeof _default$29;
+				"Schemas": typeof _default$30;
 				/**
 				 * Launcher utils for extensions to conveniently run txiki.js servers
 				 */
@@ -2423,7 +2736,7 @@ declare global {
 				/**
 				 * Launcher watchers for handling various events
 				 */
-				"Watchers": typeof _default$30;
+				"Watchers": typeof _default$31;
 				/**
 				 * Launcher context menu related collection of utilities
 				 */

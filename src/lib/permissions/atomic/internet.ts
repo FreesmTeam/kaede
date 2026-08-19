@@ -224,6 +224,12 @@ export function handleInternetPermission({
 
           const response: Response = await fetch(url, {
             method,
+
+            /*
+             * We are using '@ts-ignore' instead of '@ts-expect-error' since uhm there are no errors
+             */
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore 'dts-bundle-generator' throws an error even though there are no errors????
             body,
             "redirect": "manual",
             "headers" : {
@@ -243,6 +249,12 @@ export function handleInternetPermission({
 
           const response: Response = await tauriFetch(url, {
             method,
+
+            /*
+             * We are using '@ts-ignore' instead of '@ts-expect-error' since uhm there are no errors
+             */
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore 'dts-bundle-generator' throws an error even though there are no errors????
             body,
             "redirect": "manual",
             "headers" : {

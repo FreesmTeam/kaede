@@ -37,7 +37,7 @@ import { GlobalInternals } from "@/extendable/global-internals.ts";
 import { log } from "@/lib/logging/log.ts";
 import IsKeyInObject from "@/types/utils/is-key-in-object.ts";
 
-interface ComponentRegistryType {
+type ComponentRegistryType = {
   [key: string]     : Component;
   "ContextMenu"     : Component;
   "GlobalBackground": Component;
@@ -52,7 +52,7 @@ interface ComponentRegistryType {
   "Library"         : Component;
   "Profile"         : Component;
   "Settings"        : Component;
-}
+};
 
 // /*
 export const LazyExtensionLoader = defineAsyncComponent(() => (

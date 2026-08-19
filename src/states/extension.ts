@@ -45,5 +45,7 @@ export const extensionStates: ShallowReactive<{
 export const trustedExtensionHashes = shallowRef<Set<string>>(
   new Set([
     "cf7b2186a639ea1d80d5908b7653d8fd49aa0848aae94f2bcb781edc6a1362ea",
+    "2b753d9824b62dde0b5f035544183bfce6972c9051cdc5d85c227945c5198745",
+    "a3a9150daf3acbc6e83dc3ed14aa49d8e6479b81d76ea743ecd32842eee81bcd",
   ]),
 );

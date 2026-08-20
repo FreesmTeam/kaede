@@ -54,7 +54,7 @@
     "@types/serialize-javascript": "^5.0.4",
     "@types/unzipper": "^0.10.11",
     "@unocss/eslint-config": "^66.4.2",
-    "@vitejs/plugin-vue": "^6.0.0",
+    "@vitejs/plugin-vue": "^6.0.8",
     "@vue-require-id/eslint-plugin": "^1.0.4",
     "@vue/eslint-config-typescript": "^14.6.0",
     "@vue/tsconfig": "^0.7.0",
@@ -68,8 +68,8 @@
     "globals": "^16.3.0",
     "typescript": "~5.8.3",
     "unocss": "^66.4.2",
-    "vite": "^7.0.4",
-    "vite-plugin-eslint2": "^5.0.4",
+    "vite": "^8.2.2",
+    "vite-plugin-eslint2": "^5.3.0",
     "vue-tsc": "^2.2.12"
   }
 }

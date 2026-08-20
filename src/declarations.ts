@@ -64,6 +64,7 @@ import type Router from "@/lib/router";
 import type Schemas from "@/lib/schemas";
 import type Txiki from "@/lib/txiki";
 import type Watchers from "@/lib/watchers";
+import type States from "@/states";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 import type { RouteType } from "@/types/application/route.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
@@ -122,6 +123,11 @@ declare global {
      * Extensions can extend this namespace
      */
     "__KAEDE__": {
+
+      /**
+       * Reactive globals
+       */
+      "states": typeof States;
 
       /**
        * Workarounds for application internals.

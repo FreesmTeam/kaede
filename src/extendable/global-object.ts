@@ -18,6 +18,7 @@
 
 import type { KaedeNamespaceType } from "@/declarations.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import States from "@/states";
 
 /**
  * An object that contains everything that can be changed by extensions.
@@ -25,6 +26,7 @@ import { GlobalInternals } from "@/extendable/global-internals.ts";
  * The launcher heavily relies on this object in all kind of code places
  */
 export const GlobalObject: KaedeNamespaceType = {
+  "states"   : States,
   "internals": GlobalInternals,
   "packages" : {},
   "constants": {} as KaedeNamespaceType["constants"],

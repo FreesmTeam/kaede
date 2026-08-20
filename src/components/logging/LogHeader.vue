@@ -31,6 +31,7 @@ import FileStructure from "@/constants/file-structure.ts";
 import FileManager from "@/lib/file-manager";
 import { globalStates } from "@/states/global.ts";
 import type { LogSearchComposableType } from "@/types/logging/log-searching.type.ts";
+import LogCopy from "@/components/logging/header/LogCopy.vue";
 
 const { size, searcher, status } = defineProps<{
   "size"    : number;
@@ -156,6 +157,7 @@ function handleIndex(event: Event): void {
       :on-click="viewInExplorer"
       class="min-h-8"
     />
+    <LogCopy />
   </div>
   <div id="__log-viewer__inner-separator" class="h-2 w-full"></div>
   <div

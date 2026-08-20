@@ -1,6 +1,6 @@
 export type CustomButtonType = {
   "idRoot"   : string;
-  "label"    : string;
+  "label"   ?: string;
   "disabled"?: boolean;
   "icon"    ?: string;
   "tooltip" ?: string;

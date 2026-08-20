@@ -30,6 +30,7 @@ const {
   >
     <span v-if="icon" :id="`${idRoot}-icon`" :class="[icon, 'shrink-0 block size-4']"></span>
     <span
+      v-if="label"
       :id="`${idRoot}-label`"
       :class="[
         hide === 'sm'

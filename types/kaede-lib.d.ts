@@ -502,6 +502,7 @@ declare const ActionKeys: {
 	readonly ContextMenuSoftReload: "context-menu.soft-reload";
 	readonly ContextMenuHardReload: "context-menu.hard-reload";
 	readonly ContextMenuProcessReload: "context-menu.process-reload";
+	readonly ContextMenuSafeMode: "context-menu.safe-mode";
 	readonly ContextMenuLogs: "context-menu.logs";
 	readonly ContextMenuRootFolder: "context-menu.root-folder";
 	readonly ContextMenuInstanceFolder: "context-menu.instance-folder";
@@ -2452,6 +2453,315 @@ declare const _default$31: {
 	readonly watchLocaleStates: typeof watchLocaleStates;
 	readonly watchLogModeStates: typeof watchLogModeStates;
 };
+export type JavaInstallationType = {
+	"path": string;
+	"vendor": string;
+	"version": string;
+	"major": number | null;
+	"source": "environment" | "java-home" | "path" | "scan";
+};
+export type PendingModalType = {
+	"title": string;
+	"description": string;
+	"actions": Array<{
+		"label": string;
+		"callback": () => void;
+	}>;
+	"icon"?: string;
+	"rows"?: Array<{
+		"title": string;
+		"description": string;
+		"icon"?: string;
+	}>;
+};
+declare const _default$32: {
+	readonly extensionStates: import("vue").ShallowReactive<{
+		valid: Array<ExtensionType>;
+		invalid: Array<import("unocss").DeepPartial<ExtensionType>>;
+		executed: Array<{
+			"extension": ExtensionType;
+			"api": ExtensionAPI | {
+				enable: () => void | Promise<void>;
+				disable: () => void | Promise<void>;
+			};
+		}>;
+	}>;
+	readonly globalStates: {
+		development: {
+			loadErudaDevTools: boolean;
+			showFPS: boolean;
+			showCPUUsage: boolean;
+			showMemoryUsage: boolean;
+			enableDebugMode: boolean;
+			enableNativeContextMenu: boolean;
+			enableNativeReloadKeyBinds: boolean;
+			useNativeColorPicker: boolean;
+		};
+		extensions: {
+			list: {
+				enabled: boolean;
+				sha256: string;
+				label: string;
+			}[];
+			permissions: Record<string, Record<string, boolean>>;
+			enabled: boolean;
+			allowUnrestrictedUntrusted: boolean;
+			showAppAfterExtensionsLoad: boolean;
+		};
+		ui: {
+			ripple: {
+				color: string | null;
+				sparkles: string | null;
+			};
+			background: {
+				image: string | null;
+				blur: number | null;
+				color: string | null;
+				isVideo: boolean | null;
+				key: string | number | null;
+			};
+			text: {
+				font: string | null;
+				mainColor: string | null;
+				secondaryColor: string | null;
+			};
+			widget: {
+				blur: number | null;
+				textColor: string | null;
+				secondaryColor: string | null;
+				background: string | null;
+			};
+			atAGlance: {
+				title: string;
+				subtitle: string;
+			}[];
+		};
+		selected: {
+			account: number;
+			currentInstance: string | null;
+			stats: "playtime" | "last-launch";
+		};
+		locale: string;
+		logs: {
+			show: boolean;
+			mode: "kaede-launcher" | string;
+			filtering: string;
+			lineHeight: number;
+			partsShown: {
+				time: boolean;
+				level: boolean;
+				target: boolean;
+				message: boolean;
+			};
+			partsSize: {
+				time: number;
+				level: number;
+				target: number;
+			};
+		};
+		java: {
+			label: string;
+			path: string;
+		}[];
+		minecraft: {
+			windowHeight: number;
+			windowWidth: number;
+			icon: string;
+			javaBinary: string;
+			add: {
+				jvmArguments: Array<string>;
+				gameArguments: Array<string>;
+			};
+			remove: {
+				jvmArguments: Array<string>;
+				gameArguments: Array<string>;
+			};
+		};
+		currentPage: RouteType;
+		translations: {
+			Info: {
+				Code: string;
+				Name: string;
+				Flag: string;
+				RTL: boolean;
+			};
+			Messages: {
+				"general.errors.global-error.emoji": string;
+				"general.errors.global-error.message": string;
+				"general.errors.page-error.message": string;
+				"general.sidebar.add-instance": string;
+				"general.sidebar.home": string;
+				"general.sidebar.library": string;
+				"general.sidebar.settings": string;
+				"general.sidebar.profile": string;
+				"general.sidebar.none": string;
+				"general.launch-status.general-pending-starting": string;
+				"general.launch-status.general-aborted": string;
+				"general.launch-status.general-success": string;
+				"general.launch-status.patch-index-pending-reading": string;
+				"general.launch-status.patch-index-pending-fetching": string;
+				"general.launch-status.patch-index-error-fetch": string;
+				"general.launch-status.patch-index-error-parse": string;
+				"general.launch-status.patch-index-error-validation": string;
+				"general.launch-status.patch-index-success": string;
+				"general.launch-status.patch-metadata-pending-reading": string;
+				"general.launch-status.patch-metadata-pending-fetching": string;
+				"general.launch-status.patch-metadata-error-fetch": string;
+				"general.launch-status.patch-metadata-error-parse": string;
+				"general.launch-status.patch-metadata-error-validation": string;
+				"general.launch-status.patch-metadata-success": string;
+				"general.launch-status.asset-index-pending-reading": string;
+				"general.launch-status.asset-index-pending-fetching": string;
+				"general.launch-status.asset-index-error-get": string;
+				"general.launch-status.asset-index-error-fetch": string;
+				"general.launch-status.asset-index-error-parse": string;
+				"general.launch-status.asset-index-error-validation": string;
+				"general.launch-status.asset-index-success": string;
+				"general.launch-status.asset-objects-success": string;
+				"general.launch-status.libraries-error-validation": string;
+				"general.launch-status.libraries-success": string;
+				"general.launch-status.logging-checking": string;
+				"general.launch-status.logging-error-parse": string;
+				"general.launch-status.logging-success": string;
+				"general.launch-status.client-checking": string;
+				"general.launch-status.client-error-parse": string;
+				"general.launch-status.client-success": string;
+				"general.launch-status.errors-unhandled-error": string;
+				"general.launch-status.errors-incompatible-platform": string;
+				"general.launch-status.errors-incompatible-arch": string;
+				"home.instance.current-playtime.label": string;
+				"home.instance.last-launch.label": string;
+				"profile.accounts.title": string;
+				"profile.accounts.empty": string;
+				"profile.accounts.add-microsoft": string;
+				"profile.accounts.add-offline": string;
+				"profile.accounts.offline-nickname": string;
+				"profile.accounts.type.microsoft": string;
+				"profile.accounts.type.offline": string;
+				"profile.accounts.remove": string;
+				"profile.accounts.refresh": string;
+				"profile.accounts.copy-uuid": string;
+				"profile.sign-in.status.authorizing": string;
+				"profile.sign-in.status.exchanging-code": string;
+				"profile.sign-in.status.xbox-live": string;
+				"profile.sign-in.status.xsts": string;
+				"profile.sign-in.status.minecraft-token": string;
+				"profile.sign-in.status.profile": string;
+				"profile.sign-in.status.finalizing": string;
+			};
+		};
+		sidebarItems: ("divider" | {
+			path: RouteType;
+			name: string;
+			action: ActionKeyType;
+			icon?: string | undefined;
+			image?: string | undefined;
+		})[];
+		contextMenuItems: ("divider" | {
+			name: string;
+			action: ActionKeyType;
+			icon?: string | undefined;
+			image?: string | undefined;
+		} | {
+			name: string;
+			children: ("divider" | {
+				name: string;
+				action: ActionKeyType;
+				icon?: string | undefined;
+				image?: string | undefined;
+			} | /*elided*/ any)[];
+			icon?: string | undefined;
+			image?: string | undefined;
+		})[];
+		pages: {
+			home: Partial<object>;
+			library: {
+				selected?: string | undefined;
+			};
+			settings: {
+				select?: ((tab: TabSectionType) => Promise<void>) | undefined;
+				tab?: string | undefined;
+			};
+			profile: {
+				pending?: boolean | undefined;
+				step?: SignInStatusType | null | undefined;
+				error?: string | null | undefined;
+			};
+			"add-instance": {
+				lastCreated?: string | undefined;
+				select?: ((tab: TabSectionType) => Promise<void>) | undefined;
+				instanceVersionSearch?: {
+					patch: ExtendedPatchUIDType;
+					input: string;
+				} | undefined;
+				importedModpack?: {
+					path: string;
+					name: string | undefined;
+					loader: string;
+				} | undefined;
+				instance?: {
+					name: string;
+					entry: ExtendedPatchUIDType;
+					checksum: boolean;
+					groups: Array<string>;
+					javaBinary: string;
+					patchVersions: {
+						"net.minecraft": string;
+						"com.azul.java"?: string | undefined;
+						"com.mumfrey.liteloader"?: string | undefined;
+						"net.adoptium.java"?: string | undefined;
+						"net.fabricmc.fabric-loader"?: string | undefined;
+						"net.fabricmc.intermediary"?: string | undefined;
+						"net.minecraft.java"?: string | undefined;
+						"net.minecraftforge"?: string | undefined;
+						"net.neoforged"?: string | undefined;
+						"org.lwjgl"?: string | undefined;
+						"org.lwjgl3"?: string | undefined;
+						"org.quiltmc.quilt-loader"?: string | undefined;
+						"optifine.OptiFine"?: string | undefined;
+						"org.mcphackers.launchwrapper"?: string | undefined;
+					};
+					windowHeight: number;
+					windowWidth: number;
+					icon: string;
+					add: {
+						jvmArguments: Array<string>;
+						gameArguments: Array<string>;
+					};
+					remove: {
+						jvmArguments: Array<string>;
+						gameArguments: Array<string>;
+					};
+				} | undefined;
+				full?: boolean | undefined;
+				tab?: string | undefined;
+				customSettings?: {
+					label?: string | undefined;
+					input?: {
+						onInput: (value: string, currentInstance: GlobalStatesType["pages"]["add-instance"]["instance"], currentPatch: ExtendedPatchUIDType) => void;
+						iconClassName: string;
+						placeholder: string;
+						defaultValue?: (() => string | undefined) | undefined;
+						tooltip?: string | undefined;
+						type?: "text" | "number" | undefined;
+						debounceTime?: number | undefined;
+					} | undefined;
+				}[] | undefined;
+			};
+			none: Record<string, unknown>;
+		};
+	};
+	readonly instanceStates: import("vue").ShallowReactive<InstanceStatesType>;
+	readonly javaStates: import("vue").ShallowReactive<{
+		installations: Array<JavaInstallationType>;
+		environment: JavaInstallationType | null;
+		status: "idle" | "scanning" | "loaded" | "failed";
+	}>;
+	readonly modalStates: import("vue").ShallowReactive<Set<PendingModalType>>;
+	readonly codeOutput: import("vue").Ref<string, string>;
+	readonly codeToEvaluate: import("vue").Ref<string, string>;
+	readonly serverProcesses: import("vue").ShallowRef<ServerProcessType[], ServerProcessType[]>;
+};
 export type ArgumentReplacementsType = {
 	"assets_index_name": string;
 	"assets_root": string;
@@ -2506,6 +2816,10 @@ declare global {
 		 * Extensions can extend this namespace
 		 */
 		"__KAEDE__": {
+			/**
+			 * Reactive globals
+			 */
+			"states": typeof _default$32;
 			/**
 			 * Workarounds for application internals.
 			 *

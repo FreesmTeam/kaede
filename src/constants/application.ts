@@ -26,6 +26,9 @@ export const CustomFontFamily = "kaede-custom-font";
 export const DefaultLocale = "en";
 export const DefaultLocaleName = EnglishTranslations.Info.Name;
 
+export const TrustedHashesURL =
+  "https://raw.githubusercontent.com/kaede-basement/trusted-extensions/refs/heads/main/HASHES.json";
+
 export const TranslationsContextKey = Symbol();
 export const AuthOneTimeFetchContextKey = Symbol();
 export const AuthStatesContextKey = Symbol();
@@ -331,6 +334,7 @@ export default {
   CustomFontFamily,
   DefaultLocale,
   DefaultLocaleName,
+  TrustedHashesURL,
   TranslationsContextKey,
   AuthOneTimeFetchContextKey,
   AuthStatesContextKey,

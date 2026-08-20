@@ -24,6 +24,7 @@ import CustomButton from "@/components/general/base/CustomButton.vue";
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import CustomSelect from "@/components/general/base/CustomSelect.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
+import LogCopy from "@/components/logging/header/LogCopy.vue";
 import LogSections from "@/components/logging/header/LogSections.vue";
 import { useConfigColors } from "@/composables/use-config-colors.ts";
 import { InstanceLogsContextKey } from "@/constants/application.ts";
@@ -31,7 +32,6 @@ import FileStructure from "@/constants/file-structure.ts";
 import FileManager from "@/lib/file-manager";
 import { globalStates } from "@/states/global.ts";
 import type { LogSearchComposableType } from "@/types/logging/log-searching.type.ts";
-import LogCopy from "@/components/logging/header/LogCopy.vue";
 
 const { size, searcher, status } = defineProps<{
   "size"    : number;

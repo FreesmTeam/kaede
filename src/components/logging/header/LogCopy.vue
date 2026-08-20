@@ -73,7 +73,7 @@ async function copy(): Promise<void> {
     :on-click="copy"
     :icon="icon"
     id-root="__log-viewer__header-copy"
-    tooltip="Copy the filtered logs"
+    tooltip="Copy the shown logs"
     class="min-h-8"
   />
 </template>

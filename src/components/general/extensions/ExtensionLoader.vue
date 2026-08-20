@@ -20,6 +20,9 @@ GlobalObject.libs.Permissions = Permissions;
 GlobalObject.libs.Txiki = Txiki;
 
 onMounted(async () => {
+  // A background task to update the trusted hashes
+  void Extensions.updateTrustedHashes();
+
   log.debug(__PRE_BUNDLED_FILENAME__, "Getting all extensions");
   const { valid, invalid } = await Extensions.readExtensions();
 

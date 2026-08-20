@@ -1463,6 +1463,7 @@ declare const _default$19: {
 		Layout: Component;
 		PagesSelector: Component;
 		PageWrapper: Component;
+		Router: Component;
 		Sidebar: Component;
 		Tabs: Component;
 		AddInstance: Component;

@@ -25,7 +25,6 @@ import ExtensionsError from "@/components/general/errors/ExtensionsError.vue";
 import GlobalError from "@/components/general/errors/GlobalError.vue";
 import CssThemeLoader from "@/components/general/extensions/CssThemeLoader.vue";
 import Modal from "@/components/general/layout/Modal.vue";
-import Router from "@/components/general/layout/Router.vue";
 import ContextProviders from "@/components/general/misc/ContextProviders.vue";
 import NonBundledClasses from "@/components/general/misc/NonBundledClasses.vue";
 import LogViewer from "@/components/logging/LogViewer.vue";
@@ -65,8 +64,6 @@ provide<TranslationsStateType>(TranslationsContextKey, translations);
     <template #default>
       <ContextProviders>
         <C.Layout :context-menu="contextMenu">
-          <Router />
-
           <Transition name="fade">
             <LogViewer v-if="globalStates.logs.show" />
           </Transition>

@@ -26,6 +26,7 @@ import LaunchProgress from "@/components/general/layout/LaunchProgress.vue";
 import Layout from "@/components/general/layout/Layout.vue";
 import PagesSelector from "@/components/general/layout/PagesSelector.vue";
 import PageWrapper from "@/components/general/layout/PageWrapper.vue";
+import Router from "@/components/general/layout/Router.vue";
 import Sidebar from "@/components/general/layout/Sidebar.vue";
 import Tabs from "@/components/general/layout/Tabs.vue";
 import Home from "@/components/home/Home.vue";
@@ -45,6 +46,7 @@ type ComponentRegistryType = {
   "Layout"          : Component;
   "PagesSelector"   : Component;
   "PageWrapper"     : Component;
+  "Router"          : Component;
   "Sidebar"         : Component;
   "Tabs"            : Component;
   "AddInstance"     : Component;
@@ -75,6 +77,7 @@ const ComponentStorage = {
   Layout,
   PagesSelector,
   PageWrapper,
+  Router,
   Sidebar,
   Tabs,
   AddInstance,

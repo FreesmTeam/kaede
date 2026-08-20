@@ -34,6 +34,11 @@ const { styles } = useConfigColors();
     <!-- Pages error boundary -->
     <ErrorBoundary :reset-key="globalStates.currentPage">
       <template #default>
+        <!-- The 'Router' component is accessible for extensions and customizable
+          -- but is optional for custom layouts
+          -->
+        <C.Router />
+        <!-- 'slot' accepts the 'must have' components, but extensions can still reject them -->
         <slot />
       </template>
 

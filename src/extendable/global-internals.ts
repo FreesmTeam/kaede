@@ -43,4 +43,5 @@ export const GlobalInternals: KaedeNamespaceType["internals"] = {
   "baseDirectory"      : "",
   "launchCount"        : 0,
   "logsInBrowser"      : [],
+  "logs"               : {},
 };

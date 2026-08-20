@@ -70,6 +70,7 @@ export const ActionKeys = {
   "ContextMenuProcessReload" : "context-menu.process-reload",
   "ContextMenuSafeMode"      : "context-menu.safe-mode",
   "ContextMenuLogs"          : "context-menu.logs",
+  "ContextMenuMinecraftLogs" : "context-menu.minecraft-logs",
   "ContextMenuRootFolder"    : "context-menu.root-folder",
   "ContextMenuInstanceFolder": "context-menu.instance-folder",
   "SidebarRouteChange"       : "sidebar.route-change",
@@ -268,10 +269,16 @@ export const ContextMenuItems: GlobalStatesType["contextMenuItems"] = [
   },
   "divider",
   {
-    "name"  : "Show Logs",
+    "name"  : "Show Kaede Logs",
     "icon"  : "i-lucide-bug",
     "action": ActionKeys.ContextMenuLogs,
   },
+  {
+    "name"  : "Show Minecraft Logs",
+    "icon"  : "i-lucide-box",
+    "action": ActionKeys.ContextMenuMinecraftLogs,
+  },
+  "divider",
   {
     "name"  : "Open Root Folder",
     "icon"  : "i-lucide-folder",

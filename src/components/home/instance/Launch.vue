@@ -9,6 +9,7 @@ import {
   LaunchInstanceContextKey, LaunchInstanceStatusesContextKey,
   LaunchStatesContextKey,
 } from "@/constants/application.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Errors from "@/lib/errors";
 import Instances from "@/lib/instances";
 import Fetching from "@/lib/launcher/scopes/fetching";
@@ -206,6 +207,13 @@ provide<{
   "launchable" : ComputedRef<boolean>;
   "unstoppable": ComputedRef<boolean>;
 }>(LaunchInstanceStatusesContextKey, { launchable, unstoppable });
+
+// Expose the 'instanceStatuses' so that 'declare-action-registry.ts' can use it
+watchEffect(() => {
+  if (instanceStatuses) {
+    GlobalInternals.logs.instanceStatuses = instanceStatuses;
+  }
+});
 </script>
 
 <template>

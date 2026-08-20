@@ -75,7 +75,10 @@ import type {
   ArgumentAuthReplacementsType,
   ArgumentReplacementsType,
 } from "@/types/launcher/launch/argument-replacements.type.ts";
-import type { LauncherStatusesType } from "@/types/launcher/launch/launch-status.type.ts";
+import type {
+  LauncherStatusesType,
+  WrappedInstanceLauncherStatusesType,
+} from "@/types/launcher/launch/launch-status.type.ts";
 import type { PatchDependencyType } from "@/types/launcher/meta/patch-index.type.ts";
 import type {
   PreLaunchInformationType,
@@ -145,38 +148,39 @@ declare global {
           "resizable": boolean;
         };
         // Requests plugin permissions from user
-        "requestPermissions"  : (
+        "requestPermissions": (
           permissions: Array<PermissionType | string> | unknown,
           extension: string
         ) => Promise<Array<unknown>>;
         // Platform-specific delimiter
-        "joinDelimiter"       : string;
+        "joinDelimiter"      : string;
         // Launcher version
-        "launcherVersion"     : string;
+        "launcherVersion"    : string;
         // SHA256 of the launcher executable (empty when unavailable)
-        "executableHash"      : string;
+        "executableHash"     : string;
         // Config state before launcher initialization (used for first sync check)
-        "initialConfig"       : ConfigType;
+        "initialConfig"      : ConfigType;
         // Translations state before launcher initialization
-        "initialTranslations" : TranslationsType;
+        "initialTranslations": TranslationsType;
         // Instances metadata state before launcher initialization (used for first sync check)
-        "initialInstances"    : InstanceStatesType;
+        "initialInstances"   : InstanceStatesType;
         // Portable state
-        "portable"            : boolean;
+        "portable"           : boolean;
         // Base directory
-        "baseDirectory"       : string;
+        "baseDirectory"      : string;
         // This counter starts as 0 and increases by 1 each time the UI is reloaded (window#reload)
-        "launchCount"         : number;
+        "launchCount"        : number;
         // A Java major version (for example, 8, 11, or 17)
-        "javaMajor"          ?: number;
+        "javaMajor"         ?: number;
 
-        "appInstance"        ?: App<Element>;
-        "mountedInstance"    ?: ComponentPublicInstance;
-        "logs"               ?: {
-          "raw"     : ShallowRef<{ "list": Array<string> }>;
-          "filtered": ComputedRef<{ "list": Array<LogLineType> }>;
-        };
-        "instanceContext"    ?: {
+        "appInstance"       ?: App<Element>;
+        "mountedInstance"   ?: ComponentPublicInstance;
+        "logs"                : Partial<{
+          "raw"             : ShallowRef<{ "list": Array<string> }>;
+          "filtered"        : ComputedRef<{ "list": Array<LogLineType> }>;
+          "instanceStatuses": WrappedInstanceLauncherStatusesType;
+        }>;
+        "instanceContext"?: {
           "launches": Record<string, LauncherStatusesType>;
           "logs"    : ShallowReactive<Record<string, {
             "list": string[];
@@ -186,8 +190,8 @@ declare global {
         };
 
         /* Needed for browser environments (non-application) */
-        "logsInBrowser"       : Array<string>;
-        "indexedDB"          ?: IDBDatabase;
+        "logsInBrowser": Array<string>;
+        "indexedDB"   ?: IDBDatabase;
       };
 
       /**

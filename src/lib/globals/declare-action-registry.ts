@@ -17,13 +17,14 @@
  */
 
 import { writeText } from "@tauri-apps/plugin-clipboard-manager";
-import { confirm } from "@tauri-apps/plugin-dialog";
+import { confirm, message } from "@tauri-apps/plugin-dialog";
 import { revealItemInDir } from "@tauri-apps/plugin-opener";
 import { relaunch } from "@tauri-apps/plugin-process";
 
 import { ActionKeys, ContextMenu, LaunchOptionItems } from "@/constants/application.ts";
 import FileStructure from "@/constants/file-structure.ts";
 import { ActionRegistry } from "@/extendable/action-registry.ts";
+import { GlobalInternals } from "@/extendable/global-internals.ts";
 import Auth from "@/lib/auth";
 import Configs from "@/lib/configs";
 import Errors from "@/lib/errors";
@@ -136,7 +137,29 @@ export function declareActionRegistry(): void {
   ActionRegistry.register(
     ActionKeys.ContextMenuLogs,
     (): void => {
+      globalStates.logs.mode = "kaede-launcher";
       globalStates.logs.show = true;
+
+      ContextMenu.close();
+    },
+  );
+  ActionRegistry.register(
+    ActionKeys.ContextMenuMinecraftLogs,
+    (): void => {
+      const instanceStatuses = GlobalInternals.logs?.instanceStatuses;
+
+      if (!instanceStatuses) {
+        return void message(GlobalInternals.logs + "No Minecraft logs were found");
+      }
+
+      const key: string | undefined = Object.keys(instanceStatuses)[0];
+
+      if (!key) {
+        return void message("No Minecraft logs were found");
+      }
+
+      globalStates.logs.show = true;
+      globalStates.logs.mode = key;
 
       ContextMenu.close();
     },

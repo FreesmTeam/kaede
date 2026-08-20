@@ -162,10 +162,8 @@ onMounted(() => container?.value?.addEventListener?.("scroll", updateView, { "pa
 onUnmounted(() => container?.value?.removeEventListener?.("scroll", updateView));
 
 // Expose log arrays for plugins
-GlobalInternals.logs = {
-  "raw"     : lines,
-  "filtered": filtered,
-};
+GlobalInternals.logs.raw = lines;
+GlobalInternals.logs.filtered = filtered;
 </script>
 
 <template>

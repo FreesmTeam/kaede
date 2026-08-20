@@ -8,6 +8,7 @@
     "build:debug": "tauri build --debug",
     "dev:frontend": "vite",
     "build:frontend": "vue-tsc -b && vite build",
+    "build:hmr": "NODE_ENV=development tauri build",
     "preview:frontend": "vite preview",
     "test": "bun test --preload ./bun.setup.ts src",
     "lint": "eslint .",

@@ -123,6 +123,17 @@ export function declareActionRegistry(): void {
     relaunch,
   );
   ActionRegistry.register(
+    ActionKeys.ContextMenuSafeMode,
+    (): void => {
+      globalStates.extensions.enabled = false;
+      Configs
+        .sync()
+        .then(() => {
+          window.location.reload();
+        });
+    },
+  );
+  ActionRegistry.register(
     ActionKeys.ContextMenuLogs,
     (): void => {
       globalStates.logs.show = true;

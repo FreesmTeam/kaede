@@ -19,7 +19,6 @@
 import { type ShallowReactive, shallowReactive } from "vue";
 
 import { GlobalInternals } from "@/extendable/global-internals.ts";
-import { GlobalObject } from "@/extendable/global-object";
 import type { InstanceStatesType } from "@/types/application/instance-states.type.ts";
 
 /**
@@ -38,5 +37,16 @@ export function declareInstanceStates(): void {
    * fields, so any new changes should not touch 'GlobalInternals.initialInstances'
    */
   instanceStates = shallowReactive<InstanceStatesType>({ ...GlobalInternals.initialInstances });
-  GlobalObject.states.instanceStates = instanceStates;
+
+  /*
+   * I genuinely do not know why importing 'GlobalObject' leads
+   * to fucking module evaluation errors, completely breaking
+   * the whole fucking app?????????
+   * Therefore, we directly assign the new reference of instance states
+   * to the 'window' by accessing the Kaede namespace
+   */
+  const states = window.__KAEDE__.states as Record<string, unknown>;
+
+  states.instanceStates = instanceStates;
+  // GlobalObject.states.instanceStates = instanceStates;
 }

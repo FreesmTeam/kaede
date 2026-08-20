@@ -33,4 +33,4 @@ export default {
   codeOutput,
   codeToEvaluate,
   serverProcesses,
-};
+} as const;

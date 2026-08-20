@@ -25,7 +25,6 @@ import {
 } from "@/constants/application.ts";
 import { Routes, SidebarRouteGroupItems } from "@/constants/routes.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
-import { GlobalObject } from "@/extendable/global-object";
 import Router from "@/lib/router";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
@@ -78,5 +77,16 @@ export function declareGlobalStates(): void {
       },
     ]),
   });
-  GlobalObject.states.globalStates = globalStates;
+
+  /*
+   * I genuinely do not know why importing 'GlobalObject' leads
+   * to fucking module evaluation errors, completely breaking
+   * the whole fucking app?????????
+   * Therefore, we directly assign the new reference of global states
+   * to the 'window' by accessing the Kaede namespace
+   */
+  const states = window.__KAEDE__.states as Record<string, unknown>;
+
+  states.globalStates = globalStates;
+  // GlobalObject.states.globalStates = globalStates;
 }

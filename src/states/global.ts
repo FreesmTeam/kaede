@@ -25,6 +25,7 @@ import {
 } from "@/constants/application.ts";
 import { Routes, SidebarRouteGroupItems } from "@/constants/routes.ts";
 import { GlobalInternals } from "@/extendable/global-internals.ts";
+import { GlobalObject } from "@/extendable/global-object";
 import Router from "@/lib/router";
 import type { GlobalStatesType } from "@/types/application/global-states.type.ts";
 import type { ConfigType } from "@/types/configs/config.type.ts";
@@ -77,4 +78,5 @@ export function declareGlobalStates(): void {
       },
     ]),
   });
+  GlobalObject.states.globalStates = globalStates;
 }

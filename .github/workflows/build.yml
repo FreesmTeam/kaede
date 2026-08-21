@@ -326,3 +326,5 @@ jobs:
     name: "Windows 7 build"
     uses: ./.github/workflows/build-windows-7.yml
     secrets: inherit
+    permissions:
+      contents: write

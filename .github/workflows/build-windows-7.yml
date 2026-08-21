@@ -166,6 +166,23 @@ jobs:
           name: "${{ steps.json_properties.outputs.productName }}-win7-portable-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}"
           path: "portable-build/"
 
+      # Release-only
+      - name: Archive the portable build for a release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $name = "${{ steps.json_properties.outputs.productName }}-win7-portable-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}.zip"
+          Compress-Archive -Path "portable-build/*" -DestinationPath $name
+          echo "ZIP_NAME=$name" >> $env:GITHUB_ENV
+
+      - name: Upload the portable build to a release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          files: ${{ env.ZIP_NAME }}
+
+      # Both for non-release and release builds
       - name: Bundle the WebView2 fixed runtime
         if: env.WEBVIEW2_RUNTIME_URL != ''
         shell: pwsh
@@ -239,21 +256,6 @@ jobs:
           path: "portable-build/"
 
       # Release-only
-      - name: Archive the portable build for a release
-        if: startsWith(github.ref, 'refs/tags/')
-        shell: pwsh
-        run: |
-          $name = "${{ steps.json_properties.outputs.productName }}-win7-portable-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}.zip"
-          Compress-Archive -Path "portable-build/*" -DestinationPath $name
-          echo "ZIP_NAME=$name" >> $env:GITHUB_ENV
-
-      - name: Upload the portable build to a release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v3
-        with:
-          draft: true
-          files: ${{ env.ZIP_NAME }}
-
       - name: Archive the full portable build for a release (includes the WebView2 109)
         if: startsWith(github.ref, 'refs/tags/') && env.WEBVIEW2_RUNTIME_URL != ''
         shell: pwsh

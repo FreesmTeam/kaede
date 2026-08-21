@@ -11,9 +11,6 @@ on:
       - beta
       - rc
       - release
-      - extensions
-    tags:
-      - "*"
   workflow_dispatch:
 
 env:

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
+import RowContainer from "@/components/general/base/RowContainer.vue";
+import SettingsRow from "@/components/settings/SettingsRow.vue";
 import DevelopmentSettings from "@/components/settings/tabs/DevelopmentSettings.vue";
 import ExtensionsSettings from "@/components/settings/tabs/ExtensionsSettings.vue";
 import JavaSettings from "@/components/settings/tabs/JavaSettings.vue";
 import MinecraftSettings from "@/components/settings/tabs/MinecraftSettings.vue";
 import UserInterfaceSettings from "@/components/settings/tabs/UserInterfaceSettings.vue";
 import { SettingsSections } from "@/constants/application.ts";
+import { CustomRows } from "@/constants/row-collections.ts";
 import { C, LazyPluginPlayground } from "@/extendable/component-registry.ts";
 import { globalStates } from "@/states/global.ts";
 import type { TabSectionType } from "@/types/ui/tab-section.type.ts";
@@ -41,6 +44,19 @@ const sections = computed((): Array<TabSectionType> => {
       <ExtensionsSettings v-else-if="selected === 'extensions'" />
       <DevelopmentSettings v-else-if="selected === 'development'" />
       <LazyPluginPlayground v-else-if="selected === 'plugin-playground'" />
+      <div
+        v-else
+        id="__settings-page__custom-wrapper"
+        class="h-fit w-full flex flex-col gap-2 pb-2"
+      >
+        <RowContainer id="__settings-page__custom-inner">
+          <SettingsRow
+            v-for="row in CustomRows[selected]"
+            :row="row.value"
+            :key="row.value.idRoot"
+          />
+        </RowContainer>
+      </div>
     </div>
   </C.PageWrapper>
 </template>

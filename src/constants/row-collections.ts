@@ -18,7 +18,7 @@
 
 /* eslint-disable max-lines */
 import { confirm } from "@tauri-apps/plugin-dialog";
-import { computed, shallowReactive } from "vue";
+import { computed, type ShallowReactive, shallowReactive } from "vue";
 
 import { DefaultLocale, DefaultLocaleName } from "@/constants/application.ts";
 import Permissions from "@/constants/permissions.ts";
@@ -1142,6 +1142,9 @@ export const JavaSettingsRows: SettingsRowCollectionType = [
     };
   }),
 ];
+export const CustomRows: ShallowReactive<
+  Record<string, SettingsRowCollectionType>
+> = shallowReactive({});
 
 export default {
   DevelopmentSettingsRows,
@@ -1150,4 +1153,5 @@ export default {
   UserInterfaceSettingsRows,
   MinecraftSettingsRows,
   JavaSettingsRows,
+  CustomRows,
 } as const;

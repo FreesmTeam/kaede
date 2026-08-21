@@ -23,7 +23,15 @@ import Errors from "@/lib/errors";
 import { log } from "@/lib/logging/log.ts";
 import { trustedExtensionHashes } from "@/states/extension.ts";
 
+let cached: Array<string> | undefined;
+
 export async function updateTrustedHashes(): Promise<void> {
+  if (cached) {
+    trustedExtensionHashes.value = new Set(cached);
+
+    return;
+  }
+
   try {
     log.debug(__PRE_BUNDLED_FILENAME__, "Fetching the trusted hashes...");
 
@@ -31,6 +39,7 @@ export async function updateTrustedHashes(): Promise<void> {
     const data: Array<string> = await response.json();
 
     trustedExtensionHashes.value = new Set(data);
+    cached = data;
 
     log.info(
       __PRE_BUNDLED_FILENAME__,

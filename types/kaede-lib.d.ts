@@ -504,6 +504,7 @@ declare const ActionKeys: {
 	readonly ContextMenuProcessReload: "context-menu.process-reload";
 	readonly ContextMenuSafeMode: "context-menu.safe-mode";
 	readonly ContextMenuLogs: "context-menu.logs";
+	readonly ContextMenuMinecraftLogs: "context-menu.minecraft-logs";
 	readonly ContextMenuRootFolder: "context-menu.root-folder";
 	readonly ContextMenuInstanceFolder: "context-menu.instance-folder";
 	readonly SidebarRouteChange: "sidebar.route-change";
@@ -522,6 +523,7 @@ declare const _default$4: {
 	readonly CustomFontFamily: "kaede-custom-font";
 	readonly DefaultLocale: "en";
 	readonly DefaultLocaleName: string;
+	readonly TrustedHashesURL: "https://raw.githubusercontent.com/kaede-basement/trusted-extensions/refs/heads/main/HASHES.json";
 	readonly TranslationsContextKey: typeof TranslationsContextKey;
 	readonly AuthOneTimeFetchContextKey: typeof AuthOneTimeFetchContextKey;
 	readonly AuthStatesContextKey: typeof AuthStatesContextKey;
@@ -1030,6 +1032,13 @@ export type SettingsRowType = {
 		"kind": "toggle";
 		"value": boolean;
 	} | {
+		"kind": "button";
+		"label"?: string;
+		"icon"?: string;
+		"tooltip"?: string;
+		"invert"?: boolean;
+		"hide"?: "sm" | "md" | boolean;
+	} | {
 		"kind": "radio";
 		"value": boolean;
 	} | {
@@ -1052,7 +1061,7 @@ export type SettingsRowType = {
 		"onInput"?: (value: string) => void;
 		"filePicker"?: {
 			"icon": string;
-			"onPick": (value: string) => void;
+			"onPick": (value: string, original: string, event: Event) => void;
 			"title"?: string;
 			"filters"?: Array<{
 				"name": string;
@@ -1071,13 +1080,14 @@ export type SettingsRowCollectionType = Array<ComputedRef<SettingsRowType>>;
 declare const _default$11: {
 	readonly DevelopmentSettingsRows: SettingsRowCollectionType;
 	readonly ExtensionsSettingsRows: SettingsRowCollectionType;
-	readonly ReadLocales: import("vue").ShallowReactive<{
+	readonly ReadLocales: ShallowReactive<{
 		id: string;
 		label: string;
 	}[]>;
 	readonly UserInterfaceSettingsRows: SettingsRowCollectionType;
 	readonly MinecraftSettingsRows: SettingsRowCollectionType;
 	readonly JavaSettingsRows: SettingsRowCollectionType;
+	readonly CustomRows: ShallowReactive<Record<string, SettingsRowCollectionType>>;
 };
 declare function buildLaunchAuth(account: AccountType): LaunchAuthType;
 declare function ensureFreshAccount(account: AccountType, forceRefresh?: boolean): Promise<EnsureFreshResultType>;
@@ -1372,6 +1382,7 @@ declare function runInSandbox({ id, code, permissions, }: {
 	"disable": () => void | Promise<void>;
 };
 declare function showWebviewWindow(): Promise<void>;
+declare function updateTrustedHashes(): Promise<void>;
 declare const _default$16: {
 	readonly requestPermissions: (permissions: Array<PermissionType | string> | unknown, extension: string) => Promise<Array<unknown>>;
 	readonly dirtyLifecycle: typeof dirtyLifecycle;
@@ -1383,6 +1394,7 @@ declare const _default$16: {
 	readonly lockdownEnvironment: typeof lockdownEnvironment;
 	readonly runInSandbox: typeof runInSandbox;
 	readonly showWebviewWindow: typeof showWebviewWindow;
+	readonly updateTrustedHashes: typeof updateTrustedHashes;
 };
 declare function getBaseDirectory(): string;
 declare function handleJsonFile({ baseDirectory, path, label, getDefaultValue, invalidation, }: {
@@ -1620,6 +1632,12 @@ export type LauncherStatusesType = {
 	"current": LaunchStatusType | undefined;
 	"downloads": LauncherStatusesDownloadsType;
 };
+export type WrappedInstanceLauncherStatusesType = Reactive<Record<string, {
+	"instanceId": LauncherStatusesType["instanceId"];
+	"launching": LauncherStatusesType["launching"];
+	"current": LauncherStatusesType["current"];
+	"downloads": LauncherStatusesType["downloads"];
+}>>;
 export type PreLaunchInformationType = {
 	"logPrefix": string;
 	"statuses": LauncherStatusesType;
@@ -2848,14 +2866,15 @@ declare global {
 				"javaMajor"?: number;
 				"appInstance"?: App<Element>;
 				"mountedInstance"?: ComponentPublicInstance;
-				"logs"?: {
+				"logs": Partial<{
 					"raw": ShallowRef<{
 						"list": Array<string>;
 					}>;
 					"filtered": ComputedRef<{
 						"list": Array<LogLineType>;
 					}>;
-				};
+					"instanceStatuses": WrappedInstanceLauncherStatusesType;
+				}>;
 				"instanceContext"?: {
 					"launches": Record<string, LauncherStatusesType>;
 					"logs": ShallowReactive<Record<string, {

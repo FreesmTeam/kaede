@@ -209,13 +209,30 @@ jobs:
           args: ${{ matrix.args }}
 
       - name: Bundle txiki-server (Windows, non-setup)
-        if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows'
+        if: matrix.identifier == 'windows'
         run: |
           New-Item -ItemType Directory -Force -Path portable-build
           Copy-Item "./src-tauri/target/release/${{ steps.json_properties.outputs.productName }}.exe" -Destination "portable-build/"
           Copy-Item "./src-tauri/binaries/txiki-server-x86_64-pc-windows-msvc.exe" -Destination "portable-build/txiki-server.exe"
           Set-Content -Path "portable-build/portable.txt" -Value "This file is required here to enable portable mode in Kaede."
 
+      # Release-only
+      - name: Archive the portable build for a release (Windows, non-setup)
+        if: startsWith(github.ref, 'refs/tags/') && matrix.identifier == 'windows'
+        shell: pwsh
+        run: |
+          $name = "${{ steps.json_properties.outputs.productName }}-dev-windows-non-setup-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}.zip"
+          Compress-Archive -Path "portable-build/*" -DestinationPath $name
+          echo "ZIP_NAME=$name" >> $env:GITHUB_ENV
+
+      - name: Upload the portable build to a release (Windows, non-setup)
+        if: startsWith(github.ref, 'refs/tags/') && matrix.identifier == 'windows'
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          files: ${{ env.ZIP_NAME }}
+
+      # Non-release ones
       - name: Upload binary (Windows, non-setup)
         if: (startsWith(github.ref, 'refs/tags/') != true) && matrix.identifier == 'windows'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02

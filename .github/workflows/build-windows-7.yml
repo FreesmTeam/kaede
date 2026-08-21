@@ -1,5 +1,5 @@
 #
-# ATTENTION: AI-generated (by GPT-5.6-Sol on 'max' reasoning)
+# ATTENTION: AI-generated (by GPT-5.6-Sol on 'max' reasoning and Qwen 3.8-Max)
 #
 name: "Build (Windows 7)"
 
@@ -8,7 +8,7 @@ on:
   workflow_call:
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: "windows7-compat-${{ github.workflow }}-${{ github.ref }}"
@@ -238,6 +238,38 @@ jobs:
           name: "${{ steps.json_properties.outputs.productName }}-win7-portable-full-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}"
           path: "portable-build/"
 
+      # Release-only
+      - name: Archive the portable build for a release
+        if: startsWith(github.ref, 'refs/tags/')
+        shell: pwsh
+        run: |
+          $name = "${{ steps.json_properties.outputs.productName }}-win7-portable-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}.zip"
+          Compress-Archive -Path "portable-build/*" -DestinationPath $name
+          echo "ZIP_NAME=$name" >> $env:GITHUB_ENV
+
+      - name: Upload the portable build to a release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          files: ${{ env.ZIP_NAME }}
+
+      - name: Archive the full portable build for a release (includes the WebView2 109)
+        if: startsWith(github.ref, 'refs/tags/') && env.WEBVIEW2_RUNTIME_URL != ''
+        shell: pwsh
+        run: |
+          $name = "${{ steps.json_properties.outputs.productName }}-win7-portable-full-${{ steps.json_properties.outputs.version }}-${{ github.ref_name }}.zip"
+          Compress-Archive -Path "portable-build/*" -DestinationPath $name
+          echo "ZIP_NAME=$name" >> $env:GITHUB_ENV
+
+      - name: Upload the full portable build to a release (includes the WebView2 109)
+        if: startsWith(github.ref, 'refs/tags/') && env.WEBVIEW2_RUNTIME_URL != ''
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: true
+          files: ${{ env.ZIP_NAME }}
+
+      # Both for non-release and release builds
       - name: Log a message about compatibility
         shell: pwsh
         run: |

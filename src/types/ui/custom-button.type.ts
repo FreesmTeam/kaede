@@ -4,7 +4,7 @@ export type CustomButtonType = {
   "disabled"?: boolean;
   "icon"    ?: string;
   "tooltip" ?: string;
-  "onClick" ?: () => void;
+  "onClick" ?: (event: MouseEvent) => void;
   "invert"  ?: boolean;
   "hide"    ?: "sm" | "md" | boolean;
 };

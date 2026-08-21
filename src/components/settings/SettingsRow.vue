@@ -20,6 +20,7 @@
 import { computed, useTemplateRef } from "vue";
 
 import ColorPicker from "@/components/general/base/ColorPicker.vue";
+import CustomButton from "@/components/general/base/CustomButton.vue";
 import CustomInput from "@/components/general/base/CustomInput.vue";
 import CustomSelect from "@/components/general/base/CustomSelect.vue";
 import MaterialRipple from "@/components/general/base/MaterialRipple.vue";
@@ -108,6 +109,17 @@ function handleRowClick(event: MouseEvent): void {
       v-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'radio'"
       :id="`${row.idRoot}-radio`"
       :value="row.inner.value"
+    />
+    <CustomButton
+      v-else-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'button'"
+      :id-root="`${row.idRoot}-button`"
+      :label="row.inner.label"
+      :disabled="row.disabled"
+      :icon="row.inner.icon"
+      :tooltip="row.inner.tooltip"
+      :on-click="handleRowClick"
+      :invert="row.inner.invert"
+      :hide="row.inner.hide"
     />
     <Toggle
       v-else-if="row.inner && !Array.isArray(row.inner) && row.inner.kind === 'toggle'"

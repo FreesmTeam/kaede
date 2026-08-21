@@ -32,6 +32,13 @@ export type SettingsRowType = {
     "kind" : "toggle";
     "value": boolean;
   } | {
+    "kind"    : "button";
+    "label"  ?: string;
+    "icon"   ?: string;
+    "tooltip"?: string;
+    "invert" ?: boolean;
+    "hide"   ?: "sm" | "md" | boolean;
+  } | {
     "kind" : "radio";
     "value": boolean;
   } | {
@@ -48,7 +55,7 @@ export type SettingsRowType = {
     "onInput"     ?: (value: string) => void;
     "filePicker"  ?: {
       "icon"     : string;
-      "onPick"   : (value: string) => void;
+      "onPick"   : (value: string, original: string, event: Event) => void;
       "title"   ?: string;
       "filters" ?: Array<{ "name": string; "extensions": Array<string> }>;
     };

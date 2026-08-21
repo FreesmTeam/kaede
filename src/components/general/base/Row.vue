@@ -67,7 +67,7 @@ const { idRoot, separate, image, icon, title, subtitle } = defineProps<{
       <span
         v-if="title"
         :id="`${idRoot}-title`"
-        class="leading-none"
+        class="break-all leading-none"
         :style="{ 'color': globalStates.ui.widget.textColor || '#FFFFFF' }"
       >
         {{ title }}
@@ -75,7 +75,7 @@ const { idRoot, separate, image, icon, title, subtitle } = defineProps<{
       <span
         v-if="subtitle"
         :id="`${idRoot}-subtitle`"
-        class="text-sm leading-none"
+        class="break-all text-sm leading-none"
         :style="{ 'color': globalStates.ui.widget.secondaryColor || '#A3A3A3' }"
       >
         {{ subtitle }}

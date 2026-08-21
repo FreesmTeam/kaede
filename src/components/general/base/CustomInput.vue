@@ -50,7 +50,7 @@ const {
     "icon"     : string;
     "title"   ?: string;
     "filters" ?: Array<{ "name": string; "extensions": Array<string> }>;
-    "onPick"   : (value: string) => void;
+    "onPick"   : (value: string, original: string, event: Event) => void;
   };
 }>();
 
@@ -80,7 +80,7 @@ async function handleFilePickerClick(event: Event): Promise<void> {
 
   const assetUrl: string = convertFileSrc(selectedPath);
 
-  filePicker.onPick(assetUrl);
+  filePicker.onPick(assetUrl, selectedPath, event);
 }
 
 function unFocus(event: Event): void {

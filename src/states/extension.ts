@@ -23,8 +23,9 @@ import type ExtensionAPI from "@/lib/extension-api";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 
 type SandboxedAPI = {
-  "enable" : () => void | Promise<void>;
-  "disable": () => void | Promise<void>;
+  "enable"      : () => void | Promise<void>;
+  "disable"     : () => void | Promise<void>;
+  "afterDisable": () => void | Promise<void>;
 };
 
 export const extensionStates: ShallowReactive<{
@@ -44,8 +45,8 @@ export const extensionStates: ShallowReactive<{
 // Updated on successful fetch of trusted hashes from GitHub
 export const trustedExtensionHashes = shallowRef<Set<string>>(
   new Set([
-    "cf7b2186a639ea1d80d5908b7653d8fd49aa0848aae94f2bcb781edc6a1362ea",
-    "2b753d9824b62dde0b5f035544183bfce6972c9051cdc5d85c227945c5198745",
-    "a3a9150daf3acbc6e83dc3ed14aa49d8e6479b81d76ea743ecd32842eee81bcd",
+    "b80531a7aa431a190669f0b31195666807f2317097e79ad72744dc745fbc9a22",
+    "55b1d3e5e9fae4629968b3e3c8f9be083ae78e3f8b3747312679ea3ec7d44ea4",
+    "1f24aa45a69fc0b30737e428a99edec28b446ae794f7a68efacba69ebca53c52",
   ]),
 );

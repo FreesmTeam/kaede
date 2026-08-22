@@ -25,11 +25,13 @@ export default class ExtensionAPI {
   private readonly id: string;
 
   private lifecycle: {
-    "enable" : (data: unknown) => Promise<unknown>;
-    "disable": (data: unknown) => Promise<unknown>;
+    "enable"      : (data: unknown) => Promise<unknown>;
+    "disable"     : (data: unknown) => Promise<unknown>;
+    "afterDisable": (data: unknown) => Promise<unknown>;
   } = {
-    "enable" : async () => {},
-    "disable": async () => {},
+    "enable"      : async () => {},
+    "disable"     : async () => {},
+    "afterDisable": async () => {},
   };
 
   private watchers: Map<() => unknown, WeakMap<(data: unknown) => unknown, () => void>> = new Map;
@@ -44,6 +46,10 @@ export default class ExtensionAPI {
 
   public async disable(): Promise<void> {
     await this.lifecycle.disable(this.id);
+  }
+
+  public async afterDisable(): Promise<void> {
+    await this.lifecycle.afterDisable(this.id);
   }
 
   public subscribe(event: unknown, callback: (data: unknown) => Promise<unknown>): ExtensionAPI {
@@ -75,7 +81,13 @@ export default class ExtensionAPI {
           break;
         }
 
-        this.lifecycle.disable = callback;
+        if (result.timing === "before") {
+          this.lifecycle.disable = callback;
+
+          break;
+        }
+
+        this.lifecycle.afterDisable = callback;
 
         break;
       }
@@ -114,7 +126,13 @@ export default class ExtensionAPI {
           break;
         }
 
-        this.lifecycle.disable = async (): Promise<void> => {};
+        if (result.timing === "before") {
+          this.lifecycle.disable = async (): Promise<void> => {};
+
+          break;
+        }
+
+        this.lifecycle.afterDisable = async (): Promise<void> => {};
 
         break;
       }

@@ -104,6 +104,21 @@ const extensionHandler = {
     if (!needsCleanRun) {
       globalStates.extensions.list[index].enabled = !enabled;
 
+      // 'enabled' being true means that the extension is being enabled
+      if (enabled) {
+        const existing = extensionStates.executed.find(searching => (
+          searching.extension.sha256 === extension.sha256 &&
+
+          /*
+           * Just to be sure... Maybe there will be extensions that can work in both environments
+           * with the same code
+           */
+          searching.extension.metadata.type === extension.metadata.type
+        ));
+
+        existing?.api?.afterDisable?.();
+      }
+
       return;
     }
 

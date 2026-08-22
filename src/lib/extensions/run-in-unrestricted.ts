@@ -20,9 +20,6 @@ import { AsyncFunction } from "@/constants/application.ts";
 import Errors from "@/lib/errors";
 import ExtensionAPI from "@/lib/extension-api";
 import { log } from "@/lib/logging/log.ts";
-import { extensionStates } from "@/states/extension.ts";
-import { globalStates } from "@/states/global.ts";
-import { instanceStates } from "@/states/instance.ts";
 import type { ExtensionType } from "@/types/extensions/extension.type.ts";
 
 export async function runInUnrestricted(
@@ -39,18 +36,11 @@ export async function runInUnrestricted(
 
     const compiled = new AsyncFunction(
       "scopedThis",
-      "Kaede",
-      "globalStates",
-      "instanceStates",
-      "extensionStates",
       code,
     );
 
     scopedThis = {
-      "Kaede": new ExtensionAPI(id),
-      globalStates,
-      instanceStates,
-      extensionStates,
+      "Extension": new ExtensionAPI(id),
     };
 
     log.debug(
@@ -59,10 +49,6 @@ export async function runInUnrestricted(
     );
     await compiled(
       scopedThis,
-      scopedThis.Kaede,
-      scopedThis.globalStates,
-      scopedThis.instanceStates,
-      scopedThis.extensionStates,
     );
   } catch (error: unknown) {
     // Treat the error as fatal
@@ -85,5 +71,5 @@ export async function runInUnrestricted(
     ),
   );
 
-  return scopedThis.Kaede;
+  return scopedThis.Extension;
 }

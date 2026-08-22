@@ -23,7 +23,11 @@ import IsKeyInObject from "@/types/utils/is-key-in-object.ts";
 
 export function parseEvent(event: unknown): {
   "kind": "lifecycle";
-  "id"  : "dirty-enable" | "disable";
+  "id"  : "dirty-enable";
+} | {
+  "kind"  : "lifecycle";
+  "id"    : "disable";
+  "timing": "before" | "after";
 } | {
   "kind"    : "hook";
   "id"      : keyof KaedeNamespaceType["hooks"];
@@ -49,14 +53,23 @@ export function parseEvent(event: unknown): {
 
   switch (base) {
     case "lifecycle": {
-      if (id !== "dirty-enable" && id !== "disable") {
-        throw new TypeError("Invalid lifecycle event name");
+      if (id === "dirty-enable") {
+        return {
+          "kind": "lifecycle",
+          "id"  : id,
+        };
       }
 
-      return {
-        "kind": "lifecycle",
-        "id"  : id,
-      };
+      if (id === "disable") {
+        return {
+          "kind"  : "lifecycle",
+          "id"    : id,
+          // Handle 'lifecycle::disable' with a 'before' timing by default
+          "timing": timing === "after" ? timing : "before",
+        };
+      }
+
+      throw new TypeError("Invalid lifecycle event name");
     }
     case "hook": {
       if (!id || !timing) {

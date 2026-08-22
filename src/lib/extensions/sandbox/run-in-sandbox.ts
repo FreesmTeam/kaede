@@ -33,8 +33,9 @@ export function runInSandbox({
   "code"        : string;
   "permissions"?: Array<PermissionType>;
 }): void | {
-  "enable" : () => void | Promise<void>;
-  "disable": () => void | Promise<void>;
+  "enable"      : () => void | Promise<void>;
+  "disable"     : () => void | Promise<void>;
+  "afterDisable": () => void | Promise<void>;
 } {
   try {
     // It will not lock down more than once
@@ -60,9 +61,10 @@ export function runInSandbox({
     return await Extensions.requestPermissions(permissions, id);
   };
   const api: {
-    "enable" : () => void | Promise<void>;
-    "disable": () => void | Promise<void>;
-  } = { "enable": (): void => {}, "disable": (): void => {} };
+    "enable"      : () => void | Promise<void>;
+    "disable"     : () => void | Promise<void>;
+    "afterDisable": () => void | Promise<void>;
+  } = { "enable": (): void => {}, "disable": (): void => {}, "afterDisable": (): void => {} };
 
   try {
     const compartment = new Compartment({
@@ -94,8 +96,9 @@ export function runInSandbox({
      * so the performance of sandboxed plugins vs. unrestricted should equal
      */
     const result: unknown | {
-      "enable" : () => void | Promise<void>;
-      "disable": () => void | Promise<void>;
+      "enable"      : () => void | Promise<void>;
+      "disable"     : () => void | Promise<void>;
+      "afterDisable": () => void | Promise<void>;
     } = compartment.evaluate(code);
 
     if (typeof result !== "object" || result === null) {
@@ -109,6 +112,10 @@ export function runInSandbox({
 
     if (("disable" in result) && typeof result.disable === "function") {
       api.disable = result.disable as () => void | Promise<void>;
+    }
+
+    if (("afterDisable" in result) && typeof result.afterDisable === "function") {
+      api.afterDisable = result.afterDisable as () => void | Promise<void>;
     }
   } catch (error: unknown) {
     return log.error(

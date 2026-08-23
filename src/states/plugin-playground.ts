@@ -20,7 +20,10 @@ import { ref } from "vue";
 
 export const codeOutput = ref<string>("");
 export const codeToEvaluate = ref<string>(`// Imports, basically
+// Imports, basically
 const { Txiki } = window.__KAEDE__.libs;
+// Unfortunately, the autocomplete only works when you directly use 'window.__KAEDE__'
+const { globalStates } = window.__KAEDE__.states;
 
 const answer = await confirm("Do you want to host a txiki.js server?");
 
@@ -29,8 +32,6 @@ if (!answer) {
 }
 
 const name = "Txiki Server Test";
-// Unfortunately, the autocomplete only works when you directly use 'window.__KAEDE__'
-const globalStates = window.__KAEDE__.libs.GlobalStateHelpers.get();
 
 const server = await new Txiki()
   .defineGlobal("globalStates", globalStates)

@@ -87,6 +87,25 @@
       }
       // In case of an error, make the window visible
       function getWindowDisplay() {
+        const renderError = (initialError, lineCount) => {
+          const root = document.getElementById("app");
+
+          if (!root || !root.childNodes || root.childNodes.length > 0) {
+            return;
+          }
+
+          const fallback = document.createElement("div");
+
+          fallback.className =
+            "h-vh w-full flex justify-center items-center select-text whitespace-pre-wrap text-center";
+          fallback.textContent = "A fatal error occurred that was caught at 'index.html:" +
+            lineCount +
+            "':" +
+            log.stringify(initialError);
+
+          root.append(fallback);
+        }
+
         let initialized = false;
 
         return (initialError) => {
@@ -103,26 +122,13 @@
               .getCurrentWebviewWindow()
               .show()
               .then(() => {
-                log.info("index.html:106", "Successfully displayed the window on an error");
-
-                const root = document.getElementById("app");
-
-                if (!root || !root.childNodes || root.childNodes.length > 0) {
-                  return;
-                }
-
-                const fallback = document.createElement("div");
-
-                fallback.className =
-                  "h-vh w-full flex justify-center items-center select-text whitespace-pre-wrap text-center";
-                fallback.textContent = `A fatal error occurred that was caught at 'index.html:118':${log.stringify(initialError)}`;
-
-                root.append(fallback);
+                log.info("index.html:122", "Successfully displayed the window on an error");
+                renderError(initialError, "123");
               })
               .catch(error => {
                 initialized = false;
                 log.error(
-                  "index.html:125",
+                  "index.html:128",
                   "Failed to show the window: " +
                   log.stringify(error),
                 );
@@ -131,10 +137,13 @@
           } catch (error) {
             initialized = false;
             log.error(
-              "index.html:134",
+              "index.html:137",
               "Failed to access the 'getCurrentWebviewWindow#show' function: " +
               log.stringify(error),
             );
+            // Since the caught 'error' probably means we are in a non-Tauri environment,
+            // we might render 'initialError' as well
+            renderError(initialError, "143");
           }
         };
       }
@@ -142,7 +151,7 @@
       const log = getLogger();
       const show = getWindowDisplay();
 
-      log.info("index.html:145", "WebView for Kaede has loaded >.<");
+      log.info("index.html:151", "WebView for Kaede has loaded >.<");
 
       // When using macOS 10.15 in VMWare while having Safari 15.6.1,
       // accessing 'WebGL2RenderingContext' throws a module evaluation error:
@@ -178,16 +187,16 @@
           toPass = "Most likely a fetch error to: " + event.target.src;
         }
 
-        log.error("index.html:181", "Uncaught error: " + log.stringify(toPass));
+        log.error("index.html:187", "Uncaught error: " + log.stringify(toPass));
         // Show the WebView Window if it wasn't shown before
         show(toPass);
       }, true);
       // 'PromiseRejectionEvent'
       window.addEventListener("unhandledrejection", (event) => {
-        log.error("index.html:187", "Unhandled rejection: " + log.stringify(event.reason));
+        log.error("index.html:193", "Unhandled rejection: " + log.stringify(event.reason));
       }, true);
 
-      log.info("index.html:190", "Starting 'main.ts' module evaluation");
+      log.info("index.html:196", "Starting 'main.ts' module evaluation");
     </script>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>

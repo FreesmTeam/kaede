@@ -236,7 +236,8 @@ run().catch(error => {
       const fallback = document.createElement("div");
 
       fallback.className =
-        "h-vh w-full flex justify-center items-center select-text whitespace-pre-wrap text-center";
+        "h-vh w-full flex select-text items-center justify-center" + " " +
+        "whitespace-pre-wrap text-center text-white";
       fallback.textContent = `A fatal error occurred while starting the launcher:\n${prettified}`;
 
       root.append(fallback);

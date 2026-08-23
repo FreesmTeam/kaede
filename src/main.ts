@@ -55,7 +55,6 @@ async function run(): Promise<void> {
     __PRE_BUNDLED_FILENAME__,
     `Starting to execute 'main.ts#run' at time mark: ${performance.now().toFixed(1)} ms`,
   );
-  Watchers.watchErrors();
 
   // The global object is accessed not only by extensions but by the application itself
   Globals.declareGlobals();

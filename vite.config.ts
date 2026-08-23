@@ -93,7 +93,7 @@ function injectSafariPolyfills(): Plugin {
               // Safari < 15
               // https://developer.mozilla.org/en-US/docs/Web/API/WebGL2RenderingContext#browser_compatibility
               if (window.WebGL2RenderingContext === undefined) {
-                window.WebGL2RenderingContext = window.WebGLRenderingContext ?? {};
+                window.WebGL2RenderingContext = window.WebGLRenderingContext || {};
               }
 
               // Safari < 15.4

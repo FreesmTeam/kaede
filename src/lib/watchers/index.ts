@@ -18,7 +18,6 @@
 
 import { watchConfigSync } from "@/lib/watchers/watch-config-sync.ts";
 import { watchCustomFont } from "@/lib/watchers/watch-custom-font.ts";
-import { watchErrors } from "@/lib/watchers/watch-errors.ts";
 import { watchInstancesSync } from "@/lib/watchers/watch-instances-sync.ts";
 import { watchProcesses } from "@/lib/watchers/watch-processes.ts";
 import {
@@ -30,7 +29,6 @@ import {
 export default {
   watchConfigSync,
   watchCustomFont,
-  watchErrors,
   watchInstancesSync,
   watchProcesses,
   watchDevelopmentStates,

@@ -10,6 +10,66 @@
     <script>
       console.log("WebView for Kaede has loaded >.<");
 
+      // Depending on the environment, let the logger return an object
+      // that logs messages into console or into both a log file and console
+      function getLogger() {
+        const Tauri = window.__TAURI_INTERNALS__;
+        const Stringify = (error) => {
+          // Some errors are string-typed instead of being objects
+          if (typeof error !== "object" || error === null) {
+            return error;
+          }
+
+          const currentError = [];
+
+          if ("name" in error && typeof error.name === "string")       { currentError.push(error.name) }
+          if ("message" in error && typeof error.message === "string") { currentError.push(error.message) }
+          if ("stack" in error && typeof error.stack === "string")     { currentError.push(error.stack) }
+
+          return "\n" + currentError.join("; ");
+        };
+        const ConsoleLogger = {
+          "stringify": (error) => Stringify(error),
+          "info"     : (prefix, message) => console.log(prefix, message),
+          "error"    : (prefix, message) => console.error(prefix, message),
+        };
+
+        if (
+          typeof Tauri !== "object" || Tauri === null ||
+          !("invoke" in Tauri) || typeof Tauri.invoke !== "function"
+        ) {
+          return ConsoleLogger;
+        }
+
+        const LevelEnum = { "INFO": 3, "ERROR": 5 };
+
+        return {
+          "stringify": (error) => Stringify(error),
+          "info"     : (prefix, message) => {
+            // It returns a promise, but we do not care
+            Tauri.invoke("plugin:log|log", {
+              "level"   : LevelEnum.INFO,
+              "message" : message,
+              "location": prefix,
+            })
+            ConsoleLogger.info(prefix, message);
+          },
+          "error": (prefix, message) => {
+            // It returns a promise, but we do not care
+            Tauri.invoke("plugin:log|log", {
+              "level"   : LevelEnum.ERROR,
+              "message" : message,
+              "location": prefix,
+            })
+            ConsoleLogger.error(prefix, message);
+          },
+        };
+      }
+
+      const log = getLogger();
+
+      log.info("index.html:71", "WebView for Kaede has loaded >.<");
+
       // When using macOS 10.15 in VMWare while having Safari 15.6.1,
       // accessing 'WebGL2RenderingContext' throws a module evaluation error:
       // 'ReferenceError: Can't find variable: WebGL2RenderingContext',
@@ -30,11 +90,16 @@
       // is Safari 13. And that version breaks way more things
       // than a simple 'WebGL2RenderingContext'
 
-      window.__TAURI_INTERNALS__.invoke("plugin:log|log", {
-        "level"   : 3,
-        "message" : "Starting 'main.ts' module evaluation",
-        "location": "index.html:36",
-      });
+      // 'ErrorEvent'
+      window.addEventListener("error", (event) => {
+        log.error("index.html:95", "Uncaught error: " + log.stringify(event.error));
+      }, true);
+      // 'PromiseRejectionEvent'
+      window.addEventListener("unhandledrejection", (event) => {
+        log.error("index.html:99", "Unhandled rejection: " + log.stringify(event.reason));
+      }, true);
+
+      log.info("index.html:102", "Starting 'main.ts' module evaluation");
     </script>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>

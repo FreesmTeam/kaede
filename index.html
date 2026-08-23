@@ -17,7 +17,19 @@
         const Stringify = (error) => {
           // Some errors are string-typed instead of being objects
           if (typeof error !== "object" || error === null) {
-            return error;
+            if (error === null || typeof error === "string") {
+              return error;
+            }
+
+            let toReturn;
+
+            try {
+              toReturn = error.toString();
+            } catch (error) {
+              toReturn = "Unknown";
+            }
+
+            return toReturn;
           }
 
           const currentError = [];
@@ -55,7 +67,7 @@
               // the 'unhandledrejection' event, which will trigger another
               // logger call, which will probably once again reject,
               // because the logger call rejected in the first place lol
-            }).catch(error => ConsoleLogger.error(error));
+            }).catch(error => ConsoleLogger.error("index.html:70", error));
             ConsoleLogger.info(prefix, message);
           },
           "error": (prefix, message) => {
@@ -68,7 +80,7 @@
               // the 'unhandledrejection' event, which will trigger another
               // logger call, which will probably once again reject,
               // because the logger call rejected in the first place lol
-            }).catch(error => ConsoleLogger.error(error));
+            }).catch(error => ConsoleLogger.error("index.html:83", error));
             ConsoleLogger.error(prefix, message);
           },
         };
@@ -77,7 +89,7 @@
       function getWindowDisplay() {
         let initialized = false;
 
-        return () => {
+        return (initialError) => {
           if (initialized) {
             // Do not try to show the window again
             return;
@@ -91,20 +103,35 @@
               .getCurrentWebviewWindow()
               .show()
               .then(() => {
-                log.info("index.html:94", "Successfully displayed the window on an error");
+                log.info("index.html:106", "Successfully displayed the window on an error");
+
+                const root = document.getElementById("app");
+
+                if (!root || !root.childNodes || root.childNodes.length > 0) {
+                  return;
+                }
+
+                const fallback = document.createElement("div");
+
+                fallback.className =
+                  "h-vh w-full flex justify-center items-center select-text whitespace-pre-wrap text-center";
+                fallback.textContent = `A fatal error occurred that was caught at 'index.html:118':${log.stringify(initialError)}`;
+
+                root.append(fallback);
               })
               .catch(error => {
                 initialized = false;
                 log.error(
-                  "index.html:99",
+                  "index.html:125",
                   "Failed to show the window: " +
                   log.stringify(error),
                 );
               });
             // Therefore, the only errors that this try-catch might catch must be related to the function accessing
           } catch (error) {
+            initialized = false;
             log.error(
-              "index.html:107",
+              "index.html:134",
               "Failed to access the 'getCurrentWebviewWindow#show' function: " +
               log.stringify(error),
             );
@@ -115,7 +142,7 @@
       const log = getLogger();
       const show = getWindowDisplay();
 
-      log.info("index.html:118", "WebView for Kaede has loaded >.<");
+      log.info("index.html:145", "WebView for Kaede has loaded >.<");
 
       // When using macOS 10.15 in VMWare while having Safari 15.6.1,
       // accessing 'WebGL2RenderingContext' throws a module evaluation error:
@@ -151,16 +178,16 @@
           toPass = "Most likely a fetch error to: " + event.target.src;
         }
 
-        log.error("index.html:154", "Uncaught error: " + log.stringify(toPass));
+        log.error("index.html:181", "Uncaught error: " + log.stringify(toPass));
         // Show the WebView Window if it wasn't shown before
-        show();
+        show(toPass);
       }, true);
       // 'PromiseRejectionEvent'
       window.addEventListener("unhandledrejection", (event) => {
-        log.error("index.html:160", "Unhandled rejection: " + log.stringify(event.reason));
+        log.error("index.html:187", "Unhandled rejection: " + log.stringify(event.reason));
       }, true);
 
-      log.info("index.html:163", "Starting 'main.ts' module evaluation");
+      log.info("index.html:190", "Starting 'main.ts' module evaluation");
     </script>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>

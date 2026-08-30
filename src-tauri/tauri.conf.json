@@ -31,6 +31,7 @@
       "assetProtocol": {
         "enable": true,
         "scope": {
+          "requireLiteralLeadingDot": false,
           "allow": ["**/*", "**"]
         }
       }
